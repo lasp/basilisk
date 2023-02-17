@@ -70,10 +70,7 @@ jobs:
     # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
 
     - name: "Build basilisk"
-      run: |
-        source .venv/bin/activate && 
-        conan install . --build=missing -s build_type=Debug -if dist3/conan -o opNav=False -o vizInterface=False &&
-        conan build . -if dist3/conan
+      run: source .venv/bin/activate && python3 conanfile.py --vizInterface False --opNav False
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
