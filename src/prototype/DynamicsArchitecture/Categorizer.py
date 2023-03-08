@@ -1,0 +1,3 @@
+
+class Categorizer:
+    pass
