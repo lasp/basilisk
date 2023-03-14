@@ -85,21 +85,19 @@ def run(show_plots):
         print("Unable to configure stepper motor rotor and stator")
 
     # Define the panel angular reference values
-    panelThetaRef = 18 * np.pi / 180  # [rad]
+    panelThetaRef = 36 * np.pi / 180  # [rad]
     panelThetaDotRef = 0.0  # [rad/s]
 
-    # Create and initialize the torque and voltage arrays
+    # Create and initialize the torque array
     T_elec = np.array(0.0)
-    V_a = np.array(0.0)
-    V_b = np.array(12.0)
 
     # Define initial states
     hubThetaInit = 0.0 * np.pi / 180.0  # [rad]
     hubThetaDotInit = 0.0 * np.pi / 180.0  # [rad/s]
-    panelThetaInit = 0.0 * np.pi / 180.0  # [rad]
+    panelThetaInit = 10.0 * np.pi / 180.0  # [rad]
     panelThetaDotInit = 0.1 * np.pi / 180.0  # [rad/s]
-    current_a_Init = V_a / resistance  # [Amperes]
-    current_b_Init = V_b / resistance  # [Amperes]
+    current_a_Init = 0.0 / resistance  # [Amperes]
+    current_b_Init = 0.0 / resistance  # [Amperes]
     X = np.array([[hubThetaInit], [hubThetaDotInit], [panelThetaInit], [panelThetaDotInit], [current_a_Init], [current_b_Init]])
 
     # Create and initialize the timespan array
@@ -109,75 +107,73 @@ def run(show_plots):
     # Define quantities for the integration loop
     timeStep = 0.0001  # [s]
     t = 0.0
-    step = 1
     i = 0
+    k = 0
 
-    while(i < 20000):
-    #while (np.abs(X[2,i] - panelThetaRef) > 1e-1 or np.abs(X[3,i] - panelThetaDotRef) > 1e-1):
-    #while (np.abs(X[2,i] - panelThetaRef) > 1e-8 or np.abs(X[3,i] - panelThetaDotRef) > 1e-8):
-        # Update the current time
-        t = t + timeStep
-        timespan = np.append(timespan, t)
+    # Define stepping requirements
+    numSteps = int(np.ceil(np.abs(panelThetaRef - panelThetaInit) / stepAngleRad))
 
-        # Store the current state
-        XCurrent = np.reshape(X[:,i], (6,1))
+    if (panelThetaRef - panelThetaInit) > 0:
+        forward = True
+        backward = False
+    elif (panelThetaRef - panelThetaInit) < 0:
+        forward = False
+        backward = True
 
-        if (i != 0):
-            Va = V_a[i]
-            Vb = V_b[i]
+    for step in range(numSteps):
+        print(step)
+        # Define intermediate reference angle
+        panelThetaRefIntermediate = panelThetaInit + ((step + 1) * stepAngleRad)
+        print(panelThetaRefIntermediate)
+
+        # Define phase number
+        if (forward):
+            phaseNum = (step + 1) % 4
         else:
-            Va = V_a
-            Vb = V_b
+            phaseNum = 5 - ((step + 1) % 4)
 
-        # Numerically integrate the system EOM using RK4 algorithm
-        K1, Telec = EOM(t, XCurrent, Ih, Ip, panelThetaRef, panelThetaDotRef, Va, Vb, resistance, inductance, backEMFAmplitude, friction, numTeeth)
-        K2, Telec = EOM(t + (timeStep/2), XCurrent + ((timeStep * K1) / 2), Ih, Ip, panelThetaRef, panelThetaDotRef, Va, Vb, resistance, inductance, backEMFAmplitude, friction, numTeeth)
-        K3, Telec = EOM(t + (timeStep/2), XCurrent + ((timeStep * K2) / 2), Ih, Ip, panelThetaRef, panelThetaDotRef, Va, Vb, resistance, inductance, backEMFAmplitude, friction, numTeeth)
-        K4, Telec = EOM(t + timeStep, XCurrent + timeStep * K3, Ih, Ip, panelThetaRef, panelThetaDotRef, Va, Vb, resistance, inductance, backEMFAmplitude, friction, numTeeth)
-        X = np.append(X, XCurrent + (timeStep / 6) * (K1 + 2 * K2 + 2 * K3 + K4), axis=1)
-        T_elec = np.append(T_elec, Telec)
-        i = i + 1
+        # Define the voltages, depending on the phase number
+        if (phaseNum == 1):
+            Va = 0.0
+            Vb = 12.0
+        elif (phaseNum == 2):
+            Va = -12.0
+            Vb = 0.0
+        elif (phaseNum == 3):
+            Va = 0.0
+            Vb = -12.0
+        else:
+            Va = 12.0
+            Vb = 0.0
 
-        # # Define the voltage for each phase
-        # if (panelThetaRef - X[2,i] > 0):
-        #     if (step == 1):
-        #         V_a = np.append(V_a, 0.0)
-        #         V_b = np.append(V_b, 12.0)
-        #         X[4,i] = 0.0
-        #     elif (step == 2):
-        #         V_a = np.append(V_a, -12.0)
-        #         V_b = np.append(V_b, 0.0)
-        #         X[5,i] = 0.0
-        #     elif (step == 3):
-        #         V_a = np.append(V_a, 0.0)
-        #         V_b = np.append(V_b, -12.0)
-        #         X[4,i] = 0.0
-        #     else:
-        #         V_a = np.append(V_a, 12.0)
-        #         V_b = np.append(V_b, 0.0)
-        #         X[5,i] = 0.0
-        # elif (panelThetaRef - XCurrent[2] < 0):
-        #     if (step == 1):
-        #         V_a = np.append(V_a, 0.0)
-        #         V_b = np.append(V_b, -12.0)
-        #         X[4,i] = 0.0
-        #     elif (step == 2):
-        #         V_a = np.append(V_a, -12.0)
-        #         V_b = np.append(V_b, 0.0)
-        #         X[5,i] = 0.0
-        #     elif (step == 3):
-        #         V_a = np.append(V_a, 0.0)
-        #         V_b = np.append(V_b, 12.0)
-        #         X[4,i] = 0.0
-        #     else:
-        #         V_a = np.append(V_a, 12.0)
-        #         V_b = np.append(V_b, 0.0)
-        #         X[5,i] = 0.0
+        if (step == 0):
+            V_a = np.array(Va)
+            V_b = np.array(Vb)
 
-        V_a = np.append(V_a, Va)
-        V_b = np.append(V_b, Vb)
-        X[4,i] = X[4,i-1]
-        X[5,i] = X[5,i-1]
+        i = 0
+
+        while(i < 10000):
+        #while (np.abs(X[2,i] - panelThetaRef) > 1e-8 or np.abs(X[3,i] - panelThetaDotRef) > 1e-8):
+            # Update the current time
+            t = t + timeStep
+            timespan = np.append(timespan, t)
+
+            # Store the current state
+            XCurrent = np.reshape(X[:,k], (6,1))
+
+            # Numerically integrate the system EOM using RK4 algorithm
+            K1, Telec = EOM(t, XCurrent, Ih, Ip, panelThetaRefIntermediate, panelThetaDotRef, Va, Vb, resistance, inductance, backEMFAmplitude, friction, numTeeth)
+            K2, Telec = EOM(t + (timeStep/2), XCurrent + ((timeStep * K1) / 2), Ih, Ip, panelThetaRefIntermediate, panelThetaDotRef, Va, Vb, resistance, inductance, backEMFAmplitude, friction, numTeeth)
+            K3, Telec = EOM(t + (timeStep/2), XCurrent + ((timeStep * K2) / 2), Ih, Ip, panelThetaRefIntermediate, panelThetaDotRef, Va, Vb, resistance, inductance, backEMFAmplitude, friction, numTeeth)
+            K4, Telec = EOM(t + timeStep, XCurrent + timeStep * K3, Ih, Ip, panelThetaRefIntermediate, panelThetaDotRef, Va, Vb, resistance, inductance, backEMFAmplitude, friction, numTeeth)
+            X = np.append(X, XCurrent + (timeStep / 6) * (K1 + 2 * K2 + 2 * K3 + K4), axis=1)
+
+            T_elec = np.append(T_elec, Telec)
+            V_a = np.append(V_a, Va)
+            V_b = np.append(V_b, Vb)
+
+            i = i + 1
+            k = k + 1
 
     # Plot the results
     plt.close("all")  # clears out plots from earlier test runs

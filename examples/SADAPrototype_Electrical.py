@@ -120,7 +120,6 @@ def run(show_plots):
     panelThetaDotInit = 0.0 * np.pi / 180.0  # [rad/s]
     current_a_Init = V_a / resistance  # [Amperes]
     current_b_Init = V_b / resistance  # [Amperes]
-
     X = np.array([[hubThetaInit], [hubThetaDotInit], [panelThetaInit], [panelThetaDotInit], [current_a_Init], [current_b_Init]])
 
     step = 1
@@ -133,7 +132,6 @@ def run(show_plots):
     timeStep = 0.0001 # [s]
     t = 0.0
     i = 0
-    convergence = False
 
     while(i < 10000):
     #while (np.abs(X[2,i] - panelThetaRef) > 1e-1 or np.abs(X[3,i] - panelThetaDotRef) > 1e-1):
