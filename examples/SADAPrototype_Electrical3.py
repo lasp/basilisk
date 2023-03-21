@@ -44,19 +44,19 @@ def EOM(t, X, Ih, Ip, panelThetaRef, panelThetaDotRef, V_a, V_b, resistance, ind
     current_b = X[5]
 
     # Define back EMFs
-    backEMF_a = panelAngleRate * numTeeth * backEMFAmplitude * np.sin(panelThetaRef - panelAngle)
-    backEMF_b = -panelAngleRate * numTeeth * backEMFAmplitude * np.cos(panelThetaRef - panelAngle)
+    backEMF_a = panelAngleRate * numTeeth * backEMFAmplitude * np.sin(numTeeth * panelAngle)
+    backEMF_b = -panelAngleRate * numTeeth * backEMFAmplitude * np.cos(numTeeth * panelAngle)
 
     # Define electromagnetic torque
-    T_elec = - (current_a * backEMFAmplitude * numTeeth * np.sin(numTeeth * (panelThetaRef - panelAngle))) + (current_b * backEMFAmplitude * numTeeth * np.cos(numTeeth * (panelThetaRef - panelAngle)))
+    T_elec = - (current_a * backEMFAmplitude * numTeeth * np.sin(numTeeth * panelAngle)) + (current_b * backEMFAmplitude * numTeeth * np.cos(numTeeth * panelAngle))
 
     XDot = np.array([[0.0], [0.0], [0.0], [0.0], [0.0], [0.0]])
     XDot[0,0] = hubAngleRate
-    XDot[1,0] = -(T_elec - (friction * (panelAngleRate))) / Ih
+    XDot[1,0] = -(T_elec - (friction * panelAngleRate)) / Ih
     XDot[2,0] = panelAngleRate
-    XDot[3,0] = (T_elec - (friction * (panelAngleRate))) * ((1 / Ip) + (1 / Ih))
-    XDot[4,0] = (V_a - (resistance * current_a) + backEMF_a) / inductance # IDot_a
-    XDot[5,0] = (V_b - (resistance * current_b) + backEMF_b) / inductance # IDot_b
+    XDot[3,0] = (T_elec - (friction * panelAngleRate)) * ((1 / Ip) + (1 / Ih))
+    XDot[4,0] = (V_a - (resistance * current_a) + backEMF_a) / inductance  # IDot_a
+    XDot[5,0] = (V_b - (resistance * current_b) + backEMF_b) / inductance  # IDot_b
 
     return XDot, T_elec
 
@@ -71,10 +71,10 @@ def run(show_plots):
     Ip = 3e-3  # [kg m^2]
 
     # SADA Electrical Parameters
-    resistance = 13.0  # [Ohms]
-    inductance = 0.002  # [Henrys]
+    resistance = 10.0  # [Ohms]
+    inductance = 0.2  # [Henrys]
     backEMFAmplitude = 0.53  # [Vs]
-    friction = 8e-4  # [N m / Hz]
+    friction = 8e-5  # [N m / Hz]
     voltageMag = 12  # [Volts]
     numTeeth = 5  # Number of rotor teeth
     stepAngleRad = 18 * np.pi / 180  # [rad]
@@ -85,7 +85,7 @@ def run(show_plots):
         print("Unable to configure stepper motor rotor and stator")
 
     # Define the panel angular reference values
-    panelThetaRef = 36 * np.pi / 180  # [rad]
+    panelThetaRef = 4 * 18 * np.pi / 180  # [rad]
     panelThetaDotRef = 0.0  # [rad/s]
 
     # Create and initialize the torque array
@@ -94,8 +94,8 @@ def run(show_plots):
     # Define initial states
     hubThetaInit = 0.0 * np.pi / 180.0  # [rad]
     hubThetaDotInit = 0.0 * np.pi / 180.0  # [rad/s]
-    panelThetaInit = 10.0 * np.pi / 180.0  # [rad]
-    panelThetaDotInit = 0.1 * np.pi / 180.0  # [rad/s]
+    panelThetaInit = 0.0 * np.pi / 180.0  # [rad]
+    panelThetaDotInit = 0.0 * np.pi / 180.0  # [rad/s]
     current_a_Init = 0.0 / resistance  # [Amperes]
     current_b_Init = 0.0 / resistance  # [Amperes]
     X = np.array([[hubThetaInit], [hubThetaDotInit], [panelThetaInit], [panelThetaDotInit], [current_a_Init], [current_b_Init]])

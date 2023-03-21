@@ -44,19 +44,19 @@ def EOM(t, X, Ih, Ip, panelThetaRef, panelThetaDotRef, V_a, V_b, resistance, ind
     current_b = X[5]
 
     # Define back EMFs
-    backEMF_a = panelAngleRate * numTeeth * backEMFAmplitude * np.sin(panelThetaRef - panelAngle)
-    backEMF_b = -panelAngleRate * numTeeth * backEMFAmplitude * np.cos(panelThetaRef - panelAngle)
+    backEMF_a = panelAngleRate * numTeeth * backEMFAmplitude * np.sin(numTeeth * (panelAngle))
+    backEMF_b = -panelAngleRate * numTeeth * backEMFAmplitude * np.cos(numTeeth * (panelAngle))
 
     # Define electromagnetic torque
-    T_elec = - (current_a * backEMFAmplitude * numTeeth * np.sin(numTeeth * (panelThetaRef - panelAngle))) + (current_b * backEMFAmplitude * numTeeth * np.cos(numTeeth * (panelThetaRef - panelAngle)))
+    T_elec = - (current_a * backEMFAmplitude * numTeeth * np.sin(numTeeth * (panelAngle))) + (current_b * backEMFAmplitude * numTeeth * np.cos(numTeeth * (panelAngle)))
 
     XDot = np.array([[0.0], [0.0], [0.0], [0.0], [0.0], [0.0]])
     XDot[0,0] = hubAngleRate
-    XDot[1,0] = -(T_elec - (friction * (panelAngleRate))) / Ih
+    XDot[1,0] = -(T_elec - (friction * panelAngleRate)) / Ih
     XDot[2,0] = panelAngleRate
-    XDot[3,0] = (T_elec - (friction * (panelAngleRate))) * ((1 / Ip) + (1 / Ih))
-    XDot[4,0] = (V_a - (resistance * current_a) + backEMF_a) / inductance # IDot_a
-    XDot[5,0] = (V_b - (resistance * current_b) + backEMF_b) / inductance # IDot_b
+    XDot[3,0] = (T_elec - (friction * panelAngleRate)) * ((1 / Ip) + (1 / Ih))
+    XDot[4,0] = (V_a - (resistance * current_a) + backEMF_a) / inductance  # IDot_a
+    XDot[5,0] = (V_b - (resistance * current_b) + backEMF_b) / inductance  # IDot_b
 
     return XDot, T_elec
 
@@ -138,46 +138,8 @@ def run(show_plots):
         T_elec = np.append(T_elec, Telec)
         i = i + 1
 
-        # # Define the voltage for each phase
-        # if (panelThetaRef - X[2,i] > 0):
-        #     if (step == 1):
-        #         V_a = np.append(V_a, 0.0)
-        #         V_b = np.append(V_b, 12.0)
-        #         X[4,i] = 0.0
-        #     elif (step == 2):
-        #         V_a = np.append(V_a, -12.0)
-        #         V_b = np.append(V_b, 0.0)
-        #         X[5,i] = 0.0
-        #     elif (step == 3):
-        #         V_a = np.append(V_a, 0.0)
-        #         V_b = np.append(V_b, -12.0)
-        #         X[4,i] = 0.0
-        #     else:
-        #         V_a = np.append(V_a, 12.0)
-        #         V_b = np.append(V_b, 0.0)
-        #         X[5,i] = 0.0
-        # elif (panelThetaRef - XCurrent[2] < 0):
-        #     if (step == 1):
-        #         V_a = np.append(V_a, 0.0)
-        #         V_b = np.append(V_b, -12.0)
-        #         X[4,i] = 0.0
-        #     elif (step == 2):
-        #         V_a = np.append(V_a, -12.0)
-        #         V_b = np.append(V_b, 0.0)
-        #         X[5,i] = 0.0
-        #     elif (step == 3):
-        #         V_a = np.append(V_a, 0.0)
-        #         V_b = np.append(V_b, 12.0)
-        #         X[4,i] = 0.0
-        #     else:
-        #         V_a = np.append(V_a, 12.0)
-        #         V_b = np.append(V_b, 0.0)
-        #         X[5,i] = 0.0
-
         V_a = np.append(V_a, Va)
         V_b = np.append(V_b, Vb)
-        X[4,i] = X[4,i-1]
-        X[5,i] = X[5,i-1]
 
     # Plot the results
     plt.close("all")  # clears out plots from earlier test runs
