@@ -1,0 +1,244 @@
+#
+#  ISC License
+#
+#  Copyright (c) 2023, Autonomous Vehicle Systems Lab, University of Colorado at Boulder
+#
+#  Permission to use, copy, modify, and/or distribute this software for any
+#  purpose with or without fee is hereby granted, provided that the above
+#  copyright notice and this permission notice appear in all copies.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+#  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+#  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+#  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+#  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+#  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+#  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+
+#
+# SADA Prototyping
+#
+# Purpose: This script is a preliminary unit test for the Solar Array Drive Assembly (SADA) electrical model.
+#
+# Author:  Leah Kiner
+# Creation Date:  March 27, 2023
+#
+
+import os
+import matplotlib.pyplot as plt
+import numpy as np
+
+# This function defines the system equations of motion
+def EOM(t, X, Ih, Ip, panelThetaRef, panelThetaDotRef, V_a, V_b, resistance, inductance, backEMFAmplitude, friction, numTeeth):
+    # Store state variables
+    hubAngleRate = X[1]
+    panelAngle = X[2]
+    panelAngleRate = X[3]
+    current_a = X[4]
+    current_b = X[5]
+
+    # Define back EMFs
+    backEMF_a = panelAngleRate * numTeeth * backEMFAmplitude * np.sin(numTeeth * panelAngle)
+    backEMF_b = -panelAngleRate * numTeeth * backEMFAmplitude * np.cos(numTeeth * panelAngle)
+
+    # Define electromagnetic torque
+    T_elec = - (current_a * backEMFAmplitude * numTeeth * np.sin(numTeeth * panelAngle)) + (current_b * backEMFAmplitude * numTeeth * np.cos(numTeeth * panelAngle))
+
+    XDot = np.array([[0.0], [0.0], [0.0], [0.0], [0.0], [0.0]])
+    XDot[0,0] = hubAngleRate
+    XDot[1,0] = -(T_elec - (friction * panelAngleRate)) / Ih
+    XDot[2,0] = panelAngleRate
+    XDot[3,0] = (T_elec - (friction * panelAngleRate)) * ((1 / Ip) + (1 / Ih))
+    XDot[4,0] = (V_a - (resistance * current_a) + backEMF_a) / inductance  # IDot_a
+    XDot[5,0] = (V_b - (resistance * current_b) + backEMF_b) / inductance  # IDot_b
+
+    return XDot, T_elec, backEMF_a, backEMF_b
+
+# Call this function to run the simulation
+def run(show_plots):
+    # Define the mass properties of the rigid spacecraft hub
+    mHub = 1.0  # [kg]
+    Ih = 0.5  # [kg m^2]
+
+    # Define the mass properties of the panel
+    mPanel = 0.75  # [kg]
+    Ip = 3e-3  # [kg m^2]
+
+    # SADA Electrical Parameters
+    resistance = 10.0  # [Ohms]
+    inductance = 0.2  # [Henrys]
+    backEMFAmplitude = 0.53  # [Vs]
+    friction = 0.0  # [N m / Hz]
+    voltageMag = 12  # [Volts]
+    numTeeth = 5  # Number of rotor teeth
+    stepAngleRad = 18 * np.pi / 180  # [rad]
+    numPhases = 4  # Number of stator phases
+
+    # Check to ensure the rotor and sator are properly configured
+    if ( (2 * np.pi / (stepAngleRad * numPhases)) != numTeeth):
+        print("Unable to configure stepper motor rotor and stator")
+
+    # Define the panel angular reference values
+    panelThetaRef = 1 * 18 * np.pi / 180  # [rad]
+    panelThetaDotRef = 0.0  # [rad/s]
+
+    # Define initial states
+    hubThetaInit = 0.0 * np.pi / 180.0  # [rad]
+    hubThetaDotInit = 0.0 * np.pi / 180.0  # [rad/s]
+    panelThetaInit = 0.0 * np.pi / 180.0  # [rad]
+    panelThetaDotInit = 0.0 * np.pi / 180.0  # [rad/s]
+    current_a_Init = 0.0 / resistance  # [Amperes]
+    current_b_Init = 0.0 / resistance  # [Amperes]
+    X = np.array([[hubThetaInit], [hubThetaDotInit], [panelThetaInit], [panelThetaDotInit], [current_a_Init], [current_b_Init]])
+
+    # Define quantities for the integration loop
+    timeStep = 0.001  # [s]
+    t = 0.0  # [s]
+    i = 0
+
+    # Define stepping requirements
+    numSteps = int(np.ceil(np.abs(panelThetaRef - panelThetaInit) / stepAngleRad))
+
+    if (panelThetaRef - panelThetaInit) > 0:
+        forward = True
+        backward = False
+    elif (panelThetaRef - panelThetaInit) < 0:
+        forward = False
+        backward = True
+
+    for step in range(numSteps):
+        # Define intermediate reference angle
+        panelThetaRefIntermediate = panelThetaInit + ((step + 1) * stepAngleRad)
+
+        # Define phase number
+        if (forward):
+            phaseNum = (step + 1) % 4
+        else:
+            phaseNum = 5 - ((step + 1) % 4)
+
+        # Define the voltages, depending on the phase number
+        if (phaseNum == 1):
+            Va = 0.0
+            Vb = 12.0
+        elif (phaseNum == 2):
+            Va = -12.0
+            Vb = 0.0
+        elif (phaseNum == 3):
+            Va = 0.0
+            Vb = -12.0
+        else:
+            Va = 12.0
+            Vb = 0.0
+
+        while (np.abs(X[2,i] - panelThetaRefIntermediate) > 1e-10 or np.abs(X[3,i] - panelThetaDotRef) > 1e-10 or i < 5000):
+            # Update the current time
+            t = i * timeStep
+            if i == 0:
+                timespan = np.array(t)
+                V_a = np.array(Va)
+                V_b = np.array(Vb)
+
+            # Store the current state
+            XCurrent = np.reshape(X[:,i], (6,1))
+
+            # Numerically integrate the system EOM using RK4 algorithm
+            K1, Telec, backEMF_a, backEMF_b = EOM(t, XCurrent, Ih, Ip, panelThetaRefIntermediate, panelThetaDotRef, Va, Vb, resistance, inductance, backEMFAmplitude, friction, numTeeth)
+            K2, Telec, backEMF_a, backEMF_b = EOM(t + (timeStep/2), XCurrent + ((timeStep * K1) / 2), Ih, Ip, panelThetaRefIntermediate, panelThetaDotRef, Va, Vb, resistance, inductance, backEMFAmplitude, friction, numTeeth)
+            K3, Telec, backEMF_a, backEMF_b = EOM(t + (timeStep/2), XCurrent + ((timeStep * K2) / 2), Ih, Ip, panelThetaRefIntermediate, panelThetaDotRef, Va, Vb, resistance, inductance, backEMFAmplitude, friction, numTeeth)
+            K4, Telec, backEMF_a, backEMF_b = EOM(t + timeStep, XCurrent + timeStep * K3, Ih, Ip, panelThetaRefIntermediate, panelThetaDotRef, Va, Vb, resistance, inductance, backEMFAmplitude, friction, numTeeth)
+            X = np.append(X, XCurrent + (timeStep / 6) * (K1 + 2 * K2 + 2 * K3 + K4), axis=1)
+
+            if i == 0:
+                T_elec = np.array(Telec)
+                emfa = np.array(backEMF_a)
+                emfb = np.array(backEMF_b)
+                IaDot = np.array(K4[4])
+                IbDot = np.array(K4[5])
+            else:
+                T_elec = np.append(T_elec, Telec)
+                emfa = np.append(emfa, backEMF_a)
+                emfb = np.append(emfb, backEMF_b)
+                IaDot = np.append(IaDot, K4[4])
+                IbDot = np.append(IbDot, K4[5])
+            V_a = np.append(V_a, Va)
+            V_b = np.append(V_b, Vb)
+            timespan = np.append(timespan, t)
+
+            i = i + 1
+
+    # Calculate conservation information
+    for i in range(len(timespan) - 1):
+
+        elecPower = - emfa[i] * X[4, i] - emfb[i] * X[5,i]
+        mechPower = T_elec[i] * X[2, i]
+        energyRate = X[4, i] * IaDot[i] * inductance + X[5, i] * IbDot[i] * inductance
+        cons = elecPower - mechPower - energyRate
+
+        if i != 0:
+            electricPower = np.append(electricPower, elecPower)
+            mechanicalPower = np.append(mechanicalPower, mechPower)
+            energyRateIncrease = np.append(energyRateIncrease, energyRate)
+            conservation = np.append(conservation, cons)
+        else:
+            electricPower = np.array(elecPower)
+            mechanicalPower = np.array(mechPower)
+            energyRateIncrease = np.array(energyRate)
+            conservation = np.array(cons)
+
+    # Plot the results
+    plt.close("all")  # clears out plots from earlier test runs
+
+    panelThetaData = (180 / np.pi) * X[2,:]
+    panelThetaDotData = (180 / np.pi) * X[3,:]
+
+    # Plot the panel angle and angle rate
+    fig, plts = plt.subplots(2, 1, sharex=True)
+    l1, = plts[0].plot(timespan, panelThetaData)
+    l2, = plts[0].plot(timespan, np.ones(len(timespan)) * (panelThetaRef * 180 / np.pi) , '--')
+    plts[0].set_title(r'Panel Angle, $\theta$')
+    l3, = plts[1].plot(timespan, panelThetaDotData)
+    l4, = plts[1].plot(timespan, np.ones(len(timespan)) * (panelThetaDotRef * 180 / np.pi), '--')
+    plts[1].set_title(r'Panel Angle Rate, $\dot{\theta}$')
+    plts.flat[0].set(ylabel='[deg]')
+    plts.flat[1].set(xlabel='Time [sec]', ylabel='[deg/s]')
+    plts[0].legend((l1, l2), (r'$\theta$', r'$\theta_{Ref}$', ), loc='lower right', prop={'size': 14})
+    plts[1].legend((l3, l4), (r'$\dot{\theta}$', r'$\dot{\theta}_{Ref}$', ), loc='upper right', prop={'size': 14})
+
+    # Plot the voltage, current, and torque
+    fig, plts = plt.subplots(3, 1, sharex=True)
+    l1, = plts[0].plot(timespan, V_a)
+    l2, = plts[0].plot(timespan, V_b)
+    plts[0].set_title(r'Phase A and B Voltages')
+    l3, = plts[1].plot(timespan, X[4,:])
+    l4, = plts[1].plot(timespan, X[5,:])
+    plts[1].set_title(r'Phase A and B Currents')
+    l5, = plts[2].plot(timespan[1:], T_elec)
+    plts[2].set_title(r'$T_{elec}$')
+    plts.flat[0].set(ylabel='Voltage [v]')
+    plts.flat[1].set(ylabel='Current [A]')
+    plts.flat[2].set(xlabel='Time [sec]', ylabel='Torque [Nm]')
+    plts[0].legend((l1, l2), (r'$V_a$', r'$V_b$', ), loc='lower right', prop={'size': 14})
+    plts[1].legend((l3, l4), (r'$I_a$', r'$I_b$', ), loc='center right', prop={'size': 14})
+
+    # Plot conservation
+    fig, plts = plt.subplots(2, 1, sharex=False)
+    l1, = plts[0].plot(timespan[1:], conservation)
+    plts[0].set_title(r'Diff. Between Electrical Power and Mechanical Power + Magnetic Energy Increase')
+    l2, = plts[1].plot(timespan[-1000:], conservation[-1000:])
+    plts.flat[0].set(ylabel='Power [W]')
+    plts.flat[1].set(xlabel='Time [sec]', ylabel='Power [W]')
+
+    if show_plots:
+        plt.show()
+
+    plt.close("all")
+
+#
+# This statement below ensures that the unit test scrip can be run as a
+# stand-along python script
+#
+if __name__ == "__main__":
+    run(
+        True  # show_plots
+    )
