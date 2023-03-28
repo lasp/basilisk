@@ -71,10 +71,10 @@ def run(show_plots):
     Ip = 3e-3  # [kg m^2]
 
     # SADA Electrical Parameters
-    resistance = 10.0  # [Ohms]
+    resistance = 13.0  # [Ohms]
     inductance = 0.2  # [Henrys]
     backEMFAmplitude = 0.53  # [Vs]
-    friction = 8e-5  # [N m / Hz]
+    friction = 0.05  # [N m / Hz]
     voltageMag = 12  # [Volts]
     numTeeth = 5  # Number of rotor teeth
     stepAngleRad = 18 * np.pi / 180  # [rad]
@@ -88,9 +88,6 @@ def run(show_plots):
     panelThetaRef = 4 * 18 * np.pi / 180  # [rad]
     panelThetaDotRef = 0.0  # [rad/s]
 
-    # Create and initialize the torque array
-    T_elec = np.array(0.0)
-
     # Define initial states
     hubThetaInit = 0.0 * np.pi / 180.0  # [rad]
     hubThetaDotInit = 0.0 * np.pi / 180.0  # [rad/s]
@@ -100,15 +97,10 @@ def run(show_plots):
     current_b_Init = 0.0 / resistance  # [Amperes]
     X = np.array([[hubThetaInit], [hubThetaDotInit], [panelThetaInit], [panelThetaDotInit], [current_a_Init], [current_b_Init]])
 
-    # Create and initialize the timespan array
-    t = 0.0
-    timespan = np.array(t)
-
     # Define quantities for the integration loop
     timeStep = 0.0001  # [s]
-    t = 0.0
+    t = 0.0  # [s]
     i = 0
-    k = 0
 
     # Define stepping requirements
     numSteps = int(np.ceil(np.abs(panelThetaRef - panelThetaInit) / stepAngleRad))
@@ -121,10 +113,8 @@ def run(show_plots):
         backward = True
 
     for step in range(numSteps):
-        print(step)
         # Define intermediate reference angle
         panelThetaRefIntermediate = panelThetaInit + ((step + 1) * stepAngleRad)
-        print(panelThetaRefIntermediate)
 
         # Define phase number
         if (forward):
@@ -146,20 +136,16 @@ def run(show_plots):
             Va = 12.0
             Vb = 0.0
 
-        if (step == 0):
-            V_a = np.array(Va)
-            V_b = np.array(Vb)
-
-        i = 0
-
-        while(i < 10000):
-        #while (np.abs(X[2,i] - panelThetaRef) > 1e-8 or np.abs(X[3,i] - panelThetaDotRef) > 1e-8):
+        while (np.abs(X[2,i] - panelThetaRefIntermediate) > 1e-6 or np.abs(X[3,i] - panelThetaDotRef) > 1e-6):
             # Update the current time
-            t = t + timeStep
-            timespan = np.append(timespan, t)
+            t = i * timeStep
+            if i == 0:
+                timespan = np.array(t)
+                V_a = np.array(Va)
+                V_b = np.array(Vb)
 
             # Store the current state
-            XCurrent = np.reshape(X[:,k], (6,1))
+            XCurrent = np.reshape(X[:,i], (6,1))
 
             # Numerically integrate the system EOM using RK4 algorithm
             K1, Telec = EOM(t, XCurrent, Ih, Ip, panelThetaRefIntermediate, panelThetaDotRef, Va, Vb, resistance, inductance, backEMFAmplitude, friction, numTeeth)
@@ -168,12 +154,15 @@ def run(show_plots):
             K4, Telec = EOM(t + timeStep, XCurrent + timeStep * K3, Ih, Ip, panelThetaRefIntermediate, panelThetaDotRef, Va, Vb, resistance, inductance, backEMFAmplitude, friction, numTeeth)
             X = np.append(X, XCurrent + (timeStep / 6) * (K1 + 2 * K2 + 2 * K3 + K4), axis=1)
 
-            T_elec = np.append(T_elec, Telec)
+            if i == 0:
+                T_elec = np.array(Telec)
+            else:
+                T_elec = np.append(T_elec, Telec)
             V_a = np.append(V_a, Va)
             V_b = np.append(V_b, Vb)
+            timespan = np.append(timespan, t)
 
             i = i + 1
-            k = k + 1
 
     # Plot the results
     plt.close("all")  # clears out plots from earlier test runs
@@ -202,7 +191,7 @@ def run(show_plots):
     l3, = plts[1].plot(timespan, X[4,:])
     l4, = plts[1].plot(timespan, X[5,:])
     plts[1].set_title(r'Phase A and B Currents')
-    l5, = plts[2].plot(timespan, T_elec)
+    l5, = plts[2].plot(timespan[1:], T_elec)
     plts[2].set_title(r'$T_{elec}$')
     plts.flat[0].set(ylabel='Voltage [v]')
     plts.flat[1].set(ylabel='Current [A]')
