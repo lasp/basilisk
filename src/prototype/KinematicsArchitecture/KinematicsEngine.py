@@ -13,8 +13,8 @@ class KinematicsEngine:
         self.jointList = []
         self.assemblyList = []
 
-        self.baseFrame = Frame(MRP([0, 0, 0]), [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], None)
-        self.frameList.append(self.baseFrame)
+        self.rootFrame = Frame(MRP([0, 0, 0]), [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], None)
+        self.frameList.append(self.rootFrame)
 
     def createFrame(self, attitude_CP=MRP([0, 0, 0]), omega_CP_C=None, omegaDot_CP_C=None,
                     r_CP_P=None, rDot_CP_P=None, rDDot_CP_P=None, parentFrame=None):
@@ -30,7 +30,7 @@ class KinematicsEngine:
         if omegaDot_CP_C is None:
             omegaDot_CP_C = [0, 0, 0]
         if parentFrame is None:
-            parentFrame = self.baseFrame
+            parentFrame = self.rootFrame
 
         # Create the frame
         frame = Frame(attitude_CP, omega_CP_C, omegaDot_CP_C, r_CP_P, rDot_CP_P, rDDot_CP_P, parentFrame)
