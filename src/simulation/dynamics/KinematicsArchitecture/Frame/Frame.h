@@ -29,34 +29,32 @@
 #include <Eigen/Core>
 
 /*! @brief basic Basilisk C++ module class */
-class Vector;
-
 class Frame {
 public:
     Frame() = default;
+    Frame(Frame* parentFrame);
     Frame(Frame* parentFrame,
           const MRP& sigma_CP,
           const Eigen::Vector3d& omega_CP_C,
-          const Eigen::Vector3d& omegaDot_CP_C,
+          const Eigen::Vector3d& omegaPrime_CP_C,
           const Eigen::Vector3d& r_CP_P,
-          const Eigen::Vector3d& rDot_CP_P,
-          const Eigen::Vector3d& rDDot_CP_P);
+          const Eigen::Vector3d& rPrime_CP_P,
+          const Eigen::Vector3d& rPPrime_CP_P);
     ~Frame() = default;
 
     BSKLogger bskLogger;              //!< -- BSK Logging
 
     Frame* parentFrame = nullptr;
-
     std::string tag;
 
-    MRP sigma_CP = MRP();
-    Vector omega_CP = Vector(this, Eigen::Vector3d::Zero());
-    Vector omegaDot_CP = Vector(this, Eigen::Vector3d::Zero());
-    Vector r_CP = Vector(this->parentFrame, Eigen::Vector3d::Zero());
-    Vector rDot_CP = Vector(this->parentFrame, Eigen::Vector3d::Zero());
-    Vector rDDot_CP = Vector(this->parentFrame, Eigen::Vector3d::Zero());
+    MRP sigma_CP;
+    Vector omega_CP;
+    Vector omegaPrime_CP;
+    Vector r_CP;
+    Vector rPrime_CP;
+    Vector rPPrime_CP;
 
-    void addParentFrame(Frame newParentFrame) {this->parentFrame = &newParentFrame;}
+    void addParentFrame(Frame* newParentFrame) {this->parentFrame = newParentFrame;};
 };
 
 

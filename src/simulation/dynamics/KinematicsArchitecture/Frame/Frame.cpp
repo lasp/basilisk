@@ -18,16 +18,27 @@
  */
 #include "Frame.h"
 
-/*! This is the constructor for the module class.  It sets default variable
-    values and initializes the various parts of the model */
+Frame::Frame(Frame* parentFrame) :
+             parentFrame(parentFrame),
+             omega_CP(Eigen::Vector3d::Zero(), this, nullptr),
+             omegaPrime_CP(Eigen::Vector3d::Zero(), this, this),
+             r_CP(Eigen::Vector3d::Zero(), parentFrame, nullptr),
+             rPrime_CP(Eigen::Vector3d::Zero(), parentFrame, parentFrame),
+             rPPrime_CP(Eigen::Vector3d::Zero(), parentFrame, parentFrame) {
+}
+
 Frame::Frame(Frame* parentFrame,
              const MRP& sigma_CP,
              const Eigen::Vector3d& omega_CP_C,
-             const Eigen::Vector3d& omegaDot_CP_C,
+             const Eigen::Vector3d& omegaPrime_CP_C,
              const Eigen::Vector3d& r_CP_P,
-             const Eigen::Vector3d& rDot_CP_P,
-             const Eigen::Vector3d& rDDot_CP_P) :
+             const Eigen::Vector3d& rPrime_CP_P,
+             const Eigen::Vector3d& rPPrime_CP_P) :
              parentFrame(parentFrame),
              sigma_CP(sigma_CP),
-             r_CP(parentFrame, r_CP_P) {
+             omega_CP(omega_CP_C, this, nullptr),
+             omegaPrime_CP(omegaPrime_CP_C, this, this),
+             r_CP(r_CP_P, parentFrame, nullptr),
+             rPrime_CP(rPrime_CP_P, parentFrame, parentFrame),
+             rPPrime_CP(rPPrime_CP_P, parentFrame, parentFrame) {
 }
