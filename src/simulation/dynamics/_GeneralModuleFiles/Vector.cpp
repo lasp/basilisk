@@ -23,10 +23,10 @@
 
 /*! This is the constructor for the module class.  It sets default variable
     values and initializes the various parts of the model */
-Vector::Vector(Frame* frameObject, Eigen::Vector3d matrix) :
-        components(std::move(matrix)),
-        frame(frameObject) {
-}
+Vector::Vector(Eigen::Vector3d matrix, Frame* writtenFrame, Frame* derivFrame) :
+        matrix(std::move(matrix)),
+        writtenFrame(writtenFrame),
+        derivFrame(derivFrame) {}
 
 /*! Module Destructor.  */
 Vector::~Vector() = default;

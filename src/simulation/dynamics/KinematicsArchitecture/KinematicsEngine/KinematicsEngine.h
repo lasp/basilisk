@@ -31,14 +31,19 @@ public:
     KinematicsEngine();
     ~KinematicsEngine() override = default;
 
-    void Reset(uint64_t CurrentSimNanos) override;
-    void UpdateState(uint64_t CurrentSimNanos) override;
-
     BSKLogger bskLogger;              //!< -- BSK Logging
 
-private:
-    Frame baseFrame;
+//    Frame* createFrame();
+//    Frame* createFrame(Frame* parentFrame);
+//    Frame* createFrame(Frame* parentFrame,
+//                       const MRP& sigma_CP,
+//                       const Eigen::Vector3d& omega_CP_C,
+//                       const Eigen::Vector3d& omegaPrime_CP_C,
+//                       const Eigen::Vector3d& r_CP_P,
+//                       const Eigen::Vector3d& rPrime_CP_P,
+//                       const Eigen::Vector3d& rPPrime_CP_P);
 
+    Frame baseFrame;
 };
 
 

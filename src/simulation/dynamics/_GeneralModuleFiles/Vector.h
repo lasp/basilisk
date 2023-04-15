@@ -28,22 +28,15 @@
 /*! @brief basic Basilisk C++ module class */
 class Frame;  // Needs a forward declaration so it compiles
 
-class Array {
+class Vector {
 public:
+    Vector() = default;
+    Vector(Eigen::Vector3d matrix, Frame* writtenFrame, Frame* derivFrame);
+    ~Vector();
+
     Eigen::Vector3d matrix = Eigen::Vector3d::Zero();
     Frame* writtenFrame = nullptr;
     Frame* derivFrame = nullptr;
-
-};
-
-class Vector {
-public:
-    Vector(Frame* frameObject, Eigen::Vector3d matrix);
-    ~Vector();
-
-    Array zerothDeriv;
-    Array firstDeriv;
-    Array secondDeriv;
 
 };
 
