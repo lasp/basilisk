@@ -16,17 +16,23 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
-#include "Vector.h"
-#include "Frame.h"
+%module AttitudeParameterization
+%{
+    #include "../../_GeneralModuleFiles/AttitudeParameterization.h"
 
-#include <utility>
+%}
 
-/*! This is the constructor for the module class.  It sets default variable
-    values and initializes the various parts of the model */
-Vector::Vector(Eigen::Vector3d matrix, Frame* writtenFrame, Frame* derivFrame) :
-        matrix(std::move(matrix)),
-        writtenFrame(writtenFrame),
-        derivFrame(derivFrame) {}
+%pythoncode %{
+from Basilisk.architecture.swig_common_model import *
+%}
+%include "std_string.i"
+%include "swig_eigen.i"
+%include "swig_conly_data.i"
 
-/*! Module Destructor.  */
-Vector::~Vector() = default;
+%include "sys_model.h"
+%include "../../_GeneralModuleFiles/AttitudeParameterization.h"
+
+%pythoncode %{
+import sys
+protectAllClasses(sys.modules[__name__])
+%}
