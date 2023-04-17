@@ -20,22 +20,24 @@
 
 /*! This is the constructor for the module class.  It sets default variable
     values and initializes the various parts of the model */
-KinematicsEngine::KinematicsEngine() = default;
+KinematicsEngine::KinematicsEngine() :
+    rootFrame(new Frame) {
+};
 
-//Frame* KinematicsEngine::createFrame() {
-//    return new Frame(&this->baseFrame);
-//}
-//
-//Frame* KinematicsEngine::createFrame(Frame* parentFrame) {
-//    return new Frame(parentFrame);
-//}
-//
-//Frame* KinematicsEngine::createFrame(Frame *parentFrame,
-//                                     const MRP &sigma_CP,
-//                                     const Eigen::Vector3d &omega_CP_C,
-//                                     const Eigen::Vector3d &omegaPrime_CP_C,
-//                                     const Eigen::Vector3d &r_CP_P,
-//                                     const Eigen::Vector3d &rPrime_CP_P,
-//                                     const Eigen::Vector3d &rPPrime_CP_P) {
-//    return new Frame(parentFrame, sigma_CP, omega_CP_C, omegaPrime_CP_C, r_CP_P, rPrime_CP_P, rPPrime_CP_P);
-//}
+Frame* KinematicsEngine::createFrame() {
+    return new Frame(this->rootFrame);
+}
+
+Frame* KinematicsEngine::createFrame(Frame* parentFrame) {
+    return new Frame(parentFrame);
+}
+
+Frame* KinematicsEngine::createFrame(Frame *parentFrame,
+                                     const MRP &sigma_CP,
+                                     const Eigen::Vector3d &omega_CP_C,
+                                     const Eigen::Vector3d &omegaPrime_CP_C,
+                                     const Eigen::Vector3d &r_CP_P,
+                                     const Eigen::Vector3d &rPrime_CP_P,
+                                     const Eigen::Vector3d &rPPrime_CP_P) {
+    return new Frame(parentFrame, sigma_CP, omega_CP_C, omegaPrime_CP_C, r_CP_P, rPrime_CP_P, rPPrime_CP_P);
+}
