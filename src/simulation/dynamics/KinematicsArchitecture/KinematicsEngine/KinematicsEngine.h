@@ -22,9 +22,8 @@
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/bskLogging.h"
-#include "architecture/messaging/messaging.h"
-#include "simulation/dynamics/_GeneralModuleFiles/AttitudeParameterization.h"
 #include "simulation/dynamics/_GeneralModuleFiles/Frame.h"
+#include "simulation/dynamics/_GeneralModuleFiles/Part.h"
 
 class KinematicsEngine: public SysModel {
 public:
@@ -36,6 +35,16 @@ public:
     Frame* createFrame();
     Frame* createFrame(Frame* parentFrame);
     Frame* createFrame(Frame* parentFrame,
+                       const MRP& sigma_CP,
+                       const Eigen::Vector3d& omega_CP_C,
+                       const Eigen::Vector3d& omegaPrime_CP_C,
+                       const Eigen::Vector3d& r_CP_P,
+                       const Eigen::Vector3d& rPrime_CP_P,
+                       const Eigen::Vector3d& rPPrime_CP_P);
+
+    Part* createPart();
+    Part* createPart(Frame* parentFrame);
+    Part* createPart(Frame* parentFrame,
                        const MRP& sigma_CP,
                        const Eigen::Vector3d& omega_CP_C,
                        const Eigen::Vector3d& omegaPrime_CP_C,

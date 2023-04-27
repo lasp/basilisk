@@ -19,12 +19,9 @@
 #include "Frame.h"
 
 Frame::Frame(Frame* parentFrame) :
-             parentFrame(parentFrame),
-             omega_CP(Vector(Eigen::Vector3d::Zero(), this, nullptr)),
-             omegaPrime_CP(Vector(Eigen::Vector3d::Zero(), this, this)),
-             r_CP(Vector(Eigen::Vector3d::Zero(), parentFrame, nullptr)),
-             rPrime_CP(Vector(Eigen::Vector3d::Zero(), parentFrame, parentFrame)),
-             rPPrime_CP(Vector(Eigen::Vector3d::Zero(), parentFrame, parentFrame)) {
+parentFrame(parentFrame),
+omega_CP(Vector(Eigen::Vector3d::Zero(), this, Eigen::Vector3d::Zero(), this, this, Eigen::Vector3d::Zero(), this, this)),
+r_CP(Vector(Eigen::Vector3d::Zero(), parentFrame, Eigen::Vector3d::Zero(), parentFrame, parentFrame, Eigen::Vector3d::Zero(), parentFrame, parentFrame)) {
 }
 
 Frame::Frame(Frame* parentFrame,
@@ -34,11 +31,8 @@ Frame::Frame(Frame* parentFrame,
              const Eigen::Vector3d& r_CP_P,
              const Eigen::Vector3d& rPrime_CP_P,
              const Eigen::Vector3d& rPPrime_CP_P) :
-             parentFrame(parentFrame),
-             sigma_CP(sigma_CP),
-             omega_CP(Vector(omega_CP_C, this, nullptr)),
-             omegaPrime_CP(Vector(omegaPrime_CP_C, this, this)),
-             r_CP(Vector(r_CP_P, parentFrame, nullptr)),
-             rPrime_CP(Vector(rPrime_CP_P, parentFrame, parentFrame)),
-             rPPrime_CP(Vector(rPPrime_CP_P, parentFrame, parentFrame)) {
+parentFrame(parentFrame),
+sigma_CP(sigma_CP),
+omega_CP(Vector(omega_CP_C, this, omegaPrime_CP_C, this, this, Eigen::Vector3d::Zero(), nullptr, nullptr)),
+r_CP(Vector(r_CP_P, parentFrame, rPrime_CP_P, parentFrame, parentFrame, rPPrime_CP_P, parentFrame, parentFrame)) {
 }

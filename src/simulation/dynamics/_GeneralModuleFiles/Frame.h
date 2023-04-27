@@ -49,12 +49,9 @@ public:
 
     MRP sigma_CP;
     Vector omega_CP;
-    Vector omegaPrime_CP;
     Vector r_CP;
-    Vector rPrime_CP;
-    Vector rPPrime_CP;
 
-    void addParentFrame(Frame* newParentFrame) {this->parentFrame = newParentFrame;};
+    void setParentFrame(Frame* newParentFrame) {this->parentFrame = newParentFrame;};
 };
 
 
