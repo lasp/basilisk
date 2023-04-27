@@ -4,7 +4,7 @@ from Basilisk import __path__
 bskPath = __path__[0]
 fileName = os.path.basename(os.path.splitext(__file__)[0])
 
-from Basilisk.simulation import KinematicsEngine, Frame, Vector, AttitudeParameterization
+from Basilisk.simulation import KinematicsEngine, Frame, Vector, AttitudeParameterization, Part
 
 
 def run():
@@ -12,9 +12,46 @@ def run():
     myInertialFrame = myKinematicsEngine.createFrame()
     myBodyFrame = myKinematicsEngine.createFrame(myInertialFrame)
 
+    myPart = myKinematicsEngine.createPart(myBodyFrame)
+    myPar2 = myKinematicsEngine.createPart(myPart.frame)
+
     myKinematicsEngine.rootFrame.tag = "root"
     myInertialFrame.tag = "inertial"
     myBodyFrame.tag = "body"
+    myPart.frame.tag = "part"
+    myPar2.frame.tag = "part2"
+
+    # ####
+    #
+    # myAssembly = Assembly.createAssembly()
+    # myPart1 = myAssembly.createPart(myAssembly.rootFrame)
+    # myJoint = myAssembly.createJoint(myPart1.frame)
+    # myPart2 = myAssembly.createPart(myJoint.frame)
+    #
+    # myAssembly2 = Assembly.createAssembly()
+    # myPart3 = myAssembly2.createPart()
+    #
+    # myAssembly3 = Assembly.createAssembly()
+    # myAssembly3.addAssembly(myAssembly, myAssembly2)
+    # myKinematicsEngine.placeAssembly(myAssembly3)
+    #
+    # ####
+    #
+    # myPart1 = myKinematicsEngine.createPart(myAssembly.rootFrame)
+    # myJoint = myKinematicsEngine.createJoint(myPart1.frame)
+    # myPart2 = myKinematicsEngine.createPart(myJoint.frame)
+    #
+    # myAssembly = myKinematicsEngine.createAssembly()
+    # myAssembly.addComponent(myPart1)
+    # myAssembly.addComponent(myPart2)
+    # myAssembly.addComponent(myJoint)
+    #
+    # ####
+    #
+    # myAssembly = myKinematicsEngine.createAssembly()
+    # myPart1 = myAssembly.createPart()
+    # myJoint = myAssembly.createJoint(myPart1.frame)
+    # myPart2 = myAssembly.createPart(myJoint.frame)
 
     breakpoint()
 
