@@ -25,7 +25,7 @@
 /*! @brief basic Basilisk C++ module class */
 class Frame;  // Needs a forward declaration so it compiles
 
-struct Array {
+struct VectorProperties {
     Eigen::Vector3d matrix = Eigen::Vector3d::Zero();
     Frame* writtenFrame = nullptr;
     Frame* derivFrame = nullptr;
@@ -39,9 +39,9 @@ public:
            Eigen::Vector3d secondMatrix, Frame* secondWrittenFrame, Frame* secondDerivFrame);
     ~Vector();
 
-    Array zerothOrder;
-    Array firstOrder;
-    Array secondOrder;
+    VectorProperties zerothOrder;
+    VectorProperties firstOrder;
+    VectorProperties secondOrder;
 
 };
 

@@ -4,8 +4,12 @@ from Basilisk import __path__
 bskPath = __path__[0]
 fileName = os.path.basename(os.path.splitext(__file__)[0])
 
-from Basilisk.simulation import KinematicsEngine, Frame, Vector, AttitudeParameterization, Part
-
+from Basilisk.simulation import KinematicsEngine
+from Basilisk.simulation import Frame
+from Basilisk.simulation import Vector
+from Basilisk.simulation import Tensor
+from Basilisk.simulation import AttitudeParameterization
+from Basilisk.simulation import Part
 
 def run():
     myKinematicsEngine = KinematicsEngine.KinematicsEngine()
@@ -53,7 +57,7 @@ def run():
     # myJoint = myAssembly.createJoint(myPart1.frame)
     # myPart2 = myAssembly.createPart(myJoint.frame)
 
-    breakpoint()
+    # breakpoint()
 
 
 if __name__ == "__main__":

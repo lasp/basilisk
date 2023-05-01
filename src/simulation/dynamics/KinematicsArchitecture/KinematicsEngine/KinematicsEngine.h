@@ -52,7 +52,7 @@ public:
                        const Eigen::Vector3d& rPrime_CP_P,
                        const Eigen::Vector3d& rPPrime_CP_P);
 
-    Frame* rootFrame;
+    Frame* rootFrame = nullptr;
 };
 
 
