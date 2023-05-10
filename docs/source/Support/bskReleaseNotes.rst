@@ -47,8 +47,10 @@ Version |release|
   format, with_quirc QR code lib. Users that have Basilisk control the build of these modules through the External
   Modules CMake integration will need to manual toggle these OpenCV build options.
 - Updated :ref:`SmallBodyNavEKF` with several bug fixes. Removed spacecraft attitude estimation component.
-- Bug fix made to :ref:`eclipse`: Saturn, Jupiter, Uranus, and Neptune radii were incorrectly being assigned the 
-  radius of Mars.
+- Bug fix made to :ref:`eclipse`: Saturn, Jupiter, Uranus, and Neptune radii were incorrectly being assigned the
+  radius of Mars. 
+- Added custom planet name to :ref:`eclipse` in case the user wants to use a body not contained within the module.
+- Removed all instances of using ``unitTestSupport.np2EigenVectorXd()``, as this function is now unneeded.
 - Created :ref:`lambertSolver` module to solve Lambert's problem
 - Created :ref:`lambertPlanner` module to write the :ref:`lambertProblemMsgPayload` Lambert problem setup message
 
