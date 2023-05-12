@@ -20,29 +20,25 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/utilities/bskLogging.h"
+#include "architecture/messaging/messaging.h"
+
+#include "simulation/dynamics/_GeneralModuleFiles/Frame.h"
 #include <Eigen/Core>
 
 /*! @brief basic Basilisk C++ module class */
-class Frame;  // Needs a forward declaration so it compiles
-
-struct VectorProperties {
-    Eigen::Vector3d matrix = Eigen::Vector3d::Zero();
-    Frame* writtenFrame = nullptr;
-    Frame* derivFrame = nullptr;
-};
-
-class Vector {
+class Vector{
 public:
     Vector() = default;
-    Vector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame,
-           Eigen::Vector3d firstMatrix, Frame* firstWrittenFrame, Frame* firstDerivFrame,
-           Eigen::Vector3d secondMatrix, Frame* secondWrittenFrame, Frame* secondDerivFrame);
+    Vector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame);
     ~Vector();
 
-    VectorProperties zerothOrder;
-    VectorProperties firstOrder;
-    VectorProperties secondOrder;
+    BSKLogger bskLogger;              //!< -- BSK Logging
 
+    Eigen::Vector3d matrix = Eigen::Vector3d::Zero();
+    Frame* writtenFrame = nullptr;
 };
+
 
 #endif
