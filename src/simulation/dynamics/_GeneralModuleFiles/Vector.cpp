@@ -17,24 +17,18 @@
 
  */
 #include "Vector.h"
-
-#include <utility>
 #include "Frame.h"
 
 /*! This is the constructor for the module class.  It sets default variable
-    values and initializes the various parts of the model */
-Vector::Vector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame,
-               Eigen::Vector3d firstMatrix, Frame* firstWrittenFrame, Frame* firstDerivFrame,
-               Eigen::Vector3d secondMatrix, Frame* secondWrittenFrame, Frame* secondDerivFrame) {
-this->zerothOrder.matrix = std::move(zerothMatrix);
-this->zerothOrder.writtenFrame = zerothWrittenFrame;
-this->firstOrder.matrix = std::move(firstMatrix);
-this->firstOrder.writtenFrame = firstWrittenFrame;
-this->firstOrder.derivFrame = firstDerivFrame;
-this->secondOrder.matrix = std::move(secondMatrix);
-this->secondOrder.writtenFrame = secondWrittenFrame;
-this->secondOrder.derivFrame = secondDerivFrame;
+    values and initializes the various parts of the module */
+Vector::Vector(){
 }
 
-/*! Module Destructor.  */
-Vector::~Vector() = default;
+Vector::Vector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame){
+    this->zerothOrder.matrix = std::move(zerothMatrix);
+    this->zerothOrder.writtenFrame = zerothWrittenFrame;
+}
+
+/*! Module Destructor. */
+Vector::~Vector(){
+}
