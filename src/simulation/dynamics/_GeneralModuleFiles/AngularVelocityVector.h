@@ -17,29 +17,32 @@
 
  */
 
-#ifndef POINT_H
-#define POINT_H
+#ifndef ANGULARVELOCITYVECTOR_H
+#define ANGULARVELOCITYVECTOR_H
 
-#include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "architecture/utilities/bskLogging.h"
-#include "architecture/messaging/messaging.h"
-
+#include "simulation/dynamics/_GeneralModuleFiles/Vector.h"
 #include <Eigen/Core>
-#include <vector>
 #include <utility>
 
-class PositionVector;
+class Frame;
 
-/*! @brief basic Basilisk C++ module class */
-class Point{
-public:
-    Point() = default;
-    ~Point() = default;
-
-    BSKLogger bskLogger;              //!< -- BSK Logging
-
-    std::vector<PositionVector*> positionVector;
+/*! @brief Angular velocity vector derivative properties data structure */
+struct AngularVelocityVectorDerivProperties{
+    Eigen::Vector3d matrix = Eigen::Vector3d::Zero();
+    Frame* writtenFrame = nullptr;
+    Frame* derivFrame = nullptr;
 };
 
+/*! @brief basic Basilisk C++ module class */
+class AngularVelocityVector : public Vector{
+public:
+    AngularVelocityVector() = default;
+    AngularVelocityVector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame);
+    AngularVelocityVector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame,
+                          Eigen::Vector3d firstMatrix, Frame* firstWrittenFrame, Frame* firstDerivFrame);
+    ~AngularVelocityVector() = default;
+
+    AngularVelocityVectorDerivProperties firstOrder;
+};
 
 #endif

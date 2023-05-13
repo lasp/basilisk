@@ -16,18 +16,4 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
-#include "Vector.h"
-
-/*! This is the constructor for the module class.  It sets default variable
-    values and initializes the various parts of the module */
-Vector::Vector(){
-}
-
-Vector::Vector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame){
-    this->matrix = std::move(zerothMatrix);
-    this->writtenFrame = zerothWrittenFrame;
-}
-
-/*! Module Destructor. */
-Vector::~Vector(){
-}
+#include "ForceVector.h"

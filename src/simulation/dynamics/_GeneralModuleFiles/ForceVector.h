@@ -16,18 +16,23 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
-#include "Vector.h"
 
-/*! This is the constructor for the module class.  It sets default variable
-    values and initializes the various parts of the module */
-Vector::Vector(){
-}
+#ifndef FORCEVECTOR_H
+#define FORCEVECTOR_H
 
-Vector::Vector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame){
-    this->matrix = std::move(zerothMatrix);
-    this->writtenFrame = zerothWrittenFrame;
-}
+#include "simulation/dynamics/_GeneralModuleFiles/Vector.h"
+#include "simulation/dynamics/_GeneralModuleFiles/Point.h"
+#include <utility>
+#include <Eigen/Core>
 
-/*! Module Destructor. */
-Vector::~Vector(){
-}
+/*! @brief basic Basilisk C++ module class */
+class ForceVector : public Vector{
+public:
+    ForceVector() = default;
+    ~ForceVector() = default;
+
+    Point* applicationPoint;
+};
+
+
+#endif

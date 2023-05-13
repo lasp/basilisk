@@ -20,8 +20,8 @@
 
 Frame::Frame(Frame* parentFrame) :
 parentFrame(parentFrame),
-omega_CP(Vector(Eigen::Vector3d::Zero(), this, Eigen::Vector3d::Zero(), this, this, Eigen::Vector3d::Zero(), this, this)),
-r_CP(Vector(Eigen::Vector3d::Zero(), parentFrame, Eigen::Vector3d::Zero(), parentFrame, parentFrame, Eigen::Vector3d::Zero(), parentFrame, parentFrame)) {
+omega_CP(AngularVelocityVector(Eigen::Vector3d::Zero(), this)),
+r_CP(PositionVector(Eigen::Vector3d::Zero(), parentFrame)){
 }
 
 Frame::Frame(Frame* parentFrame,
@@ -33,6 +33,6 @@ Frame::Frame(Frame* parentFrame,
              const Eigen::Vector3d& rPPrime_CP_P) :
 parentFrame(parentFrame),
 sigma_CP(sigma_CP),
-omega_CP(Vector(omega_CP_C, this, omegaPrime_CP_C, this, this, Eigen::Vector3d::Zero(), nullptr, nullptr)),
-r_CP(Vector(r_CP_P, parentFrame, rPrime_CP_P, parentFrame, parentFrame, rPPrime_CP_P, parentFrame, parentFrame)) {
+omega_CP(AngularVelocityVector(omega_CP_C, this, omegaPrime_CP_C, this, this)),
+r_CP(PositionVector(r_CP_P, parentFrame, rPrime_CP_P, parentFrame, parentFrame, rPPrime_CP_P, parentFrame, parentFrame)) {
 }

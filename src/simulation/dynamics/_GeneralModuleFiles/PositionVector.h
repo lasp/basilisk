@@ -17,23 +17,23 @@
 
  */
 
-#ifndef VECTOR_H
-#define VECTOR_H
+#ifndef POSITIONVECTOR_H
+#define POSITIONVECTOR_H
 
 #include "simulation/dynamics/_GeneralModuleFiles/Vector.h"
-#include "simulation/dynamics/_GeneralModuleFiles/Frame.h"
-
 #include <Eigen/Core>
 
-/*! @brief basic Basilisk C++ module class */
-class Frame;  // Needs a forward declaration so it compiles
+class Frame;
+class Point;
 
+/*! @brief Position vector derivative properties data structure */
 struct PositionVectorDerivProperties{
     Eigen::Vector3d matrix = Eigen::Vector3d::Zero();
     Frame* writtenFrame = nullptr;
     Frame* derivFrame = nullptr;
 };
 
+/*! @brief basic Basilisk C++ module class */
 class PositionVector : public Vector{
 public:
     PositionVector() = default;
@@ -42,7 +42,10 @@ public:
                    Eigen::Vector3d firstMatrix, Frame* firstWrittenFrame,
                    Frame* firstDerivFrame, Eigen::Vector3d secondMatrix,
                    Frame* secondWrittenFrame, Frame* secondDerivFrame);
-    ~PositionVector();
+    ~PositionVector() = default;
+
+    Point* tailPoint;
+    Point* headPoint;
 
     PositionVectorDerivProperties firstOrder;
     PositionVectorDerivProperties secondOrder;
