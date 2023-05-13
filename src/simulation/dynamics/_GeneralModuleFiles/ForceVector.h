@@ -21,9 +21,10 @@
 #define FORCEVECTOR_H
 
 #include "simulation/dynamics/_GeneralModuleFiles/Vector.h"
-#include "simulation/dynamics/_GeneralModuleFiles/Point.h"
 #include <utility>
 #include <Eigen/Core>
+
+class Point;
 
 /*! @brief basic Basilisk C++ module class */
 class ForceVector : public Vector{
