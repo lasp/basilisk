@@ -28,6 +28,7 @@
 #include "simulation/dynamics/_GeneralModuleFiles/Vector.h"
 #include "simulation/dynamics/_GeneralModuleFiles/Tensor.h"
 #include <Eigen/Core>
+#include <utility>
 
 /*! @brief basic Basilisk C++ module class */
 class Part {

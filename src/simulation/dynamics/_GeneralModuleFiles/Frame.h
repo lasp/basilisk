@@ -23,10 +23,11 @@
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/messaging/messaging.h"
-
-#include "simulation/dynamics/_GeneralModuleFiles/Vector.h"
+#include "simulation/dynamics/_GeneralModuleFiles/PositionVector.h"
+#include "simulation/dynamics/_GeneralModuleFiles/AngularVelocityVector.h"
 #include "simulation/dynamics/_GeneralModuleFiles/AttitudeParameterization.h"
 #include <Eigen/Core>
+#include <utility>
 
 /*! @brief basic Basilisk C++ module class */
 class Frame {
@@ -48,8 +49,8 @@ public:
     std::string tag;
 
     MRP sigma_CP;
-    Vector omega_CP;
-    Vector r_CP;
+    AngularVelocityVector omega_CP;
+    PositionVector r_CP;
 
     void setParentFrame(Frame* newParentFrame) {this->parentFrame = newParentFrame;};
 };

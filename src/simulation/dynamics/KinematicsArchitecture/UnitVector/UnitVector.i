@@ -16,18 +16,21 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
-#include "Vector.h"
+%module UnitVector
+%{
+    #include "../../_GeneralModuleFiles/UnitVector.h"
+%}
 
-/*! This is the constructor for the module class.  It sets default variable
-    values and initializes the various parts of the module */
-Vector::Vector(){
-}
+%pythoncode %{
+from Basilisk.architecture.swig_common_model import *
+%}
+%include "std_string.i"
+%include "swig_eigen.i"
+%include "swig_conly_data.i"
 
-Vector::Vector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame){
-    this->matrix = std::move(zerothMatrix);
-    this->writtenFrame = zerothWrittenFrame;
-}
+%include "../../_GeneralModuleFiles/UnitVector.h"
 
-/*! Module Destructor. */
-Vector::~Vector(){
-}
+%pythoncode %{
+import sys
+protectAllClasses(sys.modules[__name__])
+%}

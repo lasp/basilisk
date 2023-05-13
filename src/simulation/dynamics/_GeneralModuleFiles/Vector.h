@@ -23,14 +23,15 @@
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/messaging/messaging.h"
-
-#include "simulation/dynamics/_GeneralModuleFiles/Frame.h"
 #include <Eigen/Core>
+#include <utility>
+
+class Frame;
 
 /*! @brief basic Basilisk C++ module class */
 class Vector{
 public:
-    Vector() = default;
+    Vector();
     Vector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame);
     ~Vector();
 

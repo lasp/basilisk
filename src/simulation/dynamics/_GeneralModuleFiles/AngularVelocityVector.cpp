@@ -16,18 +16,20 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
-#include "Vector.h"
+#include "AngularVelocityVector.h"
+#include "Frame.h"
+#include <utility>
 
 /*! This is the constructor for the module class.  It sets default variable
     values and initializes the various parts of the module */
-Vector::Vector(){
+AngularVelocityVector::AngularVelocityVector(Eigen::Vector3d zerothMatrix,
+                               Frame* zerothWrittenFrame):Vector(zerothMatrix, zerothWrittenFrame){
 }
 
-Vector::Vector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame){
-    this->matrix = std::move(zerothMatrix);
-    this->writtenFrame = zerothWrittenFrame;
-}
-
-/*! Module Destructor. */
-Vector::~Vector(){
+AngularVelocityVector::AngularVelocityVector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame,
+               Eigen::Vector3d firstMatrix, Frame* firstWrittenFrame,
+               Frame* firstDerivFrame):Vector(zerothMatrix, zerothWrittenFrame){
+this->firstOrder.matrix = std::move(firstMatrix);
+this->firstOrder.writtenFrame = firstWrittenFrame;
+this->firstOrder.derivFrame = firstDerivFrame;
 }

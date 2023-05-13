@@ -17,11 +17,4 @@
 
  */
 #include "Point.h"
-
-/*! This is the constructor for the module class.  It sets default variable
-    values and initializes the various parts of the module */
-Point::Point(){
-}
-
-Point::~Point(){
-}
+#include "simulation/dynamics/_GeneralModuleFiles/PositionVector.h"
