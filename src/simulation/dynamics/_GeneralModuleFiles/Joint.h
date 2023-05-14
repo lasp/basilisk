@@ -26,7 +26,6 @@
 
 #include "simulation/dynamics/_GeneralModuleFiles/Frame.h"
 #include "simulation/dynamics/_GeneralModuleFiles/Hinge.h"
-
 #include <Eigen/Core>
 
 /*! @brief basic Basilisk C++ module class */

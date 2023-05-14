@@ -27,6 +27,7 @@
 #include <utility>
 
 class Frame;
+class Point;
 
 /*! @brief basic Basilisk C++ module class */
 class Vector{
@@ -39,6 +40,74 @@ public:
 
     Eigen::Vector3d matrix = Eigen::Vector3d::Zero();
     Frame* writtenFrame = nullptr;
+};
+
+
+
+/*! @brief Position vector derivative properties data structure */
+struct PositionVectorDerivProperties{
+    Eigen::Vector3d matrix = Eigen::Vector3d::Zero();
+    Frame* writtenFrame = nullptr;
+    Frame* derivFrame = nullptr;
+};
+
+/*! @brief basic Basilisk C++ module class */
+class PositionVector : public Vector{
+public:
+    PositionVector() = default;
+    PositionVector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame);
+    PositionVector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame,
+                   Eigen::Vector3d firstMatrix, Frame* firstWrittenFrame,
+                   Frame* firstDerivFrame, Eigen::Vector3d secondMatrix,
+                   Frame* secondWrittenFrame, Frame* secondDerivFrame);
+    ~PositionVector() = default;
+
+    Point* tailPoint;
+    Point* headPoint;
+
+    PositionVectorDerivProperties firstOrder;
+    PositionVectorDerivProperties secondOrder;
+};
+
+
+
+/*! @brief basic Basilisk C++ module class */
+class ForceVector : public Vector{
+public:
+    ForceVector() = default;
+    ~ForceVector() = default;
+
+    Point* applicationPoint;
+};
+
+
+
+/*! @brief Angular velocity vector derivative properties data structure */
+struct AngularVelocityVectorDerivProperties{
+    Eigen::Vector3d matrix = Eigen::Vector3d::Zero();
+    Frame* writtenFrame = nullptr;
+    Frame* derivFrame = nullptr;
+};
+
+/*! @brief basic Basilisk C++ module class */
+class AngularVelocityVector : public Vector{
+public:
+    AngularVelocityVector() = default;
+    AngularVelocityVector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame);
+    AngularVelocityVector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame,
+                          Eigen::Vector3d firstMatrix, Frame* firstWrittenFrame, Frame* firstDerivFrame);
+    ~AngularVelocityVector() = default;
+
+    AngularVelocityVectorDerivProperties firstOrder;
+};
+
+
+
+/*! @brief basic Basilisk C++ module class */
+class UnitVector : public Vector{
+public:
+    UnitVector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame);
+    ~UnitVector();
 };
 
 

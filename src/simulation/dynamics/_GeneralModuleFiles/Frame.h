@@ -23,8 +23,7 @@
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/messaging/messaging.h"
-#include "simulation/dynamics/_GeneralModuleFiles/PositionVector.h"
-#include "simulation/dynamics/_GeneralModuleFiles/AngularVelocityVector.h"
+#include "simulation/dynamics/_GeneralModuleFiles/Vector.h"
 #include "simulation/dynamics/_GeneralModuleFiles/AttitudeParameterization.h"
 #include <Eigen/Core>
 #include <utility>
