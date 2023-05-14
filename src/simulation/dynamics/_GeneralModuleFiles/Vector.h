@@ -43,13 +43,13 @@ public:
 };
 
 
-
-/*! @brief Position vector derivative properties data structure */
-struct PositionVectorDerivProperties{
+/*! @brief Vector derivative properties data structure */
+struct VectorDerivativeProperties{
     Eigen::Vector3d matrix = Eigen::Vector3d::Zero();
     Frame* writtenFrame = nullptr;
     Frame* derivFrame = nullptr;
 };
+
 
 /*! @brief basic Basilisk C++ module class */
 class PositionVector : public Vector{
@@ -62,13 +62,12 @@ public:
                    Frame* secondWrittenFrame, Frame* secondDerivFrame);
     ~PositionVector() = default;
 
-    Point* tailPoint;
-    Point* headPoint;
+    Point* tailPoint = nullptr;
+    Point* headPoint = nullptr;
 
-    PositionVectorDerivProperties firstOrder;
-    PositionVectorDerivProperties secondOrder;
+    VectorDerivativeProperties firstOrder;
+    VectorDerivativeProperties secondOrder;
 };
-
 
 
 /*! @brief basic Basilisk C++ module class */
@@ -77,17 +76,9 @@ public:
     ForceVector() = default;
     ~ForceVector() = default;
 
-    Point* applicationPoint;
+    Point* applicationPoint = nullptr;
 };
 
-
-
-/*! @brief Angular velocity vector derivative properties data structure */
-struct AngularVelocityVectorDerivProperties{
-    Eigen::Vector3d matrix = Eigen::Vector3d::Zero();
-    Frame* writtenFrame = nullptr;
-    Frame* derivFrame = nullptr;
-};
 
 /*! @brief basic Basilisk C++ module class */
 class AngularVelocityVector : public Vector{
@@ -98,9 +89,8 @@ public:
                           Eigen::Vector3d firstMatrix, Frame* firstWrittenFrame, Frame* firstDerivFrame);
     ~AngularVelocityVector() = default;
 
-    AngularVelocityVectorDerivProperties firstOrder;
+    VectorDerivativeProperties firstOrder;
 };
-
 
 
 /*! @brief basic Basilisk C++ module class */
