@@ -17,6 +17,9 @@
 
  */
 #include "Vector.h"
+#include "Frame.h"
+#include <utility>
+
 
 /*! This is the constructor for the module class.  It sets default variable
     values and initializes the various parts of the module */
@@ -30,4 +33,52 @@ Vector::Vector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame){
 
 /*! Module Destructor. */
 Vector::~Vector(){
+}
+
+
+
+/*! This is the constructor for the module class.  It sets default variable
+    values and initializes the various parts of the module */
+PositionVector::PositionVector(Eigen::Vector3d zerothMatrix,
+                               Frame* zerothWrittenFrame):Vector(zerothMatrix, zerothWrittenFrame){
+}
+
+PositionVector::PositionVector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame,
+               Eigen::Vector3d firstMatrix, Frame* firstWrittenFrame, Frame* firstDerivFrame,
+               Eigen::Vector3d secondMatrix, Frame* secondWrittenFrame,
+               Frame* secondDerivFrame):Vector(zerothMatrix, zerothWrittenFrame){
+this->firstOrder.matrix = std::move(firstMatrix);
+this->firstOrder.writtenFrame = firstWrittenFrame;
+this->firstOrder.derivFrame = firstDerivFrame;
+this->secondOrder.matrix = std::move(secondMatrix);
+this->secondOrder.writtenFrame = secondWrittenFrame;
+this->secondOrder.derivFrame = secondDerivFrame;
+}
+
+
+
+/*! This is the constructor for the module class.  It sets default variable
+    values and initializes the various parts of the module */
+AngularVelocityVector::AngularVelocityVector(Eigen::Vector3d zerothMatrix,
+                               Frame* zerothWrittenFrame):Vector(zerothMatrix, zerothWrittenFrame){
+}
+
+AngularVelocityVector::AngularVelocityVector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame,
+               Eigen::Vector3d firstMatrix, Frame* firstWrittenFrame,
+               Frame* firstDerivFrame):Vector(zerothMatrix, zerothWrittenFrame){
+this->firstOrder.matrix = std::move(firstMatrix);
+this->firstOrder.writtenFrame = firstWrittenFrame;
+this->firstOrder.derivFrame = firstDerivFrame;
+}
+
+
+
+/*! This is the constructor for the module class.  It sets default variable
+    values and initializes the various parts of the module */
+UnitVector::UnitVector(Eigen::Vector3d zerothMatrix,
+                       Frame* zerothWrittenFrame):Vector(zerothMatrix.normalized(), zerothWrittenFrame){
+}
+
+/*! Module Destructor. */
+UnitVector::~UnitVector(){
 }
