@@ -35,22 +35,22 @@ public:
     Frame* createFrame();
     Frame* createFrame(Frame* parentFrame);
     Frame* createFrame(Frame* parentFrame,
-                       const MRP& sigma_CP,
-                       const Eigen::Vector3d& omega_CP_C,
-                       const Eigen::Vector3d& omegaPrime_CP_C,
-                       const Eigen::Vector3d& r_CP_P,
-                       const Eigen::Vector3d& rPrime_CP_P,
-                       const Eigen::Vector3d& rPPrime_CP_P);
+                       const MRP& sigma_SP,
+                       const Eigen::Vector3d& omega_SP_S,
+                       const Eigen::Vector3d& omegaPrime_SP_S,
+                       const Eigen::Vector3d& r_SP_P,
+                       const Eigen::Vector3d& rPrime_SP_P,
+                       const Eigen::Vector3d& rPPrime_SP_P);
 
     Part* createPart();
     Part* createPart(Frame* parentFrame);
     Part* createPart(Frame* parentFrame,
-                       const MRP& sigma_CP,
-                       const Eigen::Vector3d& omega_CP_C,
-                       const Eigen::Vector3d& omegaPrime_CP_C,
-                       const Eigen::Vector3d& r_CP_P,
-                       const Eigen::Vector3d& rPrime_CP_P,
-                       const Eigen::Vector3d& rPPrime_CP_P);
+                       const MRP& sigma_SP,
+                       const Eigen::Vector3d& omega_SP_S,
+                       const Eigen::Vector3d& omegaPrime_SP_S,
+                       const Eigen::Vector3d& r_SP_P,
+                       const Eigen::Vector3d& rPrime_SP_P,
+                       const Eigen::Vector3d& rPPrime_SP_P);
 
     Frame* rootFrame = nullptr;
 };

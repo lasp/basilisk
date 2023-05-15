@@ -23,11 +23,11 @@ frame(new Frame(parentFrame)) {
 }
 
 Part::Part(Frame* parentFrame,
-           const MRP& sigma_CP,
-           const Eigen::Vector3d& omega_CP_C,
-           const Eigen::Vector3d& omegaPrime_CP_C,
-           const Eigen::Vector3d& r_CP_P,
-           const Eigen::Vector3d& rPrime_CP_P,
-           const Eigen::Vector3d& rPPrime_CP_P) :
-frame(new Frame(parentFrame, sigma_CP, omega_CP_C, omegaPrime_CP_C, r_CP_P, rPrime_CP_P, rPPrime_CP_P)) {
+           const MRP& sigma_SP,
+           const Eigen::Vector3d& omega_SP_S,
+           const Eigen::Vector3d& omegaPrime_SP_S,
+           const Eigen::Vector3d& r_SP_P,
+           const Eigen::Vector3d& rPrime_SP_P,
+           const Eigen::Vector3d& rPPrime_SP_P) :
+frame(new Frame(parentFrame, sigma_SP, omega_SP_S, omegaPrime_SP_S, r_SP_P, rPrime_SP_P, rPPrime_SP_P)) {
 }
