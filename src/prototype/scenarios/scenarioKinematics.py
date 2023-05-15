@@ -13,7 +13,7 @@ def run():
 
     # Define parts
     beta = Quaternion([0, 0, 1, 0])
-    myPart1 = myKinematicsEngine.createPart(attitude_CP=beta, parentFrame=inertialFrame)
+    myPart1 = myKinematicsEngine.createPart(attitude_SP=beta, parentFrame=inertialFrame)
     myPart2 = myKinematicsEngine.createPart()
     myPart3 = myKinematicsEngine.createPart(parentFrame=inertialFrame)
 

@@ -16,52 +16,52 @@ class KinematicsEngine:
         self.rootFrame = Frame(MRP([0, 0, 0]), [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], None)
         self.frameList.append(self.rootFrame)
 
-    def createFrame(self, attitude_CP=MRP([0, 0, 0]), omega_CP_C=None, omegaDot_CP_C=None,
-                    r_CP_P=None, rDot_CP_P=None, rDDot_CP_P=None, parentFrame=None):
+    def createFrame(self, attitude_SP=MRP([0, 0, 0]), omega_SP_S=None, omegaDot_SP_S=None,
+                    r_SP_P=None, rDot_SP_P=None, rDDot_SP_P=None, parentFrame=None):
         # Default parameter handling
-        if r_CP_P is None:
-            r_CP_P = [0, 0, 0]
-        if rDot_CP_P is None:
-            rDot_CP_P = [0, 0, 0]
-        if rDDot_CP_P is None:
-            rDDot_CP_P = [0, 0, 0]
-        if omega_CP_C is None:
-            omega_CP_C = [0, 0, 0]
-        if omegaDot_CP_C is None:
-            omegaDot_CP_C = [0, 0, 0]
+        if r_SP_P is None:
+            r_SP_P = [0, 0, 0]
+        if rDot_SP_P is None:
+            rDot_SP_P = [0, 0, 0]
+        if rDDot_SP_P is None:
+            rDDot_SP_P = [0, 0, 0]
+        if omega_SP_S is None:
+            omega_SP_S = [0, 0, 0]
+        if omegaDot_SP_S is None:
+            omegaDot_SP_S = [0, 0, 0]
         if parentFrame is None:
             parentFrame = self.rootFrame
 
         # Create the frame
-        frame = Frame(attitude_CP, omega_CP_C, omegaDot_CP_C, r_CP_P, rDot_CP_P, rDDot_CP_P, parentFrame)
+        frame = Frame(attitude_SP, omega_SP_S, omegaDot_SP_S, r_SP_P, rDot_SP_P, rDDot_SP_P, parentFrame)
         self.frameList.append(frame)
 
         return frame
 
-    def createPart(self, attitude_CP=None, omega_CP_C=None, omegaDot_CP_C=None,
-                   r_CP_P=None, rDot_CP_P=None, rDDot_CP_P=None, parentFrame=None,
-                   r_CsC_P=None, m=0, I=None):
+    def createPart(self, attitude_SP=None, omega_SP_S=None, omegaDot_SP_S=None,
+                   r_SP_P=None, rDot_SP_P=None, rDDot_SP_P=None, parentFrame=None,
+                   r_ScP_P=None, m=0, I=None):
         # Default parameter handling
-        if attitude_CP is None:
-            attitude_CP = MRP([0, 0, 0])
-        if omega_CP_C is None:
-            omega_CP_C = [0, 0, 0]
-        if omegaDot_CP_C is None:
-            omegaDot_CP_C = [0, 0, 0]
-        if r_CP_P is None:
-            r_CP_P = [0, 0, 0]
-        if rDot_CP_P is None:
-            rDot_CP_P = [0, 0, 0]
-        if rDDot_CP_P is None:
-            rDDot_CP_P = [0, 0, 0]
+        if attitude_SP is None:
+            attitude_SP = MRP([0, 0, 0])
+        if omega_SP_S is None:
+            omega_SP_S = [0, 0, 0]
+        if omegaDot_SP_S is None:
+            omegaDot_SP_S = [0, 0, 0]
+        if r_SP_P is None:
+            r_SP_P = [0, 0, 0]
+        if rDot_SP_P is None:
+            rDot_SP_P = [0, 0, 0]
+        if rDDot_SP_P is None:
+            rDDot_SP_P = [0, 0, 0]
         if parentFrame is None:
             parentFrame = self.createFrame()
         if I is None:
             I = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
 
         # Create the frame and part
-        frame = self.createFrame(attitude_CP, omega_CP_C, omegaDot_CP_C, r_CP_P, rDot_CP_P, rDDot_CP_P, parentFrame)
-        part = Part(r_CsC_P, frame, m, I)
+        frame = self.createFrame(attitude_SP, omega_SP_S, omegaDot_SP_S, r_SP_P, rDot_SP_P, rDDot_SP_P, parentFrame)
+        part = Part(r_ScP_P, frame, m, I)
         self.partList.append(part)
 
         return part
