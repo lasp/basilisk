@@ -23,16 +23,9 @@
 
 /*! This is the constructor for the module class.  It sets default variable
     values and initializes the various parts of the module */
-Vector::Vector(){
-}
-
 Vector::Vector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame){
     this->matrix = std::move(zerothMatrix);
     this->writtenFrame = zerothWrittenFrame;
-}
-
-/*! Module Destructor. */
-Vector::~Vector(){
 }
 
 
@@ -77,8 +70,4 @@ this->firstOrder.derivFrame = firstDerivFrame;
     values and initializes the various parts of the module */
 UnitVector::UnitVector(Eigen::Vector3d zerothMatrix,
                        Frame* zerothWrittenFrame):Vector(zerothMatrix.normalized(), zerothWrittenFrame){
-}
-
-/*! Module Destructor. */
-UnitVector::~UnitVector(){
 }

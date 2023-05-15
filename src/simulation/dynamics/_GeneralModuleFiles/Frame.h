@@ -28,6 +28,8 @@
 #include <Eigen/Core>
 #include <utility>
 
+class Point;
+
 /*! @brief basic Basilisk C++ module class */
 class Frame {
 public:
@@ -45,6 +47,7 @@ public:
     BSKLogger bskLogger;              //!< -- BSK Logging
 
     Frame* parentFrame = nullptr;
+    Point* originPoint = nullptr;
     std::string tag;
 
     MRP sigma_CP;
