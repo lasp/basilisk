@@ -32,9 +32,9 @@ class Point;
 /*! @brief basic Basilisk C++ module class */
 class Vector{
 public:
-    Vector();
+    Vector() = default;
     Vector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame);
-    ~Vector();
+    ~Vector() = default;
 
     BSKLogger bskLogger;              //!< -- BSK Logging
 
@@ -90,6 +90,8 @@ public:
     ~AngularVelocityVector() = default;
 
     VectorDerivativeProperties firstOrder;
+    Frame* upperFrame = nullptr;
+    Frame* lowerFrame = nullptr;
 };
 
 
@@ -97,7 +99,7 @@ public:
 class UnitVector : public Vector{
 public:
     UnitVector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame);
-    ~UnitVector();
+    ~UnitVector() = default;
 };
 
 
