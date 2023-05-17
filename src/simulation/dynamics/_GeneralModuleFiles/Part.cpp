@@ -18,6 +18,5 @@
  */
 #include "Part.h"
 
-Part::Part(const std::shared_ptr<Frame>& parentFrame) {
-    this->frame->setParentFrame(parentFrame);
-}
+Part::Part(const std::shared_ptr<Frame>& frame)
+    : frame(frame) {}

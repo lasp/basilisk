@@ -29,9 +29,9 @@ public:
     ~KinematicsEngine() = default;
 
     std::shared_ptr<Frame> createFrame();
-    std::shared_ptr<Frame> createFrame(const std::shared_ptr<Frame>& parentFrame);
+    static std::shared_ptr<Frame> createFrame(const std::shared_ptr<Frame>& parentFrame);
     std::shared_ptr<Part> createPart();
-    std::shared_ptr<Part> createPart(const std::shared_ptr<Frame>& parentFrame);
+    static std::shared_ptr<Part> createPart(const std::shared_ptr<Frame>& parentFrame);
 
     std::shared_ptr<Frame> rootFrame = std::make_shared<Frame>();
 };

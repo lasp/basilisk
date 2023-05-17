@@ -17,13 +17,13 @@ def run():
     myBodyFrame = myKinematicsEngine.createFrame(myInertialFrame)
 
     myPart = myKinematicsEngine.createPart(myBodyFrame)
-    myPar2 = myKinematicsEngine.createPart(myPart.frame)
+    myPart2 = myKinematicsEngine.createPart(myPart.frame)
 
     myKinematicsEngine.rootFrame.tag = "root"
     myInertialFrame.tag = "inertial"
     myBodyFrame.tag = "body"
     myPart.frame.tag = "part"
-    myPar2.frame.tag = "part2"
+    myPart2.frame.tag = "part2"
 
     # ####
     #
