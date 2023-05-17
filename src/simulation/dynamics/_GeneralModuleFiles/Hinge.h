@@ -20,13 +20,8 @@
 #ifndef HINGE_H
 #define HINGE_H
 
-#include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "architecture/utilities/bskLogging.h"
-#include "architecture/messaging/messaging.h"
-
 #include "simulation/dynamics/_GeneralModuleFiles/Frame.h"
 #include "simulation/dynamics/_GeneralModuleFiles/Vector.h"
-
 #include <Eigen/Core>
 
 /*! @brief basic Basilisk C++ module class */
@@ -35,10 +30,10 @@ public:
     Hinge() = default;
     ~Hinge() = default;
 
-    Frame* equilibriumFrame = nullptr;
-    Frame* currentFrame = nullptr;
+    std::shared_ptr<Frame> equilibriumFrame = std::make_shared<Frame>();
+    std::shared_ptr<Frame> currentFrame = std::make_shared<Frame>(equilibriumFrame);
 
-    Vector spinAxis;
+    UnitVector spinAxis;
 
     double theta = 0.0;
     double thetaDot = 0.0;

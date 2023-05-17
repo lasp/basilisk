@@ -27,15 +27,15 @@ class Frame;  // Needs a forward declaration so it compiles
 
 struct TensorProperties {
     Eigen::Matrix3d matrix = Eigen::Matrix3d::Zero();
-    Frame* writtenFrame = nullptr;
-    Frame* derivFrame = nullptr;
+    std::shared_ptr<Frame> writtenFrame = nullptr;
+    std::shared_ptr<Frame> derivFrame = nullptr;
 };
 
 class Tensor {
 public:
     Tensor() = default;
-    Tensor(Eigen::Matrix3d zerothMatrix, Frame* zerothWrittenFrame,
-           Eigen::Matrix3d firstMatrix, Frame* firstWrittenFrame, Frame* firstDerivFrame);
+    Tensor(Eigen::Matrix3d zerothMatrix, std::shared_ptr<Frame> zerothWrittenFrame,
+           Eigen::Matrix3d firstMatrix, std::shared_ptr<Frame> firstWrittenFrame, std::shared_ptr<Frame> firstDerivFrame);
     ~Tensor() = default;
 
     TensorProperties zerothOrder;

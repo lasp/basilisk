@@ -18,14 +18,12 @@
  */
 #include "Vector.h"
 #include "Frame.h"
-#include <utility>
+#include "Point.h"
 
 
-/*! This is the constructor for the module class.  It sets default variable
-    values and initializes the various parts of the module */
-Vector::Vector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame){
+Vector::Vector(Eigen::Vector3d zerothMatrix, std::weak_ptr<Frame> zerothWrittenFrame){
     this->matrix = std::move(zerothMatrix);
-    this->writtenFrame = zerothWrittenFrame;
+    this->writtenFrame = std::move(zerothWrittenFrame);
 }
 
 
@@ -33,19 +31,19 @@ Vector::Vector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame){
 /*! This is the constructor for the module class.  It sets default variable
     values and initializes the various parts of the module */
 PositionVector::PositionVector(Eigen::Vector3d zerothMatrix,
-                               Frame* zerothWrittenFrame):Vector(zerothMatrix, zerothWrittenFrame){
+                               std::weak_ptr<Frame> zerothWrittenFrame):Vector(std::move(zerothMatrix), std::move(zerothWrittenFrame)){
 }
 
-PositionVector::PositionVector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame,
-               Eigen::Vector3d firstMatrix, Frame* firstWrittenFrame, Frame* firstDerivFrame,
-               Eigen::Vector3d secondMatrix, Frame* secondWrittenFrame,
-               Frame* secondDerivFrame):Vector(zerothMatrix, zerothWrittenFrame){
+PositionVector::PositionVector(Eigen::Vector3d zerothMatrix, std::weak_ptr<Frame> zerothWrittenFrame,
+               Eigen::Vector3d firstMatrix, std::weak_ptr<Frame> firstWrittenFrame, std::weak_ptr<Frame> firstDerivFrame,
+               Eigen::Vector3d secondMatrix, std::weak_ptr<Frame> secondWrittenFrame,
+               std::weak_ptr<Frame> secondDerivFrame):Vector(std::move(zerothMatrix), std::move(zerothWrittenFrame)){
 this->firstOrder.matrix = std::move(firstMatrix);
-this->firstOrder.writtenFrame = firstWrittenFrame;
-this->firstOrder.derivFrame = firstDerivFrame;
+this->firstOrder.writtenFrame = std::move(firstWrittenFrame);
+this->firstOrder.derivFrame = std::move(firstDerivFrame);
 this->secondOrder.matrix = std::move(secondMatrix);
-this->secondOrder.writtenFrame = secondWrittenFrame;
-this->secondOrder.derivFrame = secondDerivFrame;
+this->secondOrder.writtenFrame = std::move(secondWrittenFrame);
+this->secondOrder.derivFrame = std::move(secondDerivFrame);
 }
 
 
@@ -53,21 +51,21 @@ this->secondOrder.derivFrame = secondDerivFrame;
 /*! This is the constructor for the module class.  It sets default variable
     values and initializes the various parts of the module */
 AngularVelocityVector::AngularVelocityVector(Eigen::Vector3d zerothMatrix,
-                               Frame* zerothWrittenFrame):Vector(zerothMatrix, zerothWrittenFrame){
+                               std::weak_ptr<Frame> zerothWrittenFrame):Vector(std::move(zerothMatrix), std::move(zerothWrittenFrame)){
 }
 
-AngularVelocityVector::AngularVelocityVector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame,
-               Eigen::Vector3d firstMatrix, Frame* firstWrittenFrame,
-               Frame* firstDerivFrame):Vector(zerothMatrix, zerothWrittenFrame){
+AngularVelocityVector::AngularVelocityVector(Eigen::Vector3d zerothMatrix, std::weak_ptr<Frame> zerothWrittenFrame,
+               Eigen::Vector3d firstMatrix, std::weak_ptr<Frame> firstWrittenFrame,
+               std::weak_ptr<Frame> firstDerivFrame):Vector(std::move(zerothMatrix), std::move(zerothWrittenFrame)){
 this->firstOrder.matrix = std::move(firstMatrix);
-this->firstOrder.writtenFrame = firstWrittenFrame;
-this->firstOrder.derivFrame = firstDerivFrame;
+this->firstOrder.writtenFrame = std::move(firstWrittenFrame);
+this->firstOrder.derivFrame = std::move(firstDerivFrame);
 }
 
 
 
 /*! This is the constructor for the module class.  It sets default variable
     values and initializes the various parts of the module */
-UnitVector::UnitVector(Eigen::Vector3d zerothMatrix,
-                       Frame* zerothWrittenFrame):Vector(zerothMatrix.normalized(), zerothWrittenFrame){
+UnitVector::UnitVector(const Eigen::Vector3d& zerothMatrix,
+                       std::weak_ptr<Frame> zerothWrittenFrame):Vector(zerothMatrix.normalized(), std::move(zerothWrittenFrame)){
 }

@@ -17,22 +17,3 @@
 
  */
 #include "Frame.h"
-
-Frame::Frame(Frame* parentFrame) :
-parentFrame(parentFrame),
-omega_SP(AngularVelocityVector(Eigen::Vector3d::Zero(), this)),
-r_SP(PositionVector(Eigen::Vector3d::Zero(), parentFrame)){
-}
-
-Frame::Frame(Frame* parentFrame,
-             const MRP& sigma_SP,
-             const Eigen::Vector3d& omega_SP_S,
-             const Eigen::Vector3d& omegaPrime_SP_S,
-             const Eigen::Vector3d& r_SP_P,
-             const Eigen::Vector3d& rPrime_SP_P,
-             const Eigen::Vector3d& rPPrime_SP_P) :
-parentFrame(parentFrame),
-sigma_SP(sigma_SP),
-omega_SP(AngularVelocityVector(omega_SP_S, this, omegaPrime_SP_S, this, this)),
-r_SP(PositionVector(r_SP_P, parentFrame, rPrime_SP_P, parentFrame, parentFrame, rPPrime_SP_P, parentFrame, parentFrame)) {
-}

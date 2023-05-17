@@ -18,8 +18,7 @@
  */
 %module Hinge
 %{
-#include "../../_GeneralModuleFiles/Hinge.h"
-
+    #include "../../_GeneralModuleFiles/Hinge.h"
 %}
 
 %pythoncode %{
@@ -28,6 +27,9 @@ from Basilisk.architecture.swig_common_model import *
 %include "std_string.i"
 %include "swig_eigen.i"
 %include "swig_conly_data.i"
+
+%include <std_shared_ptr.i>
+%shared_ptr(Hinge)
 
 %include "../../_GeneralModuleFiles/Hinge.h"
 

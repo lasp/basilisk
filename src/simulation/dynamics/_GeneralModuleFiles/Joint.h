@@ -34,10 +34,26 @@ public:
     Joint() = default;
     ~Joint() = default;
 
-    Frame* lowerFrame = nullptr;
-    Frame* upperFrame = nullptr;
+    std::shared_ptr<Frame> lowerFrame;
+    std::shared_ptr<Frame> upperFrame;
 
-    std::vector<Hinge*> hingeVector;
+    std::vector<std::shared_ptr<Hinge>> hingeVector;
+};
+
+
+class RotaryOneDOF : public Joint {
+public:
+    RotaryOneDOF();
+    ~RotaryOneDOF() = default;
+
+};
+
+
+class RotaryTwoDOF : public Joint {
+public:
+    RotaryTwoDOF();
+    ~RotaryTwoDOF() = default;
+
 };
 
 

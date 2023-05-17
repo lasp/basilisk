@@ -57,7 +57,7 @@ def run():
     # myJoint = myAssembly.createJoint(myPart1.frame)
     # myPart2 = myAssembly.createPart(myJoint.frame)
 
-    # breakpoint()
+    breakpoint()
 
 
 if __name__ == "__main__":

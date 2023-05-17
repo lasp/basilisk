@@ -18,6 +18,7 @@
  */
 #include "Hinge.h"
 
+
 void Hinge::updateKinematicStates(double newTheta, double newThetaDot) {
     this->theta = newTheta;
     this->thetaDot = newThetaDot;

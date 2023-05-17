@@ -38,7 +38,7 @@ public:
 
     BSKLogger bskLogger;              //!< -- BSK Logging
 
-    std::vector<PositionVector*> positionVector;
+    std::vector<std::weak_ptr<PositionVector>> positionVectorArray;
 };
 
 

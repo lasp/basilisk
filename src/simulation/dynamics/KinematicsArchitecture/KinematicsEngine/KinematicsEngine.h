@@ -1,7 +1,7 @@
 /*
  ISC License
 
- Copyright (c) 2016, Autonomous Vehicle Systems Lab, University of Colorado at Boulder
+ Copyright (c) 2023, Autonomous Vehicle Systems Lab, University of Colorado at Boulder
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -20,39 +20,20 @@
 #ifndef KINEMATICS_ENGINE_H
 #define KINEMATICS_ENGINE_H
 
-#include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "architecture/utilities/bskLogging.h"
 #include "simulation/dynamics/_GeneralModuleFiles/Frame.h"
 #include "simulation/dynamics/_GeneralModuleFiles/Part.h"
 
-class KinematicsEngine: public SysModel {
+class KinematicsEngine {
 public:
-    KinematicsEngine();
-    ~KinematicsEngine() override = default;
+    KinematicsEngine() = default;
+    ~KinematicsEngine() = default;
 
-    BSKLogger bskLogger;              //!< -- BSK Logging
+    std::shared_ptr<Frame> createFrame();
+    std::shared_ptr<Frame> createFrame(const std::shared_ptr<Frame>& parentFrame);
+    std::shared_ptr<Part> createPart();
+    std::shared_ptr<Part> createPart(const std::shared_ptr<Frame>& parentFrame);
 
-    Frame* createFrame();
-    Frame* createFrame(Frame* parentFrame);
-    Frame* createFrame(Frame* parentFrame,
-                       const MRP& sigma_SP,
-                       const Eigen::Vector3d& omega_SP_S,
-                       const Eigen::Vector3d& omegaPrime_SP_S,
-                       const Eigen::Vector3d& r_SP_P,
-                       const Eigen::Vector3d& rPrime_SP_P,
-                       const Eigen::Vector3d& rPPrime_SP_P);
-
-    Part* createPart();
-    Part* createPart(Frame* parentFrame);
-    Part* createPart(Frame* parentFrame,
-                       const MRP& sigma_SP,
-                       const Eigen::Vector3d& omega_SP_S,
-                       const Eigen::Vector3d& omegaPrime_SP_S,
-                       const Eigen::Vector3d& r_SP_P,
-                       const Eigen::Vector3d& rPrime_SP_P,
-                       const Eigen::Vector3d& rPPrime_SP_P);
-
-    Frame* rootFrame = nullptr;
+    std::shared_ptr<Frame> rootFrame = std::make_shared<Frame>();
 };
 
 

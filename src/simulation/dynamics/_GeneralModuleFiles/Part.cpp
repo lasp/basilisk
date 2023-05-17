@@ -18,16 +18,6 @@
  */
 #include "Part.h"
 
-Part::Part(Frame* parentFrame) :
-frame(new Frame(parentFrame)) {
-}
-
-Part::Part(Frame* parentFrame,
-           const MRP& sigma_SP,
-           const Eigen::Vector3d& omega_SP_S,
-           const Eigen::Vector3d& omegaPrime_SP_S,
-           const Eigen::Vector3d& r_SP_P,
-           const Eigen::Vector3d& rPrime_SP_P,
-           const Eigen::Vector3d& rPPrime_SP_P) :
-frame(new Frame(parentFrame, sigma_SP, omega_SP_S, omegaPrime_SP_S, r_SP_P, rPrime_SP_P, rPPrime_SP_P)) {
+Part::Part(const std::shared_ptr<Frame>& parentFrame) {
+    this->frame->setParentFrame(parentFrame);
 }
