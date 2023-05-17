@@ -17,3 +17,22 @@
 
  */
 #include "Joint.h"
+
+
+RotaryOneDOF::RotaryOneDOF() {
+    this->hingeVector.push_back(std::make_shared<Hinge>());
+
+    this->lowerFrame = this->hingeVector[0]->equilibriumFrame;
+    this->upperFrame = this->hingeVector[0]->currentFrame;
+}
+
+
+
+RotaryTwoDOF::RotaryTwoDOF() {
+    this->hingeVector.push_back(std::make_shared<Hinge>());
+    this->hingeVector.push_back(std::make_shared<Hinge>());
+
+    this->hingeVector[1]->equilibriumFrame->setParentFrame(this->hingeVector[0]->currentFrame);
+    this->lowerFrame = this->hingeVector[0]->equilibriumFrame;
+    this->upperFrame = this->hingeVector[1]->currentFrame;
+}

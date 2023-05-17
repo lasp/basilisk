@@ -18,6 +18,16 @@
  */
 %module Joint
 %{
+    #include "../../_GeneralModuleFiles/Joint.h"
+%}
+
+%module RotaryOneDOF
+%{
+#include "../../_GeneralModuleFiles/Joint.h"
+%}
+
+%module RotaryTwoDOF
+%{
 #include "../../_GeneralModuleFiles/Joint.h"
 %}
 
@@ -28,8 +38,12 @@ from Basilisk.architecture.swig_common_model import *
 %include "swig_eigen.i"
 %include "swig_conly_data.i"
 
+%include <std_shared_ptr.i>
+%shared_ptr(Joint)
+%shared_ptr(RotaryOneDOF)
+%shared_ptr(RotaryTwoDOF)
+
 %include "../../_GeneralModuleFiles/Joint.h"
-%include "../../_GeneralModuleFiles/Hinge.h"
 
 %pythoncode %{
 import sys

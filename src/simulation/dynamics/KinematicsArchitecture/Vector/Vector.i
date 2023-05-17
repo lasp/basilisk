@@ -21,12 +21,40 @@
     #include "../../_GeneralModuleFiles/Vector.h"
 %}
 
+%module PositionVector
+%{
+#include "../../_GeneralModuleFiles/Vector.h"
+%}
+
+%module ForceVector
+%{
+#include "../../_GeneralModuleFiles/Vector.h"
+%}
+
+%module AngularVelocityVector
+%{
+#include "../../_GeneralModuleFiles/Vector.h"
+%}
+
+%module UnitVector
+%{
+#include "../../_GeneralModuleFiles/Vector.h"
+%}
+
 %pythoncode %{
 from Basilisk.architecture.swig_common_model import *
 %}
 %include "std_string.i"
 %include "swig_eigen.i"
 %include "swig_conly_data.i"
+
+%include <std_shared_ptr.i>
+%shared_ptr(Vector)
+%shared_ptr(PositionVector)
+%shared_ptr(ForceVector)
+%shared_ptr(AngularVelocityVector)
+%shared_ptr(UnitVector)
+
 
 %include "../../_GeneralModuleFiles/Vector.h"
 

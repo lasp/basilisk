@@ -20,13 +20,11 @@
 #ifndef FRAME_H
 #define FRAME_H
 
-#include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "architecture/utilities/bskLogging.h"
-#include "architecture/messaging/messaging.h"
 #include "simulation/dynamics/_GeneralModuleFiles/Vector.h"
 #include "simulation/dynamics/_GeneralModuleFiles/AttitudeParameterization.h"
 #include <Eigen/Core>
 #include <utility>
+#include <memory>
 
 class Point;
 
@@ -34,27 +32,17 @@ class Point;
 class Frame {
 public:
     Frame() = default;
-    Frame(Frame* parentFrame);
-    Frame(Frame* parentFrame,
-          const MRP& sigma_SP,
-          const Eigen::Vector3d& omega_SP_S,
-          const Eigen::Vector3d& omegaPrime_SP_S,
-          const Eigen::Vector3d& r_SP_P,
-          const Eigen::Vector3d& rPrime_SP_P,
-          const Eigen::Vector3d& rPPrime_SP_P);
+    explicit Frame(std::shared_ptr<Frame> parentFrame) : parentFrame(std::move(parentFrame)) {};
     ~Frame() = default;
 
-    BSKLogger bskLogger;              //!< -- BSK Logging
-
-    Frame* parentFrame = nullptr;
-    Point* originPoint = nullptr;
+    std::shared_ptr<Frame> parentFrame;
     std::string tag;
 
     MRP sigma_SP;
     AngularVelocityVector omega_SP;
     PositionVector r_SP;
 
-    void setParentFrame(Frame* newParentFrame) {this->parentFrame = newParentFrame;};
+    void setParentFrame(std::shared_ptr<Frame> newParentFrame) {this->parentFrame = newParentFrame;};
 };
 
 

@@ -29,6 +29,9 @@ from Basilisk.architecture.swig_common_model import *
 %include "swig_eigen.i"
 %include "swig_conly_data.i"
 
+%include <std_shared_ptr.i>
+%shared_ptr(Point)
+
 %include "../../_GeneralModuleFiles/Point.h"
 
 %pythoncode %{

@@ -20,11 +20,9 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
-#include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/messaging/messaging.h"
 #include <Eigen/Core>
-#include <utility>
 
 class Frame;
 class Point;
@@ -33,21 +31,21 @@ class Point;
 class Vector{
 public:
     Vector() = default;
-    Vector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame);
+    Vector(Eigen::Vector3d zerothMatrix, std::weak_ptr<Frame> zerothWrittenFrame);
     ~Vector() = default;
 
     BSKLogger bskLogger;              //!< -- BSK Logging
 
     Eigen::Vector3d matrix = Eigen::Vector3d::Zero();
-    Frame* writtenFrame = nullptr;
+    std::weak_ptr<Frame> writtenFrame;
 };
 
 
 /*! @brief Vector derivative properties data structure */
 struct VectorDerivativeProperties{
     Eigen::Vector3d matrix = Eigen::Vector3d::Zero();
-    Frame* writtenFrame = nullptr;
-    Frame* derivFrame = nullptr;
+    std::weak_ptr<Frame> writtenFrame;
+    std::weak_ptr<Frame> derivFrame;
 };
 
 
@@ -55,15 +53,15 @@ struct VectorDerivativeProperties{
 class PositionVector : public Vector{
 public:
     PositionVector() = default;
-    PositionVector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame);
-    PositionVector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame,
-                   Eigen::Vector3d firstMatrix, Frame* firstWrittenFrame,
-                   Frame* firstDerivFrame, Eigen::Vector3d secondMatrix,
-                   Frame* secondWrittenFrame, Frame* secondDerivFrame);
+    PositionVector(Eigen::Vector3d zerothMatrix, std::weak_ptr<Frame> zerothWrittenFrame);
+    PositionVector(Eigen::Vector3d zerothMatrix, std::weak_ptr<Frame> zerothWrittenFrame,
+                   Eigen::Vector3d firstMatrix, std::weak_ptr<Frame> firstWrittenFrame,
+                   std::weak_ptr<Frame> firstDerivFrame, Eigen::Vector3d secondMatrix,
+                   std::weak_ptr<Frame> secondWrittenFrame, std::weak_ptr<Frame> secondDerivFrame);
     ~PositionVector() = default;
 
-    Point* tailPoint = nullptr;
-    Point* headPoint = nullptr;
+    std::weak_ptr<Point> tailPoint;
+    std::weak_ptr<Point> headPoint;
 
     VectorDerivativeProperties firstOrder;
     VectorDerivativeProperties secondOrder;
@@ -76,7 +74,7 @@ public:
     ForceVector() = default;
     ~ForceVector() = default;
 
-    Point* applicationPoint = nullptr;
+    std::weak_ptr<Point> applicationPoint;
 };
 
 
@@ -84,9 +82,9 @@ public:
 class AngularVelocityVector : public Vector{
 public:
     AngularVelocityVector() = default;
-    AngularVelocityVector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame);
-    AngularVelocityVector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame,
-                          Eigen::Vector3d firstMatrix, Frame* firstWrittenFrame, Frame* firstDerivFrame);
+    AngularVelocityVector(Eigen::Vector3d zerothMatrix, std::weak_ptr<Frame> zerothWrittenFrame);
+    AngularVelocityVector(Eigen::Vector3d zerothMatrix, std::weak_ptr<Frame> zerothWrittenFrame,
+                          Eigen::Vector3d firstMatrix, std::weak_ptr<Frame> firstWrittenFrame, std::weak_ptr<Frame> firstDerivFrame);
     ~AngularVelocityVector() = default;
 
     VectorDerivativeProperties firstOrder;
@@ -98,7 +96,8 @@ public:
 /*! @brief basic Basilisk C++ module class */
 class UnitVector : public Vector{
 public:
-    UnitVector(Eigen::Vector3d zerothMatrix, Frame* zerothWrittenFrame);
+    UnitVector() = default;
+    UnitVector(const Eigen::Vector3d& zerothMatrix, std::weak_ptr<Frame> zerothWrittenFrame);
     ~UnitVector() = default;
 };
 

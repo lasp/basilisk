@@ -20,33 +20,19 @@
 #ifndef PART_H
 #define PART_H
 
-#include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "architecture/utilities/bskLogging.h"
-#include "architecture/messaging/messaging.h"
-
-#include "simulation/dynamics/_GeneralModuleFiles/Frame.h"
 #include "simulation/dynamics/_GeneralModuleFiles/Vector.h"
 #include "simulation/dynamics/_GeneralModuleFiles/Tensor.h"
+#include "simulation/dynamics/_GeneralModuleFiles/Frame.h"
 #include <Eigen/Core>
-#include <utility>
 
 /*! @brief basic Basilisk C++ module class */
 class Part {
 public:
     Part() = default;
-    Part(Frame* parentFrame);
-    Part(Frame* parentFrame,
-          const MRP& sigma_SP,
-          const Eigen::Vector3d& omega_SP_S,
-          const Eigen::Vector3d& omegaPrime_SP_S,
-          const Eigen::Vector3d& r_SP_P,
-          const Eigen::Vector3d& rPrime_SP_P,
-          const Eigen::Vector3d& rPPrime_SP_P);
+    explicit Part(const std::shared_ptr<Frame>& parentFrame);
     ~Part() = default;
 
-    BSKLogger bskLogger;              //!< -- BSK Logging
-
-    Frame* frame = nullptr;
+    std::shared_ptr<Frame> frame = std::make_shared<Frame>();
     double mass = 0.0;
     Tensor IPntSc_S;
     Vector r_ScS_P;
