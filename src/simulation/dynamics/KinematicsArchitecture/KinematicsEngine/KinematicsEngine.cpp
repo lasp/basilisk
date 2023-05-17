@@ -22,17 +22,43 @@
     values and initializes the various parts of the model */
 
 std::shared_ptr<Frame> KinematicsEngine::createFrame() {
-    return std::make_shared<Frame>(this->rootFrame);
+    auto tempFrame  = std::make_shared<Frame>(this->rootFrame);
+
+    tempFrame->omega_SP.writtenFrame = tempFrame;
+    tempFrame->omega_SP.firstOrder.writtenFrame = tempFrame;
+    tempFrame->omega_SP.firstOrder.derivFrame = tempFrame;
+
+    tempFrame->r_SP.writtenFrame = this->rootFrame;
+    tempFrame->r_SP.firstOrder.writtenFrame = this->rootFrame;
+    tempFrame->r_SP.firstOrder.derivFrame = this->rootFrame;
+    tempFrame->r_SP.secondOrder.writtenFrame = this->rootFrame;
+    tempFrame->r_SP.secondOrder.derivFrame = this->rootFrame;
+
+    return tempFrame;
 }
 
 std::shared_ptr<Frame> KinematicsEngine::createFrame(const std::shared_ptr<Frame>& parentFrame) {
-    return std::make_shared<Frame>(parentFrame);
+    auto tempFrame = std::make_shared<Frame>(parentFrame);
+
+    tempFrame->omega_SP.writtenFrame = tempFrame;
+    tempFrame->omega_SP.firstOrder.writtenFrame = tempFrame;
+    tempFrame->omega_SP.firstOrder.derivFrame = tempFrame;
+
+    tempFrame->r_SP.writtenFrame = parentFrame;
+    tempFrame->r_SP.firstOrder.writtenFrame = parentFrame;
+    tempFrame->r_SP.firstOrder.derivFrame = parentFrame;
+    tempFrame->r_SP.secondOrder.writtenFrame = parentFrame;
+    tempFrame->r_SP.secondOrder.derivFrame = parentFrame;
+
+    return tempFrame;
 }
 
 std::shared_ptr<Part> KinematicsEngine::createPart() {
-    return std::make_shared<Part>(this->rootFrame);
+    auto tempFrame = this->createFrame();
+    return std::make_shared<Part>(std::move(tempFrame));
 }
 
 std::shared_ptr<Part> KinematicsEngine::createPart(const std::shared_ptr<Frame>& parentFrame) {
-    return std::make_shared<Part>(parentFrame);
+    auto tempFrame = KinematicsEngine::createFrame(parentFrame);
+    return std::make_shared<Part>(std::move(tempFrame));
 }

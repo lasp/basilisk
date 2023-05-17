@@ -29,7 +29,7 @@
 class Part {
 public:
     Part() = default;
-    explicit Part(const std::shared_ptr<Frame>& parentFrame);
+    explicit Part(const std::shared_ptr<Frame>& frame);
     ~Part() = default;
 
     std::shared_ptr<Frame> frame = std::make_shared<Frame>();
