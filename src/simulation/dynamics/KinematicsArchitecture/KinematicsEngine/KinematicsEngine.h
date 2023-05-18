@@ -22,16 +22,22 @@
 
 #include "simulation/dynamics/_GeneralModuleFiles/Frame.h"
 #include "simulation/dynamics/_GeneralModuleFiles/Part.h"
+#include "simulation/dynamics/_GeneralModuleFiles/Joint.h"
+#include "simulation/dynamics/_GeneralModuleFiles/Point.h"
 
 class KinematicsEngine {
 public:
     KinematicsEngine() = default;
     ~KinematicsEngine() = default;
 
+    std::vector<std::shared_ptr<Part>> partList;
+    std::vector<std::shared_ptr<Joint>> jointList;
+    std::vector<std::shared_ptr<Point>> pointList;
+
     std::shared_ptr<Frame> createFrame();
     static std::shared_ptr<Frame> createFrame(const std::shared_ptr<Frame>& parentFrame);
     std::shared_ptr<Part> createPart();
-    static std::shared_ptr<Part> createPart(const std::shared_ptr<Frame>& parentFrame);
+    std::shared_ptr<Part> createPart(const std::shared_ptr<Frame>& parentFrame);
 
     std::shared_ptr<Frame> rootFrame = std::make_shared<Frame>();
 };
