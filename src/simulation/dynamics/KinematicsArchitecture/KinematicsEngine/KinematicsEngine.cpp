@@ -55,10 +55,14 @@ std::shared_ptr<Frame> KinematicsEngine::createFrame(const std::shared_ptr<Frame
 
 std::shared_ptr<Part> KinematicsEngine::createPart() {
     auto tempFrame = this->createFrame();
-    return std::make_shared<Part>(std::move(tempFrame));
+    auto tempPart =  std::make_shared<Part>(std::move(tempFrame));
+    this->partList.push_back(tempPart);
+    return tempPart;
 }
 
 std::shared_ptr<Part> KinematicsEngine::createPart(const std::shared_ptr<Frame>& parentFrame) {
     auto tempFrame = KinematicsEngine::createFrame(parentFrame);
-    return std::make_shared<Part>(std::move(tempFrame));
+    auto tempPart = std::make_shared<Part>(std::move(tempFrame));
+    this->partList.push_back(tempPart);
+    return tempPart;
 }
