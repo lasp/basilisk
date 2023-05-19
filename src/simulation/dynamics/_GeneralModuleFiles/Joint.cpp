@@ -19,8 +19,8 @@
 #include "Joint.h"
 
 
-RotaryOneDOF::RotaryOneDOF() {
-    this->hingeVector.push_back(std::make_shared<Hinge>());
+RotaryOneDOF::RotaryOneDOF(std::shared_ptr<Hinge> hinge) {
+    this->hingeVector.push_back(std::move(hinge));
 
     this->lowerFrame = this->hingeVector[0]->equilibriumFrame;
     this->upperFrame = this->hingeVector[0]->currentFrame;
@@ -28,9 +28,9 @@ RotaryOneDOF::RotaryOneDOF() {
 
 
 
-RotaryTwoDOF::RotaryTwoDOF() {
-    this->hingeVector.push_back(std::make_shared<Hinge>());
-    this->hingeVector.push_back(std::make_shared<Hinge>());
+RotaryTwoDOF::RotaryTwoDOF(std::shared_ptr<Hinge> firstHinge, std::shared_ptr<Hinge> secondHinge) {
+    this->hingeVector.push_back(std::move(firstHinge));
+    this->hingeVector.push_back(std::move(secondHinge));
 
     this->hingeVector[1]->equilibriumFrame->setParentFrame(this->hingeVector[0]->currentFrame);
     this->lowerFrame = this->hingeVector[0]->equilibriumFrame;

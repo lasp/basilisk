@@ -43,7 +43,7 @@ public:
 
 class RotaryOneDOF : public Joint {
 public:
-    RotaryOneDOF();
+    explicit RotaryOneDOF(std::shared_ptr<Hinge> hinge);
     ~RotaryOneDOF() = default;
 
 };
@@ -51,7 +51,7 @@ public:
 
 class RotaryTwoDOF : public Joint {
 public:
-    RotaryTwoDOF();
+    RotaryTwoDOF(std::shared_ptr<Hinge> firstHinge, std::shared_ptr<Hinge> secondHinge);
     ~RotaryTwoDOF() = default;
 
 };
