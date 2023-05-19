@@ -36,13 +36,14 @@ public:
     ~Frame() = default;
 
     std::shared_ptr<Frame> parentFrame;
-    std::string tag;
+    std::string tag = "root";
 
     MRP sigma_SP;
     AngularVelocityVector omega_SP;
     PositionVector r_SP;
 
-    void setParentFrame(std::shared_ptr<Frame> newParentFrame) {this->parentFrame = newParentFrame;};
+    void setParentFrame(std::shared_ptr<Frame> newParentFrame) {this->parentFrame = std::move(newParentFrame);};
+    void updateFrame() {};
 };
 
 
