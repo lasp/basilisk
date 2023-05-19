@@ -18,6 +18,14 @@
  */
 #include "Hinge.h"
 
+#include <utility>
+
+
+
+Hinge::Hinge(std::shared_ptr<Frame> equilibriumFrame, std::shared_ptr<Frame> currentFrame)
+    : equilibriumFrame(std::move(equilibriumFrame)),
+    currentFrame(std::move(currentFrame)) {}
+
 
 void Hinge::updateKinematicStates(double newTheta, double newThetaDot) {
     this->theta = newTheta;

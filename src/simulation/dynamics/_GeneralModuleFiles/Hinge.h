@@ -27,11 +27,11 @@
 /*! @brief basic Basilisk C++ module class */
 class Hinge {
 public:
-    Hinge() = default;
+    Hinge(std::shared_ptr<Frame> equilibriumFrame, std::shared_ptr<Frame> currentFrame);
     ~Hinge() = default;
 
-    std::shared_ptr<Frame> equilibriumFrame = std::make_shared<Frame>();
-    std::shared_ptr<Frame> currentFrame = std::make_shared<Frame>(equilibriumFrame);
+    std::shared_ptr<Frame> equilibriumFrame;
+    std::shared_ptr<Frame> currentFrame;
 
     UnitVector spinAxis;
 

@@ -10,20 +10,27 @@ from Basilisk.simulation import Vector
 from Basilisk.simulation import Tensor
 from Basilisk.simulation import AttitudeParameterization
 from Basilisk.simulation import Part
+from Basilisk.simulation import Joint
+from Basilisk.simulation import Hinge
 
 def run():
     myKinematicsEngine = KinematicsEngine.KinematicsEngine()
+
     myInertialFrame = myKinematicsEngine.createFrame()
-    myBodyFrame = myKinematicsEngine.createFrame(myInertialFrame)
-
-    myPart = myKinematicsEngine.createPart(myBodyFrame)
-    myPart2 = myKinematicsEngine.createPart(myPart.frame)
-
-    myKinematicsEngine.rootFrame.tag = "root"
     myInertialFrame.tag = "inertial"
+    myBodyFrame = myKinematicsEngine.createFrame(myInertialFrame)
     myBodyFrame.tag = "body"
-    myPart.frame.tag = "part"
+
+    myPart1 = myKinematicsEngine.createPart(myBodyFrame)
+    myPart1.frame.tag = "part1"
+    myPart2 = myKinematicsEngine.createPart(myPart1.frame)
     myPart2.frame.tag = "part2"
+
+    myJoint = myKinematicsEngine.createRotaryOneDOFJoint()
+    myJoint.lowerFrame.tag = "lower"
+    myJoint.upperFrame.tag = "upper"
+
+    myKinematicsEngine.connect(myPart1, myJoint, myPart2)
 
     # ####
     #

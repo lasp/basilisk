@@ -25,21 +25,27 @@
 #include "simulation/dynamics/_GeneralModuleFiles/Joint.h"
 #include "simulation/dynamics/_GeneralModuleFiles/Point.h"
 
+#include <iostream>
+
 class KinematicsEngine {
 public:
     KinematicsEngine() = default;
-    ~KinematicsEngine() = default;
+    ~KinematicsEngine();
 
+    std::shared_ptr<Frame> rootFrame = std::make_shared<Frame>();
     std::vector<std::shared_ptr<Part>> partList;
     std::vector<std::shared_ptr<Joint>> jointList;
     std::vector<std::shared_ptr<Point>> pointList;
 
     std::shared_ptr<Frame> createFrame();
-    static std::shared_ptr<Frame> createFrame(const std::shared_ptr<Frame>& parentFrame);
+    std::shared_ptr<Frame> createFrame(const std::shared_ptr<Frame>& parentFrame);
     std::shared_ptr<Part> createPart();
     std::shared_ptr<Part> createPart(const std::shared_ptr<Frame>& parentFrame);
 
-    std::shared_ptr<Frame> rootFrame = std::make_shared<Frame>();
+    std::shared_ptr<RotaryOneDOF> createRotaryOneDOFJoint();
+    std::shared_ptr<RotaryTwoDOF> createRotaryTwoDOFJoint();
+
+    void connect(const std::shared_ptr<Part>& lowerPart, const std::shared_ptr<Joint>& joint, const std::shared_ptr<Part>& upperPart);
 };
 
 
