@@ -18,5 +18,5 @@
  */
 #include "Part.h"
 
-Part::Part(const std::shared_ptr<Frame>& frame)
-    : frame(frame) {}
+Part::Part(std::shared_ptr<Frame> frame)
+    : frame(std::move(frame)) {}

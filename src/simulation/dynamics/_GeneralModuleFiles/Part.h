@@ -29,10 +29,10 @@
 class Part {
 public:
     Part() = default;
-    explicit Part(const std::shared_ptr<Frame>& frame);
+    explicit Part(std::shared_ptr<Frame> frame);
     ~Part() = default;
 
-    std::shared_ptr<Frame> frame = std::make_shared<Frame>();
+    std::shared_ptr<Frame> frame;
     double mass = 0.0;
     Tensor IPntSc_S;
     Vector r_ScS_P;
