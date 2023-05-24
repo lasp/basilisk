@@ -47,13 +47,20 @@ Version |release|
   format, with_quirc QR code lib. Users that have Basilisk control the build of these modules through the External
   Modules CMake integration will need to manual toggle these OpenCV build options.
 - Updated :ref:`SmallBodyNavEKF` with several bug fixes. Removed spacecraft attitude estimation component.
-- Bug fix made to :ref:`eclipse`: Saturn, Jupiter, Uranus, and Neptune radii were incorrectly being assigned the 
+- Bug fix made to :ref:`eclipse`: Saturn, Jupiter, Uranus, and Neptune radii were incorrectly being assigned the
   radius of Mars.
+- Added custom planet name to :ref:`eclipse` in case the user wants to use a body not contained within the module.
 - Created :ref:`lambertSolver` module to solve Lambert's problem
 - Created :ref:`lambertPlanner` module to write the :ref:`lambertProblemMsgPayload` Lambert problem setup message
 - Created :ref:`lambertValidator` module to check if the solution from the :ref:`lambertSolver` module violates any
   constraints before a Delta-V is commanded.
 - Added :ref:`scenarioLambertSolver` scenario to illustrate the Lambert solver module package
+- Removed all instances of using ``unitTestSupport.np2EigenVectorXd()``, as this function is now unneeded.
+- Created a :ref:`facetSRPDynamicEffector` dynamics module to calculate the B frame SRP force and torque acting on a static spacecraft.
+- Google Test C/C++ testing framework added
+- Created a :ref:`prescribedRot2DOF` fsw module to profile a prescribed 2 DOF rotational maneuver for a secondary rigid
+  body connected to the spacecraft hub. To simulate the maneuver, this module must be connected to the
+  :ref:`prescribedMotionStateEffector` dynamics module.
 
 Version 2.1.7 (March 24, 2023)
 ------------------------------
