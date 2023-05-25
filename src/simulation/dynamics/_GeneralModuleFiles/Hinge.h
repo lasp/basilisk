@@ -22,7 +22,7 @@
 
 #include "simulation/dynamics/_GeneralModuleFiles/Frame.h"
 #include "simulation/dynamics/_GeneralModuleFiles/Vector.h"
-#include <Eigen/Core>
+#include <Eigen/Geometry>
 
 /*! @brief basic Basilisk C++ module class */
 class Hinge {
@@ -43,7 +43,7 @@ public:
     // we need an actuator here
 
     void updateKinematicStates(double newTheta, double newThetaDot);
-    void updateFrameStates() {};  // call PRV rotation to update things
+    void updateFrameStates();  // call PRV rotation to update things
     void connectActuator() {};  // uses actuator
 };
 

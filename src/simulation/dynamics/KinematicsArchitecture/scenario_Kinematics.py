@@ -13,6 +13,7 @@ from Basilisk.simulation import Part
 from Basilisk.simulation import Joint
 from Basilisk.simulation import Hinge
 
+
 def run():
     myKinematicsEngine = KinematicsEngine.KinematicsEngine()
 
@@ -27,6 +28,7 @@ def run():
     myPart2.frame.tag = "part2"
 
     myJoint = myKinematicsEngine.createRotaryOneDOFJoint()
+    # myJoint.hingeVector[0].spinAxis = [1, 0, 0]
     myJoint.lowerFrame.tag = "lower"
     myJoint.upperFrame.tag = "upper"
 

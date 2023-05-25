@@ -22,7 +22,8 @@
 
 #include "simulation/dynamics/_GeneralModuleFiles/Vector.h"
 #include "simulation/dynamics/_GeneralModuleFiles/AttitudeParameterization.h"
-#include <Eigen/Core>
+#include "architecture/utilities/avsEigenMRP.h"
+#include <Eigen/Dense>
 #include <utility>
 #include <memory>
 
@@ -38,7 +39,7 @@ public:
     std::shared_ptr<Frame> parentFrame;
     std::string tag = "root";
 
-    MRP sigma_SP;
+    Eigen::MRPd sigma_SP;
     AngularVelocityVector omega_SP;
     PositionVector r_SP;
 
