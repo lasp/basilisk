@@ -17,6 +17,7 @@
 
  */
 #include "Hinge.h"
+#include "architecture/utilities/avsEigenSupport.h"
 
 #include <utility>
 
@@ -30,5 +31,15 @@ Hinge::Hinge(std::shared_ptr<Frame> equilibriumFrame, std::shared_ptr<Frame> cur
 void Hinge::updateKinematicStates(double newTheta, double newThetaDot) {
     this->theta = newTheta;
     this->thetaDot = newThetaDot;
+}
+
+
+void Hinge::updateFrameStates() {
+    // Update the attitude
+    Eigen::AngleAxisd prv(this->theta, this->spinAxis.matrix);
+    this->currentFrame->sigma_SP = eigenC2MRP(prv.toRotationMatrix().transpose());
+
+    // Update the angular velocity
+    this->currentFrame->omega_SP.matrix = this->thetaDot * this->spinAxis.matrix;
 }
 
