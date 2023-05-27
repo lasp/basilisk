@@ -43,6 +43,8 @@ struct AttGuidMsg_C;
 struct ArrayMotorTorqueMsg_C;
 %include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
 struct VehicleConfigMsg_C;
+%include "architecture/msgPayloadDefC/ErrorDataMsgPayload.h"
+struct ErrorDataMsg_C;
 
 %pythoncode %{
 import sys

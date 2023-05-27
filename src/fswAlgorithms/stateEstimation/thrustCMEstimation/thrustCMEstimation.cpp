@@ -41,7 +41,12 @@ void ThrustCMEstimation::Reset(uint64_t CurrentSimNanos)
     if (!this->attGuidInMsg.isLinked()) {
         bskLogger.bskLog(BSK_ERROR,  " attGuidInMsg wasn't connected.");
     }
-
+    if (!this->platformTorquesInMsg.isLinked()) {
+        bskLogger.bskLog(BSK_ERROR,  " platformTorquesInMsg wasn't connected.");
+    }
+    if (!this->vehConfigInMsg.isLinked()) {
+        bskLogger.bskLog(BSK_ERROR,  " vehConfigInMsg wasn't connected.");
+    }
 }
 
 /*! Take the relative position measurements and outputs an estimate of the
@@ -56,8 +61,7 @@ void ThrustCMEstimation::UpdateState(uint64_t CurrentSimNanos)
 
     /*! compute thruster information in B-frame coordinates */
     Eigen::Vector3d r_TB_B = cArray2EigenVector3d(thrConfigBuffer.rThrust_B);
-    Eigen::Vector3d T_B = cArray2EigenVector3d(thrConfigBuffer.tHatThrust_B);
-    T_B = T_B * thrConfigBuffer.maxThrust;
+    Eigen::Vector3d T_B = thrConfigBuffer.maxThrust * cArray2EigenVector3d(thrConfigBuffer.tHatThrust_B);
 
     /*! compute error w.r.t. target attitude */
     AttGuidMsgPayload attGuidBuffer = this->attGuidInMsg();
@@ -68,8 +72,21 @@ void ThrustCMEstimation::UpdateState(uint64_t CurrentSimNanos)
     CmdTorqueBodyMsgPayload cmdTorqueBuffer = this->cmdTorqueInMsg();
     Eigen::Vector3d u = cArray2EigenVector3d(cmdTorqueBuffer.torqueRequestBody);
 
+    VehicleConfigMsgPayload vehConfigBuffer = this->vehConfigInMsg();
+    Eigen::Vector3d r_CB_B = cArray2EigenVector3d(vehConfigBuffer.CoM_B);
 
-    std::cout << this->attError << "\n";
+    Eigen::Vector3d r_TC_B = r_TB_B - r_CB_B;
+    Eigen::Vector3d u_calc = r_TC_B.cross(T_B);
+
+    this->torqueError = u_calc + u;
+
+    ErrorDataMsgPayload errDataBuffer;
+    errDataBuffer.attError = this->attError;
+    eigenVector3d2CArray(this->torqueError, errDataBuffer.torqueError);
+
+    this->errorDataOutMsg.write(&errDataBuffer, this->moduleID, CurrentSimNanos);
+
+    // std::cout << this->attError << "\n";
 }
 
 

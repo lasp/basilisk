@@ -35,6 +35,7 @@
 #include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
 #include "architecture/msgPayloadDefC/ArrayMotorTorqueMsgPayload.h"
 #include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/ErrorDataMsgPayload.h"
 
 #include <string.h>
 #include <array>
@@ -48,21 +49,18 @@ public:
     void UpdateState(uint64_t CurrentSimNanos) override;
 
     /* declare these user-defined quantities */
-    double epsilon;
+    double attitudeTol;
+    double torqueTol;
 
-private:
-
-
-public:
-    ReadFunctor<THRConfigMsgPayload>      thrusterConfigInMsg;
-    ReadFunctor<CmdTorqueBodyMsgPayload>  cmdTorqueInMsg;
-    ReadFunctor<AttGuidMsgPayload>        attGuidInMsg;
-    ReadFunctor<A
-    Message<VehicleConfigMsgPayload>      vehConfigInMsg;
-
-    double measNoiseScaling = 1; //!< [s] Scale factor that can be applied on the measurement noise to over/under weight
+    ReadFunctor<THRConfigMsgPayload>        thrusterConfigInMsg;
+    ReadFunctor<CmdTorqueBodyMsgPayload>    cmdTorqueInMsg;
+    ReadFunctor<AttGuidMsgPayload>          attGuidInMsg;
+    ReadFunctor<ArrayMotorTorqueMsgPayload> platformTorquesInMsg;
+    ReadFunctor<VehicleConfigMsgPayload>    vehConfigInMsg;
+    Message<ErrorDataMsgPayload>            errorDataOutMsg;
 
     double attError;
+    Eigen::Vector3d torqueError;
 
 private:
     // THRConfigMsgPayload      thrConfigMsgBuffer;  //!< Message buffer
