@@ -41,6 +41,12 @@ list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/conan")
 
 include(bskTargetExcludeBuildOptions)
 
+# This was set because when executing on a github runner the runner
+# has 4 compiler versions on it and conan find version 9 and Cmake find 11.3.
+# I didn't manage to find a robust way of accomodating this. But I did find
+# some discussion on this setting and it seems that if our versions of things
+# will stay close then we won't need to support a wide range of conan dependency versions.
+set(CONAN_DISABLE_CHECK_COMPILER TRUE CACHE BOOL "" FORCE )
 
 # ! create_symlinks : create symlinks to support files in source rather than keeping them in dist The function takes one
 # required argument and N optional arguments. \argn: a list of supporting file paths
