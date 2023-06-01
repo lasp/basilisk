@@ -22,7 +22,7 @@
 
 #include "simulation/dynamics/_GeneralModuleFiles/Vector.h"
 #include "simulation/dynamics/_GeneralModuleFiles/Tensor.h"
-#include "simulation/dynamics/_GeneralModuleFiles/Frame.h"
+#include "Frame.h"
 #include <Eigen/Core>
 
 /*! @brief basic Basilisk C++ module class */

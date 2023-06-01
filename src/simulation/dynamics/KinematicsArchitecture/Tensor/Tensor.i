@@ -19,6 +19,7 @@
 %module Tensor
 %{
     #include "../../_GeneralModuleFiles/Tensor.h"
+
 %}
 
 %pythoncode %{

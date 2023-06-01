@@ -33,6 +33,15 @@ from Basilisk.architecture.swig_common_model import *
 %shared_ptr(KinematicsEngine)
 
 %include "KinematicsEngine.h"
+%include "../../_GeneralModuleFiles/Part.h"
+%include "../../_GeneralModuleFiles/Joint.h"
+%include "../../_GeneralModuleFiles/Point.h"
+
+namespace std {
+        %template(PartVector) vector<shared_ptr<Part>>;
+        %template(JointVector) vector<shared_ptr<Joint>>;
+        %template(PointVector) vector<shared_ptr<Point>>;
+}
 
 %pythoncode %{
 import sys

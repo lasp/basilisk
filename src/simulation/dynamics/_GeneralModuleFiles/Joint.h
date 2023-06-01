@@ -20,12 +20,8 @@
 #ifndef JOINT_H
 #define JOINT_H
 
-#include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "architecture/utilities/bskLogging.h"
-#include "architecture/messaging/messaging.h"
-
-#include "simulation/dynamics/_GeneralModuleFiles/Frame.h"
-#include "simulation/dynamics/_GeneralModuleFiles/Hinge.h"
+#include "Frame.h"
+#include "Hinge.h"
 #include <Eigen/Core>
 
 /*! @brief basic Basilisk C++ module class */

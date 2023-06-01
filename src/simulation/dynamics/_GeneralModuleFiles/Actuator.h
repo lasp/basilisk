@@ -24,8 +24,8 @@
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/messaging/messaging.h"
 
-#include "simulation/dynamics/_GeneralModuleFiles/Frame.h"
-#include "simulation/dynamics/_GeneralModuleFiles/Vector.h"
+#include "Frame.h"
+#include "Vector.h"
 
 #include <Eigen/Core>
 

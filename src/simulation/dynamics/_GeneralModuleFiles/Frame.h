@@ -21,7 +21,7 @@
 #define FRAME_H
 
 #include "simulation/dynamics/_GeneralModuleFiles/Vector.h"
-#include "simulation/dynamics/_GeneralModuleFiles/AttitudeParameterization.h"
+#include "AttitudeParameterization.h"
 #include "architecture/utilities/avsEigenMRP.h"
 #include <Eigen/Dense>
 #include <utility>

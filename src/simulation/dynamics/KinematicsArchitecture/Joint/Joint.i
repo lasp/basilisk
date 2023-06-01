@@ -33,8 +33,14 @@ from Basilisk.architecture.swig_common_model import *
 %shared_ptr(Joint)
 %shared_ptr(RotaryOneDOF)
 %shared_ptr(RotaryTwoDOF)
+%shared_ptr(Hinge)
+
+namespace std {
+        %template(HingeVector) vector<shared_ptr<Hinge>>;
+}
 
 %include "../../_GeneralModuleFiles/Joint.h"
+%include "../../_GeneralModuleFiles/Hinge.h"
 
 %pythoncode %{
 import sys
