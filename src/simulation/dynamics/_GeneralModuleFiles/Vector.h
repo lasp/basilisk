@@ -34,8 +34,6 @@ public:
     Vector(Eigen::Vector3d zerothMatrix, std::weak_ptr<Frame> zerothWrittenFrame);
     ~Vector() = default;
 
-    BSKLogger bskLogger;              //!< -- BSK Logging
-
     Eigen::Vector3d matrix = Eigen::Vector3d::Zero();
     std::weak_ptr<Frame> writtenFrame;
 };

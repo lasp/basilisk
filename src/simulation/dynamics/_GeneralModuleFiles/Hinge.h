@@ -20,7 +20,7 @@
 #ifndef HINGE_H
 #define HINGE_H
 
-#include "simulation/dynamics/_GeneralModuleFiles/Frame.h"
+#include "Frame.h"
 #include "simulation/dynamics/_GeneralModuleFiles/Vector.h"
 #include <Eigen/Geometry>
 

@@ -27,6 +27,7 @@ from Basilisk.architecture.swig_common_model import *
 %include "std_string.i"
 %include "swig_eigen.i"
 %include "swig_conly_data.i"
+%include "std_vector.i"
 
 %include <std_shared_ptr.i>
 %shared_ptr(Hinge)
