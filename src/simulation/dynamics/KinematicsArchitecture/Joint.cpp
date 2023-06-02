@@ -20,6 +20,8 @@
 
 
 RotaryOneDOF::RotaryOneDOF(std::shared_ptr<Hinge> hinge) {
+    n = 1;
+
     this->hingeVector.push_back(std::move(hinge));
 
     this->lowerFrame = this->hingeVector[0]->equilibriumFrame;
@@ -29,6 +31,8 @@ RotaryOneDOF::RotaryOneDOF(std::shared_ptr<Hinge> hinge) {
 
 
 RotaryTwoDOF::RotaryTwoDOF(std::shared_ptr<Hinge> firstHinge, std::shared_ptr<Hinge> secondHinge) {
+    n = 2;
+
     this->hingeVector.push_back(std::move(firstHinge));
     this->hingeVector.push_back(std::move(secondHinge));
 

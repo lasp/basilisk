@@ -28,6 +28,8 @@ KinematicsEngine::KinematicsEngine() {
     this->rootFrame->originPoint = originPoint;
 }
 
+#include <utility>
+
 KinematicsEngine::~KinematicsEngine() {
     this->frameList.clear();
     this->partList.clear();
@@ -94,6 +96,9 @@ std::shared_ptr<Part> KinematicsEngine::createPart(const std::shared_ptr<Frame>&
     tempPart->IPntSc_S = tempInertia;
 
     this->partList.push_back(tempPart);
+
+    auto tempNode = std::make_shared<Node>(tempPart);
+    this->nodeList.push_back(tempNode);
 
     return tempPart;
 }
@@ -164,11 +169,30 @@ std::shared_ptr<Assembly> KinematicsEngine::createAssembly() {
     return std::make_shared<Assembly>();
 }
 
+std::shared_ptr<Node> KinematicsEngine::findNode(const std::shared_ptr<Part>& part) {
+    for (const auto& node: this->nodeList) {
+        if (node->part == part)
+            return node;
+    }
+    // Add an error message here, this cannot happen
+    return nullptr;
+}
+
 void KinematicsEngine::connect(const std::shared_ptr<Part>& lowerPart,
                                 const std::shared_ptr<Joint>& joint,
                                 const std::shared_ptr<Part>& upperPart) {
     joint->lowerFrame->setParentFrame(lowerPart->frame);
     upperPart->frame->setParentFrame(joint->upperFrame);
+
+    auto lowerNode = findNode(lowerPart);
+    auto upperNode = findNode(upperPart);
+    lowerNode->addEdge(upperNode, joint);
+    upperNode->addEdge(lowerNode, joint);
+}
+
+
+void Node::addEdge(const std::shared_ptr<Node>& adjNode, const std::shared_ptr<Joint>& joint) {
+    this->edgeList.emplace_back(adjNode, joint);
 }
 
 std::vector<std::shared_ptr<Frame> > KinematicsEngine::findAbsolutePath(const std::shared_ptr<Frame>& frame) {

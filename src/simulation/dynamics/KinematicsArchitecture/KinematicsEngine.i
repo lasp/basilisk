@@ -34,6 +34,7 @@
 %shared_ptr(InertiaTensor)
 %shared_ptr(Joint)
 %shared_ptr(KinematicsEngine)
+%shared_ptr(Node)
 %shared_ptr(Part)
 %shared_ptr(Point)
 %shared_ptr(RotaryOneDOF)
@@ -52,6 +53,7 @@ namespace std {
         %template(TranslationVector) vector<shared_ptr<Translation>>;
         %template(RotationVector) vector<shared_ptr<Rotation>>;
         %template(FrameVector) vector<shared_ptr<Frame>>;
+        %template(NodeVector) vector<shared_ptr<Node>>;
 }
 
 %pythoncode %{

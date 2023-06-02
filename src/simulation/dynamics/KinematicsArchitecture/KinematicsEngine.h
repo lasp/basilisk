@@ -31,6 +31,19 @@
 #include "architecture/utilities/avsEigenMRP.h"
 #include <iostream>
 
+class Node {
+public:
+    explicit Node(std::shared_ptr<Part> part) : part(std::move(part)) {};
+    ~Node() = default;
+
+    void addEdge(const std::shared_ptr<Node>& adjNode, const std::shared_ptr<Joint>& joint);
+
+    std::shared_ptr<Part> part;
+    std::vector<std::pair<std::shared_ptr<Node>, std::shared_ptr<Joint>>> edgeList;
+    bool visited;
+};
+
+
 class KinematicsEngine {
 public:
     KinematicsEngine();
@@ -38,6 +51,7 @@ public:
 
     std::shared_ptr<Frame> rootFrame;
     std::vector<std::shared_ptr<Frame>> frameList;
+    std::vector<std::shared_ptr<Node>> nodeList;
     std::vector<std::shared_ptr<Part>> partList;
     std::vector<std::shared_ptr<Joint>> jointList;
     std::vector<std::shared_ptr<Point>> pointList;
@@ -55,6 +69,8 @@ public:
     std::shared_ptr<Rotation> createRotationProperties(const std::shared_ptr<Frame>& upperFrame, const std::shared_ptr<Frame>& lowerFrame);
     InertiaTensor createInertiaTensor(const std::shared_ptr<Point>& point);
     std::shared_ptr<Assembly> createAssembly();
+
+    std::shared_ptr<Node> findNode(const std::shared_ptr<Part>& part);
     void connect(const std::shared_ptr<Part>& lowerPart, const std::shared_ptr<Joint>& joint, const std::shared_ptr<Part>& upperPart);
 
     static std::vector<std::shared_ptr<Frame>> findAbsolutePath(const std::shared_ptr<Frame>& frame);

@@ -35,11 +35,13 @@ public:
     std::shared_ptr<Frame> upperFrame;
 
     std::vector<std::shared_ptr<Hinge>> hingeVector;
+    int n;
 };
 
 
 class RotaryOneDOF : public Joint {
 public:
+    RotaryOneDOF() {this->n = 1; };
     explicit RotaryOneDOF(std::shared_ptr<Hinge> hinge);
     ~RotaryOneDOF() = default;
 };
@@ -47,6 +49,7 @@ public:
 
 class RotaryTwoDOF : public Joint {
 public:
+    RotaryTwoDOF() {this->n = 2; };
     RotaryTwoDOF(std::shared_ptr<Hinge> firstHinge, std::shared_ptr<Hinge> secondHinge);
     ~RotaryTwoDOF() = default;
 };
