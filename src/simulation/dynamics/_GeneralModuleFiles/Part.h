@@ -22,6 +22,7 @@
 
 #include "simulation/dynamics/_GeneralModuleFiles/Vector.h"
 #include "simulation/dynamics/_GeneralModuleFiles/Tensor.h"
+#include "simulation/dynamics/_GeneralModuleFiles/Point.h"
 #include "Frame.h"
 #include <Eigen/Core>
 
@@ -32,10 +33,10 @@ public:
     explicit Part(std::shared_ptr<Frame> frame);
     ~Part() = default;
 
-    std::shared_ptr<Frame> frame;
     double mass = 0.0;
-    Tensor IPntSc_S;
-    Vector r_ScS_P;
+    std::shared_ptr<InertiaTensor> IPntSc_S;
+    std::shared_ptr<PositionVector> r_ScS;
+    std::shared_ptr<Frame> frame;
 };
 
 

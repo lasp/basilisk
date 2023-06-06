@@ -20,35 +20,19 @@
 #include "Frame.h"
 #include "Point.h"
 
-
-Vector::Vector(Eigen::Vector3d zerothMatrix, std::weak_ptr<Frame> zerothWrittenFrame){
+Vector::Vector(Eigen::Vector3d zerothMatrix, std::weak_ptr<Frame> zerothWrittenFrame) {
     this->matrix = std::move(zerothMatrix);
     this->writtenFrame = std::move(zerothWrittenFrame);
 }
-
 
 void Vector::setZerothOrder(Eigen::Vector3d newMatrix, std::shared_ptr<Frame> newWrittenFrame) {
     this->matrix = newMatrix;
     this->writtenFrame = newWrittenFrame;
 }
 
-
-/*! This is the constructor for the module class.  It sets default variable
-    values and initializes the various parts of the module */
-PositionVector::PositionVector(Eigen::Vector3d zerothMatrix,
-                               std::weak_ptr<Frame> zerothWrittenFrame):Vector(std::move(zerothMatrix), std::move(zerothWrittenFrame)){
-}
-
-PositionVector::PositionVector(Eigen::Vector3d zerothMatrix, std::weak_ptr<Frame> zerothWrittenFrame,
-               Eigen::Vector3d firstMatrix, std::weak_ptr<Frame> firstWrittenFrame, std::weak_ptr<Frame> firstDerivFrame,
-               Eigen::Vector3d secondMatrix, std::weak_ptr<Frame> secondWrittenFrame,
-               std::weak_ptr<Frame> secondDerivFrame):Vector(std::move(zerothMatrix), std::move(zerothWrittenFrame)){
-this->firstOrder.matrix = std::move(firstMatrix);
-this->firstOrder.writtenFrame = std::move(firstWrittenFrame);
-this->firstOrder.derivFrame = std::move(firstDerivFrame);
-this->secondOrder.matrix = std::move(secondMatrix);
-this->secondOrder.writtenFrame = std::move(secondWrittenFrame);
-this->secondOrder.derivFrame = std::move(secondDerivFrame);
+PositionVector::PositionVector(std::shared_ptr<Point> headPoint, std::shared_ptr<Point> tailPoint) {
+    this->headPoint = headPoint;
+    this->tailPoint = tailPoint;
 }
 
 void PositionVector::setFirstOrder(Eigen::Vector3d newMatrix, const std::shared_ptr<Frame>& newWrittenFrame,
@@ -66,18 +50,9 @@ void PositionVector::setSecondOrder(Eigen::Vector3d newMatrix, const std::shared
 }
 
 
-/*! This is the constructor for the module class.  It sets default variable
-    values and initializes the various parts of the module */
-AngularVelocityVector::AngularVelocityVector(Eigen::Vector3d zerothMatrix,
-                               std::weak_ptr<Frame> zerothWrittenFrame):Vector(std::move(zerothMatrix), std::move(zerothWrittenFrame)){
-}
-
-AngularVelocityVector::AngularVelocityVector(Eigen::Vector3d zerothMatrix, std::weak_ptr<Frame> zerothWrittenFrame,
-               Eigen::Vector3d firstMatrix, std::weak_ptr<Frame> firstWrittenFrame,
-               std::weak_ptr<Frame> firstDerivFrame):Vector(std::move(zerothMatrix), std::move(zerothWrittenFrame)){
-this->firstOrder.matrix = std::move(firstMatrix);
-this->firstOrder.writtenFrame = std::move(firstWrittenFrame);
-this->firstOrder.derivFrame = std::move(firstDerivFrame);
+AngularVelocityVector::AngularVelocityVector(std::weak_ptr<Frame> upperFrame, std::weak_ptr<Frame> lowerFrame) {
+    this->upperFrame = upperFrame;
+    this->lowerFrame = lowerFrame;
 }
 
 void AngularVelocityVector::setFirstOrder(Eigen::Vector3d newMatrix, const std::shared_ptr<Frame>& newWrittenFrame,
@@ -87,10 +62,7 @@ void AngularVelocityVector::setFirstOrder(Eigen::Vector3d newMatrix, const std::
     this->firstOrder.derivFrame = newDerivFrame;
 }
 
-
-
-/*! This is the constructor for the module class.  It sets default variable
-    values and initializes the various parts of the module */
 UnitVector::UnitVector(const Eigen::Vector3d& zerothMatrix,
-                       std::weak_ptr<Frame> zerothWrittenFrame):Vector(zerothMatrix.normalized(), std::move(zerothWrittenFrame)){
+                       std::weak_ptr<Frame> zerothWrittenFrame):Vector(zerothMatrix.normalized(),
+                                                                       std::move(zerothWrittenFrame)) {
 }

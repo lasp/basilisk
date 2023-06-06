@@ -17,35 +17,38 @@
 
  */
 
-#ifndef FRAME_H
-#define FRAME_H
+#ifndef ASSEMBLY_H
+#define ASSEMBLY_H
 
-#include "simulation/dynamics/_GeneralModuleFiles/Vector.h"
-#include "simulation/dynamics/_GeneralModuleFiles/Point.h"
-#include "AttitudeParameterization.h"
 #include "architecture/utilities/avsEigenSupport.h"
 #include "architecture/utilities/avsEigenMRP.h"
-#include <Eigen/Dense>
+#include "simulation/dynamics/_GeneralModuleFiles/AttitudeParameterization.h"
+#include "simulation/dynamics/_GeneralModuleFiles/Part.h"
+#include "simulation/dynamics/_GeneralModuleFiles/Joint.h"
+#include "simulation/dynamics/_GeneralModuleFiles/Frame.h"
+#include "simulation/dynamics/_GeneralModuleFiles/Vector.h"
+#include "simulation/dynamics/_GeneralModuleFiles/Tensor.h"
+#include <Eigen/Core>
 #include <utility>
-#include <memory>
 
 /*! @brief basic Basilisk C++ module class */
-class Frame {
+class Assembly {
 public:
-    Frame() = default;
-    explicit Frame(std::shared_ptr<Frame> parentFrame) : parentFrame(std::move(parentFrame)) {};
-    ~Frame() = default;
+    Assembly() = default;
+    ~Assembly() = default;
 
-    std::shared_ptr<Frame> parentFrame = nullptr;
-    std::shared_ptr<Point> originPoint = nullptr;
-    std::string tag = "root";
+    void addPart(std::shared_ptr<Part> part);
 
-    Eigen::MRPd sigma_SP;
-    std::shared_ptr<AngularVelocityVector> omega_SP = nullptr;
-    std::shared_ptr<PositionVector> r_SP = nullptr;
+    std::vector<std::shared_ptr<Assembly>> assemblyList;
+    std::vector<std::shared_ptr<Part>> partList;
+    std::vector<std::shared_ptr<Joint>> jointList;
 
-    void setParentFrame(std::shared_ptr<Frame> newParentFrame) {this->parentFrame = std::move(newParentFrame);};
-    void updateFrame() {};
+    std::string tag;
+    std::shared_ptr<Frame> frame;
+    double mass = 0.0;
+    InertiaTensor IPntSc;
+    InertiaTensor IPntS;
+    PositionVector r_ScS;
 };
 
 

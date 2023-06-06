@@ -16,9 +16,9 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
-%module Part
+%module Assembly
 %{
-#include "../../_GeneralModuleFiles/Part.h"
+#include "../../_GeneralModuleFiles/Assembly.h"
 
 %}
 
@@ -30,13 +30,11 @@ from Basilisk.architecture.swig_common_model import *
 %include "swig_conly_data.i"
 
 %include <std_shared_ptr.i>
-%shared_ptr(Part)
+%shared_ptr(Assembly)
 
+%include "../../_GeneralModuleFiles/Assembly.h"
 %include "../../_GeneralModuleFiles/Part.h"
-%include "../../_GeneralModuleFiles/Tensor.h"
-%include "../../_GeneralModuleFiles/Vector.h"
-%include "../../_GeneralModuleFiles/Point.h"
-%include "../../_GeneralModuleFiles/Frame.h"
+
 
 %pythoncode %{
 import sys

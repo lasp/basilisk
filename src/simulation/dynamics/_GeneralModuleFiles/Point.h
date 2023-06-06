@@ -20,25 +20,17 @@
 #ifndef POINT_H
 #define POINT_H
 
-#include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "architecture/utilities/bskLogging.h"
-#include "architecture/messaging/messaging.h"
-
 #include <Eigen/Core>
 #include <vector>
 #include <utility>
-
-class PositionVector;
+#include <string>
 
 /*! @brief basic Basilisk C++ module class */
-class Point{
+class Point {
 public:
     Point() = default;
     ~Point() = default;
-
-    BSKLogger bskLogger;              //!< -- BSK Logging
-
-    std::vector<std::weak_ptr<PositionVector>> positionVectorArray;
+    std::string tag;
 };
 
 

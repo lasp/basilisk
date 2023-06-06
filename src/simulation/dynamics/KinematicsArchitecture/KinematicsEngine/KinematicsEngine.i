@@ -41,24 +41,21 @@ from Basilisk.architecture.swig_common_model import *
 %shared_ptr(RotaryOneDOF)
 %shared_ptr(RotaryTwoDOF)
 
-#include "../../_GeneralModuleFiles/Actuator.h"
-#include "../../_GeneralModuleFiles/AttitudeParameterization.h"
-#include "../../_GeneralModuleFiles/Hinge.h"
-#include "../../_GeneralModuleFiles/Joint.h"
-#include "../../_GeneralModuleFiles/Part.h"
-#include "../../_GeneralModuleFiles/Point.h"
-#include "../../_GeneralModuleFiles/Tensor.h"
-#include "../../_GeneralModuleFiles/Vector.h"
+%include "KinematicsEngine.h"
+%include "../../_GeneralModuleFiles/Part.h"
+%include "../../_GeneralModuleFiles/Joint.h"
+%include "../../_GeneralModuleFiles/Point.h"
+%include "../../_GeneralModuleFiles/Vector.h"
+%include "../../_GeneralModuleFiles/Frame.h"
 
 namespace std {
         %template(HingeVector) vector<shared_ptr<Hinge>>;
         %template(JointVector) vector<shared_ptr<Joint>>;
         %template(PartVector) vector<shared_ptr<Part>>;
         %template(PointVector) vector<shared_ptr<Point>>;
+        %template(PositionVectorVector) vector<shared_ptr<PositionVector>>;
+        %template(FrameVector) vector<shared_ptr<Frame>>;
 }
-
-%include "KinematicsEngine.h"
-%include "../../_GeneralModuleFiles/Joint.h"
 
 %pythoncode %{
 import sys

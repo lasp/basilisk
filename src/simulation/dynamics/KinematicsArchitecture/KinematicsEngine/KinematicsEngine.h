@@ -24,29 +24,69 @@
 #include "simulation/dynamics/_GeneralModuleFiles/Part.h"
 #include "simulation/dynamics/_GeneralModuleFiles/Joint.h"
 #include "simulation/dynamics/_GeneralModuleFiles/Point.h"
-
+#include "simulation/dynamics/_GeneralModuleFiles/Assembly.h"
+#include "architecture/utilities/avsEigenSupport.h"
+#include "architecture/utilities/avsEigenMRP.h"
 #include <iostream>
 
 class KinematicsEngine {
 public:
-    KinematicsEngine() = default;
+    KinematicsEngine();
     ~KinematicsEngine();
 
     std::shared_ptr<Frame> rootFrame = std::make_shared<Frame>();
+    std::vector<std::shared_ptr<Frame>> frameList;
     std::vector<std::shared_ptr<Part>> partList;
     std::vector<std::shared_ptr<Joint>> jointList;
     std::vector<std::shared_ptr<Point>> pointList;
+    std::vector<std::shared_ptr<PositionVector>> positionVectorList;
+    std::vector<std::shared_ptr<AngularVelocityVector>> angularVelocityVectorList;
 
+    std::shared_ptr<Point> createPoint();
     std::shared_ptr<Frame> createFrame();
     std::shared_ptr<Frame> createFrame(const std::shared_ptr<Frame>& parentFrame);
     std::shared_ptr<Part> createPart();
     std::shared_ptr<Part> createPart(const std::shared_ptr<Frame>& parentFrame);
-
     std::shared_ptr<RotaryOneDOF> createRotaryOneDOFJoint();
     std::shared_ptr<RotaryTwoDOF> createRotaryTwoDOFJoint();
+    std::shared_ptr<PositionVector> createPositionVector(std::shared_ptr<Point> headPoint, std::shared_ptr<Point> tailPoint);
+    std::shared_ptr<AngularVelocityVector> createAngularVelocityVector(std::shared_ptr<Frame> upperFrame, std::shared_ptr<Frame> lowerFrame);
+    std::shared_ptr<InertiaTensor> createInertiaTensor(std::shared_ptr<Point> point);
+    std::shared_ptr<Assembly> createAssembly();
 
     void connect(const std::shared_ptr<Part>& lowerPart, const std::shared_ptr<Joint>& joint, const std::shared_ptr<Part>& upperPart);
-};
+    std::vector<std::shared_ptr<Frame>> findAbsolutePath(std::shared_ptr<Frame> frame);
+    std::pair<std::vector<std::shared_ptr<Frame>>, std::vector<std::shared_ptr<Frame>>> findPath2LCA(std::shared_ptr<Frame> upperFrame, std::shared_ptr<Frame> lowerFrame);
+    Eigen::MRPd findIntermediateAttitude(std::vector<std::shared_ptr<Frame>> path);
+    std::shared_ptr<AngularVelocityVector> findIntermediateAngularVelocity(std::vector<std::shared_ptr<Frame>> path, std::shared_ptr<Frame> lowerFrame);
+    Eigen::MRPd findRelativeAttitude(std::shared_ptr<Frame> upperFrame, std::shared_ptr<Frame> lowerFrame);
+    std::shared_ptr<AngularVelocityVector> findRelativeAngularVelocity(std::shared_ptr<Frame> upperFrame, std::shared_ptr<Frame> lowerFrame);
+    std::shared_ptr<PositionVector> addPositionVectors(std::shared_ptr<PositionVector> positionVector1, std::shared_ptr<PositionVector> positionVector2);
+    std::shared_ptr<AngularVelocityVector> addAngularVelocityVectors(std::shared_ptr<AngularVelocityVector> angularVelocityVector1, std::shared_ptr<AngularVelocityVector> angularVelocityVector2);
+    std::shared_ptr<PositionVector> callFindRelativePosition(std::shared_ptr<Point> headPoint,
+                                                             std::shared_ptr<Point> tailPoint,
+                                                             std::shared_ptr<Frame> writtenFrame);
+    std::shared_ptr<AngularVelocityVector> callFindRelativeAngularVelocity(std::shared_ptr<Frame> upperFrame,
+                                                                           std::shared_ptr<Frame> lowerFrame,
+                                                                           std::shared_ptr<Frame> writtenFrame);
+    std::shared_ptr<InertiaTensor> parallelAxisTheorem(std::shared_ptr<Part> part, std::shared_ptr<Point> point, std::shared_ptr<Frame> writtenFrame);
+    double getAssemblyMass(std::shared_ptr<Assembly> assembly);
+    std::shared_ptr<PositionVector> getAssemblyCOM(std::shared_ptr<Assembly> assembly, std::shared_ptr<Point> tailPoint, std::shared_ptr<Frame> writtenFrame);
+    std::shared_ptr<InertiaTensor> getAssemblyInertia(std::shared_ptr<Assembly> assembly, std::shared_ptr<Point> tailPoint, std::shared_ptr<Frame> writtenFrame);
 
+private:
+    std::shared_ptr<PositionVector> findRelativePosition(std::shared_ptr<Point> headPoint,
+                                                         std::shared_ptr<Point> tailPoint,
+                                                         std::shared_ptr<Point> intermediateHeadPoint,
+                                                         std::shared_ptr<Frame> writtenFrame,
+                                                         Eigen::Vector3d intermediatePosVec,
+                                                         std::vector<std::shared_ptr<PositionVector>> visitedVectors);
+    std::shared_ptr<AngularVelocityVector> findRelativeAngularVelocity(std::shared_ptr<Frame> upperFrame,
+                                                                       std::shared_ptr<Frame> lowerFrame,
+                                                                       std::shared_ptr<Frame> intermediateUpperFrame,
+                                                                       std::shared_ptr<Frame> writtenFrame,
+                                                                       Eigen::Vector3d intermediateAngVelVec,
+                                                                       std::vector<std::shared_ptr<AngularVelocityVector>> visitedVectors);
+};
 
 #endif

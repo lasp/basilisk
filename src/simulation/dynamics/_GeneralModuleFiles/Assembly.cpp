@@ -16,29 +16,10 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
-%module Part
-%{
-#include "../../_GeneralModuleFiles/Part.h"
+#include "Assembly.h"
+#include "architecture/utilities/avsEigenSupport.h"
+#include "architecture/utilities/avsEigenMRP.h"
 
-%}
-
-%pythoncode %{
-from Basilisk.architecture.swig_common_model import *
-%}
-%include "std_string.i"
-%include "swig_eigen.i"
-%include "swig_conly_data.i"
-
-%include <std_shared_ptr.i>
-%shared_ptr(Part)
-
-%include "../../_GeneralModuleFiles/Part.h"
-%include "../../_GeneralModuleFiles/Tensor.h"
-%include "../../_GeneralModuleFiles/Vector.h"
-%include "../../_GeneralModuleFiles/Point.h"
-%include "../../_GeneralModuleFiles/Frame.h"
-
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}
+void Assembly::addPart(std::shared_ptr<Part> part) {
+    this->partList.push_back(part);
+}

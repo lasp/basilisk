@@ -40,6 +40,6 @@ void Hinge::updateFrameStates() {
     this->currentFrame->sigma_SP = eigenC2MRP(prv.toRotationMatrix().transpose());
 
     // Update the angular velocity
-    this->currentFrame->omega_SP.matrix = this->thetaDot * this->spinAxis.matrix;
+    this->currentFrame->omega_SP->matrix = this->thetaDot * this->spinAxis.matrix;
 }
 

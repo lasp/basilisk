@@ -18,8 +18,10 @@
  */
 #include "Tensor.h"
 #include "Frame.h"
-
 #include <utility>
+
+InertiaTensor::InertiaTensor(std::shared_ptr<Point> point):point(std::move(point)) {
+}
 
 void Tensor::setZerothOrder(const Eigen::Matrix3d& newMatrix, const std::shared_ptr<Frame>& newWrittenFrame) {
     this->matrix = newMatrix;
