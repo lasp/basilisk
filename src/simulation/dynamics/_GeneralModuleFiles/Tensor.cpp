@@ -21,13 +21,3 @@
 
 #include <utility>
 
-/*! This is the constructor for the module class.  It sets default variable
-    values and initializes the various parts of the model */
-Tensor::Tensor(Eigen::Matrix3d zerothMatrix, std::shared_ptr<Frame> zerothWrittenFrame,
-               Eigen::Matrix3d firstMatrix, std::shared_ptr<Frame> firstWrittenFrame, std::shared_ptr<Frame> firstDerivFrame) {
-this->zerothOrder.matrix = std::move(zerothMatrix);
-this->zerothOrder.writtenFrame = zerothWrittenFrame;
-this->firstOrder.matrix = std::move(firstMatrix);
-this->firstOrder.writtenFrame = firstWrittenFrame;
-this->firstOrder.derivFrame = firstDerivFrame;
-}

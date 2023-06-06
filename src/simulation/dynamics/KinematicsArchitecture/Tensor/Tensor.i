@@ -31,6 +31,7 @@ from Basilisk.architecture.swig_common_model import *
 
 %include <std_shared_ptr.i>
 %shared_ptr(Tensor)
+%shared_ptr(InertiaTensor)
 
 %include "../../_GeneralModuleFiles/Tensor.h"
 
