@@ -1,7 +1,7 @@
 /*
  ISC License
 
- Copyright (c) 2023, Autonomous Vehicle Systems Lab, University of Colorado at Boulder
+ Copyright (c) 2023, Laboratory for Atmospheric and Space Physics, University of Colorado at Boulder
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +18,10 @@
  */
 %module KinematicsEngine
 %{
-   #include "KinematicsEngine.h"
+    #include "KinematicsEngine.h"
+    #include "../../_GeneralModuleFiles/Joint.h"
+    #include "../../_GeneralModuleFiles/Hinge.h"
+    #include "../../_GeneralModuleFiles/Part.h"
 %}
 
 %pythoncode %{
@@ -29,19 +32,33 @@ from Basilisk.architecture.swig_common_model import *
 %include "swig_conly_data.i"
 %include "std_vector.i"
 
+%include "../Vector/Vector.i"
+%include "../Joint/Joint.i"
+
 %include <std_shared_ptr.i>
 %shared_ptr(KinematicsEngine)
+%shared_ptr(Joint)
+%shared_ptr(RotaryOneDOF)
+%shared_ptr(RotaryTwoDOF)
 
-%include "KinematicsEngine.h"
-%include "../../_GeneralModuleFiles/Part.h"
-%include "../../_GeneralModuleFiles/Joint.h"
-%include "../../_GeneralModuleFiles/Point.h"
+#include "../../_GeneralModuleFiles/Actuator.h"
+#include "../../_GeneralModuleFiles/AttitudeParameterization.h"
+#include "../../_GeneralModuleFiles/Hinge.h"
+#include "../../_GeneralModuleFiles/Joint.h"
+#include "../../_GeneralModuleFiles/Part.h"
+#include "../../_GeneralModuleFiles/Point.h"
+#include "../../_GeneralModuleFiles/Tensor.h"
+#include "../../_GeneralModuleFiles/Vector.h"
 
 namespace std {
-        %template(PartVector) vector<shared_ptr<Part>>;
+        %template(HingeVector) vector<shared_ptr<Hinge>>;
         %template(JointVector) vector<shared_ptr<Joint>>;
+        %template(PartVector) vector<shared_ptr<Part>>;
         %template(PointVector) vector<shared_ptr<Point>>;
 }
+
+%include "KinematicsEngine.h"
+%include "../../_GeneralModuleFiles/Joint.h"
 
 %pythoncode %{
 import sys
