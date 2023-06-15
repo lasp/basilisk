@@ -21,3 +21,13 @@
 
 #include <utility>
 
+void Tensor::setZerothOrder(const Eigen::Matrix3d& newMatrix, const std::shared_ptr<Frame>& newWrittenFrame) {
+    this->matrix = newMatrix;
+    this->writtenFrame = newWrittenFrame;
+}
+
+void InertiaTensor::setFirstOrder(const Eigen::Matrix3d& newMatrix, const std::shared_ptr<Frame>& newWrittenFrame, const std::shared_ptr<Frame>& newDerivFrame) {
+    this->firstOrder.matrix = newMatrix;
+    this->firstOrder.writtenFrame = newWrittenFrame;
+    this->firstOrder.derivFrame = newDerivFrame;
+}

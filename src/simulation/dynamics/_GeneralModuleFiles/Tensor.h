@@ -21,29 +21,32 @@
 #define TENSOR_H
 
 #include "simulation/dynamics/_GeneralModuleFiles/Frame.h"
-#include <Eigen/Core>
+#include <Eigen/Dense>
 
 /*! @brief basic Basilisk C++ module class */
 
 struct TensorDerivativeProperties {
     Eigen::Matrix3d matrix = Eigen::Matrix3d::Zero();
-    std::weak_ptr<Frame> writtenFrame;
-    std::weak_ptr<Frame> derivFrame;
+    std::shared_ptr<Frame> writtenFrame;
+    std::shared_ptr<Frame> derivFrame;
 };
 
 class Tensor {
 public:
     Tensor() = default;
     ~Tensor() = default;
+    void setZerothOrder(const Eigen::Matrix3d& newMatrix, const std::shared_ptr<Frame>& newWrittenFrame);
 
-    Eigen::Matrix3d matrix = Eigen::Matrix3d::Zero();
-    std::weak_ptr<Frame> writtenFrame;
+    Eigen::Matrix3d matrix = Eigen::Matrix3d::Identity();
+    std::shared_ptr<Frame> writtenFrame;
 };
 
 
 class InertiaTensor: public Tensor {
+public:
     InertiaTensor() = default;
     ~InertiaTensor() = default;
+    void setFirstOrder(const Eigen::Matrix3d& newMatrix, const std::shared_ptr<Frame>& newWrittenFrame, const std::shared_ptr<Frame>& newDerivFrame);
 
     TensorDerivativeProperties firstOrder;
 };

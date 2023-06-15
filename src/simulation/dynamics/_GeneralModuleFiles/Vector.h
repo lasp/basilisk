@@ -33,6 +33,7 @@ public:
     Vector() = default;
     Vector(Eigen::Vector3d zerothMatrix, std::weak_ptr<Frame> zerothWrittenFrame);
     ~Vector() = default;
+    void setZerothOrder(Eigen::Vector3d newMatrix, std::shared_ptr<Frame> newWrittenFrame);
 
     Eigen::Vector3d matrix = Eigen::Vector3d::Zero();
     std::weak_ptr<Frame> writtenFrame;
@@ -57,6 +58,8 @@ public:
                    std::weak_ptr<Frame> firstDerivFrame, Eigen::Vector3d secondMatrix,
                    std::weak_ptr<Frame> secondWrittenFrame, std::weak_ptr<Frame> secondDerivFrame);
     ~PositionVector() = default;
+    void setFirstOrder(Eigen::Vector3d newMatrix, const std::shared_ptr<Frame>& newWrittenFrame, const std::shared_ptr<Frame>& newDerivFrame);
+    void setSecondOrder(Eigen::Vector3d newMatrix, const std::shared_ptr<Frame>& newWrittenFrame, const std::shared_ptr<Frame>& newDerivFrame);
 
     std::weak_ptr<Point> tailPoint;
     std::weak_ptr<Point> headPoint;
@@ -84,6 +87,7 @@ public:
     AngularVelocityVector(Eigen::Vector3d zerothMatrix, std::weak_ptr<Frame> zerothWrittenFrame,
                           Eigen::Vector3d firstMatrix, std::weak_ptr<Frame> firstWrittenFrame, std::weak_ptr<Frame> firstDerivFrame);
     ~AngularVelocityVector() = default;
+    void setFirstOrder(Eigen::Vector3d newMatrix, const std::shared_ptr<Frame>& newWrittenFrame, const std::shared_ptr<Frame>& newDerivFrame);
 
     VectorDerivativeProperties firstOrder;
     Frame* upperFrame = nullptr;
