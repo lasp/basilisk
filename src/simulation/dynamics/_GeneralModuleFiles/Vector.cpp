@@ -19,6 +19,7 @@
 #include "Vector.h"
 #include "Frame.h"
 #include "Point.h"
+#include "KinematicsEngine.h"
 
 Vector::Vector(Eigen::Vector3d zerothMatrix, std::weak_ptr<Frame> zerothWrittenFrame) {
     this->matrix = std::move(zerothMatrix);
@@ -28,6 +29,15 @@ Vector::Vector(Eigen::Vector3d zerothMatrix, std::weak_ptr<Frame> zerothWrittenF
 void Vector::setZerothOrder(Eigen::Vector3d newMatrix, std::shared_ptr<Frame> newWrittenFrame) {
     this->matrix = newMatrix;
     this->writtenFrame = newWrittenFrame;
+}
+
+Eigen::Vector3d Vector::getZerothOrder(std::shared_ptr<Frame> newWrittenFrame) {
+    Eigen::MRPd relativeAttitude;
+    relativeAttitude = KinematicsEngine::findRelativeAttitude(newWrittenFrame, this->writtenFrame.lock());
+
+    Eigen::Matrix3d dcm = relativeAttitude.toRotationMatrix().transpose();
+
+    return dcm * this->matrix;
 }
 
 PositionVector::PositionVector(std::shared_ptr<Point> headPoint, std::shared_ptr<Point> tailPoint) {

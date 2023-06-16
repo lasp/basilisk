@@ -18,6 +18,7 @@
  */
 #include "Tensor.h"
 #include "Frame.h"
+#include "KinematicsEngine.h"
 #include <utility>
 
 InertiaTensor::InertiaTensor(std::shared_ptr<Point> point):point(std::move(point)) {
@@ -26,6 +27,15 @@ InertiaTensor::InertiaTensor(std::shared_ptr<Point> point):point(std::move(point
 void Tensor::setZerothOrder(const Eigen::Matrix3d& newMatrix, const std::shared_ptr<Frame>& newWrittenFrame) {
     this->matrix = newMatrix;
     this->writtenFrame = newWrittenFrame;
+}
+
+Eigen::Matrix3d Tensor::getZerothOrder(std::shared_ptr<Frame> newWrittenFrame) {
+    Eigen::MRPd relativeAttitude;
+    relativeAttitude = KinematicsEngine::findRelativeAttitude(newWrittenFrame, this->writtenFrame);
+
+    Eigen::Matrix3d dcm = relativeAttitude.toRotationMatrix().transpose();
+
+    return (dcm * this->matrix * dcm.transpose());
 }
 
 void InertiaTensor::setFirstOrder(const Eigen::Matrix3d& newMatrix, const std::shared_ptr<Frame>& newWrittenFrame, const std::shared_ptr<Frame>& newDerivFrame) {

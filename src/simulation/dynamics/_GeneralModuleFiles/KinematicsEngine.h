@@ -55,11 +55,11 @@ public:
     std::shared_ptr<Assembly> createAssembly();
 
     void connect(const std::shared_ptr<Part>& lowerPart, const std::shared_ptr<Joint>& joint, const std::shared_ptr<Part>& upperPart);
-    std::vector<std::shared_ptr<Frame>> findAbsolutePath(std::shared_ptr<Frame> frame);
-    std::pair<std::vector<std::shared_ptr<Frame>>, std::vector<std::shared_ptr<Frame>>> findPath2LCA(std::shared_ptr<Frame> upperFrame, std::shared_ptr<Frame> lowerFrame);
-    Eigen::MRPd findIntermediateAttitude(std::vector<std::shared_ptr<Frame>> path);
+    static std::vector<std::shared_ptr<Frame>> findAbsolutePath(std::shared_ptr<Frame> frame);
+    static std::pair<std::vector<std::shared_ptr<Frame>>, std::vector<std::shared_ptr<Frame>>> findPath2LCA(std::shared_ptr<Frame> upperFrame, std::shared_ptr<Frame> lowerFrame);
+    static Eigen::MRPd findIntermediateAttitude(std::vector<std::shared_ptr<Frame>> path);
     std::shared_ptr<AngularVelocityVector> findIntermediateAngularVelocity(std::vector<std::shared_ptr<Frame>> path, std::shared_ptr<Frame> lowerFrame);
-    Eigen::MRPd findRelativeAttitude(std::shared_ptr<Frame> upperFrame, std::shared_ptr<Frame> lowerFrame);
+    static Eigen::MRPd findRelativeAttitude(std::shared_ptr<Frame> upperFrame, std::shared_ptr<Frame> lowerFrame);
     std::shared_ptr<AngularVelocityVector> findRelativeAngularVelocity(std::shared_ptr<Frame> upperFrame, std::shared_ptr<Frame> lowerFrame);
     std::shared_ptr<PositionVector> addPositionVectors(std::shared_ptr<PositionVector> positionVector1, std::shared_ptr<PositionVector> positionVector2);
     std::shared_ptr<AngularVelocityVector> addAngularVelocityVectors(std::shared_ptr<AngularVelocityVector> angularVelocityVector1, std::shared_ptr<AngularVelocityVector> angularVelocityVector2);

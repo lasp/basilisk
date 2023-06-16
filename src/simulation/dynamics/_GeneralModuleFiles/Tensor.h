@@ -35,7 +35,9 @@ class Tensor {
 public:
     Tensor() = default;
     ~Tensor() = default;
+
     void setZerothOrder(const Eigen::Matrix3d& newMatrix, const std::shared_ptr<Frame>& newWrittenFrame);
+    Eigen::Matrix3d getZerothOrder(std::shared_ptr<Frame> newWrittenFrame);
 
     Eigen::Matrix3d matrix = Eigen::Matrix3d::Zero();
     std::shared_ptr<Frame> writtenFrame;

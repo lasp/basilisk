@@ -18,7 +18,7 @@
  */
 %module KinematicsEngine
 %{
-    #include "KinematicsEngine.h"
+    #include "../../_GeneralModuleFiles/KinematicsEngine.h"
     #include "../../_GeneralModuleFiles/Joint.h"
     #include "../../_GeneralModuleFiles/Hinge.h"
     #include "../../_GeneralModuleFiles/Part.h"
@@ -41,7 +41,7 @@ from Basilisk.architecture.swig_common_model import *
 %shared_ptr(RotaryOneDOF)
 %shared_ptr(RotaryTwoDOF)
 
-%include "KinematicsEngine.h"
+%include "../../_GeneralModuleFiles/KinematicsEngine.h"
 %include "../../_GeneralModuleFiles/Part.h"
 %include "../../_GeneralModuleFiles/Joint.h"
 %include "../../_GeneralModuleFiles/Point.h"

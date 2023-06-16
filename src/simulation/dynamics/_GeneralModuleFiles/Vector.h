@@ -19,7 +19,6 @@
 
 #ifndef VECTOR_H
 #define VECTOR_H
-
 #include <Eigen/Core>
 
 class Frame;
@@ -33,6 +32,7 @@ public:
     ~Vector() = default;
 
     void setZerothOrder(Eigen::Vector3d newMatrix, std::shared_ptr<Frame> newWrittenFrame);
+    Eigen::Vector3d getZerothOrder(std::shared_ptr<Frame> newWrittenFrame);
 
     Eigen::Vector3d matrix = Eigen::Vector3d::Zero();
     std::weak_ptr<Frame> writtenFrame;
