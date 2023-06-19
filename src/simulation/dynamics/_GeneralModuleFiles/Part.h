@@ -35,6 +35,7 @@ public:
 
     double mass = 0.0;
     std::shared_ptr<InertiaTensor> IPntSc_S;
+    std::shared_ptr<Point> CoMPoint;
     std::shared_ptr<PositionVector> r_ScS;
     std::shared_ptr<Frame> frame;
 };

@@ -80,6 +80,7 @@ std::shared_ptr<Part> KinematicsEngine::createPart(const std::shared_ptr<Frame>&
     auto tempPart = std::make_shared<Part>(std::move(tempFrame)); // maybe add constructor for part with pos vec
     auto tempInertia = this->createInertiaTensor(CoMPoint);
 
+    tempPart->CoMPoint = CoMPoint;
     tempPart->r_ScS = tempPosVec;
     tempPart->r_ScS->writtenFrame = tempPart->frame;
     tempPart->IPntSc_S = tempInertia;
@@ -273,92 +274,17 @@ Eigen::MRPd KinematicsEngine::findRelativeAttitude(std::shared_ptr<Frame> upperF
     return relativeMRP;
 }
 
-std::shared_ptr<AngularVelocityVector> KinematicsEngine::findRelativeAngularVelocity(std::shared_ptr<Frame> upperFrame, std::shared_ptr<Frame> lowerFrame) {
-    std::vector<std::shared_ptr<Frame>> path2LCA1;
-    std::vector<std::shared_ptr<Frame>> path2LCA2;
-    auto paths = findPath2LCA(upperFrame, lowerFrame);
-    path2LCA1 = paths.first;
-    path2LCA2 = paths.second;
-
-    auto relAngularVelocityVector1 = findIntermediateAngularVelocity(path2LCA1, lowerFrame);
-    auto relAngularVelocityVector2 = findIntermediateAngularVelocity(path2LCA2, lowerFrame);
-
-    Eigen::Vector3d relativeAngularVelocityVec = relAngularVelocityVector1->matrix + relAngularVelocityVector2->matrix;
-    auto relativeAngularVelocity = std::make_shared<AngularVelocityVector>();
-    relativeAngularVelocity->matrix = relativeAngularVelocityVec;
-    relativeAngularVelocity->writtenFrame = relAngularVelocityVector2->writtenFrame;
-
-    return relativeAngularVelocity;
-}
-
-std::shared_ptr<PositionVector> KinematicsEngine::addPositionVectors(std::shared_ptr<PositionVector> positionVector1, std::shared_ptr<PositionVector> positionVector2) {
-    if (positionVector1->tailPoint == positionVector2->headPoint) {
-        Eigen::MRPd relativeAttitude;
-        relativeAttitude = findRelativeAttitude(positionVector1->writtenFrame.lock(), positionVector2->writtenFrame.lock());
-
-        Eigen::Matrix3d dcm = relativeAttitude.toRotationMatrix();
-        Eigen::Vector3d relPosition = dcm * positionVector1->matrix + positionVector2->matrix;
-
-        auto relativePosition = std::make_shared<PositionVector>(positionVector1->headPoint, positionVector2->headPoint);
-        relativePosition->matrix = relPosition;
-        relativePosition->writtenFrame = positionVector2->writtenFrame;
-
-        return relativePosition;
-    }
-    else{
-        auto relativePosition = std::make_shared<PositionVector>();
-
-        return relativePosition;
-    }
-}
-
-std::shared_ptr<AngularVelocityVector> KinematicsEngine::addAngularVelocityVectors(std::shared_ptr<AngularVelocityVector> angularVelocityVector1, std::shared_ptr<AngularVelocityVector> angularVelocityVector2) {
-    if (angularVelocityVector1->lowerFrame.lock() == angularVelocityVector2->upperFrame.lock()) {
-        Eigen::MRPd relativeAttitude;
-        relativeAttitude = findRelativeAttitude(angularVelocityVector1->writtenFrame.lock(), angularVelocityVector2->writtenFrame.lock());
-
-        Eigen::Matrix3d dcm = relativeAttitude.toRotationMatrix();
-        Eigen::Vector3d relAngularVelocity = dcm * angularVelocityVector1->matrix + angularVelocityVector2->matrix;
-
-        auto relativeAngularVelocity = std::make_shared<AngularVelocityVector>(angularVelocityVector1->upperFrame,
-                                                                               angularVelocityVector2->lowerFrame);
-        relativeAngularVelocity->matrix = relAngularVelocity;
-        relativeAngularVelocity->writtenFrame = angularVelocityVector2->writtenFrame;
-
-        return relativeAngularVelocity;
-    }
-    else{
-        auto relativeAngularVelocity = std::make_shared<AngularVelocityVector>();
-
-        return relativeAngularVelocity;
-    }
-}
-
 std::shared_ptr<PositionVector> KinematicsEngine::callFindRelativePosition(std::shared_ptr<Point> headPoint,
-                                                                           std::shared_ptr<Point> tailPoint,
-                                                                           std::shared_ptr<Frame> writtenFrame) {
-    Eigen::Vector3d intermediatePosVec =  {0.0, 0.0, 0.0};
+                                                                           std::shared_ptr<Point> tailPoint) {
     std::vector<std::shared_ptr<PositionVector>> visitedVectors = {};
 
-    return findRelativePosition(headPoint, tailPoint, headPoint, writtenFrame, intermediatePosVec,
-                                visitedVectors);
-}
-
-std::shared_ptr<AngularVelocityVector> KinematicsEngine::callFindRelativeAngularVelocity(std::shared_ptr<Frame> upperFrame,
-                                                                                 std::shared_ptr<Frame> lowerFrame,
-                                                                                 std::shared_ptr<Frame> writtenFrame) {
-    Eigen::Vector3d intermediatePosVec =  {0.0, 0.0, 0.0};
-    std::vector<std::shared_ptr<AngularVelocityVector>> visitedVectors = {};
-
-    return findRelativeAngularVelocity(upperFrame, lowerFrame, upperFrame, writtenFrame, intermediatePosVec,
-                                       visitedVectors);
+    return findRelativePosition(headPoint, tailPoint, headPoint, nullptr, visitedVectors);
 }
 
 std::shared_ptr<PositionVector> KinematicsEngine::findRelativePosition(std::shared_ptr<Point> headPoint,
                                                            std::shared_ptr<Point> tailPoint,
                                                            std::shared_ptr<Point> intermediateHeadPoint,
-                                                           std::shared_ptr<Frame> writtenFrame,
-                                                           Eigen::Vector3d intermediatePosVec,
+                                                           std::shared_ptr<PositionVector> intermediatePosVec,
                                                            std::vector<std::shared_ptr<PositionVector>> visitedVectors) {
     auto returnVector = std::make_shared<PositionVector>();
     std::vector<std::shared_ptr<PositionVector>> commonVecs;
@@ -372,55 +298,43 @@ std::shared_ptr<PositionVector> KinematicsEngine::findRelativePosition(std::shar
         }
     }
 
-    Eigen::Vector3d relativePosition;
     for (int i = 0; i < commonVecs.size(); i++) {
         if (commonVecs.at(i)->headPoint == intermediateHeadPoint) {
-            Eigen::MRPd relativeAttitude;
-            relativeAttitude = findRelativeAttitude(writtenFrame, commonVecs.at(i)->writtenFrame.lock());
 
-            Eigen::Matrix3d dcm = relativeAttitude.toRotationMatrix().transpose();
-
-            relativePosition = intermediatePosVec + dcm * commonVecs.at(i)->matrix;
+            if (intermediatePosVec){
+                returnVector = intermediatePosVec->add( commonVecs.at(i));
+            }
+            else{
+                returnVector = commonVecs.at(i);
+            }
 
             if (commonVecs.at(i)->tailPoint == tailPoint) {
-                returnVector->matrix = relativePosition;
-                returnVector->writtenFrame = writtenFrame;
-                returnVector->headPoint = headPoint;
-                returnVector->tailPoint = tailPoint;
-
                 return returnVector;
             } else {
                 std::shared_ptr<Point> desHead = commonVecs.at(i)->tailPoint;
 
                 visitedVectors.push_back(commonVecs.at(i));
 
-                returnVector = findRelativePosition(headPoint, tailPoint, desHead, writtenFrame,
-                                                    relativePosition, visitedVectors);
+                returnVector = findRelativePosition(headPoint, tailPoint, desHead, returnVector, visitedVectors);
             }
         }
 
         if (commonVecs.at(i)->tailPoint == intermediateHeadPoint) {
-            Eigen::MRPd relativeAttitude;
-            relativeAttitude = findRelativeAttitude(writtenFrame, commonVecs.at(i)->writtenFrame.lock());
-
-            Eigen::Matrix3d dcm = relativeAttitude.toRotationMatrix().transpose();
-
-            relativePosition = intermediatePosVec - dcm * commonVecs.at(i)->matrix;
+            if (intermediatePosVec){
+                returnVector = intermediatePosVec->subtract(commonVecs.at(i));
+            }
+            else{
+                returnVector = commonVecs.at(i)->inverse();
+            }
 
             if (commonVecs.at(i)->headPoint == tailPoint) {
-                returnVector->matrix = relativePosition;
-                returnVector->writtenFrame = writtenFrame;
-                returnVector->headPoint = headPoint;
-                returnVector->tailPoint = tailPoint;
-
                 return returnVector;
             } else {
                 std::shared_ptr<Point> desHead = commonVecs.at(i)->headPoint;
 
                 visitedVectors.push_back(commonVecs.at(i));
 
-                returnVector = findRelativePosition(headPoint, tailPoint, desHead, writtenFrame,
-                                                    relativePosition, visitedVectors);
+                returnVector = findRelativePosition(headPoint, tailPoint, desHead, returnVector, visitedVectors);
             }
         }
 
@@ -431,11 +345,17 @@ std::shared_ptr<PositionVector> KinematicsEngine::findRelativePosition(std::shar
     return returnVector;
 }
 
+std::shared_ptr<AngularVelocityVector> KinematicsEngine::callFindRelativeAngularVelocity(std::shared_ptr<Frame> upperFrame,
+                                                                                         std::shared_ptr<Frame> lowerFrame) {
+    std::vector<std::shared_ptr<AngularVelocityVector>> visitedVectors = {};
+
+    return findRelativeAngularVelocity(upperFrame, lowerFrame, upperFrame, nullptr, visitedVectors);
+}
+
 std::shared_ptr<AngularVelocityVector> KinematicsEngine::findRelativeAngularVelocity(std::shared_ptr<Frame> upperFrame,
                                                  std::shared_ptr<Frame> lowerFrame,
                                                  std::shared_ptr<Frame> intermediateUpperFrame,
-                                                 std::shared_ptr<Frame> writtenFrame,
-                                                 Eigen::Vector3d intermediateAngVelVec,
+                                                 std::shared_ptr<AngularVelocityVector> intermediateAngVelVec,
                                                  std::vector<std::shared_ptr<AngularVelocityVector>> visitedVectors) {
     auto returnVector = std::make_shared<AngularVelocityVector>();
     std::vector<std::shared_ptr<AngularVelocityVector>> commonVecs;
@@ -449,51 +369,43 @@ std::shared_ptr<AngularVelocityVector> KinematicsEngine::findRelativeAngularVelo
         }
     }
 
-    Eigen::Vector3d relativeAngularVelocity;
     for (int i = 0; i < commonVecs.size(); i++) {
         if (commonVecs.at(i)->upperFrame.lock() == intermediateUpperFrame) {
-            Eigen::MRPd relativeAttitude;
-            relativeAttitude = findRelativeAttitude(writtenFrame, commonVecs.at(i)->writtenFrame.lock());
 
-            Eigen::Matrix3d dcm = relativeAttitude.toRotationMatrix().transpose();
+            if (intermediateAngVelVec) {
+                returnVector = intermediateAngVelVec->add(commonVecs.at(i));
+            }
+            else{
+                returnVector = commonVecs.at(i);
+            }
 
-            relativeAngularVelocity = intermediateAngVelVec + dcm * commonVecs.at(i)->matrix;
 
             if (commonVecs.at(i)->lowerFrame.lock() == lowerFrame) {
-                returnVector = std::make_shared<AngularVelocityVector>(upperFrame, lowerFrame);
-                returnVector->matrix = relativeAngularVelocity;
-                returnVector->writtenFrame = writtenFrame;
-
                 return returnVector;
             } else {
                 std::shared_ptr<Frame> desUpperFrame = commonVecs.at(i)->lowerFrame.lock();
                 visitedVectors.push_back(commonVecs.at(i));
 
-                returnVector = findRelativeAngularVelocity(upperFrame, lowerFrame, desUpperFrame, writtenFrame,relativeAngularVelocity, visitedVectors);
+                returnVector = findRelativeAngularVelocity(upperFrame, lowerFrame, desUpperFrame, returnVector, visitedVectors);
             }
         }
 
         if (commonVecs.at(i)->lowerFrame.lock() == intermediateUpperFrame) {
-            Eigen::MRPd relativeAttitude;
-            relativeAttitude = findRelativeAttitude(writtenFrame, commonVecs.at(i)->writtenFrame.lock());
-
-            Eigen::Matrix3d dcm = relativeAttitude.toRotationMatrix().transpose();
-
-            relativeAngularVelocity = intermediateAngVelVec - dcm * commonVecs.at(i)->matrix;
+            if (intermediateAngVelVec) {
+                returnVector = intermediateAngVelVec->subtract(commonVecs.at(i));
+            }
+            else{
+                returnVector = commonVecs.at(i);
+            }
 
             if (commonVecs.at(i)->upperFrame.lock() == lowerFrame) {
-                returnVector = std::make_shared<AngularVelocityVector>(upperFrame, lowerFrame);
-                returnVector->matrix = relativeAngularVelocity;
-                returnVector->writtenFrame = writtenFrame;
-
                 return returnVector;
             } else {
                 std::shared_ptr<Frame> desUpperFrame = commonVecs.at(i)->upperFrame.lock();
 
                 visitedVectors.push_back(commonVecs.at(i));
 
-                returnVector = findRelativeAngularVelocity(upperFrame, lowerFrame, desUpperFrame, writtenFrame,
-                                                           relativeAngularVelocity, visitedVectors);
+                returnVector = findRelativeAngularVelocity(upperFrame, lowerFrame, desUpperFrame, returnVector, visitedVectors);
             }
         }
 
@@ -504,16 +416,14 @@ std::shared_ptr<AngularVelocityVector> KinematicsEngine::findRelativeAngularVelo
     return returnVector;
 }
 
-std::shared_ptr<InertiaTensor> KinematicsEngine::parallelAxisTheorem(std::shared_ptr<Part> part, std::shared_ptr<Point> point, std::shared_ptr<Frame> writtenFrame) {
+std::shared_ptr<InertiaTensor> KinematicsEngine::parallelAxisTheorem(std::shared_ptr<Part> part, std::shared_ptr<Point> point) {
     Eigen::Vector3d inputVec = {0.0, 0.0, 0.0};
     std::vector<std::shared_ptr<PositionVector>> emptyVector;
 
-    std::shared_ptr<PositionVector> relativePosition = findRelativePosition(part->IPntSc_S->point, point,
-                                                                            part->IPntSc_S->point, writtenFrame,
-                                                                            inputVec, emptyVector);
+    std::shared_ptr<PositionVector> relativePosition = callFindRelativePosition(part->IPntSc_S->point, point);
 
     Eigen::MRPd relativeAttitude;
-    relativeAttitude = findRelativeAttitude(writtenFrame, part->IPntSc_S->writtenFrame);
+    relativeAttitude = findRelativeAttitude(relativePosition->writtenFrame.lock(), part->IPntSc_S->writtenFrame);
 
     Eigen::Matrix3d dcm = relativeAttitude.toRotationMatrix().transpose();
 
@@ -522,7 +432,7 @@ std::shared_ptr<InertiaTensor> KinematicsEngine::parallelAxisTheorem(std::shared
 
     auto returnInertia = std::make_shared<InertiaTensor>(point);
     returnInertia->matrix = returnInertiaMatrix;
-    returnInertia->writtenFrame = writtenFrame;
+    returnInertia->writtenFrame = relativePosition->writtenFrame.lock();
 
     return returnInertia;
 }
@@ -537,43 +447,50 @@ double KinematicsEngine::getAssemblyMass(std::shared_ptr<Assembly> assembly) {
     return assemblyMass;
 }
 
-std::shared_ptr<PositionVector> KinematicsEngine::getAssemblyCOM(std::shared_ptr<Assembly> assembly, std::shared_ptr<Point> tailPoint, std::shared_ptr<Frame> writtenFrame) {
-    Eigen::Vector3d assemblyCOMVector = {0.0, 0.0, 0.0};
+std::shared_ptr<PositionVector> KinematicsEngine::getAssemblyCOM(std::shared_ptr<Assembly> assembly, std::shared_ptr<Point> tailPoint) {
     double assemblyMass = getAssemblyMass(assembly);
+    std::shared_ptr<PositionVector> assemblyCOMPositionVector = nullptr;
+    auto intermediatePosVec1 = std::make_shared<PositionVector>();
+    Eigen::Vector3d intermediateVec;
 
-    for (int i = 0; i<assembly->partList.size(); i++) {
-        Eigen::Vector3d inputVec = {0.0, 0.0, 0.0};
-        std::vector<std::shared_ptr<PositionVector>> emptyVector;
-        auto addedPositionVector = findRelativePosition(assembly->partList.at(i)->r_ScS->headPoint, tailPoint, assembly->partList.at(i)->r_ScS->headPoint, writtenFrame, inputVec, emptyVector);
+    for (const auto& part: assembly->partList) {
+        intermediatePosVec1 = callFindRelativePosition(part->r_ScS->headPoint, tailPoint);
 
-        Eigen::Vector3d addVector = {(assembly->partList.at(i)->mass / assemblyMass) * addedPositionVector->matrix(0),
-                                     (assembly->partList.at(i)->mass / assemblyMass) * addedPositionVector->matrix(1),
-                                     (assembly->partList.at(i)->mass / assemblyMass) * addedPositionVector->matrix(2)};
-        assemblyCOMVector = assemblyCOMVector + addVector;
+        Eigen::Vector3d addVector = {(part->mass / assemblyMass) * intermediatePosVec1->matrix(0),
+                                     (part->mass / assemblyMass) * intermediatePosVec1->matrix(1),
+                                     (part->mass / assemblyMass) * intermediatePosVec1->matrix(2)};
+
+        intermediatePosVec1->matrix = addVector;
+
+        if (assemblyCOMPositionVector) {
+            assemblyCOMPositionVector = assemblyCOMPositionVector->add(intermediatePosVec1);
+        }
+        else{
+            assemblyCOMPositionVector = intermediatePosVec1;
+        }
     }
 
-    auto assemblyCOMPositionVector = std::make_shared<PositionVector>();
-    assemblyCOMPositionVector->matrix = assemblyCOMVector;
-    assemblyCOMPositionVector->writtenFrame = writtenFrame;
+    assemblyCOMPositionVector->headPoint = assembly->CoMPoint;
+    assemblyCOMPositionVector->tailPoint = tailPoint;
 
     return assemblyCOMPositionVector;
 }
 
-std::shared_ptr<InertiaTensor> KinematicsEngine::getAssemblyInertia(std::shared_ptr<Assembly> assembly, std::shared_ptr<Point> point, std::shared_ptr<Frame> writtenFrame) {
-    auto assemblyInertia = std::make_shared<InertiaTensor>();
-    Eigen::Matrix3d intermediateInertia;
-    intermediateInertia.setZero();
-
+std::shared_ptr<InertiaTensor> KinematicsEngine::getAssemblyInertia(std::shared_ptr<Assembly> assembly, std::shared_ptr<Point> point) {
+    std::shared_ptr<InertiaTensor> assemblyInertia = nullptr;
     for (int i = 0; i<assembly->partList.size(); i++) {
-        auto partInertia = parallelAxisTheorem(assembly->partList.at(i), point, writtenFrame);
+        auto partInertia = parallelAxisTheorem(assembly->partList.at(i), point);
 
-        intermediateInertia = intermediateInertia + partInertia->matrix;
+        if (assemblyInertia) {
+            assemblyInertia = assemblyInertia->add(partInertia);
+        }
+        else{
+            assemblyInertia = partInertia;
+        }
     }
-
-    assemblyInertia->matrix = intermediateInertia;
-    assemblyInertia->point = point;
-    assemblyInertia->writtenFrame = writtenFrame;
 
     return assemblyInertia;
 }
+
+
 

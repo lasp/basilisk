@@ -34,7 +34,10 @@ from Basilisk.architecture.swig_common_model import *
 
 %include "../../_GeneralModuleFiles/Assembly.h"
 %include "../../_GeneralModuleFiles/Part.h"
-
+%include "../../_GeneralModuleFiles/Tensor.h"
+%include "../../_GeneralModuleFiles/Vector.h"
+%include "../../_GeneralModuleFiles/Point.h"
+%include "../../_GeneralModuleFiles/Frame.h"
 
 %pythoncode %{
 import sys

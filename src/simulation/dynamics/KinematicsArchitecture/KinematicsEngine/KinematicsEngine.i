@@ -34,6 +34,7 @@ from Basilisk.architecture.swig_common_model import *
 
 %include "../Vector/Vector.i"
 %include "../Joint/Joint.i"
+%include "../Tensor/Tensor.i"
 
 %include <std_shared_ptr.i>
 %shared_ptr(KinematicsEngine)
@@ -42,6 +43,7 @@ from Basilisk.architecture.swig_common_model import *
 %shared_ptr(RotaryTwoDOF)
 
 %include "../../_GeneralModuleFiles/KinematicsEngine.h"
+%include "../../_GeneralModuleFiles/Assembly.h"
 %include "../../_GeneralModuleFiles/Part.h"
 %include "../../_GeneralModuleFiles/Joint.h"
 %include "../../_GeneralModuleFiles/Point.h"

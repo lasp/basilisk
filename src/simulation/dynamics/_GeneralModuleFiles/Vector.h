@@ -28,11 +28,14 @@ class Point;
 class Vector {
 public:
     Vector() = default;
-    Vector(Eigen::Vector3d zerothMatrix, std::weak_ptr<Frame> zerothWrittenFrame);
     ~Vector() = default;
 
     void setZerothOrder(Eigen::Vector3d newMatrix, std::shared_ptr<Frame> newWrittenFrame);
     Eigen::Vector3d getZerothOrder(std::shared_ptr<Frame> newWrittenFrame);
+    double dot(std::shared_ptr<Vector> vec);
+    std::shared_ptr<Vector> cross(std::shared_ptr<Vector> vec);
+    // add
+    // subtract
 
     Eigen::Vector3d matrix = Eigen::Vector3d::Zero();
     std::weak_ptr<Frame> writtenFrame;
@@ -56,9 +59,12 @@ public:
 
     void setFirstOrder(Eigen::Vector3d newMatrix, const std::shared_ptr<Frame>& newWrittenFrame, const std::shared_ptr<Frame>& newDerivFrame);
     void setSecondOrder(Eigen::Vector3d newMatrix, const std::shared_ptr<Frame>& newWrittenFrame, const std::shared_ptr<Frame>& newDerivFrame);
+    std::shared_ptr<PositionVector> add(std::shared_ptr<PositionVector> vec); // call vector add
+    std::shared_ptr<PositionVector> subtract(std::shared_ptr<PositionVector> vec); // call vector sub
+    std::shared_ptr<PositionVector> inverse();
 
-    std::shared_ptr<Point> tailPoint;
-    std::shared_ptr<Point> headPoint;
+    std::shared_ptr<Point> tailPoint = nullptr;
+    std::shared_ptr<Point> headPoint = nullptr;
 
     VectorDerivativeProperties firstOrder;
     VectorDerivativeProperties secondOrder;
@@ -83,6 +89,8 @@ public:
     ~AngularVelocityVector() = default;
 
     void setFirstOrder(Eigen::Vector3d newMatrix, const std::shared_ptr<Frame>& newWrittenFrame, const std::shared_ptr<Frame>& newDerivFrame);
+    std::shared_ptr<AngularVelocityVector> add(std::shared_ptr<AngularVelocityVector> vec);
+    std::shared_ptr<AngularVelocityVector> subtract(std::shared_ptr<AngularVelocityVector> vec);
 
     VectorDerivativeProperties firstOrder;
     std::weak_ptr<Frame> upperFrame;

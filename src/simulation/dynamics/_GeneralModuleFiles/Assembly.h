@@ -46,9 +46,10 @@ public:
     std::string tag;
     std::shared_ptr<Frame> frame;
     double mass = 0.0;
-    InertiaTensor IPntSc;
-    InertiaTensor IPntS;
-    PositionVector r_ScS;
+    std::shared_ptr<InertiaTensor> IPntSc = nullptr;
+    std::shared_ptr<InertiaTensor> IPntS = nullptr;
+    std::shared_ptr<Point> CoMPoint = nullptr;
+    std::shared_ptr<PositionVector> r_ScS = nullptr;
 };
 
 

@@ -101,8 +101,10 @@ def runLeah():
     frameM.omega_SP.matrix = omega_MB_M
     frameF.omega_SP.matrix = omega_FM_F
     frameB.originPoint.tag = "pointB"
+    frameP.originPoint.tag = "pointP"
     frameM.originPoint.tag = "pointM"
     frameF.originPoint.tag = "pointF"
+    frameN.originPoint.tag = "pointN"
 
     # Create part data
     m1 = 10  # [kg]
@@ -117,15 +119,22 @@ def runLeah():
     part2.r_ScS.headPoint.tag = "pointPc"
 
     # Call kinematic engine functions
-    # sigma_FPKin = myKinematicsEngine.findRelativeAttitude(frameF, frameP)
-    # r_FB_BKin = myKinematicsEngine.addPositionVectors(frameF.r_SP, frameM.r_SP)
-    # omega_FB_MKin = myKinematicsEngine.addAngularVelocityVectors(frameF.omega_SP, frameM.omega_SP)
-    # r_PcF_MKin = myKinematicsEngine.callFindRelativePosition(part2.r_ScS.headPoint, frameF.originPoint, frameM)
-    # omega_PF_MKin = myKinematicsEngine.callFindRelativeAngularVelocity(frameP, frameF, frameM)
-    # assemblyMassKin = myKinematicsEngine.getAssemblyMass(myAssembly)
-    # r_AssemCMPntB_MKin = myKinematicsEngine.getAssemblyCOM(myAssembly, frameB.originPoint, frameM)
-    # IPart1PntB_MKin = myKinematicsEngine.parallelAxisTheorem(part1, frameB.originPoint, frameM)
-    # IAssemPntB_MKin = myKinematicsEngine.getAssemblyInertia(myAssembly, frameB.originPoint, frameM)
+    sigma_FPKin = myKinematicsEngine.findRelativeAttitude(frameF, frameP)
+    r_FBKin = frameF.r_SP.add(frameM.r_SP)
+    r_FB_BKin = r_FBKin.getZerothOrder(frameB)
+    omega_FBKin = frameF.omega_SP.add(frameM.omega_SP)
+    omega_FB_MKin = omega_FBKin.getZerothOrder(frameM)
+    r_PcF_Kin = myKinematicsEngine.callFindRelativePosition(part2.r_ScS.headPoint, frameF.originPoint)
+    r_PcF_MKin = r_PcF_Kin.getZerothOrder(frameM)
+    omega_PFKin = myKinematicsEngine.callFindRelativeAngularVelocity(frameP, frameF)
+    omega_PF_MKin = omega_PFKin.getZerothOrder(frameM)
+    assemblyMassKin = myKinematicsEngine.getAssemblyMass(myAssembly)
+    r_AssemCMPntBKin = myKinematicsEngine.getAssemblyCOM(myAssembly, frameB.originPoint)
+    r_AssemCMPntB_MKin = r_AssemCMPntBKin.getZerothOrder(frameM)
+    IPart1PntBKin = myKinematicsEngine.parallelAxisTheorem(part1, frameB.originPoint)
+    IPart1PntB_MKin = IPart1PntBKin.getZerothOrder(frameM)
+    IAssemPntBKin = myKinematicsEngine.getAssemblyInertia(myAssembly, frameB.originPoint)
+    IAssemPntB_MKin = IAssemPntBKin.getZerothOrder(frameM)
 
     # Testing getter functions
     r_PcP_FKin = part2.r_ScS.getZerothOrder(frameF)
@@ -190,75 +199,132 @@ def runLeah():
     # 2. Tensor getter
     IPntPc_M = np.matmul(np.matmul(np.transpose(dcm_PM), part2Inertia), dcm_PM)
 
-    # print("\n** ** ** ** ** TESTING 'ZEROTH' ORDER RELATIVE KINEMATICS ** ** ** ** **")
-    #
-    # print("\n\n1. RELATIVE ATTITUDE:")
-    # print("\nTRUTH: sigma_FP: ")
-    # print(sigma_FP)
-    # print("\nKINEMATICS ENGINE: sigma_FP: ")
-    # print(sigma_FPKin)
-    #
-    # print("\n\n2. ADD POSITION VECTORS:")
-    # print("\nTRUTH: r_FB_B: ")
-    # print(r_FB_B)
-    # print("\nKINEMATICS ENGINE: r_FB_B: ")
-    # print(r_FB_BKin.matrix)
-    #
-    # print("\n\n3. ADD ANGULAR VELOCITY VECTORS:")
-    # print("\nTRUTH: omega_FB_M: ")
-    # print(omega_FB_M)
-    # print("\nKINEMATICS ENGINE: omega_FB_M: ")
-    # print(omega_FB_MKin.matrix)
-    #
-    # print("\n\n4. RELATIVE POSITION:")
-    # print("\nTRUTH: r_PcF_M: ")
-    # print(r_PcF_M)
-    # print("\nKINEMATICS ENGINE: r_PcF_M: ")
-    # print(r_PcF_MKin.matrix)
-    #
-    # print("\n\n5. RELATIVE ANGULAR VELOCITY:")
-    # print("\nTRUTH: omega_PF_M: ")
-    # print(omega_PF_M)
-    # print("\nKINEMATICS ENGINE: omega_PF_M: ")
-    # print(omega_PF_MKin.matrix)
-    #
-    # print("\n\n6. PARALLEL AXIS THEOREM:")
-    # print("\nTRUTH: Inertia: ")
-    # print(IPart1PntB_M)
-    # print("\nKINEMATICS ENGINE: Inertia: ")
-    # print(IPart1PntB_MKin.matrix)
-    #
-    # print("\n\n7. ASSEMBLY MASS:")
-    # print("\nTRUTH: Assembly Mass: ")
-    # print(assemblyMass)
-    # print("\nKINEMATICS ENGINE: Assembly Mass: ")
-    # print(assemblyMassKin)
-    #
-    # print("\n\n8. ASSEMBLY COM:")
-    # print("\nTRUTH: r_AssemCMPntB_M: ")
-    # print(r_AssemCMPntB_M)
-    # print("\nKINEMATICS ENGINE: r_AssemCMPntB_M: ")
-    # print(r_AssemCMPntB_MKin.matrix)
-    #
-    # print("\n\n9. ASSEMBLY INERTIA:")
-    # print("\nTRUTH: IAssemPntB_M: ")
-    # print(IAssemPntB_M)
-    # print("\nKINEMATICS ENGINE: IAssemPntB_M: ")
-    # print(IAssemPntB_MKin.matrix)
+    # Testing tensor/vector math functions
+    # r_MB_BVecDotr_FM_MKin = myKinematicsEngine.dot(frameM.r_SP, frameF.r_SP, frameB)
+    # r_MB_BCrossDotr_FM_MKin = myKinematicsEngine.cross(frameM.r_SP, frameF.r_SP, frameB)
+    # IAssemPntB_MTensor = myKinematicsEngine.createInertiaTensor(frameB.originPoint)
+    # IAssemPntB_MTensor.setZerothOrder(IAssemPntB_M, frameM)
+    # IAssemPntB_MInvKin = myKinematicsEngine.tensorInverse(IAssemPntB_MTensor)
+    # IAssemPntB_MTimesr_MB_BKin = myKinematicsEngine.tensorTimesVector(IAssemPntB_MTensor, frameM.r_SP, frameB)
+    # IAssemPntB_MTimesIAssemPntB_MKin = myKinematicsEngine.tensorTimesTensor(IAssemPntB_MTensor, IAssemPntB_MTensor, frameB)
 
-    print("\n** ** ** ** ** TESTING ZEROTH ORDER GETTER FUNCTIONS ** ** ** ** **")
+    # Calculating tensor/vector math truth data
+    # 1. Dot product
+    r_MB_BVecDotr_FM_M = np.dot(r_MB_B, r_FM_B)
 
-    print("\n\n1. VECTOR GETTER:")
-    print("\nTRUTH: r_PcP_F: ")
-    print(r_PcP_F)
-    print("\nGETTER: r_PcP_F: ")
-    print(r_PcP_FKin)
+    # 2. Cross product
+    r_MB_BCrossr_FM_M = np.cross(r_MB_B, r_FM_B)
 
-    print("\n\n2. TENSOR GETTER:")
-    print("\nTRUTH: IPntPc_M: ")
-    print(IPntPc_M)
-    print("\nGETTER: IPntPc_M: ")
-    print(IPntPc_MKin)
+    # 3. Tensor inverse
+    IAssemPntB_MInv = np.linalg.inv(IAssemPntB_M)
+
+    # 4. Tensor times vector
+    IAssemPntB_MTimesr_MB_B = np.matmul(np.matmul(dcm_MB.transpose(), np.matmul(IAssemPntB_M, dcm_MB)), r_MB_B)
+
+    # Tensor times tensor
+    IAssemPntB_MTimesIAssemPntB_M = np.matmul(np.matmul(dcm_MB.transpose(), np.matmul(IAssemPntB_M, dcm_MB)), np.matmul(dcm_MB.transpose(), np.matmul(IAssemPntB_M, dcm_MB)))
+
+    print("\n** ** ** ** ** TESTING 'ZEROTH' ORDER RELATIVE KINEMATICS ** ** ** ** **")
+
+    print("\n\n1. RELATIVE ATTITUDE:")
+    print("\nTRUTH: sigma_FP: ")
+    print(sigma_FP)
+    print("\nKINEMATICS ENGINE: sigma_FP: ")
+    print(sigma_FPKin)
+
+    print("\n\n2. ADD POSITION VECTORS:")
+    print("\nTRUTH: r_FB_B: ")
+    print(r_FB_B)
+    print("\nKINEMATICS ENGINE: r_FB_B: ")
+    print(r_FB_BKin)
+
+    print("\n\n3. ADD ANGULAR VELOCITY VECTORS:")
+    print("\nTRUTH: omega_FB_M: ")
+    print(omega_FB_M)
+    print("\nKINEMATICS ENGINE: omega_FB_M: ")
+    print(omega_FB_MKin)
+
+    print("\n\n4. RELATIVE POSITION:")
+    print("\nTRUTH: r_PcF_M: ")
+    print(r_PcF_M)
+    print("\nKINEMATICS ENGINE: r_PcF_M: ")
+    print(r_PcF_MKin)
+
+    print("\n\n5. RELATIVE ANGULAR VELOCITY:")
+    print("\nTRUTH: omega_PF_M: ")
+    print(omega_PF_M)
+    print("\nKINEMATICS ENGINE: omega_PF_M: ")
+    print(omega_PF_MKin)
+
+    print("\n\n6. PARALLEL AXIS THEOREM:")
+    print("\nTRUTH: Inertia: ")
+    print(IPart1PntB_M)
+    print("\nKINEMATICS ENGINE: Inertia: ")
+    print(IPart1PntB_MKin)
+
+    print("\n\n7. ASSEMBLY MASS:")
+    print("\nTRUTH: Assembly Mass: ")
+    print(assemblyMass)
+    print("\nKINEMATICS ENGINE: Assembly Mass: ")
+    print(assemblyMassKin)
+
+    print("\n\n8. ASSEMBLY COM:")
+    print("\nTRUTH: r_AssemCMPntB_M: ")
+    print(r_AssemCMPntB_M)
+    print("\nKINEMATICS ENGINE: r_AssemCMPntB_M: ")
+    print(r_AssemCMPntB_MKin)
+
+    print("\n\n9. ASSEMBLY INERTIA:")
+    print("\nTRUTH: IAssemPntB_M: ")
+    print(IAssemPntB_M)
+    print("\nKINEMATICS ENGINE: IAssemPntB_M: ")
+    print(IAssemPntB_MKin)
+
+    # print("\n** ** ** ** ** TESTING ZEROTH ORDER GETTER FUNCTIONS ** ** ** ** **")
+    #
+    # print("\n\n1. VECTOR GETTER:")
+    # print("\nTRUTH: r_PcP_F: ")
+    # print(r_PcP_F)
+    # print("\nGETTER: r_PcP_F: ")
+    # print(r_PcP_FKin)
+    #
+    # print("\n\n2. TENSOR GETTER:")
+    # print("\nTRUTH: IPntPc_M: ")
+    # print(IPntPc_M)
+    # print("\nGETTER: IPntPc_M: ")
+    # print(IPntPc_MKin)
+
+    # print("\n** ** ** ** ** TESTING TENSOR/VECTOR MATH FUNCTIONS ** ** ** ** **")
+
+    # print("\n\n1. VECTOR DOT PRODUCT:")
+    # print("\nTRUTH: r_MB_BVecDotr_FM_M: ")
+    # print(r_MB_BVecDotr_FM_MKin)
+    # print("\nKINEMATICS ENGINE: r_MB_BVecDotr_FM_M: ")
+    # print(r_MB_BVecDotr_FM_M)
+    #
+    # print("\n\n2. VECTOR CROSS PRODUCT:")
+    # print("\nTRUTH: r_MB_BVecCrossr_FM_M: ")
+    # print(r_MB_BCrossr_FM_M)
+    # print("\nKINEMATICS ENGINE: r_MB_BCrossDotr_FM_M: ")
+    # print(r_MB_BCrossDotr_FM_MKin.matrix)
+    #
+    # print("\n\n3. INERTIA INVERSE:")
+    # print("\nTRUTH: IAssemPntB_MInv: ")
+    # print(IAssemPntB_MInv)
+    # print("\nKINEMATICS ENGINE: IAssemPntB_MInv: ")
+    # print(IAssemPntB_MInvKin.matrix)
+    #
+    # print("\n\n4. TENSOR TIMES VECTOR:")
+    # print("\nTRUTH: IAssemPntB_MTimesr_MB_BKin: ")
+    # print(IAssemPntB_MTimesr_MB_B)
+    # print("\nKINEMATICS ENGINE: IAssemPntB_MTimesr_MB_BKin: ")
+    # print(IAssemPntB_MTimesr_MB_BKin.matrix)
+    #
+    # print("\n\n5. TENSOR TIMES TENSOR:")
+    # print("\nTRUTH: IAssemPntB_MTimesIAssemPntB_M: ")
+    # print(IAssemPntB_MTimesIAssemPntB_M)
+    # print("\nKINEMATICS ENGINE: IAssemPntB_MTimesIAssemPntB_M: ")
+    # print(IAssemPntB_MTimesIAssemPntB_MKin.matrix)
 
 def runJoao():
     myKinematicsEngine = KinematicsEngine.KinematicsEngine()

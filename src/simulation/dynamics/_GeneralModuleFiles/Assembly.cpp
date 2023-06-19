@@ -19,6 +19,7 @@
 #include "Assembly.h"
 #include "architecture/utilities/avsEigenSupport.h"
 #include "architecture/utilities/avsEigenMRP.h"
+#include "KinematicsEngine.h"
 
 void Assembly::addPart(std::shared_ptr<Part> part) {
     this->partList.push_back(part);

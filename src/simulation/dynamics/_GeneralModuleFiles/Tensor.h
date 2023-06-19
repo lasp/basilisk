@@ -38,6 +38,11 @@ public:
 
     void setZerothOrder(const Eigen::Matrix3d& newMatrix, const std::shared_ptr<Frame>& newWrittenFrame);
     Eigen::Matrix3d getZerothOrder(std::shared_ptr<Frame> newWrittenFrame);
+    std::shared_ptr<Tensor> add(std::shared_ptr<Tensor> tensor);
+    std::shared_ptr<Tensor> subtract(std::shared_ptr<Tensor> tensor);
+    std::shared_ptr<Tensor> inverse();
+    std::shared_ptr<Vector> times(std::shared_ptr<Vector> vector);
+    std::shared_ptr<Tensor> times(std::shared_ptr<Tensor> tensor);
 
     Eigen::Matrix3d matrix = Eigen::Matrix3d::Zero();
     std::shared_ptr<Frame> writtenFrame;
@@ -49,6 +54,8 @@ public:
     InertiaTensor() = default;
     explicit InertiaTensor(std::shared_ptr<Point> point);
     ~InertiaTensor() = default;
+    std::shared_ptr<InertiaTensor> add(std::shared_ptr<InertiaTensor> inertiaTensor);
+    std::shared_ptr<InertiaTensor> subtract(std::shared_ptr<InertiaTensor> inertiaTensor);
 
     void setFirstOrder(const Eigen::Matrix3d& newMatrix, const std::shared_ptr<Frame>& newWrittenFrame, const std::shared_ptr<Frame>& newDerivFrame);
 
