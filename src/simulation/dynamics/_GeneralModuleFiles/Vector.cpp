@@ -35,6 +35,39 @@ Eigen::Vector3d Vector::getZerothOrder(std::shared_ptr<Frame> newWrittenFrame) {
     return dcm * this->matrix;
 }
 
+std::shared_ptr<Vector> Vector::add(std::shared_ptr<Vector> vec) {
+    Eigen::MRPd relativeAttitude;
+    relativeAttitude = KinematicsEngine::findRelativeAttitude(this->writtenFrame.lock(), vec->writtenFrame.lock());
+
+    Eigen::Matrix3d dcm = relativeAttitude.toRotationMatrix().transpose();
+    Eigen::Vector3d relPosition = this->matrix + dcm * vec->matrix;
+
+    auto relativePosition = std::make_shared<Vector>();
+    relativePosition->setZerothOrder(relPosition, this->writtenFrame.lock());
+
+    return relativePosition;
+}
+
+std::shared_ptr<Vector> Vector::subtract(std::shared_ptr<Vector> vec) {
+    Eigen::MRPd relativeAttitude;
+    relativeAttitude = KinematicsEngine::findRelativeAttitude(this->writtenFrame.lock(), vec->writtenFrame.lock());
+
+    Eigen::Matrix3d dcm = relativeAttitude.toRotationMatrix().transpose();
+    Eigen::Vector3d relAngularVelocity = this->matrix - dcm * vec->matrix;
+
+    auto relativeAngularVelocity = std::make_shared<Vector>();
+    relativeAngularVelocity->setZerothOrder(relAngularVelocity, this->writtenFrame.lock());
+
+    return relativeAngularVelocity;
+}
+
+std::shared_ptr<Vector> Vector::times(double constant) {
+    auto returnVector = std::make_shared<Vector>();
+    returnVector->setZerothOrder(constant * this->matrix, this->writtenFrame.lock());
+
+    return returnVector;
+}
+
 double Vector::dot(std::shared_ptr<Vector> vec) {
     Eigen::Vector3d vector;
     Eigen::MRPd relativeAttitude;
@@ -84,12 +117,6 @@ std::shared_ptr<PositionVector> PositionVector::add(std::shared_ptr<PositionVect
     std::shared_ptr<Point> headPoint = nullptr;
     std::shared_ptr<Point> tailPoint = nullptr;
 
-    Eigen::MRPd relativeAttitude;
-    relativeAttitude = KinematicsEngine::findRelativeAttitude(this->writtenFrame.lock(), vec->writtenFrame.lock());
-
-    Eigen::Matrix3d dcm = relativeAttitude.toRotationMatrix().transpose();
-    Eigen::Vector3d relPosition = this->matrix + dcm * vec->matrix;
-
     if (this->tailPoint == vec->headPoint) {
         headPoint = this->headPoint;
         tailPoint = vec->tailPoint;
@@ -99,8 +126,10 @@ std::shared_ptr<PositionVector> PositionVector::add(std::shared_ptr<PositionVect
         tailPoint = this->tailPoint;
     }
 
+    std::shared_ptr<Vector> addVector = Vector::add(vec);
+
     auto relativePosition = std::make_shared<PositionVector>(headPoint, tailPoint);
-    relativePosition->setZerothOrder(relPosition, this->writtenFrame.lock());
+    relativePosition->setZerothOrder(addVector->matrix, this->writtenFrame.lock());
 
     return relativePosition;
 }
@@ -109,19 +138,15 @@ std::shared_ptr<PositionVector> PositionVector::subtract(std::shared_ptr<Positio
     std::shared_ptr<Point> headPoint = nullptr;
     std::shared_ptr<Point> tailPoint = nullptr;
 
-    Eigen::MRPd relativeAttitude;
-    relativeAttitude = KinematicsEngine::findRelativeAttitude(this->writtenFrame.lock(), vec->writtenFrame.lock());
-
-    Eigen::Matrix3d dcm = relativeAttitude.toRotationMatrix().transpose();
-    Eigen::Vector3d relPosition = this->matrix - dcm * vec->matrix;
-
     if (this->tailPoint == vec->tailPoint) {
         headPoint = this->headPoint;
         tailPoint = vec->headPoint;
     }
 
+    auto subVector = Vector::subtract(vec);
+
     auto relativePosition = std::make_shared<PositionVector>(headPoint, tailPoint);
-    relativePosition->setZerothOrder(relPosition, this->writtenFrame.lock());
+    relativePosition->setZerothOrder(subVector->matrix, this->writtenFrame.lock());
 
     return relativePosition;
 }
@@ -147,12 +172,6 @@ std::shared_ptr<AngularVelocityVector> AngularVelocityVector::add(std::shared_pt
     std::weak_ptr<Frame> upperFrame;
     std::weak_ptr<Frame> lowerFrame;
 
-    Eigen::MRPd relativeAttitude;
-    relativeAttitude = KinematicsEngine::findRelativeAttitude(this->writtenFrame.lock(), vec->writtenFrame.lock());
-
-    Eigen::Matrix3d dcm = relativeAttitude.toRotationMatrix().transpose();
-    Eigen::Vector3d relAngularVelocity = this->matrix + dcm * vec->matrix;
-
     if (this->lowerFrame.lock() == vec->upperFrame.lock()) {
         upperFrame = this->upperFrame;
         lowerFrame = vec->lowerFrame;
@@ -162,8 +181,10 @@ std::shared_ptr<AngularVelocityVector> AngularVelocityVector::add(std::shared_pt
         lowerFrame = this->lowerFrame;
     }
 
+    auto addVector = Vector::add(vec);
+
     auto relativeAngularVelocity = std::make_shared<AngularVelocityVector>(upperFrame, lowerFrame);
-    relativeAngularVelocity->setZerothOrder(relAngularVelocity, this->writtenFrame.lock());
+    relativeAngularVelocity->setZerothOrder(addVector->matrix, this->writtenFrame.lock());
 
     return relativeAngularVelocity;
 }
@@ -172,27 +193,22 @@ std::shared_ptr<AngularVelocityVector> AngularVelocityVector::subtract(std::shar
     std::weak_ptr<Frame> upperFrame;
     std::weak_ptr<Frame> lowerFrame;
 
-    Eigen::MRPd relativeAttitude;
-    relativeAttitude = KinematicsEngine::findRelativeAttitude(this->writtenFrame.lock(), vec->writtenFrame.lock());
-
-    Eigen::Matrix3d dcm = relativeAttitude.toRotationMatrix().transpose();
-    Eigen::Vector3d relAngularVelocity = this->matrix - dcm * vec->matrix;
-
     if (this->lowerFrame.lock() == vec->lowerFrame.lock()) {
         upperFrame = this->upperFrame;
         lowerFrame = vec->upperFrame;
     }
 
+    auto subVector = Vector::subtract(vec);
+
     auto relativeAngularVelocity = std::make_shared<AngularVelocityVector>(upperFrame, lowerFrame);
-    relativeAngularVelocity->setZerothOrder(relAngularVelocity, this->writtenFrame.lock());
+    relativeAngularVelocity->setZerothOrder(subVector->matrix, this->writtenFrame.lock());
 
     return relativeAngularVelocity;
 }
 
 std::shared_ptr<AngularVelocityVector> AngularVelocityVector::inverse() {
     auto inverseAngularVelocityVector = std::make_shared<AngularVelocityVector>(this->lowerFrame, this->upperFrame);
-    Eigen::Vector3d newMat = {-1 * this->matrix(0), -1 * this->matrix(1), -1 * this->matrix(2)};
-    inverseAngularVelocityVector->setZerothOrder(newMat, this->writtenFrame.lock());
+    inverseAngularVelocityVector->setZerothOrder(-this->matrix, this->writtenFrame.lock());
 
     return inverseAngularVelocityVector;
 }

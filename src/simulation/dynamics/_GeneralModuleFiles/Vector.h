@@ -32,15 +32,15 @@ public:
 
     void setZerothOrder(Eigen::Vector3d newMatrix, std::shared_ptr<Frame> newWrittenFrame);
     Eigen::Vector3d getZerothOrder(std::shared_ptr<Frame> newWrittenFrame);
+    std::shared_ptr<Vector> add(std::shared_ptr<Vector> vec);
+    std::shared_ptr<Vector> subtract(std::shared_ptr<Vector> vec);
+    std::shared_ptr<Vector> times(double constant);
     double dot(std::shared_ptr<Vector> vec);
     std::shared_ptr<Vector> cross(std::shared_ptr<Vector> vec);
-    // add
-    // subtract
 
     Eigen::Vector3d matrix = Eigen::Vector3d::Zero();
     std::weak_ptr<Frame> writtenFrame;
 };
-
 
 /*! @brief Vector derivative properties data structure */
 struct VectorDerivativeProperties {
@@ -59,8 +59,8 @@ public:
 
     void setFirstOrder(Eigen::Vector3d newMatrix, const std::shared_ptr<Frame>& newWrittenFrame, const std::shared_ptr<Frame>& newDerivFrame);
     void setSecondOrder(Eigen::Vector3d newMatrix, const std::shared_ptr<Frame>& newWrittenFrame, const std::shared_ptr<Frame>& newDerivFrame);
-    std::shared_ptr<PositionVector> add(std::shared_ptr<PositionVector> vec); // call vector add
-    std::shared_ptr<PositionVector> subtract(std::shared_ptr<PositionVector> vec); // call vector sub
+    std::shared_ptr<PositionVector> add(std::shared_ptr<PositionVector> vec);
+    std::shared_ptr<PositionVector> subtract(std::shared_ptr<PositionVector> vec);
     std::shared_ptr<PositionVector> inverse();
 
     std::shared_ptr<Point> tailPoint = nullptr;
