@@ -395,7 +395,7 @@ std::shared_ptr<AngularVelocityVector> KinematicsEngine::findRelativeAngularVelo
                 returnVector = intermediateAngVelVec->subtract(commonVecs.at(i));
             }
             else{
-                returnVector = commonVecs.at(i);
+                returnVector = commonVecs.at(i)->inverse();
             }
 
             if (commonVecs.at(i)->upperFrame.lock() == lowerFrame) {
@@ -490,6 +490,48 @@ std::shared_ptr<InertiaTensor> KinematicsEngine::getAssemblyInertia(std::shared_
     }
 
     return assemblyInertia;
+}
+
+Eigen::Vector3d KinematicsEngine::getFirstOrder(std::shared_ptr<PositionVector> vector, std::shared_ptr<Frame> derivFrame, std::shared_ptr<Frame> writtenFrame) {
+    // Obtain correct angular velocity
+    auto relativeAngularVelocity = KinematicsEngine::callFindRelativeAngularVelocity(vector->firstOrder.derivFrame.lock(), derivFrame);
+    relativeAngularVelocity->setZerothOrder(relativeAngularVelocity->getZerothOrder(writtenFrame), writtenFrame);
+
+    // Obtain correct vector
+    vector->setZerothOrder(vector->getZerothOrder(writtenFrame), writtenFrame);
+
+    // Obtain correct derivative vector
+    Eigen::MRPd relativeAttitude;
+    relativeAttitude = KinematicsEngine::findRelativeAttitude(writtenFrame, vector->firstOrder.writtenFrame.lock());
+    Eigen::Matrix3d dcm = relativeAttitude.toRotationMatrix().transpose();
+    Eigen::Vector3d derivVector = dcm * vector->firstOrder.matrix;
+
+    // Calculate result
+    auto crossTerm = relativeAngularVelocity->cross(vector);
+    Eigen::Vector3d result = derivVector + crossTerm->matrix;
+
+    return result;
+}
+
+Eigen::Vector3d KinematicsEngine::getFirstOrder(std::shared_ptr<AngularVelocityVector> vector, std::shared_ptr<Frame> derivFrame, std::shared_ptr<Frame> writtenFrame) {
+    // Obtain correct angular velocity
+    auto relativeAngularVelocity = KinematicsEngine::callFindRelativeAngularVelocity(vector->firstOrder.derivFrame.lock(), derivFrame);
+    relativeAngularVelocity->setZerothOrder(relativeAngularVelocity->getZerothOrder(writtenFrame), writtenFrame);
+
+    // Obtain correct vector
+    vector->setZerothOrder(vector->getZerothOrder(writtenFrame), writtenFrame);
+
+    // Obtain correct derivative vector
+    Eigen::MRPd relativeAttitude;
+    relativeAttitude = KinematicsEngine::findRelativeAttitude(writtenFrame, vector->firstOrder.writtenFrame.lock());
+    Eigen::Matrix3d dcm = relativeAttitude.toRotationMatrix().transpose();
+    Eigen::Vector3d derivVector = dcm * vector->firstOrder.matrix;
+
+    // Calculate result
+    auto crossTerm = relativeAngularVelocity->cross(vector);
+    Eigen::Vector3d result = derivVector + crossTerm->matrix;
+
+    return result;
 }
 
 

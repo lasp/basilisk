@@ -91,6 +91,7 @@ public:
     void setFirstOrder(Eigen::Vector3d newMatrix, const std::shared_ptr<Frame>& newWrittenFrame, const std::shared_ptr<Frame>& newDerivFrame);
     std::shared_ptr<AngularVelocityVector> add(std::shared_ptr<AngularVelocityVector> vec);
     std::shared_ptr<AngularVelocityVector> subtract(std::shared_ptr<AngularVelocityVector> vec);
+    std::shared_ptr<AngularVelocityVector> inverse();
 
     VectorDerivativeProperties firstOrder;
     std::weak_ptr<Frame> upperFrame;

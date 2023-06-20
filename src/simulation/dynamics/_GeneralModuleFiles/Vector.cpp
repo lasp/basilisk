@@ -128,7 +128,7 @@ std::shared_ptr<PositionVector> PositionVector::subtract(std::shared_ptr<Positio
 
 std::shared_ptr<PositionVector> PositionVector::inverse() {
     auto inversePositionVector = std::make_shared<PositionVector>(this->tailPoint, this->headPoint);
-    inversePositionVector->setZerothOrder(this->matrix, this->writtenFrame.lock());
+    inversePositionVector->setZerothOrder(-this->matrix, this->writtenFrame.lock());
 }
 
 AngularVelocityVector::AngularVelocityVector(std::weak_ptr<Frame> upperFrame, std::weak_ptr<Frame> lowerFrame) {
@@ -153,8 +153,8 @@ std::shared_ptr<AngularVelocityVector> AngularVelocityVector::add(std::shared_pt
     Eigen::Matrix3d dcm = relativeAttitude.toRotationMatrix().transpose();
     Eigen::Vector3d relAngularVelocity = this->matrix + dcm * vec->matrix;
 
-    if (vec->lowerFrame.lock() == this->upperFrame.lock()) {
-        upperFrame = this->lowerFrame;
+    if (this->lowerFrame.lock() == vec->upperFrame.lock()) {
+        upperFrame = this->upperFrame;
         lowerFrame = vec->lowerFrame;
     }
     else if(vec->lowerFrame.lock() == this->upperFrame.lock()) {
@@ -187,6 +187,14 @@ std::shared_ptr<AngularVelocityVector> AngularVelocityVector::subtract(std::shar
     relativeAngularVelocity->setZerothOrder(relAngularVelocity, this->writtenFrame.lock());
 
     return relativeAngularVelocity;
+}
+
+std::shared_ptr<AngularVelocityVector> AngularVelocityVector::inverse() {
+    auto inverseAngularVelocityVector = std::make_shared<AngularVelocityVector>(this->lowerFrame, this->upperFrame);
+    Eigen::Vector3d newMat = {-1 * this->matrix(0), -1 * this->matrix(1), -1 * this->matrix(2)};
+    inverseAngularVelocityVector->setZerothOrder(newMat, this->writtenFrame.lock());
+
+    return inverseAngularVelocityVector;
 }
 
 UnitVector::UnitVector(const Eigen::Vector3d& zerothMatrix,
