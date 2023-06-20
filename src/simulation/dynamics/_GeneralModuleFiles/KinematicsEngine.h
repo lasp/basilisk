@@ -72,6 +72,7 @@ public:
 
     Eigen::Vector3d getFirstOrder(std::shared_ptr<PositionVector> vector, std::shared_ptr<Frame> derivFrame, std::shared_ptr<Frame> writtenFrame);
     Eigen::Vector3d getFirstOrder(std::shared_ptr<AngularVelocityVector> vector, std::shared_ptr<Frame> derivFrame, std::shared_ptr<Frame> writtenFrame);
+    Eigen::Matrix3d getFirstOrder(std::shared_ptr<InertiaTensor> inertiaTensor, std::shared_ptr<Frame> derivFrame, std::shared_ptr<Frame> writtenFrame);
 
 private:
     std::shared_ptr<PositionVector> findRelativePosition(std::shared_ptr<Point> headPoint,

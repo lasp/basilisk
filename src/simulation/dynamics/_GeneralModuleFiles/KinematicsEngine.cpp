@@ -534,5 +534,27 @@ Eigen::Vector3d KinematicsEngine::getFirstOrder(std::shared_ptr<AngularVelocityV
     return result;
 }
 
+Eigen::Matrix3d KinematicsEngine::getFirstOrder(std::shared_ptr<InertiaTensor> inertiaTensor, std::shared_ptr<Frame> derivFrame, std::shared_ptr<Frame> writtenFrame) {
+    // Obtain correct angular velocity
+    auto relativeAngularVelocity = KinematicsEngine::callFindRelativeAngularVelocity(inertiaTensor->firstOrder.derivFrame.lock(), derivFrame);
+    relativeAngularVelocity->setZerothOrder(relativeAngularVelocity->getZerothOrder(writtenFrame), writtenFrame);
+
+    // Obtain correct inertia
+    inertiaTensor->setZerothOrder(inertiaTensor->getZerothOrder(writtenFrame), writtenFrame);
+
+    // Obtain correct derivative inertia
+    Eigen::MRPd relativeAttitude;
+    relativeAttitude = KinematicsEngine::findRelativeAttitude(writtenFrame, inertiaTensor->firstOrder.writtenFrame.lock());
+    Eigen::Matrix3d dcm = relativeAttitude.toRotationMatrix().transpose();
+    Eigen::Matrix3d derivInertiaTensor = dcm * inertiaTensor->firstOrder.matrix * dcm.transpose();
+
+    // Calculate result
+    auto crossTerm = eigenTilde(relativeAngularVelocity->matrix) * inertiaTensor->matrix - inertiaTensor->matrix * eigenTilde(relativeAngularVelocity->matrix);
+    Eigen::Matrix3d result = derivInertiaTensor + crossTerm;
+
+    return result;
+}
+
+
 
 

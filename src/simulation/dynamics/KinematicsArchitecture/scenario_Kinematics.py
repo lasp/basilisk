@@ -122,6 +122,10 @@ def runLeah():
     rBPrime_PcP_M = [0.1, 0, 0.2]
     part2.r_ScS.setFirstOrder(rBPrime_PcP_M, frameM, frameB)
 
+    # Create inertia derivative data
+    IBPrime_PntPc_M = [[1, 0, 0], [0, 0.1, 0], [0, 0, 0.2]]
+    part2.IPntSc_S.setFirstOrder(IBPrime_PntPc_M, frameM, frameB)
+
     # Call kinematic engine functions
     sigma_FPKin = myKinematicsEngine.findRelativeAttitude(frameF, frameP)
     r_FBKin = frameF.r_SP.add(frameM.r_SP)
@@ -140,6 +144,7 @@ def runLeah():
     IAssemPntBKin = myKinematicsEngine.getAssemblyInertia(myAssembly, frameB.originPoint)
     IAssemPntB_MKin = IAssemPntBKin.getZerothOrder(frameM)
     rFPrime_PcP_NKin = myKinematicsEngine.getFirstOrder(part2.r_ScS, frameF, frameN)
+    IFPrime_PntPc_NKin = myKinematicsEngine.getFirstOrder(part2.IPntSc_S, frameF, frameN)
 
     # Testing getter functions
     r_PcP_FKin = part2.r_ScS.getZerothOrder(frameF)
@@ -229,7 +234,7 @@ def runLeah():
     # Tensor times tensor
     IAssemPntB_MTimesIAssemPntB_M = np.matmul(np.matmul(dcm_MB.transpose(), np.matmul(IAssemPntB_M, dcm_MB)), np.matmul(dcm_MB.transpose(), np.matmul(IAssemPntB_M, dcm_MB)))
 
-    # Calculate transport theorem result
+    # Calculate vector transport theorem result
     dcm_NM = np.matmul(np.transpose(dcm_BN), np.transpose(dcm_MB))
     dcm_NF = np.matmul(dcm_NM, np.transpose(dcm_FM))
     omega_BM_M = [-omega_MB_M[0], -omega_MB_M[1], -omega_MB_M[2]]
@@ -239,6 +244,15 @@ def runLeah():
     crossTerm = np.cross(omega_BF_N, r_PcP_N)
     derivTerm = np.matmul(dcm_NM, rBPrime_PcP_M)
     rFPrime_PcP_N = np.add(derivTerm, crossTerm)
+
+    # Calculate inertia transport theorem result
+    omegaTilde_BF_N = [[0, -omega_BF_N[2], omega_BF_N[1]],
+                       [omega_BF_N[2], 0, -omega_BF_N[0]],
+                       [-omega_BF_N[1], omega_BF_N[0], 0]]
+    I_PntPc_N = np.matmul(np.matmul(dcm_NP, part2Inertia), np.transpose(dcm_NP))
+    derivTerm = np.matmul(np.matmul(dcm_NM, IBPrime_PntPc_M), np.transpose(dcm_NM))
+    crossTerm = np.subtract(np.matmul(omegaTilde_BF_N, I_PntPc_N), np.matmul(I_PntPc_N, omegaTilde_BF_N))
+    IFPrime_PntPc_N = np.add(derivTerm, crossTerm)
 
     print("\n** ** ** ** ** TESTING 'ZEROTH' ORDER RELATIVE KINEMATICS ** ** ** ** **")
 
@@ -317,6 +331,12 @@ def runLeah():
     print(rFPrime_PcP_N)
     print("\nKINEMATICS ENGINE: rFPrime_PcP_N: ")
     print(rFPrime_PcP_NKin)
+
+    print("\n\n2. INERTIA TRANSPORT THEOREM:")
+    print("\nTRUTH: IFPrime_PntPc_N: ")
+    print(IFPrime_PntPc_N)
+    print("\nKINEMATICS ENGINE: IFPrime_PntPc_N: ")
+    print(IFPrime_PntPc_NKin)
 
     # print("\n** ** ** ** ** TESTING TENSOR/VECTOR MATH FUNCTIONS ** ** ** ** **")
 
