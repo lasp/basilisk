@@ -276,9 +276,18 @@ Eigen::MRPd KinematicsEngine::findRelativeAttitude(std::shared_ptr<Frame> upperF
 
 std::shared_ptr<PositionVector> KinematicsEngine::callFindRelativePosition(std::shared_ptr<Point> headPoint,
                                                                            std::shared_ptr<Point> tailPoint) {
-    std::vector<std::shared_ptr<PositionVector>> visitedVectors = {};
 
-    return findRelativePosition(headPoint, tailPoint, headPoint, nullptr, visitedVectors);
+    if (headPoint != tailPoint) {
+        std::vector<std::shared_ptr<PositionVector>> visitedVectors = {};
+
+        return findRelativePosition(headPoint, tailPoint, headPoint, nullptr, visitedVectors);
+    }
+    else{
+        auto returnVector = std::make_shared<PositionVector>(headPoint, headPoint);
+        returnVector->setZerothOrder(Eigen::Vector3d::Zero(), this->rootFrame);
+
+        return returnVector;
+    }
 }
 
 std::shared_ptr<PositionVector> KinematicsEngine::findRelativePosition(std::shared_ptr<Point> headPoint,
@@ -347,9 +356,18 @@ std::shared_ptr<PositionVector> KinematicsEngine::findRelativePosition(std::shar
 
 std::shared_ptr<AngularVelocityVector> KinematicsEngine::callFindRelativeAngularVelocity(std::shared_ptr<Frame> upperFrame,
                                                                                          std::shared_ptr<Frame> lowerFrame) {
-    std::vector<std::shared_ptr<AngularVelocityVector>> visitedVectors = {};
+    if (upperFrame != lowerFrame) {
+        std::vector<std::shared_ptr<AngularVelocityVector>> visitedVectors = {};
 
-    return findRelativeAngularVelocity(upperFrame, lowerFrame, upperFrame, nullptr, visitedVectors);
+        return findRelativeAngularVelocity(upperFrame, lowerFrame, upperFrame, nullptr, visitedVectors);
+    }
+    else{
+        auto returnVector = std::make_shared<AngularVelocityVector>(upperFrame, lowerFrame);
+        returnVector->setZerothOrder(Eigen::Vector3d::Zero(), upperFrame);
+        returnVector->setFirstOrder(Eigen::Vector3d::Zero(), upperFrame, upperFrame);
+
+        return returnVector;
+    }
 }
 
 std::shared_ptr<AngularVelocityVector> KinematicsEngine::findRelativeAngularVelocity(std::shared_ptr<Frame> upperFrame,
