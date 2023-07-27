@@ -29,10 +29,17 @@ import numpy as np
 import pandas as pd
 import math
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.patches import Circle
+import mpl_toolkits.mplot3d.art3d as art3d
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from Basilisk.utilities import RigidBodyKinematics as rbk
+import pylab as pl
+from matplotlib import collections as mc
 
 
 def run():
+    deg2Rad = np.pi / 180
 
     path_to_file = "/Users/leahkiner/Repositories/MAX_Basilisk/examples/gimbal_data.csv"
     gimbal_data = pd.read_csv(path_to_file)
@@ -56,12 +63,14 @@ def run():
     # Define initial motor states
     motor1InitAngle = 0
     motor2InitAngle = 0
+    gimbal1InitAngle = 18.342
+    gimbal2InitAngle = 0.0
     thetaDotInit = 0.0
     thetaDotRef = 0.0
 
     # Define number of steps each motor takes
-    numSteps1 = 10  # Note that numSteps * motorStepAngle must be in increments of 2.5 degrees
-    numSteps2 = 35
+    numSteps1 = 160  # Note that numSteps * motorStepAngle must be in increments of 2.5 degrees
+    numSteps2 = 160
 
     # Check to make sure that the final motor 1 angle exists in a row of the given motor/gimbal table data
     if ((numSteps1 * motorStepAngle) % 2.5 != 0):
@@ -78,20 +87,20 @@ def run():
     motor2AngleData = np.array(motor2InitAngle)
     motor2AngleRateData = np.array(thetaDotInit)
     motor2AngularAccelData = np.array(0.0)
-    gimbal1AngleData = np.array(18.342)
+    gimbal1AngleData = np.array(gimbal1InitAngle)
     gimbal1AngleRateData = np.array(0.0)
     gimbal1AngularAccelData = np.array(0.0)
-    gimbal2AngleData = np.array(0.0)
+    gimbal2AngleData = np.array(gimbal2InitAngle)
     gimbal2AngleRateData = np.array(0.0)
     gimbal2AngularAccelData = np.array(0.0)
     thrustAxis = np.array([0.0, 0.0, 0.0])
 
     dcm1 = np.array([[1,  0, 0],
-                    [0, np.cos(motor1InitAngle), np.sin(motor1InitAngle)],
-                    [0, -np.sin(motor1InitAngle), np.cos(motor1InitAngle)]])
-    dcm2 = np.array([[np.cos(motor2InitAngle),  0, -np.sin(motor2InitAngle)],
+                    [0, np.cos(deg2Rad * gimbal1InitAngle), np.sin(deg2Rad * gimbal1InitAngle)],
+                    [0, -np.sin(deg2Rad * gimbal1InitAngle), np.cos(deg2Rad * gimbal1InitAngle)]])
+    dcm2 = np.array([[np.cos(deg2Rad * gimbal2InitAngle),  0, -np.sin(deg2Rad * gimbal2InitAngle)],
                      [0, 1, 0],
-                     [np.sin(motor2InitAngle),  0, np.cos(motor2InitAngle)]])
+                     [np.sin(deg2Rad * gimbal2InitAngle),  0, np.cos(deg2Rad * gimbal2InitAngle)]])
     dcm_FMInit = np.matmul(dcm2, dcm1)
     sigma_FMInit = rbk.C2MRP(dcm_FMInit)
     sigma_FMData = np.array([sigma_FMInit[0], sigma_FMInit[1], sigma_FMInit[2]])
@@ -99,7 +108,7 @@ def run():
     omegaPrime_FM_FData = np.array([0.0, 0.0, 0.0])
 
     # Define temporal parameters
-    dt = 0.1  # [s]
+    dt = 0.5  # [s]
     t = 0.0
     motorMaxAccel = ((0.5 * np.abs(motorStepAngle)) * 8) / 100
     stepSimTime = np.sqrt(((0.5 * np.abs(motorStepAngle)) * 8) / motorMaxAccel)  # [s]
@@ -171,11 +180,11 @@ def run():
             gimbal2AngularAccelData = np.append(gimbal2AngularAccelData, gimbal2AngularAccel)
 
             dcm1 = np.array([[1,  0, 0],
-                             [0, np.cos(gimbal1Angle), np.sin(gimbal1Angle)],
-                             [0, -np.sin(gimbal1Angle), np.cos(gimbal1Angle)]])
-            dcm2 = np.array([[np.cos(gimbal2Angle),  0, -np.sin(gimbal2Angle)],
+                             [0, np.cos(deg2Rad * gimbal1Angle), np.sin(deg2Rad * gimbal1Angle)],
+                             [0, -np.sin(deg2Rad * gimbal1Angle), np.cos(deg2Rad * gimbal1Angle)]])
+            dcm2 = np.array([[np.cos(deg2Rad * gimbal2Angle),  0, -np.sin(deg2Rad * gimbal2Angle)],
                              [0, 1, 0],
-                             [np.sin(gimbal2Angle),  0, np.cos(gimbal2Angle)]])
+                             [np.sin(deg2Rad * gimbal2Angle),  0, np.cos(deg2Rad * gimbal2Angle)]])
 
             if oneTwo:
                 dcm_FM = np.matmul(dcm2, dcm1)
@@ -263,11 +272,11 @@ def run():
             gimbal2AngularAccelData = np.append(gimbal2AngularAccelData, gimbal2AngularAccel)
 
             dcm1 = np.array([[1,  0, 0],
-                             [0, np.cos(gimbal1Angle), np.sin(gimbal1Angle)],
-                             [0, -np.sin(gimbal1Angle), np.cos(gimbal1Angle)]])
-            dcm2 = np.array([[np.cos(gimbal2Angle),  0, -np.sin(gimbal2Angle)],
+                             [0, np.cos(deg2Rad * gimbal1Angle), np.sin(deg2Rad * gimbal1Angle)],
+                             [0, -np.sin(deg2Rad * gimbal1Angle), np.cos(deg2Rad * gimbal1Angle)]])
+            dcm2 = np.array([[np.cos(deg2Rad * gimbal2Angle),  0, -np.sin(deg2Rad * gimbal2Angle)],
                              [0, 1, 0],
-                             [np.sin(gimbal2Angle),  0, np.cos(gimbal2Angle)]])
+                             [np.sin(deg2Rad * gimbal2Angle),  0, np.cos(deg2Rad * gimbal2Angle)]])
             if oneTwo:
                 dcm_FM = np.matmul(dcm2, dcm1)
             else:
@@ -287,7 +296,6 @@ def run():
         # Update motor states after a step has been completed
         intermediateInitialAngle = motor2FinalAngle
 
-
     # Call functions to plot results
     plotMotorData(timespan, motor1AngleData, motor1AngleRateData, motor1AngularAccelData, motor2AngleData,
                                                                                           motor2AngleRateData,
@@ -299,10 +307,15 @@ def run():
                                                                                               gimbal2AngularAccelData)
     plotPrescribedGimbalStates(timespan, sigma_FMData, omega_FM_FData, omegaPrime_FM_FData)
 
+    plot2DGimbalMotion(gimbal1AngleData, gimbal2AngleData)
+
     plotThrustAxis(timespan, thrustAxis)
 
-    plt.show()
-    plt.close("all")
+    # Write attitude data to a text file for 3d concept figure plotting
+    sigmaFM_data_file = open(r"/Users/leahkiner/Desktop/sigma_FMData.txt", "w+")
+    np.savetxt(sigmaFM_data_file, sigma_FMData)
+    sigmaFM_data_file.close()
+
 
 def motorToGimbal(gimbal_data, tableStepAngle, motor1, motor2, motor1Angle, motor1AngleRate, motor1AngularAccel,
                   motor2Angle,
@@ -323,7 +336,7 @@ def motorToGimbal(gimbal_data, tableStepAngle, motor1, motor2, motor1Angle, moto
     lowerGimbal1Angle = 360
     lowerGimbal2Angle = 360
     upperGimbal1Angle = 360
-    uppperGimbal2Angle = 360
+    upperGimbal2Angle = 360
 
     for idx in range(numRows):
         if motor1:
@@ -358,10 +371,10 @@ def motorToGimbal(gimbal_data, tableStepAngle, motor1, motor2, motor1Angle, moto
         else:
             gimbal1Angle = lowerGimbal1Angle
             gimbal2Angle = lowerGimbal2Angle
-            gimbal1AngleRate = 0.0 #motor1AngleRate
-            gimbal2AngleRate = 0.0  #motor1AngleRate
-            gimbal1AngularAccel = 0.0  #motor1AngularAccel
-            gimbal2AngularAccel = 0.0  #motor1AngularAccel
+            gimbal1AngleRate = (gimbal1Angle / motor1Angle) * motor1AngleRate
+            gimbal2AngleRate = (gimbal2Angle / motor1Angle) * motor1AngleRate
+            gimbal1AngularAccel = (gimbal1Angle / motor1Angle) * motor1AngularAccel
+            gimbal2AngularAccel = (gimbal2Angle / motor1Angle) * motor1AngularAccel
     else:
         if upperMotorAngle != lowerMotorAngle:
             gimbal1Angle = ((lowerGimbal1Angle * (upperMotorAngle - motor2Angle)) + (upperGimbal1Angle * (motor2Angle - lowerMotorAngle))) / (upperMotorAngle - lowerMotorAngle)
@@ -373,10 +386,10 @@ def motorToGimbal(gimbal_data, tableStepAngle, motor1, motor2, motor1Angle, moto
         else:
             gimbal1Angle = lowerGimbal1Angle
             gimbal2Angle = lowerGimbal2Angle
-            gimbal1AngleRate = 0.0 #motor2AngleRate
-            gimbal2AngleRate = 0.0  #motor2AngleRate
-            gimbal1AngularAccel = 0.0  #motor2AngularAccel
-            gimbal2AngularAccel = 0.0  #motor2AngularAccel
+            gimbal1AngleRate = (gimbal1Angle / motor2Angle) * motor2AngleRate
+            gimbal2AngleRate = (gimbal2Angle / motor2Angle) * motor2AngleRate
+            gimbal1AngularAccel = (gimbal1Angle / motor2Angle) * motor2AngularAccel
+            gimbal2AngularAccel = (gimbal2Angle / motor2Angle) * motor2AngularAccel
 
     return gimbal1Angle, gimbal2Angle, gimbal1AngleRate, gimbal2AngleRate, gimbal1AngularAccel, gimbal2AngularAccel
 
@@ -386,7 +399,6 @@ def plotMotorData(timespan, motor1AngleData, motor1AngleRateData, motor1AngularA
                                                                                           motor2AngularAccelData,
                                                                                           motor1RefAngle,
                                                                                           motor2RefAngle):
-
     # # Plot motor angle data
     # motor1RefAngleData = np.ones(len(timespan)) * motor1RefAngle
     # motor2RefAngleData = np.ones(len(timespan)) * motor2RefAngle
@@ -441,7 +453,6 @@ def plotMotorData(timespan, motor1AngleData, motor1AngleRateData, motor1AngularA
     plts[2].grid(True)
 
 def plotGimbalData(timespan, gimbal1AngleData, gimbal1AngleRateData, gimbal1AngularAccelData, gimbal2AngleData, gimbal2AngleRateData, gimbal2AngularAccelData):
-
     # # Plot gimbal angles
     # plt.figure()
     # plt.clf()
@@ -486,13 +497,12 @@ def plotGimbalData(timespan, gimbal1AngleData, gimbal1AngleRateData, gimbal1Angu
     plts[0].legend((l1, l2), (r'$\psi$', r'$\phi$'), loc='center right', prop={'size': 12})
     plts[1].legend((l3, l4), (r'$\dot{\psi}$', r'$\dot{\phi}$',), loc='center right', prop={'size': 12})
     plts[2].legend((l5, l6), (r'$\ddot{\psi}$', r'$\ddot{\phi}$',), loc='center right', prop={'size': 12})
-    # plts[0].set_title(r'Gimbal Actuator States')
+    # plts[0].set_title('Gimbal Actuator States')
     plts[0].grid(True)
     plts[1].grid(True)
     plts[2].grid(True)
 
 def plotPrescribedGimbalStates(timespan, sigma_FMData, omega_FM_FData, omegaPrime_FM_FData):
-
     # # Plot gimbal attitude
     # plt.figure()
     # plt.clf()
@@ -544,13 +554,34 @@ def plotPrescribedGimbalStates(timespan, sigma_FMData, omega_FM_FData, omegaPrim
     plts[0].legend((l1, l2, l3), (r'$\sigma_{1}$', r'$\sigma_{2}$', r'$\sigma_{3}$',), loc='center right', prop={'size': 12})
     plts[1].legend((l4, l5, l6), (r'$\omega_{1}$', r'$\omega_{2}$', r'$\omega_{3}$',), loc='center right', prop={'size': 12})
     plts[2].legend((l7, l8, l9), (r'$\alpha_{1}$', r'$\alpha_{2}$', r'$\alpha_{3}$',), loc='center right', prop={'size': 12})
-    # plts[0].set_title(r'Prescribed Gimbal States')
+    # plts[0].set_title('Prescribed Gimbal States')
     plts[0].grid(True)
     plts[1].grid(True)
     plts[2].grid(True)
 
-def plotThrustAxis(timespan, thrustAxis):
+def plot2DGimbalMotion(gimbal1AngleData, gimbal2AngleData):
+    # Plot 2D Diamond and the corresponding gimbal trajectory
+    line1 = [(18.342, 0.0), (0.676, 27.43)]
+    line2 = [(-18.764, 0.0), (0.676, 27.43)]
+    line3 = [(-18.764, 0.0), (0.676, -27.43)]
+    line4 = [(18.342, 0.0), (0.676, -27.43)]
+    lines = [line1, line2, line3, line4]
+    lc = mc.LineCollection(lines, colors="crimson", linewidths=2, linestyles="dashed")
+    plt.figure()
+    plt.clf()
+    ax = plt.axes()
+    ax.add_collection(lc)
+    plt.plot(gimbal1AngleData, gimbal2AngleData, linewidth=1, color='black')
+    ax.scatter(gimbal1AngleData[0], gimbal2AngleData[0], marker='.', linewidth=4, color='springgreen', label='Initial')
+    ax.scatter(gimbal1AngleData[-1], gimbal2AngleData[-1], marker='*', linewidth=4, color='magenta', label='Final')
+    # plt.title('Gimbal Sequential Trajectory', fontsize=14)
+    plt.ylabel(r'$\psi$ (deg)', fontsize=16)
+    plt.xlabel(r'$\phi$ (deg)', fontsize=16)
+    plt.legend(loc='upper right', prop={'size': 12})
+    plt.grid(True)
+    plt.axis("equal")
 
+def plotThrustAxis(timespan, thrustAxis):
     # # Plot thrust axis
     # plt.figure()
     # plt.clf()
@@ -573,8 +604,8 @@ def plotThrustAxis(timespan, thrustAxis):
     z = np.outer(np.cos(u), np.ones_like(v))
     ax.plot_wireframe(x, y, z, linewidth=0.2, linestyle="dashed", edgecolor="grey")
     ax.plot3D(thrustAxis[1:, 0], thrustAxis[1:, 1], thrustAxis[1:, 2], color='black')
-    ax.scatter(thrustAxis[1, 0], thrustAxis[1, 1], thrustAxis[1, 2], marker='.', linewidth=2, color='magenta', label='Initial Thrust Direction')
-    ax.scatter(thrustAxis[-1, 0], thrustAxis[-1, 1], thrustAxis[-1, 2], marker='*', linewidth=2, color='springgreen', label='Final Thrust Direction')
+    ax.scatter(thrustAxis[1, 0], thrustAxis[1, 1], thrustAxis[1, 2], marker='.', linewidth=2, color='springgreen', label='Initial Thrust Direction')
+    ax.scatter(thrustAxis[-1, 0], thrustAxis[-1, 1], thrustAxis[-1, 2], marker='*', linewidth=2, color='magenta', label='Final Thrust Direction')
     ax.quiver(0, 0, 0, 1, 0, 0, length=0.75, linewidth=0.75, color="black")
     ax.quiver(0, 0, 0, 0, 1, 0, length=0.75, linewidth=0.75, color="black")
     ax.quiver(0, 0, 0, 0, 0, 1, length=0.75, linewidth=0.75, color="black")
@@ -587,3 +618,5 @@ def plotThrustAxis(timespan, thrustAxis):
 
 if __name__ == "__main__":
     run()
+    plt.show()
+    plt.close("all")
