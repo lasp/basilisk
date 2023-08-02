@@ -12,6 +12,9 @@ from Basilisk.simulation.KinematicsArchitecture import Frame
 from Basilisk.simulation.KinematicsArchitecture import Vector
 from Basilisk.simulation.KinematicsArchitecture import Tensor
 from Basilisk.simulation.KinematicsArchitecture import Part
+from Basilisk.simulation.KinematicsArchitecture import Joint
+from Basilisk.simulation.KinematicsArchitecture import Hinge
+
 
 def run1():
     myKinematicsEngine = KinematicsEngine()
@@ -33,6 +36,11 @@ def run1():
     part1.IPntSc_S.set(part1Inertia, frameF)
     part2.IPntSc_S.set(part2Inertia, frameP)
 
+    # Create assembly
+    myAssembly = myKinematicsEngine.createAssembly()
+    myAssembly.addPart(part1)
+    myAssembly.addPart(part2)
+
     # Create position vector data
     r_PcP_P = [0, 2, 1]  # [m]
     r_FcF_F = [1, 2, 0]  # [m]
@@ -48,17 +56,17 @@ def run1():
     theta_FM = -10 * np.pi / 180  # [rad]
 
     dcm_BN = np.array([[1, 0, 0],
-                       [0, np.cos(theta_BN),  np.sin(theta_BN)],
-                       [0, -np.sin(theta_BN),  np.cos(theta_BN)]])
-    dcm_PB = np.array([[np.cos(theta_PB),  np.sin(theta_PB),  0],
-                       [-np.sin(theta_PB),  np.cos(theta_PB), 0],
-                       [0,  0,  1]])
-    dcm_MB = np.array([[np.cos(theta_MB),  np.sin(theta_MB),  0],
-                       [-np.sin(theta_MB),  np.cos(theta_MB), 0],
-                       [0,  0,  1]])
-    dcm_FM = np.array([[np.cos(theta_FM),  0, -np.sin(theta_FM)],
+                       [0, np.cos(theta_BN), np.sin(theta_BN)],
+                       [0, -np.sin(theta_BN), np.cos(theta_BN)]])
+    dcm_PB = np.array([[np.cos(theta_PB), np.sin(theta_PB), 0],
+                       [-np.sin(theta_PB), np.cos(theta_PB), 0],
+                       [0, 0, 1]])
+    dcm_MB = np.array([[np.cos(theta_MB), np.sin(theta_MB), 0],
+                       [-np.sin(theta_MB), np.cos(theta_MB), 0],
+                       [0, 0, 1]])
+    dcm_FM = np.array([[np.cos(theta_FM), 0, -np.sin(theta_FM)],
                        [0, 1, 0],
-                       [np.sin(theta_FM),  0, np.cos(theta_FM)]])
+                       [np.sin(theta_FM), 0, np.cos(theta_FM)]])
 
     sigma_BN = rbk.C2MRP(dcm_BN)
     sigma_PB = rbk.C2MRP(dcm_PB)
@@ -124,8 +132,13 @@ def run1():
     r_PcF_MKin = r_PcF_Kin.getMatrix(frameM)
     omega_PFKin = myKinematicsEngine.findRelativeAngularVelocity(frameP, frameF)
     omega_PF_MKin = omega_PFKin.getMatrix(frameM)
+    assemblyMassKin = myKinematicsEngine.getAssemblyMass(myAssembly)
+    r_AssemCMPntBKin = myKinematicsEngine.getAssemblyCOM(myAssembly, frameB.getOriginPoint())
+    r_AssemCMPntB_MKin = r_AssemCMPntBKin.getMatrix(frameM)
     IPart1PntBKin = myKinematicsEngine.parallelAxisTheorem(part1, frameB.getOriginPoint())
     IPart1PntB_MKin = IPart1PntBKin.getMatrix(frameM)
+    IAssemPntBKin = myKinematicsEngine.getAssemblyInertia(myAssembly, frameB.getOriginPoint())
+    IAssemPntB_MKin = IAssemPntBKin.getMatrix(frameM)
     rFPrime_PcP_Kin = part2.r_ScS.getVelocity(frameF)
     rFPrime_PcP_NKin = rFPrime_PcP_Kin.getMatrix(frameN)
     # IFPrime_PntPc_Kin = myKinematicsEngine.getFirstOrder(part2.IPntSc_S, frameF)
@@ -160,14 +173,17 @@ def run1():
 
     # 5. Calculate omega_PF_M
     dcm_PM = np.matmul(dcm_PB, dcm_MB.transpose())
-    omega_PF_M = np.subtract(np.subtract(np.matmul(dcm_PM.transpose(), omega_PB_P), omega_MB_M), np.matmul(dcm_FM.transpose(), omega_FM_F))
+    omega_PF_M = np.subtract(np.subtract(np.matmul(dcm_PM.transpose(), omega_PB_P), omega_MB_M),
+                             np.matmul(dcm_FM.transpose(), omega_FM_F))
 
     # 6. Calculate IPart1PntB_M
     rFcB_M = np.add(np.add(np.matmul(np.transpose(dcm_FM), r_FcF_F), r_FM_M), np.matmul(dcm_MB, r_MB_B))
     rTildeFcB_M = [[0, -rFcB_M[2], rFcB_M[1]],
                    [rFcB_M[2], 0, -rFcB_M[0]],
                    [-rFcB_M[1], rFcB_M[0], 0]]
-    IPart1PntB_M = np.matmul(np.matmul(np.transpose(dcm_FM), part1Inertia), dcm_FM) + m1 * np.matmul(rTildeFcB_M, np.transpose(rTildeFcB_M))
+    IPart1PntB_M = np.matmul(np.matmul(np.transpose(dcm_FM), part1Inertia), dcm_FM) + m1 * np.matmul(rTildeFcB_M,
+                                                                                                     np.transpose(
+                                                                                                         rTildeFcB_M))
 
     # 7. Calculate assembly mass
     assemblyMass = m1 + m2
@@ -180,7 +196,9 @@ def run1():
     rTildePcB_M = [[0, -r_PcB_M[2], r_PcB_M[1]],
                    [r_PcB_M[2], 0, -r_PcB_M[0]],
                    [-r_PcB_M[1], r_PcB_M[0], 0]]
-    IPart2PntB_M = np.matmul(np.matmul(np.transpose(dcm_PM), part2Inertia), dcm_PM) + m2 * np.matmul(rTildePcB_M, np.transpose(rTildePcB_M))
+    IPart2PntB_M = np.matmul(np.matmul(np.transpose(dcm_PM), part2Inertia), dcm_PM) + m2 * np.matmul(rTildePcB_M,
+                                                                                                     np.transpose(
+                                                                                                         rTildePcB_M))
     IAssemPntB_M = np.add(IPart1PntB_M, IPart2PntB_M)
 
     # Testing tensor/vector math functions
@@ -206,7 +224,8 @@ def run1():
     IAssemPntB_MTimesr_MB_B = np.matmul(np.matmul(dcm_MB.transpose(), np.matmul(IAssemPntB_M, dcm_MB)), r_MB_B)
 
     # Tensor times tensor
-    IAssemPntB_MTimesIAssemPntB_M = np.matmul(np.matmul(dcm_MB.transpose(), np.matmul(IAssemPntB_M, dcm_MB)), np.matmul(dcm_MB.transpose(), np.matmul(IAssemPntB_M, dcm_MB)))
+    IAssemPntB_MTimesIAssemPntB_M = np.matmul(np.matmul(dcm_MB.transpose(), np.matmul(IAssemPntB_M, dcm_MB)),
+                                              np.matmul(dcm_MB.transpose(), np.matmul(IAssemPntB_M, dcm_MB)))
 
     # Calculate vector transport theorem result
     dcm_NM = np.matmul(np.transpose(dcm_BN), np.transpose(dcm_MB))
@@ -344,7 +363,14 @@ def run2():
     myPart2 = myKinematicsEngine.createPart(myPart1.frame)
     myPart2.frame.tag = "part2"
 
+    myJoint = myKinematicsEngine.createRotaryOneDOFJoint()
+    # myJoint.hingeVector[0].spinAxis = [1, 0, 0]
+    myJoint.lowerFrame.tag = "lower"
+    myJoint.upperFrame.tag = "upper"
+
+    myKinematicsEngine.connect(myPart1, myJoint, myPart2)
+
 
 if __name__ == "__main__":
     run1()
-    #run2()
+    # run2()
