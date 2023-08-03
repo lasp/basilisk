@@ -1,7 +1,7 @@
 /*
  ISC License
 
- Copyright (c) 2023, Laboratory for Atmospheric and Space Physics, University of Colorado at Boulder
+ Copyright (c) 2023, Autonomous Vehicle Systems Lab, University of Colorado at Boulder
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -16,36 +16,28 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
+
 %pythoncode %{
-    from Basilisk.architecture.swig_common_model import *
+from Basilisk.architecture.swig_common_model import *
 %}
 %include "std_string.i"
 %include "swig_eigen.i"
 %include "swig_conly_data.i"
-%include "std_vector.i"
+
 %include <std_shared_ptr.i>
+%shared_ptr(Vector)
+%shared_ptr(Translation)
+%shared_ptr(Rotation)
+%shared_ptr(ForceVector)
+%shared_ptr(UnitVector)
 
 %{
-    #include "simulation/dynamics/KinematicsArchitecture/KinematicsEngine.h"
+    #include "simulation/dynamics/KinematicsArchitecture/Vector.h"
 %}
 
-%shared_ptr(Frame)
-%shared_ptr(KinematicsEngine)
-%shared_ptr(Point)
-%shared_ptr(Rotation)
-%shared_ptr(Translation)
-%shared_ptr(Vector)
-
-%include "simulation/dynamics/KinematicsArchitecture/KinematicsEngine.h"
-
-namespace std {
-        %template(PointVector) vector<shared_ptr<Point>>;
-        %template(TranslationVector) vector<shared_ptr<Translation>>;
-        %template(RotationVector) vector<shared_ptr<Rotation>>;
-        %template(FrameVector) vector<shared_ptr<Frame>>;
-}
+%include "simulation/dynamics/KinematicsArchitecture/Vector.h"
 
 %pythoncode %{
-    import sys
-    protectAllClasses(sys.modules[__name__])
+import sys
+protectAllClasses(sys.modules[__name__])
 %}

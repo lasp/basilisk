@@ -1,7 +1,7 @@
 /*
  ISC License
 
- Copyright (c) 2023, Laboratory for Atmospheric and Space Physics, University of Colorado at Boulder
+ Copyright (c) 2023, Autonomous Vehicle Systems Lab, University of Colorado at Boulder
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -26,24 +26,15 @@
 %include <std_shared_ptr.i>
 
 %{
-    #include "simulation/dynamics/KinematicsArchitecture/KinematicsEngine.h"
+    #include "simulation/dynamics/KinematicsArchitecture/Frame.h"
 %}
 
 %shared_ptr(Frame)
-%shared_ptr(KinematicsEngine)
 %shared_ptr(Point)
 %shared_ptr(Rotation)
 %shared_ptr(Translation)
-%shared_ptr(Vector)
 
-%include "simulation/dynamics/KinematicsArchitecture/KinematicsEngine.h"
-
-namespace std {
-        %template(PointVector) vector<shared_ptr<Point>>;
-        %template(TranslationVector) vector<shared_ptr<Translation>>;
-        %template(RotationVector) vector<shared_ptr<Rotation>>;
-        %template(FrameVector) vector<shared_ptr<Frame>>;
-}
+%include "simulation/dynamics/KinematicsArchitecture/Frame.h"
 
 %pythoncode %{
     import sys
