@@ -31,6 +31,7 @@ KinematicsEngine::KinematicsEngine() {
 KinematicsEngine::~KinematicsEngine() {
     this->frameList.clear();
     this->partList.clear();
+    this->jointList.clear();
     this->pointList.clear();
     this->translationList.clear();
     this->rotationList.clear();
@@ -97,6 +98,32 @@ std::shared_ptr<Part> KinematicsEngine::createPart(const std::shared_ptr<Frame>&
     return tempPart;
 }
 
+std::shared_ptr<RotaryOneDOF> KinematicsEngine::createRotaryOneDOFJoint() {
+    auto equilibriumFrame = this->createFrame();
+    auto currentFrame = this->createFrame(equilibriumFrame);
+    auto tempHinge = std::make_shared<Hinge>(equilibriumFrame, currentFrame);
+
+    auto tempJoint = std::make_shared<RotaryOneDOF>(tempHinge);
+    this->jointList.push_back(tempJoint);
+
+    return tempJoint;
+}
+
+std::shared_ptr<RotaryTwoDOF> KinematicsEngine::createRotaryTwoDOFJoint() {
+    auto firstEquilibriumFrame = this->createFrame();
+    auto firstCurrentFrame = this->createFrame(firstEquilibriumFrame);
+    auto tempFirstHinge = std::make_shared<Hinge>(std::move(firstEquilibriumFrame), std::move(firstCurrentFrame));
+
+    auto secondEquilibriumFrame = this->createFrame();
+    auto secondCurrentFrame = this->createFrame(secondEquilibriumFrame);
+    auto tempSecondHinge = std::make_shared<Hinge>(std::move(secondEquilibriumFrame), std::move(secondCurrentFrame));
+
+    auto tempJoint = std::make_shared<RotaryTwoDOF>(tempFirstHinge, tempSecondHinge);
+    this->jointList.push_back(tempJoint);
+
+    return tempJoint;
+}
+
 // We might want to overload this to get a frame as the nominal written/derivative instead of the root frame
 std::shared_ptr<Translation> KinematicsEngine::createTranslationProperties(const std::shared_ptr<Point>& headPoint,
                                                                            const std::shared_ptr<Point>& tailPoint) {
@@ -131,6 +158,13 @@ std::shared_ptr<Rotation> KinematicsEngine::createRotationProperties(const std::
 
 InertiaTensor KinematicsEngine::createInertiaTensor(const std::shared_ptr<Point>& point) {
     return InertiaTensor(point);
+}
+
+void KinematicsEngine::connect(const std::shared_ptr<Part>& lowerPart,
+                                const std::shared_ptr<Joint>& joint,
+                                const std::shared_ptr<Part>& upperPart) {
+    joint->lowerFrame->setParentFrame(lowerPart->frame);
+    upperPart->frame->setParentFrame(joint->upperFrame);
 }
 
 std::vector<std::shared_ptr<Frame> > KinematicsEngine::findAbsolutePath(const std::shared_ptr<Frame>& frame) {

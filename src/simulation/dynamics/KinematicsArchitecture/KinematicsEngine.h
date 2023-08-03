@@ -22,6 +22,7 @@
 
 #include "simulation/dynamics/KinematicsArchitecture/Frame.h"
 #include "simulation/dynamics/KinematicsArchitecture/Part.h"
+#include "simulation/dynamics/KinematicsArchitecture/Joint.h"
 #include "simulation/dynamics/KinematicsArchitecture/Point.h"
 #include "simulation/dynamics/KinematicsArchitecture/Tensor.h"
 #include "simulation/dynamics/KinematicsArchitecture/Vector.h"
@@ -37,6 +38,7 @@ public:
     std::shared_ptr<Frame> rootFrame;
     std::vector<std::shared_ptr<Frame>> frameList;
     std::vector<std::shared_ptr<Part>> partList;
+    std::vector<std::shared_ptr<Joint>> jointList;
     std::vector<std::shared_ptr<Point>> pointList;
     std::vector<std::shared_ptr<Translation>> translationList;
     std::vector<std::shared_ptr<Rotation>> rotationList;
@@ -46,9 +48,12 @@ public:
     std::shared_ptr<Frame> createFrame(const std::shared_ptr<Frame>& parentFrame);
     std::shared_ptr<Part> createPart();
     std::shared_ptr<Part> createPart(const std::shared_ptr<Frame>& parentFrame);
+    std::shared_ptr<RotaryOneDOF> createRotaryOneDOFJoint();
+    std::shared_ptr<RotaryTwoDOF> createRotaryTwoDOFJoint();
     std::shared_ptr<Translation> createTranslationProperties(const std::shared_ptr<Point>& headPoint, const std::shared_ptr<Point>& tailPoint);
     std::shared_ptr<Rotation> createRotationProperties(const std::shared_ptr<Frame>& upperFrame, const std::shared_ptr<Frame>& lowerFrame);
     InertiaTensor createInertiaTensor(const std::shared_ptr<Point>& point);
+    void connect(const std::shared_ptr<Part>& lowerPart, const std::shared_ptr<Joint>& joint, const std::shared_ptr<Part>& upperPart);
 
     static std::vector<std::shared_ptr<Frame>> findAbsolutePath(const std::shared_ptr<Frame>& frame);
     static std::pair<std::vector<const std::shared_ptr<Frame>>, std::vector<const std::shared_ptr<Frame>>> findPath2LCA(const std::shared_ptr<Frame>& upperFrame, const std::shared_ptr<Frame>& lowerFrame);
