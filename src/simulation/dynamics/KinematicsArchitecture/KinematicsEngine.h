@@ -25,6 +25,7 @@
 #include "simulation/dynamics/KinematicsArchitecture/Joint.h"
 #include "simulation/dynamics/KinematicsArchitecture/Point.h"
 #include "simulation/dynamics/KinematicsArchitecture/Tensor.h"
+#include "simulation/dynamics/KinematicsArchitecture/Assembly.h"
 #include "simulation/dynamics/KinematicsArchitecture/Vector.h"
 #include "architecture/utilities/avsEigenSupport.h"
 #include "architecture/utilities/avsEigenMRP.h"
@@ -53,6 +54,7 @@ public:
     std::shared_ptr<Translation> createTranslationProperties(const std::shared_ptr<Point>& headPoint, const std::shared_ptr<Point>& tailPoint);
     std::shared_ptr<Rotation> createRotationProperties(const std::shared_ptr<Frame>& upperFrame, const std::shared_ptr<Frame>& lowerFrame);
     InertiaTensor createInertiaTensor(const std::shared_ptr<Point>& point);
+    std::shared_ptr<Assembly> createAssembly();
     void connect(const std::shared_ptr<Part>& lowerPart, const std::shared_ptr<Joint>& joint, const std::shared_ptr<Part>& upperPart);
 
     static std::vector<std::shared_ptr<Frame>> findAbsolutePath(const std::shared_ptr<Frame>& frame);
@@ -63,6 +65,9 @@ public:
     Vector findRelativePosition(std::shared_ptr<Point> headPoint, const std::shared_ptr<Point>& tailPoint);
     Vector findRelativeVelocity(std::shared_ptr<Point> headPoint, const std::shared_ptr<Point>& tailPoint, const std::shared_ptr<Frame> derivFrame);
     InertiaTensor parallelAxisTheorem(const std::shared_ptr<Part>& part, const std::shared_ptr<Point>& point);
+    double getAssemblyMass(const std::shared_ptr<Assembly>& assembly);
+    Vector getAssemblyCOM(const std::shared_ptr<Assembly>& assembly, const std::shared_ptr<Point>& tailPoint);
+    InertiaTensor getAssemblyInertia(const std::shared_ptr<Assembly>& assembly, const std::shared_ptr<Point>& point);
 
 private:
     static Eigen::MRPd findIntermediateAttitude(const std::vector<const std::shared_ptr<Frame>>& path);
