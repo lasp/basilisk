@@ -21,6 +21,7 @@
 #define KINEMATICS_ENGINE_H
 
 #include "simulation/dynamics/KinematicsArchitecture/Frame.h"
+#include "simulation/dynamics/KinematicsArchitecture/Part.h"
 #include "simulation/dynamics/KinematicsArchitecture/Point.h"
 #include "simulation/dynamics/KinematicsArchitecture/Tensor.h"
 #include "simulation/dynamics/KinematicsArchitecture/Vector.h"
@@ -35,6 +36,7 @@ public:
 
     std::shared_ptr<Frame> rootFrame;
     std::vector<std::shared_ptr<Frame>> frameList;
+    std::vector<std::shared_ptr<Part>> partList;
     std::vector<std::shared_ptr<Point>> pointList;
     std::vector<std::shared_ptr<Translation>> translationList;
     std::vector<std::shared_ptr<Rotation>> rotationList;
@@ -42,6 +44,8 @@ public:
     std::shared_ptr<Point> createPoint();
     std::shared_ptr<Frame> createFrame();
     std::shared_ptr<Frame> createFrame(const std::shared_ptr<Frame>& parentFrame);
+    std::shared_ptr<Part> createPart();
+    std::shared_ptr<Part> createPart(const std::shared_ptr<Frame>& parentFrame);
     std::shared_ptr<Translation> createTranslationProperties(const std::shared_ptr<Point>& headPoint, const std::shared_ptr<Point>& tailPoint);
     std::shared_ptr<Rotation> createRotationProperties(const std::shared_ptr<Frame>& upperFrame, const std::shared_ptr<Frame>& lowerFrame);
     InertiaTensor createInertiaTensor(const std::shared_ptr<Point>& point);
@@ -53,6 +57,7 @@ public:
     static Vector findRelativeAngularAcceleration(const std::shared_ptr<Frame>& upperFrame, const std::shared_ptr<Frame>& lowerFrame, const std::shared_ptr<Frame>& derivFrame);
     Vector findRelativePosition(std::shared_ptr<Point> headPoint, const std::shared_ptr<Point>& tailPoint);
     Vector findRelativeVelocity(std::shared_ptr<Point> headPoint, const std::shared_ptr<Point>& tailPoint, const std::shared_ptr<Frame> derivFrame);
+    InertiaTensor parallelAxisTheorem(const std::shared_ptr<Part>& part, const std::shared_ptr<Point>& point);
 
 private:
     static Eigen::MRPd findIntermediateAttitude(const std::vector<const std::shared_ptr<Frame>>& path);

@@ -30,6 +30,7 @@ KinematicsEngine::KinematicsEngine() {
 
 KinematicsEngine::~KinematicsEngine() {
     this->frameList.clear();
+    this->partList.clear();
     this->pointList.clear();
     this->translationList.clear();
     this->rotationList.clear();
@@ -67,6 +68,33 @@ std::shared_ptr<Frame> KinematicsEngine::createFrame(const std::shared_ptr<Frame
     this->frameList.push_back(tempFrame);
 
     return tempFrame;
+}
+
+std::shared_ptr<Part> KinematicsEngine::createPart() {
+    return this->createPart(this->rootFrame);
+}
+
+std::shared_ptr<Part> KinematicsEngine::createPart(const std::shared_ptr<Frame>& parentFrame) {
+    auto CoMPoint = this->createPoint();
+    auto tempFrame = this->createFrame(parentFrame);
+    auto transProperties = this->createTranslationProperties(CoMPoint, tempFrame->originPoint);
+    auto tempPart = std::make_shared<Part>(std::move(tempFrame)); // maybe add constructor for part with pos vec
+    auto tempInertia = this->createInertiaTensor(CoMPoint);
+
+    tempPart->r_ScS = transProperties;
+
+    auto zeroVector = Vector(Eigen::Vector3d::Zero(), parentFrame);
+    transProperties->setPosition(zeroVector);
+    transProperties->setVelocity(zeroVector, parentFrame);
+    transProperties->setAcceleration(zeroVector, parentFrame, parentFrame);
+    tempInertia.set(Eigen::Matrix3d::Zero(), tempPart->frame);
+
+    tempPart->CoMPoint = CoMPoint;
+    tempPart->IPntSc_S = tempInertia;
+
+    this->partList.push_back(tempPart);
+
+    return tempPart;
 }
 
 // We might want to overload this to get a frame as the nominal written/derivative instead of the root frame
@@ -349,4 +377,16 @@ std::pair<std::vector<const std::shared_ptr<const Translation>>, bool> Kinematic
         }
     }
     return std::make_pair(transPath, leafReached);
+}
+
+InertiaTensor KinematicsEngine::parallelAxisTheorem(const std::shared_ptr<Part>& part, const std::shared_ptr<Point>& point) {
+    Vector relativePosition = findRelativePosition(part->IPntSc_S.getPoint() , point);
+
+    Eigen::Matrix3d returnInertiaMatrix = part->IPntSc_S.getMatrix(relativePosition.getWrittenFrame()) +
+                                          (part->mass * eigenTilde(relativePosition.getMatrix(relativePosition.getWrittenFrame())) * eigenTilde(relativePosition.getMatrix(relativePosition.getWrittenFrame())).transpose());
+
+    InertiaTensor returnInertia = this->createInertiaTensor(point);
+    returnInertia.set(returnInertiaMatrix, relativePosition.getWrittenFrame());
+
+    return returnInertia;
 }
