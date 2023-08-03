@@ -29,9 +29,15 @@
     #include "simulation/dynamics/KinematicsArchitecture/KinematicsEngine.h"
 %}
 
+
+%shared_ptr(Point)
 %shared_ptr(KinematicsEngine)
 
 %include "simulation/dynamics/KinematicsArchitecture/KinematicsEngine.h"
+
+namespace std {
+        %template(PointVector) vector<shared_ptr<Point>>;
+}
 
 %pythoncode %{
     import sys

@@ -16,24 +16,4 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
-
-#ifndef KINEMATICS_ENGINE_H
-#define KINEMATICS_ENGINE_H
-
-#include "simulation/dynamics/KinematicsArchitecture/Point.h"
-#include "architecture/utilities/avsEigenSupport.h"
-#include "architecture/utilities/avsEigenMRP.h"
-#include <iostream>
-
-class KinematicsEngine {
-public:
-    KinematicsEngine();
-    ~KinematicsEngine();
-
-    std::vector<std::shared_ptr<Point>> pointList;
-
-    std::shared_ptr<Point> createPoint();
-
-};
-
-#endif
+#include "Point.h"
