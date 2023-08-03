@@ -22,6 +22,7 @@
 
 #include "simulation/dynamics/KinematicsArchitecture/Frame.h"
 #include "simulation/dynamics/KinematicsArchitecture/Point.h"
+#include "simulation/dynamics/KinematicsArchitecture/Tensor.h"
 #include "simulation/dynamics/KinematicsArchitecture/Vector.h"
 #include "architecture/utilities/avsEigenSupport.h"
 #include "architecture/utilities/avsEigenMRP.h"
@@ -43,6 +44,7 @@ public:
     std::shared_ptr<Frame> createFrame(const std::shared_ptr<Frame>& parentFrame);
     std::shared_ptr<Translation> createTranslationProperties(const std::shared_ptr<Point>& headPoint, const std::shared_ptr<Point>& tailPoint);
     std::shared_ptr<Rotation> createRotationProperties(const std::shared_ptr<Frame>& upperFrame, const std::shared_ptr<Frame>& lowerFrame);
+    InertiaTensor createInertiaTensor(const std::shared_ptr<Point>& point);
 
     static std::vector<std::shared_ptr<Frame>> findAbsolutePath(const std::shared_ptr<Frame>& frame);
     static std::pair<std::vector<const std::shared_ptr<Frame>>, std::vector<const std::shared_ptr<Frame>>> findPath2LCA(const std::shared_ptr<Frame>& upperFrame, const std::shared_ptr<Frame>& lowerFrame);

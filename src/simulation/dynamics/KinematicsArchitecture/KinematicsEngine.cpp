@@ -101,6 +101,10 @@ std::shared_ptr<Rotation> KinematicsEngine::createRotationProperties(const std::
     return rotationalProperties;
 }
 
+InertiaTensor KinematicsEngine::createInertiaTensor(const std::shared_ptr<Point>& point) {
+    return InertiaTensor(point);
+}
+
 std::vector<std::shared_ptr<Frame> > KinematicsEngine::findAbsolutePath(const std::shared_ptr<Frame>& frame) {
     auto intermediateFrame = frame;
     std::vector<std::shared_ptr<Frame>> path {frame};
@@ -346,5 +350,3 @@ std::pair<std::vector<const std::shared_ptr<const Translation>>, bool> Kinematic
     }
     return std::make_pair(transPath, leafReached);
 }
-
-
