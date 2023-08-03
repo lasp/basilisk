@@ -1,7 +1,7 @@
 /*
  ISC License
 
- Copyright (c) 2023, Laboratory for Atmospheric and Space Physics, University of Colorado at Boulder
+ Copyright (c) 2023, Autonomous Vehicle Systems Lab, University of Colorado at Boulder
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -26,31 +26,18 @@
 %include <std_shared_ptr.i>
 
 %{
-    #include "simulation/dynamics/KinematicsArchitecture/KinematicsEngine.h"
+    #include "simulation/dynamics/KinematicsArchitecture/Joint.h"
 %}
 
-%shared_ptr(Frame)
-%shared_ptr(InertiaTensor)
 %shared_ptr(Joint)
-%shared_ptr(KinematicsEngine)
-%shared_ptr(Part)
-%shared_ptr(Point)
 %shared_ptr(RotaryOneDOF)
 %shared_ptr(RotaryTwoDOF)
-%shared_ptr(Rotation)
-%shared_ptr(Tensor)
-%shared_ptr(Translation)
-%shared_ptr(Vector)
+%shared_ptr(Hinge)
 
-%include "simulation/dynamics/KinematicsArchitecture/KinematicsEngine.h"
+%include "simulation/dynamics/KinematicsArchitecture/Joint.h"
 
 namespace std {
-        %template(JointVector) vector<shared_ptr<Joint>>;
-        %template(PartVector) vector<shared_ptr<Part>>;
-        %template(PointVector) vector<shared_ptr<Point>>;
-        %template(TranslationVector) vector<shared_ptr<Translation>>;
-        %template(RotationVector) vector<shared_ptr<Rotation>>;
-        %template(FrameVector) vector<shared_ptr<Frame>>;
+        %template(HingeVector) vector<shared_ptr<Hinge>>;
 }
 
 %pythoncode %{
