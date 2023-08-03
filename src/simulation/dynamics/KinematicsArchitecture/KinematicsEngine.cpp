@@ -160,6 +160,10 @@ InertiaTensor KinematicsEngine::createInertiaTensor(const std::shared_ptr<Point>
     return InertiaTensor(point);
 }
 
+std::shared_ptr<Assembly> KinematicsEngine::createAssembly() {
+    return std::make_shared<Assembly>();
+}
+
 void KinematicsEngine::connect(const std::shared_ptr<Part>& lowerPart,
                                 const std::shared_ptr<Joint>& joint,
                                 const std::shared_ptr<Part>& upperPart) {
@@ -423,4 +427,53 @@ InertiaTensor KinematicsEngine::parallelAxisTheorem(const std::shared_ptr<Part>&
     returnInertia.set(returnInertiaMatrix, relativePosition.getWrittenFrame());
 
     return returnInertia;
+}
+
+double KinematicsEngine::getAssemblyMass(const std::shared_ptr<Assembly>& assembly) {
+    double assemblyMass = 0.0;
+    for (auto const& part: assembly->partList) {
+        assemblyMass += part->mass;
+    }
+
+    return assemblyMass;
+}
+
+Vector KinematicsEngine::getAssemblyCOM(const std::shared_ptr<Assembly>& assembly, const std::shared_ptr<Point>& tailPoint) {
+    double assemblyMass = getAssemblyMass(assembly);
+    auto assemblyCOMPositionVector = Vector(Eigen::Vector3d::Zero(), nullptr);
+    auto intermediatePosVec1 = Vector(Eigen::Vector3d::Zero(), this->rootFrame);
+    Eigen::Vector3d intermediateVec;
+
+    for (const auto& part: assembly->partList) {
+        intermediatePosVec1 = findRelativePosition(part->r_ScS->getHeadPoint(), tailPoint);
+        intermediatePosVec1 *= (part->mass / assemblyMass);
+
+        if (assemblyCOMPositionVector.getWrittenFrame()) {
+            assemblyCOMPositionVector += intermediatePosVec1;
+        }
+        else{
+            assemblyCOMPositionVector = intermediatePosVec1;
+        }
+    }
+
+    return assemblyCOMPositionVector;
+}
+
+InertiaTensor KinematicsEngine::getAssemblyInertia(const std::shared_ptr<Assembly>& assembly, const std::shared_ptr<Point>& point) {
+    auto intermediateInertia = Tensor();
+    for (int i = 0; i<assembly->partList.size(); i++) {
+        auto partInertia = parallelAxisTheorem(assembly->partList.at(i), point);
+
+        if (!(i == 0)) {
+            intermediateInertia += partInertia;
+        }
+        else{
+            intermediateInertia.set(partInertia.getMatrix(partInertia.getWrittenFrame()), partInertia.getWrittenFrame());
+        }
+    }
+
+    auto assemblyInertia = InertiaTensor(point);
+    assemblyInertia.set(intermediateInertia.getMatrix(intermediateInertia.getWrittenFrame()), intermediateInertia.getWrittenFrame());
+
+    return assemblyInertia;
 }
