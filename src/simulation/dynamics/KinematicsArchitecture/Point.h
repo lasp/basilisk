@@ -17,23 +17,19 @@
 
  */
 
-#ifndef KINEMATICS_ENGINE_H
-#define KINEMATICS_ENGINE_H
+#ifndef POINT_H
+#define POINT_H
 
-#include "simulation/dynamics/KinematicsArchitecture/Point.h"
-#include "architecture/utilities/avsEigenSupport.h"
-#include "architecture/utilities/avsEigenMRP.h"
-#include <iostream>
+#include <Eigen/Core>
+#include <string>
 
-class KinematicsEngine {
+/*! @brief basic Basilisk C++ module class */
+class Point {
 public:
-    KinematicsEngine();
-    ~KinematicsEngine();
-
-    std::vector<std::shared_ptr<Point>> pointList;
-
-    std::shared_ptr<Point> createPoint();
-
+    Point() = default;
+    ~Point() = default;
+    std::string tag;
 };
+
 
 #endif

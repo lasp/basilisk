@@ -26,4 +26,12 @@ KinematicsEngine::KinematicsEngine() {
 }
 
 KinematicsEngine::~KinematicsEngine() {
+    this->pointList.clear();
+}
+
+std::shared_ptr<Point> KinematicsEngine::createPoint() {
+    auto tempPoint = std::make_shared<Point>();
+    this->pointList.push_back(tempPoint);
+
+    return tempPoint;
 }

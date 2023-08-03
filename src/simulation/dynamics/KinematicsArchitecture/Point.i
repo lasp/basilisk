@@ -16,24 +16,23 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+%include "std_string.i"
+%include "swig_eigen.i"
+%include "swig_conly_data.i"
+%include <std_shared_ptr.i>
 
-#ifndef KINEMATICS_ENGINE_H
-#define KINEMATICS_ENGINE_H
+%{
+    #include "simulation/dynamics/KinematicsArchitecture/Point.h"
+%}
 
-#include "simulation/dynamics/KinematicsArchitecture/Point.h"
-#include "architecture/utilities/avsEigenSupport.h"
-#include "architecture/utilities/avsEigenMRP.h"
-#include <iostream>
+%shared_ptr(Point)
 
-class KinematicsEngine {
-public:
-    KinematicsEngine();
-    ~KinematicsEngine();
+%include "simulation/dynamics/KinematicsArchitecture/Point.h"
 
-    std::vector<std::shared_ptr<Point>> pointList;
-
-    std::shared_ptr<Point> createPoint();
-
-};
-
-#endif
+%pythoncode %{
+    import sys
+    protectAllClasses(sys.modules[__name__])
+%}
