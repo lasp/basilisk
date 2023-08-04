@@ -533,7 +533,8 @@ list(REMOVE_ITEM
         "simulation/dynamics/KinematicsArchitecture/Part.i"
         "simulation/dynamics/KinematicsArchitecture/Point.i"
         "simulation/dynamics/KinematicsArchitecture/Tensor.i"
-        "simulation/dynamics/KinematicsArchitecture/Vector.i")
+        "simulation/dynamics/KinematicsArchitecture/Vector.i"
+        "simulation/dynamics/KinematicsArchitecture/DynamicsEngine.i")
 
 generate_package_targets("${DYN_TARGETS}" "dynamicsLib;${ARCHITECTURE_LIBS}" "simulation")
 generate_package_targets("${ENV_TARGETS}" "environmentLib;${ARCHITECTURE_LIBS};${library_dependencies}" "simulation")
