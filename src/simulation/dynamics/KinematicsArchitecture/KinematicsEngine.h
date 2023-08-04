@@ -85,6 +85,8 @@ public:
     Vector getAssemblyCOM(const std::shared_ptr<Assembly>& assembly, const std::shared_ptr<Point>& tailPoint);
     InertiaTensor getAssemblyInertia(const std::shared_ptr<Assembly>& assembly, const std::shared_ptr<Point>& point);
 
+    void writeOutputMessages(uint64_t callTime, std::shared_ptr<Frame> inertialFrame);
+
 private:
     static Eigen::MRPd findIntermediateAttitude(const std::vector<const std::shared_ptr<Frame>>& path);
     static Vector findIntermediateAngularVelocity(const std::vector<const std::shared_ptr<Frame>>& path);

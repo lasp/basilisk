@@ -24,6 +24,8 @@
 #include "simulation/dynamics/KinematicsArchitecture/Point.h"
 #include "simulation/dynamics/KinematicsArchitecture/Tensor.h"
 #include "simulation/dynamics/KinematicsArchitecture/Vector.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
 
 #include <Eigen/Core>
 
@@ -39,6 +41,8 @@ public:
     std::shared_ptr<Translation> r_ScS;
     std::shared_ptr<Point> CoMPoint;
     std::shared_ptr<Frame> frame;
+
+    Message<SCStatesMsgPayload> bodyStateOutMsg;
 };
 
 #endif

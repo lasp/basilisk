@@ -20,15 +20,12 @@
 #include "KinematicsEngine.h"
 #include "architecture/utilities/avsEigenMRP.h"
 #include "architecture/utilities/avsEigenSupport.h"
-#include <utility>
 
 KinematicsEngine::KinematicsEngine() {
     auto originPoint = this->createPoint();
     this->rootFrame = std::make_shared<Frame>();
     this->rootFrame->originPoint = originPoint;
 }
-
-#include <utility>
 
 KinematicsEngine::~KinematicsEngine() {
     this->frameList.clear();
@@ -188,6 +185,29 @@ void KinematicsEngine::connect(const std::shared_ptr<Part>& lowerPart,
     auto upperNode = findNode(upperPart);
     lowerNode->addEdge(upperNode, joint);
     upperNode->addEdge(lowerNode, joint);
+}
+
+void KinematicsEngine::writeOutputMessages(uint64_t callTime, std::shared_ptr<Frame> inertialFrame) {
+    for (const auto& part: this->partList) {
+        // - Populate state output message
+        SCStatesMsgPayload stateOut;
+        stateOut = part->bodyStateOutMsg.zeroMsgPayload;
+
+        // Get attitude and angular velocity
+        auto omega_BN = part->frame->sigma_SP->getAngularVelocity();
+        auto sigma_BN = part->frame->sigma_SP->getAttitude();  // this conversion is so dumb
+
+        // Get position and velocity from the center of mass
+        auto r_CN = part->frame->r_SP->getPosition() + part->r_ScS->getPosition();
+        auto rDot_CN = part->frame->r_SP->getVelocity(inertialFrame)
+                + part->r_ScS->getVelocity(inertialFrame);
+
+        eigenMatrixXd2CArray(r_CN.getMatrix(inertialFrame), stateOut.r_CN_N);
+        eigenMatrixXd2CArray(rDot_CN.getMatrix(inertialFrame), stateOut.v_CN_N);
+        eigenMatrixXd2CArray(eigenMRPd2Vector3d(sigma_BN), stateOut.sigma_BN);
+        eigenMatrixXd2CArray(omega_BN.getMatrix(part->frame), stateOut.omega_BN_B);
+        part->bodyStateOutMsg.write(&stateOut, 0, callTime);  // need to figure out moduleID
+    }
 }
 
 
