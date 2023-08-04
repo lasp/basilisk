@@ -59,6 +59,8 @@ public:
     Vector findRelativeVelocity(std::shared_ptr<Point> headPoint, const std::shared_ptr<Point>& tailPoint, const std::shared_ptr<Frame> derivFrame);
     InertiaTensor parallelAxisTheorem(const std::shared_ptr<Part>& part, const std::shared_ptr<Point>& point);
 
+    void writeOutputMessages(uint64_t callTime, std::shared_ptr<Frame> inertialFrame);
+
 private:
     static Eigen::MRPd findIntermediateAttitude(const std::vector<const std::shared_ptr<Frame>>& path);
     static Vector findIntermediateAngularVelocity(const std::vector<const std::shared_ptr<Frame>>& path);

@@ -34,6 +34,9 @@
 
 %include "simulation/dynamics/KinematicsArchitecture/Part.h"
 
+%include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
+struct SCStatesMsg_C;
+
 %pythoncode %{
 import sys
 protectAllClasses(sys.modules[__name__])
