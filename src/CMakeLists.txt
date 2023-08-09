@@ -528,7 +528,10 @@ endif(NOT "${EXTERNAL_MODULES_PATH}" STREQUAL "")
 # Remove the following .i files from the list so they aren't configured as build targets
 list(REMOVE_ITEM
         DYN_TARGETS
+        "simulation/dynamics/KinematicsArchitecture/Assembly.i"
         "simulation/dynamics/KinematicsArchitecture/Frame.i"
+        "simulation/dynamics/KinematicsArchitecture/Hinge.i"
+        "simulation/dynamics/KinematicsArchitecture/Joint.i"
         "simulation/dynamics/KinematicsArchitecture/KinematicsEngine.i"
         "simulation/dynamics/KinematicsArchitecture/Part.i"
         "simulation/dynamics/KinematicsArchitecture/Point.i"
