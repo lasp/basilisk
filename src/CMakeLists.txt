@@ -577,7 +577,19 @@ if(NOT "${EXTERNAL_MODULES_PATH}" STREQUAL "")
   generate_package_targets("${EXTERNAL_MODULE_TARGETS}" "${AllLibs}" "ExternalModules")
 endif(NOT "${EXTERNAL_MODULES_PATH}" STREQUAL "")
 
-# The quotations around DYN_TARGETS informs function that it is a list
+# Remove the following .i files from the list so they aren't configured as build targets
+list(REMOVE_ITEM
+        DYN_TARGETS
+        "simulation/dynamics/KinematicsArchitecture/Assembly.i"
+        "simulation/dynamics/KinematicsArchitecture/Frame.i"
+        "simulation/dynamics/KinematicsArchitecture/Hinge.i"
+        "simulation/dynamics/KinematicsArchitecture/Joint.i"
+        "simulation/dynamics/KinematicsArchitecture/KinematicsEngine.i"
+        "simulation/dynamics/KinematicsArchitecture/Part.i"
+        "simulation/dynamics/KinematicsArchitecture/Point.i"
+        "simulation/dynamics/KinematicsArchitecture/Tensor.i"
+        "simulation/dynamics/KinematicsArchitecture/Vector.i")
+
 generate_package_targets("${DYN_TARGETS}" "dynamicsLib;${ARCHITECTURE_LIBS}" "simulation")
 generate_package_targets("${ENV_TARGETS}" "environmentLib;${ARCHITECTURE_LIBS};${library_dependencies}" "simulation")
 generate_package_targets("${DATA_TARGETS}" "onboardDataHandlingLib;${ARCHITECTURE_LIBS};" "simulation")
