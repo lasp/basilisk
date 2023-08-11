@@ -74,9 +74,9 @@ def run(show_plots):
         Pyy = 5829.0209582175321
         Pzz = 4807.992104939683
     else:
-        Pxx = 1725.697021321552
-        Pyy = 5524.699699357305
-        Pzz = 4809.231017715462
+        Pxx = 4995.119267
+        Pyy = 8794.038297
+        Pzz = 4809.587466
 
     # Find the best gain P
     P1 = 2 * Pxx / settlingTime
@@ -473,6 +473,7 @@ def collectData(useThrusters, useSolarArrays, useSRP, att180Error, spinRate, PGa
 
     if useSolarArrays:
         scObject.hub.mHub = scMass - 2 * massSolarArray
+        r_BcB_B = [[7.84713085978795 / 1000], [-9.966952366 / 1000], [1214.854881 / 1000]]  # [m] - position vector of hub CM relative to the body-fixed point B
         Pxx = 1531.396396995112  # [kg m^2]
         Pyy = 2610.4239755468516  # [kg m^2]
         Pzz = 1998.446530952034  # [kg m^2]
@@ -481,18 +482,18 @@ def collectData(useThrusters, useSolarArrays, useSRP, att180Error, spinRate, PGa
         Pyz = 79.00993258422233  # [kg m^2]
     else:
         scObject.hub.mHub = scMass
-        Pxx = 1725.697021321552  # [kg m^2]
-        Pyy = 5524.699699357305  # [kg m^2]
-        Pzz = 4809.231017715462  # [kg m^2]
-        Pxy = -5.098169104856651  # [kg m^2]
-        Pxz = -11.96633789093479  # [kg m^2]
-        Pyz = 42.83593479126124  # [kg m^2]
+        r_BcB_B = [0.007260552824003,  0.0258361327545087, 1.1569339845301208]  # [m] - position vector of hub CM relative to the body-fixed point B
+        Pxx = 4995.119267  # [kg m^2]
+        Pyy = 8794.038297  # [kg m^2]
+        Pzz = 4809.587466  # [kg m^2]
+        Pxy = -4.924921893  # [kg m^2]
+        Pxz = -33.08314604  # [kg m^2]
+        Pyz = 69.65723097  # [kg m^2]
 
     IHubPntBc_B = [Pxx,  Pxy,  Pxz,
                    Pxy,  Pyy,  Pyz,
                    Pxz,  Pyz,  Pzz]
-    # hub CM relative to the body-fixed point B
-    r_BcB_B = [[7.84713085978795 / 1000], [-9.966952366 / 1000], [1214.854881 / 1000]]  # [m] - position vector of
+
     scObject.hub.r_BcB_B = r_BcB_B
     scObject.hub.IHubPntBc_B = unitTestSupport.np2EigenMatrix3d(IHubPntBc_B)
 
