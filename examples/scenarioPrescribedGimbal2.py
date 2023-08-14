@@ -21,7 +21,7 @@
 #
 # Purpose:  Simulate the prescribed gimbal motion using two single-axis stepper motor actuators.
 # Author:   Leah Kiner
-# Creation Date:  July 13, 2023
+# Creation Date:  July 31, 2023
 #
 
 import os
@@ -91,11 +91,7 @@ def run():
     motor2AngleRateData = np.array(thetaDotInit)
     motor2AngularAccelData = np.array(0.0)
     gimbal1AngleData = np.array(gimbal1InitAngle)
-    gimbal1AngleRateData = np.array(0.0)
-    gimbal1AngularAccelData = np.array(0.0)
     gimbal2AngleData = np.array(gimbal2InitAngle)
-    gimbal2AngleRateData = np.array(0.0)
-    gimbal2AngularAccelData = np.array(0.0)
     thrustAxis = np.array([0.0, 0.0, 0.0])
 
     dcm1 = np.array([[1,  0, 0],
@@ -120,6 +116,7 @@ def run():
 
     # MOVE MOTOR 1
     intermediateInitialAngle = motor1InitAngle
+    motor1FinalAngle = motor1InitAngle
     for idx1 in range(numSteps1):
         motor1FinalAngle = motor1InitAngle + ((idx1 + 1) * motorStepAngle)
         tInit = t
@@ -137,6 +134,72 @@ def run():
         motor2AngleRate = 0.0  # [CONSTANT]
         motor2AngularAccel = 0.0  # [CONSTANT]
 
+        # Find gimbal initial angles
+        # Interpolate to find gimbal angles
+        gimbal1InitAngle, gimbal2InitAngle, gimbal1InitAngleRate, gimbal2InitAngleRate, gimbal1InitAngularAccel, gimbal2InitAngularAccel = motorToGimbal(gimbal_data,
+                                                                                                                                 tableStepAngle,
+                                                                                                                                 motor1,
+                                                                                                                                 motor2,
+                                                                                                                                 intermediateInitialAngle,
+                                                                                                                                 0.0,
+                                                                                                                                 0.0,
+                                                                                                                                 motor2Angle,
+                                                                                                                                 0.0,
+                                                                                                                                 0.0)
+
+        # Find initial PRV
+        dcm1 = np.array([[1,  0, 0],
+                         [0, np.cos(deg2Rad * gimbal1InitAngle), np.sin(deg2Rad * gimbal1InitAngle)],
+                         [0, -np.sin(deg2Rad * gimbal1InitAngle), np.cos(deg2Rad * gimbal1InitAngle)]])
+        dcm2 = np.array([[np.cos(deg2Rad * gimbal2InitAngle),  0, -np.sin(deg2Rad * gimbal2InitAngle)],
+                         [0, 1, 0],
+                         [np.sin(deg2Rad * gimbal2InitAngle),  0, np.cos(deg2Rad * gimbal2InitAngle)]])
+
+        if oneTwo:
+            dcm_FM = np.matmul(dcm2, dcm1)
+        else:
+            dcm_FM = np.matmul(dcm1, dcm2)
+
+        PRV_FM1 = rbk.C2PRV(dcm_FM)
+
+        # Find final PRV
+        # Interpolate to find gimbal angles
+        gimbal1FinalAngle, gimbal2FinalAngle, gimbal1FinalAngleRate, gimbal2FinalAngleRate, gimbal1FinalAngularAccel, gimbal2FinalAngularAccel = motorToGimbal(gimbal_data,
+                                                                                                                                 tableStepAngle,
+                                                                                                                                 motor1,
+                                                                                                                                 motor2,
+                                                                                                                                 motor1FinalAngle,
+                                                                                                                                 0.0,
+                                                                                                                                 0.0,
+                                                                                                                                 motor2Angle,
+                                                                                                                                 0.0,
+                                                                                                                                 0.0)
+
+        dcm1 = np.array([[1,  0, 0],
+                         [0, np.cos(deg2Rad * gimbal1FinalAngle), np.sin(deg2Rad * gimbal1FinalAngle)],
+                         [0, -np.sin(deg2Rad * gimbal1FinalAngle), np.cos(deg2Rad * gimbal1FinalAngle)]])
+        dcm2 = np.array([[np.cos(deg2Rad * gimbal2FinalAngle),  0, -np.sin(deg2Rad * gimbal2FinalAngle)],
+                         [0, 1, 0],
+                         [np.sin(deg2Rad * gimbal2FinalAngle),  0, np.cos(deg2Rad * gimbal2FinalAngle)]])
+
+        if oneTwo:
+            dcm_FM = np.matmul(dcm2, dcm1)
+        else:
+            dcm_FM = np.matmul(dcm1, dcm2)
+
+        PRV_FM2 = rbk.C2PRV(dcm_FM)
+
+        # Find relative PRV during the step
+        relativePRV = rbk.subPRV(PRV_FM2, PRV_FM1)
+        phiRef = np.linalg.norm(relativePRV)
+        eHat = relativePRV / phiRef
+
+        gimbalMaxAccel = phiRef / ((0.5 * stepSimTime) * (0.5 * stepSimTime))
+
+        # Find gimbal parabolic constants
+        c = (0.5 * phiRef) / ((ts - tInit) * (ts - tInit))
+        d = (-0.5 * phiRef) / ((ts - tf) * (ts - tf))
+
         for idx2 in range(n_s):
             # Update current time
             t = t + dt
@@ -146,26 +209,26 @@ def run():
                 motor1AngleRate = motor1AngularAccel * (t - tInit) + thetaDotInit
                 motor1Angle = a * (t - tInit) * (t - tInit) + intermediateInitialAngle
 
+                phiDDot = gimbalMaxAccel
+                phiDot = phiDDot * (t - tInit)
+                phi = c * (t - tInit) * (t - tInit)
+
             elif ( t > ts and t <= tf and tf - tInit != 0):
                 motor1AngularAccel = -1 * motorMaxAccel
                 motor1AngleRate = motor1AngularAccel * (t - tInit) + thetaDotInit - motor1AngularAccel * (tf - tInit)
                 motor1Angle = b * (t - tf) * (t - tf) + motor1FinalAngle
+
+                phiDDot = -1 * gimbalMaxAccel
+                phiDot = phiDDot * (t - tInit) - phiDDot * (tf - tInit)
+                phi = d * (t - tf) * (t - tf) + phiRef
             else:
                 motor1AngularAccel = 0.0
                 motor1AngleRate = thetaDotRef
                 motor1Angle = motor1FinalAngle
 
-            # Interpolate to find gimbal angles
-            gimbal1Angle, gimbal2Angle, gimbal1AngleRate, gimbal2AngleRate, gimbal1AngularAccel, gimbal2AngularAccel = motorToGimbal(gimbal_data,
-                                                                                                                                     tableStepAngle,
-                                                                                                                                     motor1,
-                                                                                                                                     motor2,
-                                                                                                                                     motor1Angle,
-                                                                                                                                     motor1AngleRate,
-                                                                                                                                     motor1AngularAccel,
-                                                                                                                                     motor2Angle,
-                                                                                                                                     motor2AngleRate,
-                                                                                                                                     motor2AngularAccel)
+                phiDDot = 0.0
+                phiDot = 0.0
+                phi = phiRef
 
             # Store time current motor and gimbal states into the data arrays
             timespan = np.append(timespan, t)
@@ -175,34 +238,26 @@ def run():
             motor2AngleData = np.append(motor2AngleData, motor2Angle)
             motor2AngleRateData = np.append(motor2AngleRateData, 0.0)
             motor2AngularAccelData = np.append(motor2AngularAccelData, 0.0)
-            gimbal1AngleData = np.append(gimbal1AngleData, gimbal1Angle)
-            gimbal1AngleRateData = np.append(gimbal1AngleRateData, gimbal1AngleRate)
-            gimbal1AngularAccelData = np.append(gimbal1AngularAccelData, gimbal1AngularAccel)
-            gimbal2AngleData = np.append(gimbal2AngleData, gimbal2Angle)
-            gimbal2AngleRateData = np.append(gimbal2AngleRateData, gimbal2AngleRate)
-            gimbal2AngularAccelData = np.append(gimbal2AngularAccelData, gimbal2AngularAccel)
 
-            dcm1 = np.array([[1,  0, 0],
-                             [0, np.cos(deg2Rad * gimbal1Angle), np.sin(deg2Rad * gimbal1Angle)],
-                             [0, -np.sin(deg2Rad * gimbal1Angle), np.cos(deg2Rad * gimbal1Angle)]])
-            dcm2 = np.array([[np.cos(deg2Rad * gimbal2Angle),  0, -np.sin(deg2Rad * gimbal2Angle)],
-                             [0, 1, 0],
-                             [np.sin(deg2Rad * gimbal2Angle),  0, np.cos(deg2Rad * gimbal2Angle)]])
+            relativePRV = phi * eHat
+            PRV_FMCurrent = rbk.addPRV(PRV_FM1, relativePRV)
 
-            if oneTwo:
-                dcm_FM = np.matmul(dcm2, dcm1)
-            else:
-                dcm_FM = np.matmul(dcm1, dcm2)
-
+            dcm_FM = rbk.PRV2C(PRV_FMCurrent)
             thrustAx = dcm_FM[2, :]
             thrustAxis = np.vstack((thrustAxis, thrustAx))
-            sigma_FM = rbk.C2MRP(dcm_FM)
+
+            gimbal1Angle = np.arctan(dcm_FM[1, 2] / dcm_FM[1, 1]) / deg2Rad
+            gimbal2Angle = np.arctan(dcm_FM[2, 0] / dcm_FM[0, 0]) / deg2Rad
+            gimbal1AngleData = np.append(gimbal1AngleData, gimbal1Angle)
+            gimbal2AngleData = np.append(gimbal2AngleData, gimbal2Angle)
+
+            sigma_FM = rbk.PRV2MRP(PRV_FMCurrent)
             sigma_FMData = np.vstack((sigma_FMData, np.array(sigma_FM)))
 
-            omega_FM_F = np.matmul(dcm_FM, np.transpose(gimbal1AngleRate * rotAxis1)) + (gimbal2AngleRate * rotAxis2)
+            omega_FM_F = phiDot * eHat
             omega_FM_FData = np.vstack((omega_FM_FData, omega_FM_F))
 
-            omegaPrime_FM_F = np.matmul(dcm_FM, np.transpose(gimbal1AngularAccel * rotAxis1)) + (gimbal1AngularAccel * rotAxis2)
+            omegaPrime_FM_F = phiDDot * eHat
             omegaPrime_FM_FData = np.vstack((omegaPrime_FM_FData, omegaPrime_FM_F))
 
         # Update motor states after a step has been completed
@@ -229,6 +284,72 @@ def run():
         motor1AngleRate = 0.0
         motor1AngularAccel = 0.0  # [CONSTANT]
 
+        # Find gimbal initial angles
+        # Interpolate to find gimbal angles
+        gimbal1InitAngle, gimbal2InitAngle, gimbal1InitAngleRate, gimbal2InitAngleRate, gimbal1InitAngularAccel, gimbal2InitAngularAccel = motorToGimbal(gimbal_data,
+                                                                                                                                                         tableStepAngle,
+                                                                                                                                                         motor1,
+                                                                                                                                                         motor2,
+                                                                                                                                                         motor1Angle,
+                                                                                                                                                         0.0,
+                                                                                                                                                         0.0,
+                                                                                                                                                         intermediateInitialAngle,
+                                                                                                                                                         0.0,
+                                                                                                                                                         0.0)
+
+        # Find initial PRV
+        dcm1 = np.array([[1,  0, 0],
+                         [0, np.cos(deg2Rad * gimbal1InitAngle), np.sin(deg2Rad * gimbal1InitAngle)],
+                         [0, -np.sin(deg2Rad * gimbal1InitAngle), np.cos(deg2Rad * gimbal1InitAngle)]])
+        dcm2 = np.array([[np.cos(deg2Rad * gimbal2InitAngle),  0, -np.sin(deg2Rad * gimbal2InitAngle)],
+                         [0, 1, 0],
+                         [np.sin(deg2Rad * gimbal2InitAngle),  0, np.cos(deg2Rad * gimbal2InitAngle)]])
+
+        if oneTwo:
+            dcm_FM = np.matmul(dcm2, dcm1)
+        else:
+            dcm_FM = np.matmul(dcm1, dcm2)
+
+        PRV_FM1 = rbk.C2PRV(dcm_FM)
+
+        # Find final PRV
+        # Interpolate to find gimbal angles
+        gimbal1FinalAngle, gimbal2FinalAngle, gimbal1FinalAngleRate, gimbal2FinalAngleRate, gimbal1FinalAngularAccel, gimbal2FinalAngularAccel = motorToGimbal(gimbal_data,
+                                                                                                                                                               tableStepAngle,
+                                                                                                                                                               motor1,
+                                                                                                                                                               motor2,
+                                                                                                                                                               motor1Angle,
+                                                                                                                                                               0.0,
+                                                                                                                                                               0.0,
+                                                                                                                                                               motor2FinalAngle,
+                                                                                                                                                               0.0,
+                                                                                                                                                               0.0)
+
+        dcm1 = np.array([[1,  0, 0],
+                         [0, np.cos(deg2Rad * gimbal1FinalAngle), np.sin(deg2Rad * gimbal1FinalAngle)],
+                         [0, -np.sin(deg2Rad * gimbal1FinalAngle), np.cos(deg2Rad * gimbal1FinalAngle)]])
+        dcm2 = np.array([[np.cos(deg2Rad * gimbal2FinalAngle),  0, -np.sin(deg2Rad * gimbal2FinalAngle)],
+                         [0, 1, 0],
+                         [np.sin(deg2Rad * gimbal2FinalAngle),  0, np.cos(deg2Rad * gimbal2FinalAngle)]])
+
+        if oneTwo:
+            dcm_FM = np.matmul(dcm2, dcm1)
+        else:
+            dcm_FM = np.matmul(dcm1, dcm2)
+
+        PRV_FM2 = rbk.C2PRV(dcm_FM)
+
+        # Find relative PRV during the step
+        relativePRV = rbk.subPRV(PRV_FM2, PRV_FM1)
+        phiRef = np.linalg.norm(relativePRV)
+        eHat = relativePRV / phiRef
+
+        gimbalMaxAccel = phiRef / ((0.5 * stepSimTime) * (0.5 * stepSimTime))
+
+        # Find gimbal parabolic constants
+        c = (0.5 * phiRef) / ((ts - tInit) * (ts - tInit))
+        d = (-0.5 * phiRef) / ((ts - tf) * (ts - tf))
+
         for idx4 in range(n_s):
             # Update current time
             t = t + dt
@@ -238,26 +359,26 @@ def run():
                 motor2AngleRate = motor2AngularAccel * (t - tInit) + thetaDotInit
                 motor2Angle = a * (t - tInit) * (t - tInit) + intermediateInitialAngle
 
+                phiDDot = gimbalMaxAccel
+                phiDot = phiDDot * (t - tInit)
+                phi = c * (t - tInit) * (t - tInit)
+
             elif ( t > ts and t <= tf and tf - tInit != 0):
                 motor2AngularAccel = -1 * motorMaxAccel
                 motor2AngleRate = motor2AngularAccel * (t - tInit) + thetaDotInit - motor2AngularAccel * (tf - tInit)
                 motor2Angle = b * (t - tf) * (t - tf) + motor2FinalAngle
+
+                phiDDot = -1 * gimbalMaxAccel
+                phiDot = phiDDot * (t - tInit) - phiDDot * (tf - tInit)
+                phi = d * (t - tf) * (t - tf) + phiRef
             else:
                 motor2AngularAccel = 0.0
                 motor2AngleRate = thetaDotRef
                 motor2Angle = motor2FinalAngle
 
-            # Interpolate to find gimbal angles
-            gimbal1Angle, gimbal2Angle, gimbal1AngleRate, gimbal2AngleRate, gimbal1AngularAccel, gimbal2AngularAccel = motorToGimbal(gimbal_data,
-                                                                                                                                     tableStepAngle,
-                                                                                                                                     motor1,
-                                                                                                                                     motor2,
-                                                                                                                                     motor1Angle,
-                                                                                                                                     motor1AngleRate,
-                                                                                                                                     motor1AngularAccel,
-                                                                                                                                     motor2Angle,
-                                                                                                                                     motor2AngleRate,
-                                                                                                                                     motor2AngularAccel)
+                phiDDot = 0.0
+                phiDot = 0.0
+                phi = phiRef
 
             # Store time current motor and gimbal states into the data arrays
             timespan = np.append(timespan, t)
@@ -267,33 +388,26 @@ def run():
             motor1AngleData = np.append(motor1AngleData, motor1Angle)
             motor1AngleRateData = np.append(motor1AngleRateData, 0.0)
             motor1AngularAccelData = np.append(motor1AngularAccelData, 0.0)
-            gimbal1AngleData = np.append(gimbal1AngleData, gimbal1Angle)
-            gimbal1AngleRateData = np.append(gimbal1AngleRateData, gimbal1AngleRate)
-            gimbal1AngularAccelData = np.append(gimbal1AngularAccelData, gimbal1AngularAccel)
-            gimbal2AngleData = np.append(gimbal2AngleData, gimbal2Angle)
-            gimbal2AngleRateData = np.append(gimbal2AngleRateData, gimbal2AngleRate)
-            gimbal2AngularAccelData = np.append(gimbal2AngularAccelData, gimbal2AngularAccel)
 
-            dcm1 = np.array([[1,  0, 0],
-                             [0, np.cos(deg2Rad * gimbal1Angle), np.sin(deg2Rad * gimbal1Angle)],
-                             [0, -np.sin(deg2Rad * gimbal1Angle), np.cos(deg2Rad * gimbal1Angle)]])
-            dcm2 = np.array([[np.cos(deg2Rad * gimbal2Angle),  0, -np.sin(deg2Rad * gimbal2Angle)],
-                             [0, 1, 0],
-                             [np.sin(deg2Rad * gimbal2Angle),  0, np.cos(deg2Rad * gimbal2Angle)]])
-            if oneTwo:
-                dcm_FM = np.matmul(dcm2, dcm1)
-            else:
-                dcm_FM = np.matmul(dcm1, dcm2)
+            relativePRV = phi * eHat
+            PRV_FMCurrent = rbk.addPRV(PRV_FM1, relativePRV)
 
+            dcm_FM = rbk.PRV2C(PRV_FMCurrent)
             thrustAx = dcm_FM[2, :]
             thrustAxis = np.vstack((thrustAxis, thrustAx))
-            sigma_FM = rbk.C2MRP(dcm_FM)
+
+            gimbal1Angle = np.arctan(dcm_FM[1, 2] / dcm_FM[1, 1]) / deg2Rad
+            gimbal2Angle = np.arctan(dcm_FM[2, 0] / dcm_FM[0, 0]) / deg2Rad
+            gimbal1AngleData = np.append(gimbal1AngleData, gimbal1Angle)
+            gimbal2AngleData = np.append(gimbal2AngleData, gimbal2Angle)
+
+            sigma_FM = rbk.PRV2MRP(PRV_FMCurrent)
             sigma_FMData = np.vstack((sigma_FMData, np.array(sigma_FM)))
 
-            omega_FM_F = np.matmul(dcm_FM, np.transpose(gimbal1AngleRate * rotAxis1)) + (gimbal2AngleRate * rotAxis2)
+            omega_FM_F = phiDot * eHat
             omega_FM_FData = np.vstack((omega_FM_FData, omega_FM_F))
 
-            omegaPrime_FM_F = np.matmul(dcm_FM, np.transpose(gimbal1AngularAccel * rotAxis1)) + (gimbal1AngularAccel * rotAxis2)
+            omegaPrime_FM_F = phiDDot * eHat
             omegaPrime_FM_FData = np.vstack((omegaPrime_FM_FData, omegaPrime_FM_F))
 
         # Update motor states after a step has been completed
@@ -305,12 +419,7 @@ def run():
                                                                                           motor2AngularAccelData,
                                                                                           motor1RefAngle,
                                                                                           motor2RefAngle)
-    plotGimbalData(timespan, gimbal1AngleData, gimbal1AngleRateData, gimbal1AngularAccelData, gimbal2AngleData,
-                                                                                              gimbal2AngleRateData,
-                                                                                              gimbal2AngularAccelData)
     plotPrescribedGimbalStates(timespan, sigma_FMData, omega_FM_FData, omegaPrime_FM_FData)
-
-    plot2DGimbalMotion(gimbal1AngleData, gimbal2AngleData)
 
     plotThrustAxis(timespan, thrustAxis)
 
@@ -318,6 +427,15 @@ def run():
     sigmaFM_data_file = open(r"/Users/leahkiner/Desktop/sigma_FMData.txt", "w+")
     np.savetxt(sigmaFM_data_file, sigma_FMData)
     sigmaFM_data_file.close()
+
+    # Write gimbal angle data to a text file for 3d concept figure plotting
+    gimbalTipAngles_data_file = open(r"/Users/leahkiner/Desktop/gimbal_tip_data.txt", "w+")
+    np.savetxt(gimbalTipAngles_data_file, gimbal1AngleData)
+    gimbalTipAngles_data_file.close()
+
+    gimbalTiltAngles_data_file = open(r"/Users/leahkiner/Desktop/gimbal_tilt_data.txt", "w+")
+    np.savetxt(gimbalTiltAngles_data_file, gimbal2AngleData)
+    gimbalTiltAngles_data_file.close()
 
 
 def motorToGimbal(gimbal_data, tableStepAngle, motor1, motor2, motor1Angle, motor1AngleRate, motor1AngularAccel,
@@ -374,10 +492,16 @@ def motorToGimbal(gimbal_data, tableStepAngle, motor1, motor2, motor1Angle, moto
         else:
             gimbal1Angle = lowerGimbal1Angle
             gimbal2Angle = lowerGimbal2Angle
-            gimbal1AngleRate = (gimbal1Angle / motor1Angle) * motor1AngleRate
-            gimbal2AngleRate = (gimbal2Angle / motor1Angle) * motor1AngleRate
-            gimbal1AngularAccel = (gimbal1Angle / motor1Angle) * motor1AngularAccel
-            gimbal2AngularAccel = (gimbal2Angle / motor1Angle) * motor1AngularAccel
+            if motor1AngleRate != 0:
+                gimbal1AngleRate = (gimbal1Angle / motor1Angle) * motor1AngleRate
+                gimbal2AngleRate = (gimbal2Angle / motor1Angle) * motor1AngleRate
+                gimbal1AngularAccel = (gimbal1Angle / motor1Angle) * motor1AngularAccel
+                gimbal2AngularAccel = (gimbal2Angle / motor1Angle) * motor1AngularAccel
+            else:
+                gimbal1AngleRate = 0.0
+                gimbal2AngleRate = 0.0
+                gimbal1AngularAccel = 0.0
+                gimbal2AngularAccel = 0.0
     else:
         if upperMotorAngle != lowerMotorAngle:
             gimbal1Angle = ((lowerGimbal1Angle * (upperMotorAngle - motor2Angle)) + (upperGimbal1Angle * (motor2Angle - lowerMotorAngle))) / (upperMotorAngle - lowerMotorAngle)
@@ -389,10 +513,17 @@ def motorToGimbal(gimbal_data, tableStepAngle, motor1, motor2, motor1Angle, moto
         else:
             gimbal1Angle = lowerGimbal1Angle
             gimbal2Angle = lowerGimbal2Angle
-            gimbal1AngleRate = (gimbal1Angle / motor2Angle) * motor2AngleRate
-            gimbal2AngleRate = (gimbal2Angle / motor2Angle) * motor2AngleRate
-            gimbal1AngularAccel = (gimbal1Angle / motor2Angle) * motor2AngularAccel
-            gimbal2AngularAccel = (gimbal2Angle / motor2Angle) * motor2AngularAccel
+
+            if motor2AngleRate != 0:
+                gimbal1AngleRate = (gimbal1Angle / motor2Angle) * motor2AngleRate
+                gimbal2AngleRate = (gimbal2Angle / motor2Angle) * motor2AngleRate
+                gimbal1AngularAccel = (gimbal1Angle / motor2Angle) * motor2AngularAccel
+                gimbal2AngularAccel = (gimbal2Angle / motor2Angle) * motor2AngularAccel
+            else:
+                gimbal1AngleRate = 0.0
+                gimbal2AngleRate = 0.0
+                gimbal1AngularAccel = 0.0
+                gimbal2AngularAccel = 0.0
 
     return gimbal1Angle, gimbal2Angle, gimbal1AngleRate, gimbal2AngleRate, gimbal1AngularAccel, gimbal2AngularAccel
 

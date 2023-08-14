@@ -21,7 +21,7 @@
 #
 # Purpose:  Simulate the prescribed gimbal motion using two single-axis stepper motor actuators.
 # Author:   Leah Kiner
-# Creation Date:  July 13, 2023
+# Creation Date:  July 31, 2023
 #
 
 import os
@@ -39,17 +39,18 @@ from matplotlib import collections as mc
 import matplotlib
 matplotlib.rc('xtick', labelsize=16)
 matplotlib.rc('ytick', labelsize=16)
+from matplotlib import rcParams
 
 
 def run():
     deg2Rad = np.pi / 180
 
-    path_to_file = "/Users/leahkiner/Repositories/MAX_Basilisk/examples/gimbal_data.csv"
+    path_to_file = "/Users/leahkiner/Repositories/MAX_Basilisk/examples/gimbal_dataPaper.csv"
     gimbal_data = pd.read_csv(path_to_file)
 
     # Define stepper motor fixed parameters
-    motorStepAngle = 1  # [deg]
-    tableStepAngle = 2.5  # [deg]
+    motorStepAngle = 0.5  # [deg]
+    tableStepAngle = 2.0  # [deg]
 
     # Define gimbal fixed parameters
     rotAxis1 = np.array([1.0, 0.0, 0.0])
@@ -66,18 +67,18 @@ def run():
     # Define initial motor states
     motor1InitAngle = 0
     motor2InitAngle = 0
-    gimbal1InitAngle = 18.342
+    gimbal1InitAngle = 25.0
     gimbal2InitAngle = 0.0
     thetaDotInit = 0.0
     thetaDotRef = 0.0
 
     # Define number of steps each motor takes
-    numSteps1 = 160  # Note that numSteps * motorStepAngle must be in increments of 2.5 degrees
-    numSteps2 = 160
+    numSteps1 = 256  # Note that numSteps * motorStepAngle must be in increments of 2 degrees
+    numSteps2 = 256
 
     # Check to make sure that the final motor 1 angle exists in a row of the given motor/gimbal table data
-    if ((numSteps1 * motorStepAngle) % 2.5 != 0):
-        print("ERROR: Motor 1 Must End At An Increment of 2.5 Degrees")
+    if ((numSteps1 * motorStepAngle) % 2.0 != 0):
+        print("ERROR: Motor 1 Must End At An Increment of 2.1 Degrees")
 
     # Calculate reference motor angles from given steps
     motor1RefAngle = motor1InitAngle + (numSteps1 * motorStepAngle)
@@ -91,11 +92,7 @@ def run():
     motor2AngleRateData = np.array(thetaDotInit)
     motor2AngularAccelData = np.array(0.0)
     gimbal1AngleData = np.array(gimbal1InitAngle)
-    gimbal1AngleRateData = np.array(0.0)
-    gimbal1AngularAccelData = np.array(0.0)
     gimbal2AngleData = np.array(gimbal2InitAngle)
-    gimbal2AngleRateData = np.array(0.0)
-    gimbal2AngularAccelData = np.array(0.0)
     thrustAxis = np.array([0.0, 0.0, 0.0])
 
     dcm1 = np.array([[1,  0, 0],
@@ -111,15 +108,16 @@ def run():
     omegaPrime_FM_FData = np.array([0.0, 0.0, 0.0])
 
     # Define temporal parameters
-    dt = 0.5  # [s]
+    dt = 0.01  # [s]
     t = 0.0
-    motorMaxAccel = ((0.5 * np.abs(motorStepAngle)) * 8) / 100
-    stepSimTime = np.sqrt(((0.5 * np.abs(motorStepAngle)) * 8) / motorMaxAccel)  # [s]
+    motorMaxAccel = 100 * ((0.5 * np.abs(motorStepAngle)) * 8) / 100
+    stepSimTime = np.sqrt( ((0.5 * np.abs(motorStepAngle)) * 8) / motorMaxAccel )  # [s]
     n_s = int(stepSimTime / dt)
     timespan = np.array(t)
 
     # MOVE MOTOR 1
     intermediateInitialAngle = motor1InitAngle
+    motor1FinalAngle = motor1InitAngle
     for idx1 in range(numSteps1):
         motor1FinalAngle = motor1InitAngle + ((idx1 + 1) * motorStepAngle)
         tInit = t
@@ -137,6 +135,54 @@ def run():
         motor2AngleRate = 0.0  # [CONSTANT]
         motor2AngularAccel = 0.0  # [CONSTANT]
 
+        # Find gimbal initial angles
+        # Interpolate to find gimbal angles
+        gimbal1InitAngle, gimbal2InitAngle = motorToGimbal(gimbal_data, tableStepAngle, motor1, motor2, intermediateInitialAngle, motor2Angle)
+
+        # Find initial PRV
+        dcm1 = np.array([[1,  0, 0],
+                         [0, np.cos(deg2Rad * gimbal1InitAngle), np.sin(deg2Rad * gimbal1InitAngle)],
+                         [0, -np.sin(deg2Rad * gimbal1InitAngle), np.cos(deg2Rad * gimbal1InitAngle)]])
+        dcm2 = np.array([[np.cos(deg2Rad * gimbal2InitAngle),  0, -np.sin(deg2Rad * gimbal2InitAngle)],
+                         [0, 1, 0],
+                         [np.sin(deg2Rad * gimbal2InitAngle),  0, np.cos(deg2Rad * gimbal2InitAngle)]])
+
+        if oneTwo:
+            dcm_FM = np.matmul(dcm2, dcm1)
+        else:
+            dcm_FM = np.matmul(dcm1, dcm2)
+
+        PRV_FM1 = rbk.C2PRV(dcm_FM)
+
+        # Find final PRV
+        # Interpolate to find gimbal angles
+        gimbal1FinalAngle, gimbal2FinalAngle = motorToGimbal(gimbal_data, tableStepAngle, motor1, motor2, motor1FinalAngle, motor2Angle)
+
+        dcm1 = np.array([[1,  0, 0],
+                         [0, np.cos(deg2Rad * gimbal1FinalAngle), np.sin(deg2Rad * gimbal1FinalAngle)],
+                         [0, -np.sin(deg2Rad * gimbal1FinalAngle), np.cos(deg2Rad * gimbal1FinalAngle)]])
+        dcm2 = np.array([[np.cos(deg2Rad * gimbal2FinalAngle),  0, -np.sin(deg2Rad * gimbal2FinalAngle)],
+                         [0, 1, 0],
+                         [np.sin(deg2Rad * gimbal2FinalAngle),  0, np.cos(deg2Rad * gimbal2FinalAngle)]])
+
+        if oneTwo:
+            dcm_FM = np.matmul(dcm2, dcm1)
+        else:
+            dcm_FM = np.matmul(dcm1, dcm2)
+
+        PRV_FM2 = rbk.C2PRV(dcm_FM)
+
+        # Find relative PRV during the step
+        relativePRV = rbk.subPRV(PRV_FM2, PRV_FM1)
+        phiRef = np.linalg.norm(relativePRV)
+        eHat = relativePRV / phiRef
+
+        gimbalMaxAccel = phiRef / ((0.5 * stepSimTime) * (0.5 * stepSimTime))
+
+        # Find gimbal parabolic constants
+        c = (0.5 * phiRef) / ((ts - tInit) * (ts - tInit))
+        d = (-0.5 * phiRef) / ((ts - tf) * (ts - tf))
+
         for idx2 in range(n_s):
             # Update current time
             t = t + dt
@@ -146,26 +192,26 @@ def run():
                 motor1AngleRate = motor1AngularAccel * (t - tInit) + thetaDotInit
                 motor1Angle = a * (t - tInit) * (t - tInit) + intermediateInitialAngle
 
+                phiDDot = gimbalMaxAccel
+                phiDot = phiDDot * (t - tInit)
+                phi = c * (t - tInit) * (t - tInit)
+
             elif ( t > ts and t <= tf and tf - tInit != 0):
                 motor1AngularAccel = -1 * motorMaxAccel
                 motor1AngleRate = motor1AngularAccel * (t - tInit) + thetaDotInit - motor1AngularAccel * (tf - tInit)
                 motor1Angle = b * (t - tf) * (t - tf) + motor1FinalAngle
+
+                phiDDot = -1 * gimbalMaxAccel
+                phiDot = phiDDot * (t - tInit) - phiDDot * (tf - tInit)
+                phi = d * (t - tf) * (t - tf) + phiRef
             else:
                 motor1AngularAccel = 0.0
                 motor1AngleRate = thetaDotRef
                 motor1Angle = motor1FinalAngle
 
-            # Interpolate to find gimbal angles
-            gimbal1Angle, gimbal2Angle, gimbal1AngleRate, gimbal2AngleRate, gimbal1AngularAccel, gimbal2AngularAccel = motorToGimbal(gimbal_data,
-                                                                                                                                     tableStepAngle,
-                                                                                                                                     motor1,
-                                                                                                                                     motor2,
-                                                                                                                                     motor1Angle,
-                                                                                                                                     motor1AngleRate,
-                                                                                                                                     motor1AngularAccel,
-                                                                                                                                     motor2Angle,
-                                                                                                                                     motor2AngleRate,
-                                                                                                                                     motor2AngularAccel)
+                phiDDot = 0.0
+                phiDot = 0.0
+                phi = phiRef
 
             # Store time current motor and gimbal states into the data arrays
             timespan = np.append(timespan, t)
@@ -175,34 +221,26 @@ def run():
             motor2AngleData = np.append(motor2AngleData, motor2Angle)
             motor2AngleRateData = np.append(motor2AngleRateData, 0.0)
             motor2AngularAccelData = np.append(motor2AngularAccelData, 0.0)
-            gimbal1AngleData = np.append(gimbal1AngleData, gimbal1Angle)
-            gimbal1AngleRateData = np.append(gimbal1AngleRateData, gimbal1AngleRate)
-            gimbal1AngularAccelData = np.append(gimbal1AngularAccelData, gimbal1AngularAccel)
-            gimbal2AngleData = np.append(gimbal2AngleData, gimbal2Angle)
-            gimbal2AngleRateData = np.append(gimbal2AngleRateData, gimbal2AngleRate)
-            gimbal2AngularAccelData = np.append(gimbal2AngularAccelData, gimbal2AngularAccel)
 
-            dcm1 = np.array([[1,  0, 0],
-                             [0, np.cos(deg2Rad * gimbal1Angle), np.sin(deg2Rad * gimbal1Angle)],
-                             [0, -np.sin(deg2Rad * gimbal1Angle), np.cos(deg2Rad * gimbal1Angle)]])
-            dcm2 = np.array([[np.cos(deg2Rad * gimbal2Angle),  0, -np.sin(deg2Rad * gimbal2Angle)],
-                             [0, 1, 0],
-                             [np.sin(deg2Rad * gimbal2Angle),  0, np.cos(deg2Rad * gimbal2Angle)]])
+            relativePRV = phi * eHat
+            PRV_FMCurrent = rbk.addPRV(PRV_FM1, relativePRV)
 
-            if oneTwo:
-                dcm_FM = np.matmul(dcm2, dcm1)
-            else:
-                dcm_FM = np.matmul(dcm1, dcm2)
-
+            dcm_FM = rbk.PRV2C(PRV_FMCurrent)
             thrustAx = dcm_FM[2, :]
             thrustAxis = np.vstack((thrustAxis, thrustAx))
-            sigma_FM = rbk.C2MRP(dcm_FM)
+
+            gimbal1Angle = np.arctan(dcm_FM[1, 2] / dcm_FM[1, 1]) / deg2Rad
+            gimbal2Angle = np.arctan(dcm_FM[2, 0] / dcm_FM[0, 0]) / deg2Rad
+            gimbal1AngleData = np.append(gimbal1AngleData, gimbal1Angle)
+            gimbal2AngleData = np.append(gimbal2AngleData, gimbal2Angle)
+
+            sigma_FM = rbk.PRV2MRP(PRV_FMCurrent)
             sigma_FMData = np.vstack((sigma_FMData, np.array(sigma_FM)))
 
-            omega_FM_F = np.matmul(dcm_FM, np.transpose(gimbal1AngleRate * rotAxis1)) + (gimbal2AngleRate * rotAxis2)
+            omega_FM_F = phiDot * eHat
             omega_FM_FData = np.vstack((omega_FM_FData, omega_FM_F))
 
-            omegaPrime_FM_F = np.matmul(dcm_FM, np.transpose(gimbal1AngularAccel * rotAxis1)) + (gimbal1AngularAccel * rotAxis2)
+            omegaPrime_FM_F = phiDDot * eHat
             omegaPrime_FM_FData = np.vstack((omegaPrime_FM_FData, omegaPrime_FM_F))
 
         # Update motor states after a step has been completed
@@ -229,6 +267,54 @@ def run():
         motor1AngleRate = 0.0
         motor1AngularAccel = 0.0  # [CONSTANT]
 
+        # Find gimbal initial angles
+        # Interpolate to find gimbal angles
+        gimbal1InitAngle, gimbal2InitAngle = motorToGimbal(gimbal_data, tableStepAngle, motor1, motor2, motor1Angle, intermediateInitialAngle)
+
+        # Find initial PRV
+        dcm1 = np.array([[1,  0, 0],
+                         [0, np.cos(deg2Rad * gimbal1InitAngle), np.sin(deg2Rad * gimbal1InitAngle)],
+                         [0, -np.sin(deg2Rad * gimbal1InitAngle), np.cos(deg2Rad * gimbal1InitAngle)]])
+        dcm2 = np.array([[np.cos(deg2Rad * gimbal2InitAngle),  0, -np.sin(deg2Rad * gimbal2InitAngle)],
+                         [0, 1, 0],
+                         [np.sin(deg2Rad * gimbal2InitAngle),  0, np.cos(deg2Rad * gimbal2InitAngle)]])
+
+        if oneTwo:
+            dcm_FM = np.matmul(dcm2, dcm1)
+        else:
+            dcm_FM = np.matmul(dcm1, dcm2)
+
+        PRV_FM1 = rbk.C2PRV(dcm_FM)
+
+        # Find final PRV
+        # Interpolate to find gimbal angles
+        gimbal1FinalAngle, gimbal2FinalAngle = motorToGimbal(gimbal_data, tableStepAngle, motor1, motor2, motor1Angle, motor2FinalAngle)
+
+        dcm1 = np.array([[1,  0, 0],
+                         [0, np.cos(deg2Rad * gimbal1FinalAngle), np.sin(deg2Rad * gimbal1FinalAngle)],
+                         [0, -np.sin(deg2Rad * gimbal1FinalAngle), np.cos(deg2Rad * gimbal1FinalAngle)]])
+        dcm2 = np.array([[np.cos(deg2Rad * gimbal2FinalAngle),  0, -np.sin(deg2Rad * gimbal2FinalAngle)],
+                         [0, 1, 0],
+                         [np.sin(deg2Rad * gimbal2FinalAngle),  0, np.cos(deg2Rad * gimbal2FinalAngle)]])
+
+        if oneTwo:
+            dcm_FM = np.matmul(dcm2, dcm1)
+        else:
+            dcm_FM = np.matmul(dcm1, dcm2)
+
+        PRV_FM2 = rbk.C2PRV(dcm_FM)
+
+        # Find relative PRV during the step
+        relativePRV = rbk.subPRV(PRV_FM2, PRV_FM1)
+        phiRef = np.linalg.norm(relativePRV)
+        eHat = relativePRV / phiRef
+
+        gimbalMaxAccel = phiRef / ((0.5 * stepSimTime) * (0.5 * stepSimTime))
+
+        # Find gimbal parabolic constants
+        c = (0.5 * phiRef) / ((ts - tInit) * (ts - tInit))
+        d = (-0.5 * phiRef) / ((ts - tf) * (ts - tf))
+
         for idx4 in range(n_s):
             # Update current time
             t = t + dt
@@ -238,26 +324,26 @@ def run():
                 motor2AngleRate = motor2AngularAccel * (t - tInit) + thetaDotInit
                 motor2Angle = a * (t - tInit) * (t - tInit) + intermediateInitialAngle
 
+                phiDDot = gimbalMaxAccel
+                phiDot = phiDDot * (t - tInit)
+                phi = c * (t - tInit) * (t - tInit)
+
             elif ( t > ts and t <= tf and tf - tInit != 0):
                 motor2AngularAccel = -1 * motorMaxAccel
                 motor2AngleRate = motor2AngularAccel * (t - tInit) + thetaDotInit - motor2AngularAccel * (tf - tInit)
                 motor2Angle = b * (t - tf) * (t - tf) + motor2FinalAngle
+
+                phiDDot = -1 * gimbalMaxAccel
+                phiDot = phiDDot * (t - tInit) - phiDDot * (tf - tInit)
+                phi = d * (t - tf) * (t - tf) + phiRef
             else:
                 motor2AngularAccel = 0.0
                 motor2AngleRate = thetaDotRef
                 motor2Angle = motor2FinalAngle
 
-            # Interpolate to find gimbal angles
-            gimbal1Angle, gimbal2Angle, gimbal1AngleRate, gimbal2AngleRate, gimbal1AngularAccel, gimbal2AngularAccel = motorToGimbal(gimbal_data,
-                                                                                                                                     tableStepAngle,
-                                                                                                                                     motor1,
-                                                                                                                                     motor2,
-                                                                                                                                     motor1Angle,
-                                                                                                                                     motor1AngleRate,
-                                                                                                                                     motor1AngularAccel,
-                                                                                                                                     motor2Angle,
-                                                                                                                                     motor2AngleRate,
-                                                                                                                                     motor2AngularAccel)
+                phiDDot = 0.0
+                phiDot = 0.0
+                phi = phiRef
 
             # Store time current motor and gimbal states into the data arrays
             timespan = np.append(timespan, t)
@@ -267,63 +353,63 @@ def run():
             motor1AngleData = np.append(motor1AngleData, motor1Angle)
             motor1AngleRateData = np.append(motor1AngleRateData, 0.0)
             motor1AngularAccelData = np.append(motor1AngularAccelData, 0.0)
-            gimbal1AngleData = np.append(gimbal1AngleData, gimbal1Angle)
-            gimbal1AngleRateData = np.append(gimbal1AngleRateData, gimbal1AngleRate)
-            gimbal1AngularAccelData = np.append(gimbal1AngularAccelData, gimbal1AngularAccel)
-            gimbal2AngleData = np.append(gimbal2AngleData, gimbal2Angle)
-            gimbal2AngleRateData = np.append(gimbal2AngleRateData, gimbal2AngleRate)
-            gimbal2AngularAccelData = np.append(gimbal2AngularAccelData, gimbal2AngularAccel)
 
-            dcm1 = np.array([[1,  0, 0],
-                             [0, np.cos(deg2Rad * gimbal1Angle), np.sin(deg2Rad * gimbal1Angle)],
-                             [0, -np.sin(deg2Rad * gimbal1Angle), np.cos(deg2Rad * gimbal1Angle)]])
-            dcm2 = np.array([[np.cos(deg2Rad * gimbal2Angle),  0, -np.sin(deg2Rad * gimbal2Angle)],
-                             [0, 1, 0],
-                             [np.sin(deg2Rad * gimbal2Angle),  0, np.cos(deg2Rad * gimbal2Angle)]])
-            if oneTwo:
-                dcm_FM = np.matmul(dcm2, dcm1)
-            else:
-                dcm_FM = np.matmul(dcm1, dcm2)
+            relativePRV = phi * eHat
+            PRV_FMCurrent = rbk.addPRV(PRV_FM1, relativePRV)
 
+            dcm_FM = rbk.PRV2C(PRV_FMCurrent)
             thrustAx = dcm_FM[2, :]
             thrustAxis = np.vstack((thrustAxis, thrustAx))
-            sigma_FM = rbk.C2MRP(dcm_FM)
+
+            gimbal1Angle = np.arctan(dcm_FM[1, 2] / dcm_FM[1, 1]) / deg2Rad
+            gimbal2Angle = np.arctan(dcm_FM[2, 0] / dcm_FM[0, 0]) / deg2Rad
+            gimbal1AngleData = np.append(gimbal1AngleData, gimbal1Angle)
+            gimbal2AngleData = np.append(gimbal2AngleData, gimbal2Angle)
+
+            sigma_FM = rbk.PRV2MRP(PRV_FMCurrent)
             sigma_FMData = np.vstack((sigma_FMData, np.array(sigma_FM)))
 
-            omega_FM_F = np.matmul(dcm_FM, np.transpose(gimbal1AngleRate * rotAxis1)) + (gimbal2AngleRate * rotAxis2)
+            omega_FM_F = phiDot * eHat
             omega_FM_FData = np.vstack((omega_FM_FData, omega_FM_F))
 
-            omegaPrime_FM_F = np.matmul(dcm_FM, np.transpose(gimbal1AngularAccel * rotAxis1)) + (gimbal1AngularAccel * rotAxis2)
+            omegaPrime_FM_F = phiDDot * eHat
             omegaPrime_FM_FData = np.vstack((omegaPrime_FM_FData, omegaPrime_FM_F))
 
         # Update motor states after a step has been completed
         intermediateInitialAngle = motor2FinalAngle
 
     # Call functions to plot results
-    plotMotorData(timespan, motor1AngleData, motor1AngleRateData, motor1AngularAccelData, motor2AngleData,
+    plotMotorData((1 / 60) * timespan, motor1AngleData, motor1AngleRateData, motor1AngularAccelData, motor2AngleData,
                                                                                           motor2AngleRateData,
                                                                                           motor2AngularAccelData,
                                                                                           motor1RefAngle,
                                                                                           motor2RefAngle)
-    plotGimbalData(timespan, gimbal1AngleData, gimbal1AngleRateData, gimbal1AngularAccelData, gimbal2AngleData,
-                                                                                              gimbal2AngleRateData,
-                                                                                              gimbal2AngularAccelData)
-    plotPrescribedGimbalStates(timespan, sigma_FMData, omega_FM_FData, omegaPrime_FM_FData)
+    plotPrescribedGimbalStates((1 / 60) * timespan, sigma_FMData, omega_FM_FData, omegaPrime_FM_FData)
 
-    plot2DGimbalMotion(gimbal1AngleData, gimbal2AngleData)
+    plot2DGimbalMotion((1 / 60) * timespan, gimbal1AngleData, gimbal2AngleData)
 
-    plotThrustAxis(timespan, thrustAxis)
+    plotThrustAxis((1 / 60) * timespan, thrustAxis)
 
-    # Write attitude data to a text file for 3d concept figure plotting
-    sigmaFM_data_file = open(r"/Users/leahkiner/Desktop/sigma_FMData.txt", "w+")
-    np.savetxt(sigmaFM_data_file, sigma_FMData)
-    sigmaFM_data_file.close()
+    # Write attitude data to a text file
+    # sigmaFM_data_file = open(r"/Users/leahkiner/Desktop/sigma_FMData.txt", "w+")
+    # np.savetxt(sigmaFM_data_file, sigma_FMData)
+    # sigmaFM_data_file.close()
 
+    # Write gimbal angle data to a text file for 3d concept figure plotting
+    gimbalTipAngles_data_file = open(r"/Users/leahkiner/Desktop/gimbal_tip_dataM1M2.txt", "w+")
+    np.savetxt(gimbalTipAngles_data_file, gimbal1AngleData)
+    gimbalTipAngles_data_file.close()
 
-def motorToGimbal(gimbal_data, tableStepAngle, motor1, motor2, motor1Angle, motor1AngleRate, motor1AngularAccel,
-                  motor2Angle,
-                  motor2AngleRate,
-                  motor2AngularAccel):
+    gimbalTiltAngles_data_file = open(r"/Users/leahkiner/Desktop/gimbal_tilt_dataM1M2.txt", "w+")
+    np.savetxt(gimbalTiltAngles_data_file, gimbal2AngleData)
+    gimbalTiltAngles_data_file.close()
+
+    # timespan_data_file = open(r"/Users/leahkiner/Desktop/timespan.txt", "w+")
+    # np.savetxt(timespan_data_file, timespan)
+    # timespan_data_file.close()
+
+def motorToGimbal(gimbal_data, tableStepAngle, motor1, motor2, motor1Angle, motor2Angle):
+    deg2Rad = np.pi / 180
 
     # Find motor angles in the provided table that most closely match to motor angles
     if motor1:
@@ -362,39 +448,47 @@ def motorToGimbal(gimbal_data, tableStepAngle, motor1, motor2, motor1Angle, moto
         if ((lowerGimbal1Angle != 360) and (lowerGimbal2Angle != 360) and (upperGimbal1Angle != 360) and (upperGimbal2Angle != 360)):
             break
 
-    # Interpolate data to get estimated gimbal angles
-    if motor1:
-        if upperMotorAngle != lowerMotorAngle:
-            gimbal1Angle = ((lowerGimbal1Angle * (upperMotorAngle - motor1Angle)) + (upperGimbal1Angle * (motor1Angle - lowerMotorAngle))) / (upperMotorAngle - lowerMotorAngle)
-            gimbal2Angle = ((lowerGimbal2Angle * (upperMotorAngle - motor1Angle)) + (upperGimbal2Angle * (motor1Angle - lowerMotorAngle))) / (upperMotorAngle - lowerMotorAngle)
-            gimbal1AngleRate = motor1AngleRate * ((upperGimbal1Angle - lowerGimbal1Angle) / (upperMotorAngle - lowerMotorAngle))
-            gimbal2AngleRate = motor1AngleRate * ((upperGimbal2Angle - lowerGimbal2Angle) / (upperMotorAngle - lowerMotorAngle))
-            gimbal1AngularAccel = motor1AngularAccel * ((upperGimbal1Angle - lowerGimbal1Angle) / (upperMotorAngle - lowerMotorAngle))
-            gimbal2AngularAccel = motor1AngularAccel * ((upperGimbal2Angle - lowerGimbal2Angle) / (upperMotorAngle - lowerMotorAngle))
-        else:
-            gimbal1Angle = lowerGimbal1Angle
-            gimbal2Angle = lowerGimbal2Angle
-            gimbal1AngleRate = (gimbal1Angle / motor1Angle) * motor1AngleRate
-            gimbal2AngleRate = (gimbal2Angle / motor1Angle) * motor1AngleRate
-            gimbal1AngularAccel = (gimbal1Angle / motor1Angle) * motor1AngularAccel
-            gimbal2AngularAccel = (gimbal2Angle / motor1Angle) * motor1AngularAccel
-    else:
-        if upperMotorAngle != lowerMotorAngle:
-            gimbal1Angle = ((lowerGimbal1Angle * (upperMotorAngle - motor2Angle)) + (upperGimbal1Angle * (motor2Angle - lowerMotorAngle))) / (upperMotorAngle - lowerMotorAngle)
-            gimbal2Angle = ((lowerGimbal2Angle * (upperMotorAngle - motor2Angle)) + (upperGimbal2Angle * (motor2Angle - lowerMotorAngle))) / (upperMotorAngle - lowerMotorAngle)
-            gimbal1AngleRate = motor2AngleRate * ((upperGimbal1Angle - lowerGimbal1Angle) / (upperMotorAngle - lowerMotorAngle))
-            gimbal2AngleRate = motor2AngleRate * ((upperGimbal2Angle - lowerGimbal2Angle) / (upperMotorAngle - lowerMotorAngle))
-            gimbal1AngularAccel = motor2AngularAccel * ((upperGimbal1Angle - lowerGimbal1Angle) / (upperMotorAngle - lowerMotorAngle))
-            gimbal2AngularAccel = motor2AngularAccel * ((upperGimbal2Angle - lowerGimbal2Angle) / (upperMotorAngle - lowerMotorAngle))
-        else:
-            gimbal1Angle = lowerGimbal1Angle
-            gimbal2Angle = lowerGimbal2Angle
-            gimbal1AngleRate = (gimbal1Angle / motor2Angle) * motor2AngleRate
-            gimbal2AngleRate = (gimbal2Angle / motor2Angle) * motor2AngleRate
-            gimbal1AngularAccel = (gimbal1Angle / motor2Angle) * motor2AngularAccel
-            gimbal2AngularAccel = (gimbal2Angle / motor2Angle) * motor2AngularAccel
+    if upperMotorAngle != lowerMotorAngle:
+        # Interpolate data to get estimated gimbal angles
+        # Find lower PRV
+        dcm1Lower = np.array([[1,  0, 0],
+                              [0, np.cos(deg2Rad * lowerGimbal1Angle), np.sin(deg2Rad * lowerGimbal1Angle)],
+                              [0, -np.sin(deg2Rad * lowerGimbal1Angle), np.cos(deg2Rad * lowerGimbal1Angle)]])
+        dcm2Lower = np.array([[np.cos(deg2Rad * lowerGimbal2Angle),  0, -np.sin(deg2Rad * lowerGimbal2Angle)],
+                              [0, 1, 0],
+                              [np.sin(deg2Rad * lowerGimbal2Angle),  0, np.cos(deg2Rad * lowerGimbal2Angle)]])
+        dcm_FMLower = np.matmul(dcm2Lower, dcm1Lower)
+        PRV_FMLower = rbk.C2PRV(dcm_FMLower)
 
-    return gimbal1Angle, gimbal2Angle, gimbal1AngleRate, gimbal2AngleRate, gimbal1AngularAccel, gimbal2AngularAccel
+        # Find upper PRV
+        dcm1Upper = np.array([[1,  0, 0],
+                              [0, np.cos(deg2Rad * upperGimbal1Angle), np.sin(deg2Rad * upperGimbal1Angle)],
+                              [0, -np.sin(deg2Rad * upperGimbal1Angle), np.cos(deg2Rad * upperGimbal1Angle)]])
+        dcm2Upper = np.array([[np.cos(deg2Rad * upperGimbal2Angle),  0, -np.sin(deg2Rad * upperGimbal2Angle)],
+                              [0, 1, 0],
+                              [np.sin(deg2Rad * upperGimbal2Angle),  0, np.cos(deg2Rad * upperGimbal2Angle)]])
+        dcm_FMUpper = np.matmul(dcm2Upper, dcm1Upper)
+        PRV_FMUpper = rbk.C2PRV(dcm_FMUpper)
+
+        # Find relative PRV
+        PRV_relative = rbk.subPRV(PRV_FMUpper, PRV_FMLower)
+        phi_relative = np.linalg.norm(PRV_relative)
+        eHat_relative = PRV_relative / phi_relative
+
+        if motor1:
+            phi_interpolated = (phi_relative * (motor1Angle - lowerMotorAngle)) / (upperMotorAngle - lowerMotorAngle)
+        else:
+            phi_interpolated = (phi_relative * (motor2Angle - lowerMotorAngle)) / (upperMotorAngle - lowerMotorAngle)
+        PRV_relative_interpolated = phi_interpolated * eHat_relative
+        PRV_interpolated = rbk.addPRV(PRV_FMLower, PRV_relative_interpolated)
+        dcm_interpolated = rbk.PRV2C(PRV_interpolated)
+        gimbal1Angle = np.arctan(dcm_interpolated[1, 2] / dcm_interpolated[1, 1]) / deg2Rad
+        gimbal2Angle = np.arctan(dcm_interpolated[2, 0] / dcm_interpolated[0, 0]) / deg2Rad
+    else:
+        gimbal1Angle = lowerGimbal1Angle
+        gimbal2Angle = lowerGimbal2Angle
+
+    return gimbal1Angle, gimbal2Angle
 
 
 def plotMotorData(timespan, motor1AngleData, motor1AngleRateData, motor1AngularAccelData, motor2AngleData,
@@ -411,7 +505,7 @@ def plotMotorData(timespan, motor1AngleData, motor1AngleRateData, motor1AngularA
     plt.plot(timespan, motor2AngleData, label=r'$\theta_{2}$', color='mediumslateblue')
     # plt.title('Stepper Motor Angles', fontsize=14)
     plt.ylabel('(deg)', fontsize=16)
-    plt.xlabel('Time (s)', fontsize=16)
+    plt.xlabel('Time (Min)', fontsize=16)
     plt.legend(loc='center right', prop={'size': 12})
     plt.grid(True)
     #
@@ -422,7 +516,7 @@ def plotMotorData(timespan, motor1AngleData, motor1AngleRateData, motor1AngularA
     # plt.plot(timespan, motor2AngleRateData, label=r'$\dot{\theta}_{2}$')
     # plt.title('Stepper Motor Angle Rates', fontsize=14)
     # plt.ylabel('Angle Rate (deg/s)', fontsize=16)
-    # plt.xlabel('Time (s)', fontsize=16)
+    # plt.xlabel('Time (Min)', fontsize=16)
     # plt.legend(loc='lower right', prop={'size': 16})
     #
     # # Plot motor acceleration data
@@ -432,7 +526,7 @@ def plotMotorData(timespan, motor1AngleData, motor1AngleRateData, motor1AngularA
     # plt.plot(timespan, motor2AngularAccelData, label=r'$\ddot{\theta}_{2}$')
     # plt.title('Stepper Motor Angular Accelerations', fontsize=14)
     # plt.ylabel('Angle Acceleration (deg/s$^2$)', fontsize=16)
-    # plt.xlabel('Time (s)', fontsize=16)
+    # plt.xlabel('Time (Min)', fontsize=16)
     # plt.legend(loc='lower right', prop={'size': 16})
 
     # Plot motor states on a single figure
@@ -443,9 +537,10 @@ def plotMotorData(timespan, motor1AngleData, motor1AngleRateData, motor1AngularA
     l4, = plts[1].plot(timespan, motor2AngleRateData, color='mediumslateblue')
     l5, = plts[2].plot(timespan, motor1AngularAccelData, color='mediumseagreen')
     l6, = plts[2].plot(timespan, motor2AngularAccelData, color='mediumslateblue')
-    plts.flat[0].set(ylabel='(deg)')
-    plts.flat[1].set(ylabel='(deg/s)')
-    plts.flat[2].set(xlabel='Time (s)', ylabel='(deg/s$^2$)')
+    plts[0].set_ylabel("(deg)", fontsize=16)
+    plts[1].set_ylabel("(deg/s)", fontsize=16)
+    plts[2].set_ylabel("(deg/s$^2$)", fontsize=16)
+    plts[2].set_xlabel("Time (Min)", fontsize=16)
     plts[0].legend((l1, l2), (r'$\theta_{1}$', r'$\theta_{2}$'), loc='center right', prop={'size': 12})
     plts[1].legend((l3, l4), (r'$\dot{\theta}_{1}$', r'$\dot{\theta}_{2}$',), loc='center right', prop={'size': 12})
     plts[2].legend((l5, l6), (r'$\ddot{\theta}_{1}$', r'$\ddot{\theta}_{2}$',), loc='center right', prop={'size': 12})
@@ -462,28 +557,9 @@ def plotGimbalData(timespan, gimbal1AngleData, gimbal1AngleRateData, gimbal1Angu
     # plt.plot(timespan, gimbal2AngleData, label=r'$\phi_{2}$')
     # plt.title('Interpolated Gimbal Angles', fontsize=14)
     # plt.ylabel('Angle (deg)', fontsize=16)
-    # plt.xlabel('Time (s)', fontsize=16)
+    # plt.xlabel('Time (Min)', fontsize=16)
     # plt.legend(loc='center right', prop={'size': 16})
     #
-    # # Plot gimbal angle rates
-    # plt.figure()
-    # plt.clf()
-    # plt.plot(timespan, gimbal1AngleRateData, label=r'$\dot{\psi}_{1}$')
-    # plt.plot(timespan, gimbal2AngleRateData, label=r'$\dot{\phi}_{2}$')
-    # plt.title('Interpolated Gimbal Angle Rates', fontsize=14)
-    # plt.ylabel('Angle Rate (deg/s)', fontsize=16)
-    # plt.xlabel('Time (s)', fontsize=16)
-    # plt.legend(loc='center right', prop={'size': 16})
-    #
-    # # Plot gimbal angular accelerations
-    # plt.figure()
-    # plt.clf()
-    # plt.plot(timespan, gimbal1AngularAccelData, label=r'$\ddot{\psi}_{1}$')
-    # plt.plot(timespan, gimbal2AngularAccelData, label=r'$\ddot{\phi}_{2}$')
-    # plt.title('Interpolated Gimbal Angular Accelerations', fontsize=14)
-    # plt.ylabel('Angle Acceleration (deg/s$^2$)', fontsize=16)
-    # plt.xlabel('Time (s)', fontsize=16)
-    # plt.legend(loc='center right', prop={'size': 16})
 
     # Plot gimbal states on a single figure
     fig, plts = plt.subplots(3, 1, sharex=True)
@@ -495,7 +571,7 @@ def plotGimbalData(timespan, gimbal1AngleData, gimbal1AngleRateData, gimbal1Angu
     l6, = plts[2].plot(timespan, gimbal2AngularAccelData, color='orchid')
     plts.flat[0].set(ylabel='(deg)')
     plts.flat[1].set(ylabel='(deg/s)')
-    plts.flat[2].set(xlabel='Time (s)', ylabel='(deg/s$^2$)')
+    plts.flat[2].set(xlabel='Time (Min)', ylabel=r'(deg/s$^2$)')
     plts[0].legend((l1, l2), (r'$\psi$', r'$\phi$'), loc='upper right', prop={'size': 12})
     plts[1].legend((l3, l4), (r'$\dot{\psi}$', r'$\dot{\phi}$',), loc='upper right', prop={'size': 12})
     plts[2].legend((l5, l6), (r'$\ddot{\psi}$', r'$\ddot{\phi}$',), loc='upper right', prop={'size': 12})
@@ -505,39 +581,41 @@ def plotGimbalData(timespan, gimbal1AngleData, gimbal1AngleRateData, gimbal1Angu
     plts[2].grid(True)
 
 def plotPrescribedGimbalStates(timespan, sigma_FMData, omega_FM_FData, omegaPrime_FM_FData):
-    # # Plot gimbal attitude
-    # plt.figure()
-    # plt.clf()
-    # plt.plot(timespan, sigma_FMData[:, 0], label=r'$\sigma_{1}$')
-    # plt.plot(timespan, sigma_FMData[:, 1], label=r'$\sigma_{2}$')
-    # plt.plot(timespan, sigma_FMData[:, 2], label=r'$\sigma_{3}$')
-    # plt.title(r'Gimbal Attitude, $\sigma_{\mathcal{F} / \mathcal{M}}$', fontsize=14)
-    # plt.ylabel('', fontsize=16)
-    # plt.xlabel('Time (s)', fontsize=16)
-    # plt.legend(loc='center right', prop={'size': 16})
-    #
-    # # Plot gimbal angle velocity
-    # plt.figure()
-    # plt.clf()
-    # plt.plot(timespan, omega_FM_FData[:, 0], label=r'$\omega_{1}$')
-    # plt.plot(timespan, omega_FM_FData[:, 1], label=r'$\omega_{2}$')
-    # plt.plot(timespan, omega_FM_FData[:, 2], label=r'$\omega_{3}$')
-    # plt.title(r'Gimbal Angular Velocity ${}^{\mathcal{F}} \omega_{\mathcal{F} / \mathcal{M}}$', fontsize=14)
-    # plt.ylabel('Angular Rate (deg/s)', fontsize=16)
-    # plt.xlabel('Time (s)', fontsize=16)
-    # plt.legend(loc='center right', prop={'size': 16})
-    #
-    # # Plot gimbal angular acceleration
-    # plt.figure()
-    # plt.clf()
-    # plt.plot(timespan, omegaPrime_FM_FData[:, 0], label=r'$\alpha_{1}$')
-    # plt.plot(timespan, omegaPrime_FM_FData[:, 1], label=r'$\alpha_{2}$')
-    # plt.plot(timespan, omegaPrime_FM_FData[:, 2], label=r'$\alpha_{3}$')
-    # plt.title(r'Gimbal Angular Acceleration ${}^{\mathcal{F}} \alpha_{\mathcal{F} / \mathcal{M}}$', fontsize=14)
-    # plt.ylabel('Angular Acceleration (deg/s$^2$)', fontsize=16)
-    # plt.xlabel('Time (s)', fontsize=16)
-    # plt.legend(loc='center right', prop={'size': 16})
+    # Plot gimbal attitude
+    plt.figure()
+    plt.clf()
+    plt.plot(timespan, sigma_FMData[:, 0], label=r'$\sigma_{1}$', color='darkturquoise')
+    plt.plot(timespan, sigma_FMData[:, 1], label=r'$\sigma_{2}$', color='orchid')
+    plt.plot(timespan, sigma_FMData[:, 2], label=r'$\sigma_{3}$', color='mediumslateblue')
+    #plt.title(r'Gimbal Attitude, $\sigma_{\mathcal{F} / \mathcal{M}}$', fontsize=14)
+    plt.ylabel('', fontsize=16)
+    plt.xlabel('Time (Min)', fontsize=16)
+    plt.legend(loc='upper right', prop={'size': 16})
+    plt.grid(True)
 
+    # Plot gimbal angle velocity
+    plt.figure()
+    plt.clf()
+    plt.plot(timespan, omega_FM_FData[:, 0], label=r'$\omega_{1}$', color='darkturquoise')
+    plt.plot(timespan, omega_FM_FData[:, 1], label=r'$\omega_{2}$', color='orchid')
+    plt.plot(timespan, omega_FM_FData[:, 2], label=r'$\omega_{3}$', color='mediumslateblue')
+    #plt.title(r'Gimbal Angular Velocity ${}^{\mathcal{F}} \omega_{\mathcal{F} / \mathcal{M}}$', fontsize=14)
+    plt.ylabel('(deg/s)', fontsize=16)
+    plt.xlabel('Time (Min)', fontsize=16)
+    plt.legend(loc='upper right', prop={'size': 16})
+    plt.grid(True)
+
+    # Plot gimbal angular acceleration
+    plt.figure()
+    plt.clf()
+    plt.plot(timespan, omegaPrime_FM_FData[:, 0], label=r'$\alpha_{1}$', color='darkturquoise')
+    plt.plot(timespan, omegaPrime_FM_FData[:, 1], label=r'$\alpha_{2}$', color='orchid')
+    plt.plot(timespan, omegaPrime_FM_FData[:, 2], label=r'$\alpha_{3}$', color='mediumslateblue')
+    #plt.title(r'Gimbal Angular Acceleration ${}^{\mathcal{F}} \alpha_{\mathcal{F} / \mathcal{M}}$', fontsize=14)
+    plt.ylabel('(deg/s$^2$)', fontsize=16)
+    plt.xlabel('Time (Min)', fontsize=16)
+    plt.legend(loc='upper right', prop={'size': 16})
+    plt.grid(True)
 
     # Plot prescribed gimbal states on a single figure
     fig, plts = plt.subplots(3, 1, sharex=True)
@@ -550,9 +628,10 @@ def plotPrescribedGimbalStates(timespan, sigma_FMData, omega_FM_FData, omegaPrim
     l7, = plts[2].plot(timespan, omegaPrime_FM_FData[:, 0], color='darkturquoise')
     l8, = plts[2].plot(timespan, omegaPrime_FM_FData[:, 1], color='orchid')
     l9, = plts[2].plot(timespan, omegaPrime_FM_FData[:, 2], color='mediumslateblue')
-    plts.flat[0].set(ylabel=r'$\sigma_{\mathcal{F} / \mathcal{M}}$')
-    plts.flat[1].set(ylabel=r'${}^{\mathcal{F}} \omega_{\mathcal{F} / \mathcal{M}}$ (deg/s)')
-    plts.flat[2].set(xlabel='Time (s)', ylabel=r'${}^{\mathcal{F}} \alpha_{\mathcal{F} / \mathcal{M}}$ (deg/s$^2$)')
+    plts[0].set_ylabel(r"$\sigma_{\mathcal{F} / \mathcal{M}}$", fontsize=16)
+    plts[1].set_ylabel(r"${}^{\mathcal{F}} \omega_{\mathcal{F} / \mathcal{M}}$ (deg/s)", fontsize=16)
+    plts[2].set_ylabel(r"${}^{\mathcal{F}} \alpha_{\mathcal{F} / \mathcal{M}}$ (deg/s$^2$)", fontsize=16)
+    plts[2].set_xlabel(r"Time (Min)", fontsize=16)
     plts[0].legend((l1, l2, l3), (r'$\sigma_{1}$', r'$\sigma_{2}$', r'$\sigma_{3}$',), loc='upper right', prop={'size': 12})
     plts[1].legend((l4, l5, l6), (r'$\omega_{1}$', r'$\omega_{2}$', r'$\omega_{3}$',), loc='upper right', prop={'size': 12})
     plts[2].legend((l7, l8, l9), (r'$\alpha_{1}$', r'$\alpha_{2}$', r'$\alpha_{3}$',), loc='upper right', prop={'size': 12})
@@ -561,12 +640,15 @@ def plotPrescribedGimbalStates(timespan, sigma_FMData, omega_FM_FData, omegaPrim
     plts[1].grid(True)
     plts[2].grid(True)
 
-def plot2DGimbalMotion(gimbal1AngleData, gimbal2AngleData):
+def plot2DGimbalMotion(timespan, gimbal1AngleData, gimbal2AngleData):
     # Plot 2D Diamond and the corresponding gimbal trajectory
-    line1 = [(18.342, 0.0), (0.676, 27.43)]
-    line2 = [(-18.764, 0.0), (0.676, 27.43)]
-    line3 = [(-18.764, 0.0), (0.676, -27.43)]
-    line4 = [(18.342, 0.0), (0.676, -27.43)]
+    scaleG1 = 25 / 18.342
+    scaleG2 = 30 / 27.43
+    scaleMotor = 128 / 160
+    line1 = [(18.342 * scaleG1, 0.0 * scaleG2), (0.676 * scaleG1, 27.43 * scaleG2)]
+    line2 = [(-18.764 * scaleG1, 0.0 * scaleG2), (0.676 * scaleG1, 27.43 * scaleG2)]
+    line3 = [(-18.764 * scaleG1, 0.0 * scaleG2), (0.676 * scaleG1, -27.43 * scaleG2)]
+    line4 = [(18.342 * scaleG1, 0.0 * scaleG2), (0.676 * scaleG1, -27.43 * scaleG2)]
     lines = [line1, line2, line3, line4]
     lc = mc.LineCollection(lines, colors="crimson", linewidths=2, linestyles="dashed")
     plt.figure()
@@ -592,7 +674,7 @@ def plotThrustAxis(timespan, thrustAxis):
     # plt.plot(timespan[1:], thrustAxis[1:, 2], label='3')
     # plt.title('Thrust Axis', fontsize=14)
     # plt.ylabel('', fontsize=16)
-    # plt.xlabel('Time (s)', fontsize=16)
+    # plt.xlabel('Time (Min)', fontsize=16)
     # plt.legend(loc='lower right', prop={'size': 16})
 
     # Plot 3d thrust direction

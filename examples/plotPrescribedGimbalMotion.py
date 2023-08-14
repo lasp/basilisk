@@ -35,11 +35,13 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from Basilisk.utilities import RigidBodyKinematics as rbk
 
 
+
+
 def run():
     deg2Rad = np.pi / 180
 
-    path_to_file = "/Users/leahkiner/Desktop/sigma_FMData.txt"
-    sigma_FMData = np.loadtxt(path_to_file)
+    # path_to_file = "/Users/leahkiner/Desktop/sigma_FMData.txt"
+    # sigma_FMData = np.loadtxt(path_to_file)
 
     # Orientation desired for initial paper concept figure
     # rad1 = 15 * np.pi / 180
@@ -53,10 +55,25 @@ def run():
     # dcm_FM = np.matmul(dcm2, dcm1)
 
     # Initial platform orientation
-    dcm_FM = rbk.MRP2C(sigma_FMData[0, :])
+    #dcm_FM = rbk.MRP2C(sigma_FMData[0, :])
 
     # Final platform orientation
-    # dcm_FM = rbk.MRP2C(sigma_FMData.iat[-1, :])
+    # dcm_FM = rbk.MRP2C(sigma_FMData[-1, :])
+
+    # 2-Axis gimbal explanation dcms
+    rad1 = 90 * np.pi / 180
+    rad2 = 45 * np.pi / 180
+    dcm1 = np.array([[np.cos(rad1), np.sin(rad1), 0],
+                     [-np.sin(rad1), np.cos(rad1), 0],
+                     [0, 0, 1]])
+    dcm2 = np.array([[1,  0, 0],
+                     [0, np.cos(rad2), np.sin(rad2)],
+                     [0, -np.sin(rad2), np.cos(rad2)]])
+    dcm_FM = np.array([[1,  0, 0],
+                       [0, 1, 0],
+                       [0, 0, 1]])
+    dcm_FM = dcm1
+    dcm_FM = np.matmul(dcm2, dcm1)
 
     # Determine gimbal frame basis vectors written in mount frame components
     frameVec1 = dcm_FM[0, :]  # [f_1]
