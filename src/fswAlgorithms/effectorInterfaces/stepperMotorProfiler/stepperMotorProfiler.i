@@ -24,8 +24,8 @@
 %include "swig_c_wrap.i"
 %c_wrap_2(stepperMotorProfiler, StepperMotorProfilerConfig);
 
-%include "architecture/msgPayloadDefC/MotorStepCountMsgPayload.h"
-struct MotorStepCountMsg_C;
+%include "architecture/msgPayloadDefC/MotorStepCommandMsgPayload.h"
+struct MotorStepCommandMsg_C;
 %include "architecture/msgPayloadDefC/StepperMotorMsgPayload.h"
 struct StepperMotorMsg_C;
 %include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"

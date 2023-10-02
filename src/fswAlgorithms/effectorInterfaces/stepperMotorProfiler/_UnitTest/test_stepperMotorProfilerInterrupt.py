@@ -31,8 +31,8 @@ import os
 import pytest
 from Basilisk.architecture import bskLogging
 from Basilisk.architecture import messaging
+from Basilisk.fswAlgorithms import stepperMotorController
 from Basilisk.fswAlgorithms import stepperMotorProfiler
-from Basilisk.fswAlgorithms import stepperMotor
 from Basilisk.utilities import SimulationBaseClass
 from Basilisk.utilities import macros
 from Basilisk.utilities import unitTestSupport
@@ -48,7 +48,7 @@ splitPath = path.split(bskName)
 @pytest.mark.parametrize("desiredMotorAngle1", [10.0 * (np.pi / 180), -10.0 * (np.pi / 180)])
 @pytest.mark.parametrize("desiredMotorAngle2", [0.0, 10.0 * (np.pi / 180), 5 * (np.pi / 180)])
 @pytest.mark.parametrize("interruptFraction", [0.0, 0.25, 0.5, 0.75])
-@pytest.mark.parametrize("accuracy", [1e-5])
+@pytest.mark.parametrize("accuracy", [1e-12])
 def test_stepperMotorProfilerTestFunction(show_plots, stepAngle, stepTime, initialMotorAngle, desiredMotorAngle1, desiredMotorAngle2, interruptFraction, accuracy):
     r"""
     **Validation Test Description**
@@ -99,22 +99,22 @@ def stepperMotorProfilerTestFunction(show_plots, stepAngle, stepTime, initialMot
     testProc = unitTestSim.CreateNewProcess(unitProcessName)
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
-    # Create an instance of the stepperMotor module to be tested
-    StepperMotor = stepperMotor.stepperMotor()
-    StepperMotor.ModelTag = "stepperMotor"
-    StepperMotor.stepAngle = stepAngle
-    StepperMotor.stepTime = stepTime
-    StepperMotor.initAngle = initialMotorAngle
-    StepperMotor.currentAngle = initialMotorAngle
+    # Create an instance of the stepperMotorController module to be tested
+    StepperMotorController = stepperMotorController.stepperMotorController()
+    StepperMotorController.ModelTag = "stepperMotorController"
+    StepperMotorController.stepAngle = stepAngle
+    StepperMotorController.stepTime = stepTime
+    StepperMotorController.initAngle = initialMotorAngle
+    StepperMotorController.currentAngle = initialMotorAngle
 
     # Add the stepperMotor test module to runtime call list
-    unitTestSim.AddModelToTask(unitTaskName, StepperMotor)
+    unitTestSim.AddModelToTask(unitTaskName, StepperMotorController)
 
     # Create the stepperMotor input message
     HingedRigidBodyMessageData = messaging.HingedRigidBodyMsgPayload()
     HingedRigidBodyMessageData.theta = desiredMotorAngle1
     HingedRigidBodyMessage = messaging.HingedRigidBodyMsg().write(HingedRigidBodyMessageData)
-    StepperMotor.spinningBodyInMsg.subscribeTo(HingedRigidBodyMessage)
+    StepperMotorController.spinningBodyInMsg.subscribeTo(HingedRigidBodyMessage)
 
     # Create an instance of the stepperMotorProfiler module to be tested
     StepperMotorProfiler = stepperMotorProfiler.stepperMotorProfiler()
@@ -133,10 +133,10 @@ def stepperMotorProfilerTestFunction(show_plots, stepAngle, stepTime, initialMot
     unitTestSim.AddModelToTask(unitTaskName, StepperMotorProfiler)
 
     # Subscribe the step command message to the stepper motor profiler module
-    StepperMotorProfiler.motorStepCountInMsg.subscribeTo(StepperMotor.motorStepCountOutMsg)
+    StepperMotorProfiler.motorStepCommandInMsg.subscribeTo(StepperMotorController.motorStepCommandOutMsg)
 
     # Log the test module output message for data comparison
-    stepCommandDataLog = StepperMotor.motorStepCountOutMsg.recorder(testProcessRate)
+    stepCommandDataLog = StepperMotorController.motorStepCommandOutMsg.recorder(testProcessRate)
     stepperMotorDataLog = StepperMotorProfiler.stepperMotorOutMsg.recorder(testProcessRate)
     prescribedDataLog = StepperMotorProfiler.prescribedMotionOutMsg.recorder(testProcessRate)
     unitTestSim.AddModelToTask(unitTaskName, stepCommandDataLog)
@@ -147,7 +147,10 @@ def stepperMotorProfilerTestFunction(show_plots, stepAngle, stepTime, initialMot
     unitTestSim.InitializeSimulation()
 
     # Calculate required number of steps for validation
-    trueNumSteps1 = (desiredMotorAngle1 - (np.ceil(initialMotorAngle/stepAngle)*stepAngle)) / stepAngle
+    if (initialMotorAngle > 0):
+        trueNumSteps1 = (desiredMotorAngle1 - (np.ceil(initialMotorAngle/stepAngle)*stepAngle)) / stepAngle
+    else:
+        trueNumSteps1 = (desiredMotorAngle1 - (np.floor(initialMotorAngle/stepAngle)*stepAngle)) / stepAngle
 
     # If the desired motor angle is not a multiple of the step angle, the number of steps calculated is not an integer
     # and it must be rounded to the nearest whole step
@@ -173,7 +176,7 @@ def stepperMotorProfilerTestFunction(show_plots, stepAngle, stepTime, initialMot
     HingedRigidBodyMessageData = messaging.HingedRigidBodyMsgPayload()
     HingedRigidBodyMessageData.theta = desiredMotorAngle2
     HingedRigidBodyMessage = messaging.HingedRigidBodyMsg().write(HingedRigidBodyMessageData, unitTestSim.TotalSim.CurrentNanos)
-    StepperMotor.spinningBodyInMsg.subscribeTo(HingedRigidBodyMessage)
+    StepperMotorController.spinningBodyInMsg.subscribeTo(HingedRigidBodyMessage)
 
     # Calculate number of steps to actuate from interrupted motor position to the second desired motor angle
     if (trueNumSteps1 > 0):
@@ -314,8 +317,8 @@ if __name__ == "__main__":
                  1.0 * (np.pi / 180),     # stepAngle
                  1.0,                     # stepTime
                  0.0,                     # initialMotorAngle
-                 -10.0 * (np.pi / 180),   # desiredMotorAngle1,
+                 10.0 * (np.pi / 180),   # desiredMotorAngle1,
                  5.0 * (np.pi / 180),     # desiredMotorAngle2
-                 0.5,                     # interruptFraction
-                 1e-3                     # accuracy
+                 0.0,                     # interruptFraction
+                 1e-12                     # accuracy
                )

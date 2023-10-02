@@ -41,8 +41,8 @@ void SelfInit_stepperMotorProfiler(StepperMotorProfilerConfig *configData, int64
 */
 void Reset_stepperMotorProfiler(StepperMotorProfilerConfig *configData, uint64_t callTime, int64_t moduleID) {
     // Check if the input message is linked
-    if (!MotorStepCountMsg_C_isLinked(&configData->motorStepCountInMsg)) {
-        _bskLog(configData->bskLogger, BSK_ERROR, "Error: prescribedRot1DOF.motorStepCountInMsg wasn't connected.");
+    if (!MotorStepCommandMsg_C_isLinked(&configData->motorStepCommandInMsg)) {
+        _bskLog(configData->bskLogger, BSK_ERROR, "Error: prescribedRot1DOF.motorStepCommandInMsg wasn't connected.");
     }
 
     // Initialize the module parameters to zero
@@ -80,24 +80,24 @@ The motor states are then written to the output messages.
 */
 void Update_stepperMotorProfiler(StepperMotorProfilerConfig *configData, uint64_t callTime, int64_t moduleID) {
     // Create the buffer messages
-    MotorStepCountMsgPayload motorStepCountIn;
+    MotorStepCommandMsgPayload motorStepCommandIn;
     StepperMotorMsgPayload stepperMotorOut;
     HingedRigidBodyMsgPayload hingedRigidBodyOut;
     PrescribedMotionMsgPayload prescribedMotionOut;
 
     // Zero the buffer messages
-    motorStepCountIn = MotorStepCountMsg_C_zeroMsgPayload();
+    motorStepCommandIn = MotorStepCommandMsg_C_zeroMsgPayload();
     stepperMotorOut = StepperMotorMsg_C_zeroMsgPayload();
     hingedRigidBodyOut = HingedRigidBodyMsg_C_zeroMsgPayload();
     prescribedMotionOut = PrescribedMotionMsg_C_zeroMsgPayload();
 
     // Read the input message
-    if (MotorStepCountMsg_C_isWritten(&configData->motorStepCountInMsg)) {
-        motorStepCountIn = MotorStepCountMsg_C_read(&configData->motorStepCountInMsg);
+    if (MotorStepCommandMsg_C_isWritten(&configData->motorStepCommandInMsg)) {
+        motorStepCommandIn = MotorStepCommandMsg_C_read(&configData->motorStepCommandInMsg);
         // Store the number of commanded motor steps when a new message is written
-        if ((motorStepCountIn.stepsCommanded != 0) && (configData->previousWrittenTime <  MotorStepCountMsg_C_timeWritten(&configData->motorStepCountInMsg))) {
-            configData->previousWrittenTime = MotorStepCountMsg_C_timeWritten(&configData->motorStepCountInMsg);
-            configData->stepsCommanded = motorStepCountIn.stepsCommanded;
+        if ((motorStepCommandIn.stepsCommanded != 0) && (configData->previousWrittenTime <  MotorStepCommandMsg_C_timeWritten(&configData->motorStepCommandInMsg))) {
+            configData->previousWrittenTime = MotorStepCommandMsg_C_timeWritten(&configData->motorStepCommandInMsg);
+            configData->stepsCommanded = motorStepCommandIn.stepsCommanded;
             configData->completion = false;
             configData->newMsg = true;
         }
@@ -152,7 +152,7 @@ void Update_stepperMotorProfiler(StepperMotorProfilerConfig *configData, uint64_
             configData->thetaDot = configData->thetaDDot * (t - configData->tInit) + configData->thetaDotInit;
             configData->theta = configData->a * (t - configData->tInit) * (t - configData->tInit) + configData->intermediateThetaInit;
             configData->stepComplete = false;
-        } else if (t > configData->ts && t <= configData->tf && configData->tf - configData->tInit != 0) { // Entered during the second half of the maneuver
+        } else if (t > configData->ts && t < configData->tf && configData->tf - configData->tInit != 0) { // Entered during the second half of the maneuver
             if (configData->stepsCommanded > 0 && !configData->newMsg){
                 configData->thetaDDot = -configData->thetaDDotMax;
             } else if (!configData->newMsg) {
@@ -170,6 +170,12 @@ void Update_stepperMotorProfiler(StepperMotorProfilerConfig *configData, uint64_
             // Update the motor step count
             if (!configData->newMsg) {
                 if (configData->stepsCommanded > 0) {
+                    configData->stepCount++;
+                } else {
+                    configData->stepCount--;
+                }
+            } else {
+                if (configData->intermediateThetaRef > configData->intermediateThetaInit) {
                     configData->stepCount++;
                 } else {
                     configData->stepCount--;
