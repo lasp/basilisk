@@ -48,7 +48,7 @@ splitPath = path.split(bskName)
 @pytest.mark.parametrize("desiredMotorAngle1", [10.0 * (np.pi / 180), -10.0 * (np.pi / 180)])
 @pytest.mark.parametrize("desiredMotorAngle2", [0.0, 10.0 * (np.pi / 180), 5 * (np.pi / 180)])
 @pytest.mark.parametrize("interruptFraction", [0.0, 0.25, 0.5, 0.75])
-@pytest.mark.parametrize("accuracy", [1e-12])
+@pytest.mark.parametrize("accuracy", [1e-5])
 def test_stepperMotorProfilerTestFunction(show_plots, stepAngle, stepTime, initialMotorAngle, desiredMotorAngle1, desiredMotorAngle2, interruptFraction, accuracy):
     r"""
     **Validation Test Description**
@@ -70,6 +70,7 @@ def test_stepperMotorProfilerTestFunction(show_plots, stepAngle, stepTime, initi
         desiredMotorAngle1 (float): [rad] Desired stepper motor angle 1
         desiredMotorAngle2 (float): [rad] Desired stepper motor angle 2
         interruptFraction (float): Specifies what fraction of a step is completed when the interrupted message is written
+        accuracy (float): absolute accuracy value used in the validation tests
 
     **Description of Variables Being Tested**
 
@@ -84,8 +85,8 @@ def test_stepperMotorProfilerTestFunction(show_plots, stepAngle, stepTime, initi
     assert testResults < 1, testMessage
 
 def stepperMotorProfilerTestFunction(show_plots, stepAngle, stepTime, initialMotorAngle, desiredMotorAngle1, desiredMotorAngle2, interruptFraction, accuracy):
-    testFailCount = 0
-    testMessages = []
+    testFailCount = 0                                        # Zero the unit test result counter
+    testMessages = []                                        # Create an empty array to store the test log messages
     unitTaskName = "unitTask"
     unitProcessName = "TestProcess"
     bskLogging.setDefaultLogLevel(bskLogging.BSK_WARNING)
@@ -99,7 +100,7 @@ def stepperMotorProfilerTestFunction(show_plots, stepAngle, stepTime, initialMot
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Create an instance of the stepperMotor module to be tested
-    StepperMotor = stepperMotor.StepperMotor()
+    StepperMotor = stepperMotor.stepperMotor()
     StepperMotor.ModelTag = "stepperMotor"
     StepperMotor.stepAngle = stepAngle
     StepperMotor.stepTime = stepTime
@@ -135,10 +136,12 @@ def stepperMotorProfilerTestFunction(show_plots, stepAngle, stepTime, initialMot
     StepperMotorProfiler.motorStepCountInMsg.subscribeTo(StepperMotor.motorStepCountOutMsg)
 
     # Log the test module output message for data comparison
-    motorStepCountLog = StepperMotor.motorStepCountOutMsg.recorder(testProcessRate)
+    stepCommandDataLog = StepperMotor.motorStepCountOutMsg.recorder(testProcessRate)
     stepperMotorDataLog = StepperMotorProfiler.stepperMotorOutMsg.recorder(testProcessRate)
-    unitTestSim.AddModelToTask(unitTaskName, motorStepCountLog)
+    prescribedDataLog = StepperMotorProfiler.prescribedMotionOutMsg.recorder(testProcessRate)
+    unitTestSim.AddModelToTask(unitTaskName, stepCommandDataLog)
     unitTestSim.AddModelToTask(unitTaskName, stepperMotorDataLog)
+    unitTestSim.AddModelToTask(unitTaskName, prescribedDataLog)
 
     # Initialize the simulation
     unitTestSim.InitializeSimulation()
@@ -201,38 +204,104 @@ def stepperMotorProfilerTestFunction(show_plots, stepAngle, stepTime, initialMot
     # Set the simulation time for chunk 2
     actuateTime2 = stepTime * np.abs(trueNumSteps2)  # [sec] Time for the motor to actuate to the desired angle
     holdTime = 5  # [sec] Time the simulation will continue while holding the final angle
-    unitTestSim.ConfigureStopTime(macros.sec2nano(actuateTime2 + holdTime))
+    simTime2 = actuateTime2 + holdTime
+    unitTestSim.ConfigureStopTime(macros.sec2nano(simTime1 + simTime2))
 
     # Execute simulation chunk 2
     unitTestSim.ExecuteSimulation()
 
     # Pull the logged motor step data
-    stepsCommanded = motorStepCountLog.stepsCommanded
+    stepCommandMsgData = stepCommandDataLog.stepsCommanded
+    timespan = stepperMotorDataLog.times()
+    theta = (180 / np.pi) * stepperMotorDataLog.theta
+    thetaDot = (180 / np.pi) * stepperMotorDataLog.thetaDot
+    thetaDDot = (180 / np.pi) * stepperMotorDataLog.thetaDDot
+    motorStepCount = stepperMotorDataLog.stepCount
+    motorCommandedSteps = stepperMotorDataLog.stepsCommanded
+    sigma_FM = prescribedDataLog.sigma_FM
+    omega_FM_F = prescribedDataLog.omega_FM_F
+    omegaPrime_FM_F = prescribedDataLog.omegaPrime_FM_F
 
-    # Extract the module-calculated number of required steps from the logged output message
-    stepCounts = stepsCommanded[np.nonzero(stepsCommanded)]
+    print(stepCommandMsgData)
 
-    # Check that the correct number of steps were calculated
-    if (trueNumSteps2 != 0):
-        if ((stepCounts[0] != trueNumSteps1) or (stepCounts[1] != trueNumSteps2)):
-            testFailCount += 1
-            testMessages.append("\nFAILED: " + StepperMotorWrap.ModelTag + " Number of required motor steps do not match")
-            if (stepCounts[0] != trueNumSteps1):
-                print("STEP CALCULATION 1 INCORRECT")
-            if (stepCounts[1] != trueNumSteps2):
-                print("STEP CALCULATION 2 INCORRECT")
-    else:
-        if (stepCounts[0] != trueNumSteps1):
-            testFailCount += 1
-            testMessages.append("\nFAILED: " + StepperMotorWrap.ModelTag + " Number of required motor steps do not match")
-            print("STEP CALCULATION 1 INCORRECT")
+    # Plot motor angle
+    plt.figure()
+    plt.clf()
+    plt.plot(timespan * macros.NANO2SEC, theta, label=r"$\theta$")
+    plt.title(r'Stepper Motor Angle $\theta_{\mathcal{F}/\mathcal{M}}$', fontsize=14)
+    plt.ylabel('(deg)', fontsize=14)
+    plt.xlabel('Time (s)', fontsize=14)
+    plt.legend(loc='upper right', prop={'size': 12})
+    plt.grid(True)
 
-    # Manual check that module outputs match the expected true result
-    print("True Steps:")
-    print(trueNumSteps1)
-    print(trueNumSteps2)
-    print("Module Calculation:")
-    print(stepCounts)
+    # Plot motor thetaDot
+    plt.figure()
+    plt.clf()
+    plt.plot(timespan * macros.NANO2SEC, thetaDot, label=r"$\dot{\theta}$")
+    plt.title(r'Stepper Motor Angle Rate $\dot{\theta}_{\mathcal{F}/\mathcal{M}}$', fontsize=14)
+    plt.ylabel('(deg/s)', fontsize=14)
+    plt.xlabel('Time (s)', fontsize=14)
+    plt.legend(loc='upper right', prop={'size': 12})
+    plt.grid(True)
+
+    # Plot motor thetaDDot
+    plt.figure()
+    plt.clf()
+    plt.plot(timespan * macros.NANO2SEC, thetaDDot, label=r"$\ddot{\theta}$")
+    plt.title(r'Stepper Motor Angular Acceleration $\ddot{\theta}_{\mathcal{F}/\mathcal{M}}$ ', fontsize=14)
+    plt.ylabel('(deg/s$^2$)', fontsize=14)
+    plt.xlabel('Time (s)', fontsize=14)
+    plt.legend(loc='upper right', prop={'size': 12})
+    plt.grid(True)
+
+    # Plot steps commanded and motor steps taken
+    plt.figure()
+    plt.clf()
+    plt.plot(timespan * macros.NANO2SEC, motorStepCount)
+    plt.plot(timespan * macros.NANO2SEC, motorCommandedSteps, '--', label='Commanded')
+    plt.title(r'Motor Step History', fontsize=14)
+    plt.ylabel('Steps', fontsize=14)
+    plt.xlabel('Time (s)', fontsize=14)
+    plt.legend(loc='upper right', prop={'size': 12})
+    plt.grid(True)
+
+    # Plot omega_FM_F
+    plt.figure()
+    plt.clf()
+    plt.plot(timespan * macros.NANO2SEC, omega_FM_F[:, 0], label=r'$\omega_{1}$')
+    plt.plot(timespan * macros.NANO2SEC, omega_FM_F[:, 1], label=r'$\omega_{2}$')
+    plt.plot(timespan * macros.NANO2SEC, omega_FM_F[:, 2], label=r'$\omega_{3}$')
+    plt.title(r'${}^\mathcal{F} \omega_{\mathcal{F}/\mathcal{M}}$ Profiled Trajectory', fontsize=14)
+    plt.ylabel('(deg/s)', fontsize=14)
+    plt.xlabel('Time (s)', fontsize=14)
+    plt.legend(loc='upper right', prop={'size': 12})
+    plt.grid(True)
+
+    # Plot omegaPrime_FM_F
+    plt.figure()
+    plt.clf()
+    plt.plot(timespan * macros.NANO2SEC, omegaPrime_FM_F[:, 0], label=r'1')
+    plt.plot(timespan * macros.NANO2SEC, omegaPrime_FM_F[:, 1], label=r'2')
+    plt.plot(timespan * macros.NANO2SEC, omegaPrime_FM_F[:, 2], label=r'3')
+    plt.title(r'${}^\mathcal{F} \omega Prime_{\mathcal{F}/\mathcal{M}}$ Profiled Trajectory', fontsize=14)
+    plt.ylabel('(deg/s$^2$)', fontsize=14)
+    plt.xlabel('Time (s)', fontsize=14)
+    plt.legend(loc='upper right', prop={'size': 12})
+    plt.grid(True)
+
+    if show_plots:
+        plt.show()
+    plt.close("all")
+
+    # Check that the final motor angle matches the motor reference angle desiredMotorAngle2
+    desiredMotorAngle2 = (180 / np.pi) * desiredMotorAngle2
+    if not unitTestSupport.isDoubleEqual(theta[-1], desiredMotorAngle2, accuracy):
+        testFailCount += 1
+        testMessages.append("FAILED: " + StepperMotorProfiler.ModelTag + " Final motor angle does not match the reference angle.")
+        print("TRUE FINAL ANGLE: \n")
+        print(desiredMotorAngle2)
+        print("MODULE FINAL ANGLE: \n")
+        print(theta[-1])
 
     return [testFailCount, ''.join(testMessages)]
 
@@ -241,11 +310,12 @@ def stepperMotorProfilerTestFunction(show_plots, stepAngle, stepTime, initialMot
 # stand-along python script
 if __name__ == "__main__":
     stepperMotorProfilerTestFunction(
-                 False,
+                 True,
                  1.0 * (np.pi / 180),     # stepAngle
                  1.0,                     # stepTime
                  0.0,                     # initialMotorAngle
                  -10.0 * (np.pi / 180),   # desiredMotorAngle1,
-                 0.0 * (np.pi / 180),     # desiredMotorAngle2
-                 0.25                     # interruptFraction
+                 5.0 * (np.pi / 180),     # desiredMotorAngle2
+                 0.5,                     # interruptFraction
+                 1e-3                     # accuracy
                )

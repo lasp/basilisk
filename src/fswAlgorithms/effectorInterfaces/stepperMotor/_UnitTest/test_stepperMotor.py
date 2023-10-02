@@ -32,10 +32,8 @@ import pytest
 from Basilisk.architecture import bskLogging
 from Basilisk.architecture import messaging
 from Basilisk.fswAlgorithms import stepperMotor
-from Basilisk.utilities import RigidBodyKinematics as rbk
 from Basilisk.utilities import SimulationBaseClass
 from Basilisk.utilities import macros
-from Basilisk.utilities import unitTestSupport
 
 filename = inspect.getframeinfo(inspect.currentframe()).filename
 path = os.path.dirname(os.path.abspath(filename))
@@ -96,16 +94,15 @@ def stepperMotorTestFunction(show_plots, stepAngle, stepTime, initialMotorAngle,
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Create an instance of the stepperMotor module to be tested
-    StepperMotor = stepperMotor.StepperMotorConfig()
-    StepperMotorWrap = unitTestSim.setModelDataWrap(StepperMotor)
-    StepperMotorWrap.ModelTag = "stepperMotor"
+    StepperMotor = stepperMotor.stepperMotor()
+    StepperMotor.ModelTag = "stepperMotor"
     StepperMotor.stepAngle = stepAngle
     StepperMotor.stepTime = stepTime
     StepperMotor.initAngle = initialMotorAngle
     StepperMotor.currentAngle = initialMotorAngle
 
     # Add the stepperMotor test module to runtime call list
-    unitTestSim.AddModelToTask(unitTaskName, StepperMotorWrap, StepperMotor)
+    unitTestSim.AddModelToTask(unitTaskName, StepperMotor)
 
     # Create the stepperMotor input message
     HingedRigidBodyMessageData = messaging.HingedRigidBodyMsgPayload()
@@ -152,17 +149,17 @@ def stepperMotorTestFunction(show_plots, stepAngle, stepTime, initialMotorAngle,
     # Check that the correct number of steps was calculated
     if (stepsCommanded[0] != trueNumSteps):
         testFailCount += 1
-        testMessages.append("\nFAILED: " + StepperMotorWrap.ModelTag + " Number of required motor steps do not match")
+        testMessages.append("\nFAILED: " + StepperMotor.ModelTag + " Number of required motor steps do not match")
 
     # Check to make sure the message was written correctly
     if (trueNumSteps != 0):
         if (np.count_nonzero(stepsCommanded) != 1):
             testFailCount += 1
-            testMessages.append("\nFAILED: " + StepperMotorWrap.ModelTag + " MotorStepCountMsg was incorrectly written \nNum nonzero: " + str(np.count_nonzero(stepsCommanded)))
+            testMessages.append("\nFAILED: " + StepperMotor.ModelTag + " MotorStepCountMsg was incorrectly written \nNum nonzero: " + str(np.count_nonzero(stepsCommanded)))
     else:
         if (np.count_nonzero(stepsCommanded) != 0):
             testFailCount += 1
-            testMessages.append("\nFAILED: " + StepperMotorWrap.ModelTag + " MotorStepCountMsg was incorrectly written")
+            testMessages.append("\nFAILED: " + StepperMotor.ModelTag + " MotorStepCountMsg was incorrectly written")
 
     return [testFailCount, ''.join(testMessages)]
 
