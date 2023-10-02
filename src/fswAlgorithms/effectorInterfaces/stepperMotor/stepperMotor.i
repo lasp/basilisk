@@ -16,18 +16,28 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
-%module prescribedRot1DOF
+%module stepperMotor
 %{
-   #include "prescribedRot1DOF.h"
+   #include "stepperMotor.h"
 %}
 
 %include "swig_c_wrap.i"
-%c_wrap_2(prescribedRot1DOF, PrescribedRot1DOFConfig);
+%c_wrap_2(stepperMotor, StepperMotorConfig);
+
+%include "swig_conly_data.i"
+%constant void SelfInit_stepperMotor(void*, uint64_t);
+%ignore SelfInit_stepperMotor;
+%constant void Reset_stepperMotor(void*, uint64_t, uint64_t);
+%ignore Reset_stepperMotor;
+%constant void Update_stepperMotor(void*, uint64_t, uint64_t);
+%ignore Update_stepperMotor;
+
+%include "stepperMotor.h"
 
 %include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
 struct HingedRigidBodyMsg_C;
-%include "architecture/msgPayloadDefC/PrescribedMotionMsgPayload.h"
-struct PrescribedMotionMsg_C;
+%include "architecture/msgPayloadDefC/MotorStepCountMsgPayload.h"
+struct MotorStepCountMsg_C;
 
 %pythoncode %{
 import sys
