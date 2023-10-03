@@ -53,13 +53,13 @@ def test_stepperMotorProfilerTestFunction(show_plots, stepAngle, stepTime, initi
     r"""
     **Validation Test Description**
 
-    This unit test ensures that the stepper motor module correctly determines the number of steps required to actuate
-    from an initial angle to a final reference angle. An interrupted message is introduced during the motor actuation
-    that specifies a new final reference angle. The initial and desired motor angles are varied so that combinations of
-    both positive and negative steps are taken. The time of step interruption is varied to ensure that once a step
-    begins, it is completed regardless of when the interrupted message is written. Because the other unit test script
-    for this module checked the module functionality for various motor step angles and desired angles that are not
-    multiples of the motor step angle, the step angle and desired angles chosen in this script are set to simple values.
+    This unit test ensures that the stepper motor profiler module correctly actuates the stepper motor from an initial
+    angle to a final reference angle, given an input number of steps commanded. An interrupted message is introduced
+    during the motor actuation that specifies a new final reference angle. The initial and desired motor angles are
+    varied so that combinations of both positive and negative steps are taken. The time of step interruption is varied
+    to ensure that once a step begins, it is completed regardless of when the interrupted message is written. Because
+    the other unit test script for this module checked the basic module functionality for a single positive or negative
+    step command, the step angle, step time, initial and desired angles chosen in this script are set to simple values.
 
     **Test Parameters**
 
@@ -74,9 +74,7 @@ def test_stepperMotorProfilerTestFunction(show_plots, stepAngle, stepTime, initi
 
     **Description of Variables Being Tested**
 
-    The module-computed number of required stepper motor steps for both simulation chunks are checked with the true
-    number of motor steps computed in this script. Because the other unit test script for this module checked that
-    messages are correctly written, this validation is not repeated in this script.
+    This test checks taht the final motor angle matches the second desired motor angle.
 
     """
 
@@ -118,7 +116,7 @@ def stepperMotorProfilerTestFunction(show_plots, stepAngle, stepTime, initialMot
 
     # Create an instance of the stepperMotorProfiler module to be tested
     StepperMotorProfiler = stepperMotorProfiler.stepperMotorProfiler()
-    StepperMotorProfiler.ModelTag = "StepperMotorProfiler"
+    StepperMotorProfiler.ModelTag = "stepperMotorProfiler"
     rotAxis_M = np.array([1.0, 0.0, 0.0])
     StepperMotorProfiler.rotAxis_M = rotAxis_M
     StepperMotorProfiler.thetaInit = initialMotorAngle
@@ -214,7 +212,6 @@ def stepperMotorProfilerTestFunction(show_plots, stepAngle, stepTime, initialMot
     unitTestSim.ExecuteSimulation()
 
     # Pull the logged motor step data
-    stepCommandMsgData = stepCommandDataLog.stepsCommanded
     timespan = stepperMotorDataLog.times()
     theta = (180 / np.pi) * stepperMotorDataLog.theta
     thetaDot = (180 / np.pi) * stepperMotorDataLog.thetaDot
@@ -224,8 +221,6 @@ def stepperMotorProfilerTestFunction(show_plots, stepAngle, stepTime, initialMot
     sigma_FM = prescribedDataLog.sigma_FM
     omega_FM_F = prescribedDataLog.omega_FM_F
     omegaPrime_FM_F = prescribedDataLog.omegaPrime_FM_F
-
-    print(stepCommandMsgData)
 
     # Plot motor angle
     plt.figure()
@@ -317,8 +312,8 @@ if __name__ == "__main__":
                  1.0 * (np.pi / 180),     # stepAngle
                  1.0,                     # stepTime
                  0.0,                     # initialMotorAngle
-                 10.0 * (np.pi / 180),   # desiredMotorAngle1,
+                 10.0 * (np.pi / 180),    # desiredMotorAngle1,
                  5.0 * (np.pi / 180),     # desiredMotorAngle2
                  0.0,                     # interruptFraction
-                 1e-12                     # accuracy
+                 1e-12                    # accuracy
                )

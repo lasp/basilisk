@@ -95,10 +95,14 @@ void Update_stepperMotorProfiler(StepperMotorProfilerConfig *configData, uint64_
     if (MotorStepCommandMsg_C_isWritten(&configData->motorStepCommandInMsg)) {
         motorStepCommandIn = MotorStepCommandMsg_C_read(&configData->motorStepCommandInMsg);
         // Store the number of commanded motor steps when a new message is written
-        if ((motorStepCommandIn.stepsCommanded != 0) && (configData->previousWrittenTime <  MotorStepCommandMsg_C_timeWritten(&configData->motorStepCommandInMsg))) {
+        if (configData->previousWrittenTime <  MotorStepCommandMsg_C_timeWritten(&configData->motorStepCommandInMsg)) {
             configData->previousWrittenTime = MotorStepCommandMsg_C_timeWritten(&configData->motorStepCommandInMsg);
             configData->stepsCommanded = motorStepCommandIn.stepsCommanded;
-            configData->completion = false;
+            if (configData->stepsCommanded != 0) {
+                configData->completion = false;
+            } else {
+                configData->completion = true;
+            }
             configData->newMsg = true;
         }
     }

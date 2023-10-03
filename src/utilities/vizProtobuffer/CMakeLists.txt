@@ -30,7 +30,7 @@ if(BUILD_VIZINTERFACE)
 
          add_library(${PROTO_TARGET}
              "${CMAKE_CURRENT_SOURCE_DIR}/${PROTO_TARGET}.pb.cc"
-         )
+                 ../../fswAlgorithms/effectorInterfaces/stepperMotorProfiler/stepperMotorProfiler.c)
          add_dependencies(${PROTO_TARGET} GeneratedProtobufMessages)
          target_include_directories(${PROTO_TARGET}
              PUBLIC
