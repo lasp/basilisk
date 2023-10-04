@@ -271,7 +271,7 @@ function(generate_package_targets TARGET_LIST LIB_DEP_LIST MODULE_DIR)
     swig_add_library(
       ${TARGET_NAME}
       LANGUAGE "python"
-      TYPE MODULE
+      TYPE STATIC
       SOURCES ${TARGET_FILE}
               ${C_FILES}
               # TODO: Following commented lines will become default with future imports OUTFILE_DIR
@@ -651,3 +651,4 @@ endif()
 
 # Tests targets
 add_subdirectory("architecture/utilities/tests")
+add_subdirectory("sim-driver")
