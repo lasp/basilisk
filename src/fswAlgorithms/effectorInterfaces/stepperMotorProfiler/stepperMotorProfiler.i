@@ -1,7 +1,7 @@
 /*
  ISC License
 
- Copyright (c) 2022, Autonomous Vehicle Systems Lab, University of Colorado at Boulder
+ Copyright (c) 2023, Autonomous Vehicle Systems Lab, University of Colorado at Boulder
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -16,36 +16,22 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
-
-
-%module spinningBodyTwoDOFStateEffector
+%module stepperMotorProfiler
 %{
-   #include "spinningBodyTwoDOFStateEffector.h"
+   #include "stepperMotorProfiler.h"
 %}
 
-%pythoncode %{
-from Basilisk.architecture.swig_common_model import *
-%}
+%include "swig_c_wrap.i"
+%c_wrap_2(stepperMotorProfiler, StepperMotorProfilerConfig);
 
-%include "std_string.i"
-%include "std_vector.i"
-%include "swig_conly_data.i"
-%include "swig_eigen.i"
-
-%include "sys_model.i"
-%include "simulation/dynamics/_GeneralModuleFiles/stateData.h"
-%include "simulation/dynamics/_GeneralModuleFiles/stateEffector.h"
-%include "simulation/dynamics/_GeneralModuleFiles/dynParamManager.h"
-%include "spinningBodyTwoDOFStateEffector.h"
-
-%include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-struct SCStatesMsg_C;
-%include "architecture/msgPayloadDefC/ArrayMotorTorqueMsgPayload.h"
-struct ArrayMotorTorqueMsg_C;
-%include "architecture/msgPayloadDefC/ArrayEffectorLockMsgPayload.h"
-struct ArrayEffectorLockMsg_C;
+%include "architecture/msgPayloadDefC/MotorStepCommandMsgPayload.h"
+struct MotorStepCommandMsg_C;
+%include "architecture/msgPayloadDefC/StepperMotorMsgPayload.h"
+struct StepperMotorMsg_C;
 %include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
 struct HingedRigidBodyMsg_C;
+%include "architecture/msgPayloadDefC/PrescribedMotionMsgPayload.h"
+struct PrescribedMotionMsg_C;
 
 %pythoncode %{
 import sys
