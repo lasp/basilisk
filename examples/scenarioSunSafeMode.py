@@ -32,8 +32,9 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from Basilisk.simulation import (spacecraft, extForceTorque, simpleNav, reactionWheelStateEffector, thrusterDynamicEffector,
-                                coarseSunSensor, facetSRPDynamicEffector, spinningBodyOneDOFStateEffector, extForceTorque)
+                                coarseSunSensor, facetSRPDynamicEffector, spinningBodyTwoDOFStateEffector, extForceTorque)
 from Basilisk.fswAlgorithms import sunSafePoint, mrpPD, cssWlsEst, thrFiringSchmitt, thrForceMapping, hingedRigidBodyPIDMotor
+from Basilisk.fswAlgorithms import stepperMotorProfiler, stepperMotorController
 from Basilisk.architecture import messaging
 from Basilisk.utilities import (macros, SimulationBaseClass, unitTestSupport, orbitalMotion, simIncludeGravBody,
                                 simIncludeRW, simIncludeThruster, vizSupport)
@@ -63,7 +64,7 @@ def run(show_plots):
 
     # Choose the settling time and damping ratios
     settlingTime = 150 * 1  # [s]
-    dampingRatios = np.array([1.0, 0.9, 0.85, 0.8])
+    dampingRatios = np.array([1.0, 0.9])
 
     # Define and initialize the gains for the MRP PD controller
     PGain = 0.0  # derivative gain on omega_BR
@@ -141,6 +142,10 @@ def run(show_plots):
     timespan = []
     r_bn_n = []
     sigma_bn = []
+    array1theta1 = []
+    array1theta2 = []
+    array2theta1 = []
+    array2theta2 = []
     rHat_sb_b = []
     sigma_br = []
     omega_br = []
@@ -153,10 +158,14 @@ def run(show_plots):
     SRPDataTorque_b = []
 
     for i in range(len(dampingRatios)):
-        timespan, r_bn_n, sigma_bn, sigma_br, omega_br, rHat_sb_b, thrusterForce, thrusterOnTimeReq, pointingErrorAng, theta_bs1, theta_bs2, SRPDataForce_b, SRPDataTorque_b = collectData(useThrusters, useSolarArrays, useSRP, att180Error, spinRate, PGain, KGains[i])
+        timespan, r_bn_n, sigma_bn, array1theta1, array1theta2, array2theta1, array2theta2, sigma_br, omega_br, rHat_sb_b, thrusterForce, thrusterOnTimeReq, pointingErrorAng, theta_bs1, theta_bs2, SRPDataForce_b, SRPDataTorque_b = collectData(useThrusters, useSolarArrays, useSRP, att180Error, spinRate, PGain, KGains[i])
         if i != 0:
             r_bn_n = np.array(r_bn_n)
             sigma_bn = np.array(sigma_bn)
+            array1theta1 = np.array(array1theta1)
+            array1theta2 = np.array(array1theta2)
+            array2theta1 = np.array(array2theta1)
+            array2theta2 = np.array(array2theta2)
             rHat_sb_b = np.array(rHat_sb_b)
             sigma_br = np.array(sigma_br)
             omega_br = np.array(omega_br)
@@ -170,6 +179,10 @@ def run(show_plots):
 
             r_BN_N = np.append(r_BN_N, r_bn_n, axis=1)
             sigma_BN = np.append(sigma_BN, sigma_bn, axis=1)
+            array1Theta1 = np.append(array1Theta1, array1theta1)
+            array1Theta2 = np.append(array1Theta2, array1theta2)
+            array2Theta1 = np.append(array2Theta1, array2theta1)
+            array2Theta2 = np.append(array2Theta2, array2theta2)
             rHat_SB_B = np.append(rHat_SB_B, rHat_sb_b, axis=1)
             sigma_BR = np.append(sigma_BR, sigma_br, axis=1)
             omega_BR = np.append(omega_BR, omega_br, axis=1)
@@ -183,6 +196,10 @@ def run(show_plots):
         else:
             r_BN_N = np.array(r_bn_n)
             sigma_BN = np.array(sigma_bn)
+            array1Theta1 = np.array(array1theta1)
+            array1Theta2 = np.array(array1theta2)
+            array2Theta1 = np.array(array2theta1)
+            array2Theta2 = np.array(array2theta2)
             rHat_SB_B = np.array(rHat_sb_b)
             sigma_BR = np.array(sigma_br)
             omega_BR = np.array(omega_br)
@@ -202,6 +219,10 @@ def run(show_plots):
     # Remove initial values for plotting clarity
     r_BN_N = r_BN_N[1:]
     sigma_BN = sigma_BN[1:]
+    array1Theta1 = array1Theta1[1:]
+    array1Theta2 = array1Theta2[1:]
+    array2Theta1 = array2Theta1[1:]
+    array2Theta2 = array2Theta2[1:]
     rHat_SB_B = rHat_SB_B[1:]
     sigma_BR = sigma_BR[1:]
     omega_BR = omega_BR[1:]
@@ -251,6 +272,29 @@ def run(show_plots):
         plts.flat[1].set(xlabel=r'Time (min)', ylabel=r'Angle (deg)')
         plts[0].grid(True)
         plts[1].grid(True)
+
+        # Plot solar array angles
+        plt.figure()
+        plt.clf()
+        for idx in range(len(dampingRatios)):
+            plt.plot((1/60) * timespan, array1Theta1[idx * len(timespan) : idx * len(timespan) + len(timespan)], label=r"Array 1")
+            plt.plot((1/60) * timespan, array2Theta1[idx * len(timespan) : idx * len(timespan) + len(timespan)], label=r"Array 2")
+        plt.title(r'Torsional Array Angles', fontsize=14)
+        plt.ylabel('(deg)', fontsize=14)
+        plt.xlabel('Time (min)', fontsize=14)
+        plt.legend(loc='upper right', prop={'size': 12})
+        plt.grid(True)
+
+        plt.figure()
+        plt.clf()
+        for idx in range(len(dampingRatios)):
+            plt.plot((1/60) * timespan, array1Theta2[idx * len(timespan) : idx * len(timespan) + len(timespan)], label=r"Array 1")
+            plt.plot((1/60) * timespan, array2Theta2[idx * len(timespan) : idx * len(timespan) + len(timespan)], label=r"Array 2")
+        plt.title(r'Bending Array Angles', fontsize=14)
+        plt.ylabel('(deg)', fontsize=14)
+        plt.xlabel('Time (min)', fontsize=14)
+        plt.legend(loc='upper right', prop={'size': 12})
+        plt.grid(True)
     else:
         plt.figure()
         plt.clf()
@@ -412,7 +456,7 @@ def collectData(useThrusters, useSolarArrays, useSRP, att180Error, spinRate, PGa
     dynProcess = scSim.CreateNewProcess(simProcessName)
 
     # Create the dynamics task and specify the simulation time and integration update time
-    simulationTime = macros.min2nano(30)
+    simulationTime = macros.min2nano(10)
     simulationTimeStepFsw = macros.sec2nano(0.1)
     simulationTimeStepDyn = macros.sec2nano(0.01)
     dynProcess.addTask(scSim.CreateNewTask(fswTask, simulationTimeStepFsw))
@@ -500,81 +544,141 @@ def collectData(useThrusters, useSolarArrays, useSRP, att180Error, spinRate, PGa
     inch2Meter = 0.0254  # [meters in an inch]
 
     if useSolarArrays:
+        stepAngle = 0.1 * (np.pi / 180)  # [rad]
+        stepTime = 0.5  # [sec]
+        initialMotorAngle1 = 0.0 * np.pi / 180  # [rad]
+        initialMotorAngle2 = 0.0 * np.pi / 180  # [rad]
+        referenceMotorAngle1 = -20 * np.pi / 180  # [rad]
+        referenceMotorAngle2 = 20 * np.pi / 180  # [rad]
+        bendingAxis_S = np.array([0.0, 1.0, 0.0])  # bending axis
+        torsionalAxis_S = np.array([1.0, 0.0, 0.0])  # torsional axis
+
+        # Create the stepperMotorController modules for each SADA
+        StepperMotorController1 = stepperMotorController.stepperMotorController()
+        StepperMotorController1.ModelTag = "stepperMotorController1"
+        StepperMotorController1.stepAngle = stepAngle
+        StepperMotorController1.stepTime = stepTime
+        StepperMotorController1.initAngle = initialMotorAngle1
+        StepperMotorController1.currentAngle = initialMotorAngle1
+
+        StepperMotorController2 = stepperMotorController.stepperMotorController()
+        StepperMotorController2.ModelTag = "stepperMotorController2"
+        StepperMotorController2.stepAngle = stepAngle
+        StepperMotorController2.stepTime = stepTime
+        StepperMotorController2.initAngle = initialMotorAngle2
+        StepperMotorController2.currentAngle = initialMotorAngle2
+
+        # Add the stepperMotorController modules to runtime call list
+        scSim.AddModelToTask(fswTask, StepperMotorController1)
+        scSim.AddModelToTask(fswTask, StepperMotorController2)
+
+        # Create the stepperMotorController input messages
+        HingedRigidBodyMessageData1 = messaging.HingedRigidBodyMsgPayload()
+        HingedRigidBodyMessageData1.theta = referenceMotorAngle1
+        HingedRigidBodyMessage1 = messaging.HingedRigidBodyMsg().write(HingedRigidBodyMessageData1)
+        StepperMotorController1.spinningBodyInMsg.subscribeTo(HingedRigidBodyMessage1)
+
+        HingedRigidBodyMessageData2 = messaging.HingedRigidBodyMsgPayload()
+        HingedRigidBodyMessageData2.theta = referenceMotorAngle2
+        HingedRigidBodyMessage2 = messaging.HingedRigidBodyMsg().write(HingedRigidBodyMessageData2)
+        StepperMotorController2.spinningBodyInMsg.subscribeTo(HingedRigidBodyMessage2)
+
+        # Create the stepperMotorProfiler modules
+        StepperMotorProfiler1 = stepperMotorProfiler.stepperMotorProfiler()
+        StepperMotorProfiler1.ModelTag = "StepperMotorProfiler1"
+        StepperMotorProfiler1.rotAxis_M = bendingAxis_S
+        StepperMotorProfiler1.thetaInit = initialMotorAngle1
+        StepperMotorProfiler1.stepAngle = stepAngle
+        StepperMotorProfiler1.stepTime = stepTime
+        StepperMotorProfiler1.thetaDDotMax = stepAngle / (0.25 * stepTime * stepTime)
+        StepperMotorProfiler1.r_FM_M = np.array([0.0, 0.0, 0.0])
+        StepperMotorProfiler1.rPrime_FM_M = np.array([0.0, 0.0, 0.0])
+        StepperMotorProfiler1.rPrimePrime_FM_M = np.array([0.0, 0.0, 0.0])
+        StepperMotorProfiler1.motorStepCommandInMsg.subscribeTo(StepperMotorController1.motorStepCommandOutMsg)
+
+        StepperMotorProfiler2 = stepperMotorProfiler.stepperMotorProfiler()
+        StepperMotorProfiler2.ModelTag = "StepperMotorProfiler2"
+        StepperMotorProfiler2.rotAxis_M = bendingAxis_S
+        StepperMotorProfiler2.thetaInit = initialMotorAngle2
+        StepperMotorProfiler2.stepAngle = stepAngle
+        StepperMotorProfiler2.stepTime = stepTime
+        StepperMotorProfiler2.thetaDDotMax = stepAngle / (0.25 * stepTime * stepTime)
+        StepperMotorProfiler2.r_FM_M = np.array([0.0, 0.0, 0.0])
+        StepperMotorProfiler2.rPrime_FM_M = np.array([0.0, 0.0, 0.0])
+        StepperMotorProfiler2.rPrimePrime_FM_M = np.array([0.0, 0.0, 0.0])
+        StepperMotorProfiler2.motorStepCommandInMsg.subscribeTo(StepperMotorController2.motorStepCommandOutMsg)
+
+        # Add the stepperMotorProfiler modules to the runtime call list
+        scSim.AddModelToTask(dynTask, StepperMotorProfiler1)
+        scSim.AddModelToTask(dynTask, StepperMotorProfiler2)
+
         # Create the solar arrays
         solarArrayList = []
 
         # Define the first solar array
-        solarArrayList.append(spinningBodyOneDOFStateEffector.SpinningBodyOneDOFStateEffector())
-        solarArrayList[0].r_SB_B = [0.5 * 1.53, 0.0, 0.44]
-        solarArrayList[0].r_ScS_S = [-0.036, 2.827, -0.469]
-        solarArrayList[0].sHat_S = [0, 1, 0]
-        solarArrayList[0].dcm_S0B = [[0, 0, -1], [1, 0, 0], [0, -1, 0]]
-        solarArrayList[0].IPntSc_S = [[319.0, 0.0, 0.0],
-                                      [0.0, 185.0, 0.0],
-                                      [0.0, 0.0, 495.0]]
-        solarArrayList[0].mass = massSolarArray
-        solarArrayList[0].k = 100
-        solarArrayList[0].c = 100
-        solarArrayList[0].thetaInit = -20 * np.pi / 180  # [rad]
-        solarArrayList[0].thetaDotInit = 0
-        solarArrayList[0].ModelTag = "solarArray0"
-        scObject.addStateEffector(solarArrayList[0])
-        scSim.AddModelToTask(dynTask, solarArrayList[0])
+        solarArrayList.append(spinningBodyTwoDOFStateEffector.SpinningBodyTwoDOFStateEffector())
+        solarArrayList[0].ModelTag = "solarArray1"
+        solarArrayList[0].mass1 = 0.0  # lower body
+        solarArrayList[0].mass2 = massSolarArray
+        solarArrayList[0].IS1PntSc1_S1 = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
+        solarArrayList[0].IS2PntSc2_S2 = [[319.0, 0.0, 0.0],
+                                          [0.0, 185.0, 0.0],
+                                          [0.0, 0.0, 495.0]]
+        solarArrayList[0].dcm_S10B = [[0, 0, -1], [1, 0, 0], [0, -1, 0]]
+        solarArrayList[0].dcm_S20S1 = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+        solarArrayList[0].r_Sc2S2_S2 = [-0.036, 2.827, -0.469]
+        solarArrayList[0].r_S2S1_S1 = [[0.0], [0.0], [0.0]]
+        solarArrayList[0].r_S1B_B = [0.5 * 1.53, 0.0, 0.44]
+        solarArrayList[0].s1Hat_S1 = torsionalAxis_S
+        solarArrayList[0].s2Hat_S2 = bendingAxis_S
+        solarArrayList[0].theta1Init = initialMotorAngle1  # initial torsional angle
+        solarArrayList[0].theta2Init = 0.01  # should be very small, bending
+        # Define spring and damper terms
+        omega_n_1 = 2 * np.pi * 5  # natural freq
+        omega_n_2 = 2 * np.pi * 15  # natural freq
+        Q = 30
+        solarArrayList[0].k1 = (omega_n_1**2) * solarArrayList[0].IS2PntSc2_S2[0][0]
+        solarArrayList[0].k2 = (omega_n_2**2) * solarArrayList[0].IS2PntSc2_S2[1][1]
+        solarArrayList[0].c1 = (omega_n_1 / Q) * solarArrayList[0].IS2PntSc2_S2[0][0]
+        solarArrayList[0].c2 = (omega_n_2 / Q) * solarArrayList[0].IS2PntSc2_S2[1][1]
+
+        # Connect stepperMotorProfiler output message to the spinningBodyTwoDOF input message
+        solarArrayList[0].spinningBodyRefInMsgs[0].subscribeTo(StepperMotorProfiler1.hingedRigidBodyOutMsg)
 
         # Define the second solar array
-        solarArrayList.append(spinningBodyOneDOFStateEffector.SpinningBodyOneDOFStateEffector())
-        solarArrayList[1].r_SB_B = [-0.5 * 1.53, 0.0, 0.44]
-        solarArrayList[1].r_ScS_S = [-0.036, 2.827, -0.469]
-        solarArrayList[1].sHat_S = [0, 1, 0]
-        solarArrayList[1].dcm_S0B = [[0, 0, 1], [-1, 0, 0], [0, -1, 0]]
-        solarArrayList[1].IPntSc_S = [[319.0, 0.0, 0.0],
-                                      [0.0, 185.0, 0.0],
-                                      [0.0, 0.0, 495.0]]
-        solarArrayList[1].mass = massSolarArray
-        solarArrayList[1].k = 100
-        solarArrayList[1].c = 100
-        solarArrayList[1].thetaInit = 20 * np.pi / 180  # [rad]
-        solarArrayList[1].thetaDotInit = 0
-        solarArrayList[1].ModelTag = "solarArray1"
+        solarArrayList.append(spinningBodyTwoDOFStateEffector.SpinningBodyTwoDOFStateEffector())
+        solarArrayList[1].ModelTag = "solarArray2"
+        solarArrayList[1].mass1 = 0.0  # lower body
+        solarArrayList[1].mass2 = massSolarArray
+        solarArrayList[1].IS1PntSc1_S1 = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
+        solarArrayList[1].IS2PntSc2_S2 = [[319.0, 0.0, 0.0],
+                                          [0.0, 185.0, 0.0],
+                                          [0.0, 0.0, 495.0]]
+        solarArrayList[1].dcm_S10B = [[0, 0, 1], [-1, 0, 0], [0, -1, 0]]
+        solarArrayList[1].dcm_S20S1 = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+        solarArrayList[1].r_Sc2S2_S2 = [-0.036, 2.827, -0.469]
+        solarArrayList[1].r_S2S1_S1 = [[0.0], [0.0], [0.0]]
+        solarArrayList[1].r_S1B_B = [-0.5 * 1.53, 0.0, 0.44]
+        solarArrayList[1].s1Hat_S1 = torsionalAxis_S
+        solarArrayList[1].s2Hat_S2 = bendingAxis_S
+        solarArrayList[1].theta1Init = initialMotorAngle2  # initial torsional angle
+        solarArrayList[1].theta2Init = 0.01  # should be very small, bending
+        # Define spring and damper terms
+        omega_n_1 = 2 * np.pi * 5  # natural freq
+        omega_n_2 = 2 * np.pi * 15  # natural freq
+        Q = 30
+        solarArrayList[1].k1 = (omega_n_1**2) * solarArrayList[1].IS2PntSc2_S2[0][0]
+        solarArrayList[1].k2 = (omega_n_2**2) * solarArrayList[1].IS2PntSc2_S2[1][1]
+        solarArrayList[1].c1 = (omega_n_1 / Q) * solarArrayList[1].IS2PntSc2_S2[0][0]
+        solarArrayList[1].c2 = (omega_n_2 / Q) * solarArrayList[1].IS2PntSc2_S2[1][1]
+
+        # Connect stepperMotorProfiler output message to the spinningBodyTwoDOF input message
+        solarArrayList[1].spinningBodyRefInMsgs[1].subscribeTo(StepperMotorProfiler2.hingedRigidBodyOutMsg)
+
+        scObject.addStateEffector(solarArrayList[0])
         scObject.addStateEffector(solarArrayList[1])
+        scSim.AddModelToTask(dynTask, solarArrayList[0])
         scSim.AddModelToTask(dynTask, solarArrayList[1])
-
-        # Create the locking message
-        lockArray = messaging.ArrayEffectorLockMsgPayload()
-        lockArray.effectorLockFlag = [1]
-        lockMsg = messaging.ArrayEffectorLockMsg().write(lockArray)
-        solarArrayList[0].motorLockInMsg.subscribeTo(lockMsg)
-        solarArrayList[1].motorLockInMsg.subscribeTo(lockMsg)
-
-        # Create the solar array reference message
-        solarArrayMsgData1 = messaging.HingedRigidBodyMsgPayload()
-        solarArrayMsgData1.theta = -20 * np.pi / 180
-        solarArrayMsgData1.thetaDot = 0.0
-        solarArrayMessage1 = messaging.HingedRigidBodyMsg().write(solarArrayMsgData1)
-
-        solarArrayMsgData2 = messaging.HingedRigidBodyMsgPayload()
-        solarArrayMsgData2.theta = 20 * np.pi / 180
-        solarArrayMsgData2.thetaDot = 0.0
-        solarArrayMessage2 = messaging.HingedRigidBodyMsg().write(solarArrayMsgData2)
-
-        # Create the hinged rigid body motor control modules
-        # Control module for array 1
-        motorConfig1 = hingedRigidBodyPIDMotor.hingedRigidBodyPIDMotorConfig()
-        motorWrap1 = scSim.setModelDataWrap(motorConfig1)
-        motorWrap1.ModelTag = "hingedRigidBodyPIDMotor1"
-        motorConfig1.K = 5.0
-        motorConfig1.P = 5
-        motorConfig1.I = 5
-        scSim.AddModelToTask(fswTask, motorWrap1, motorConfig1)
-
-        # Control module for array 2
-        motorConfig2 = hingedRigidBodyPIDMotor.hingedRigidBodyPIDMotorConfig()
-        motorWrap2 = scSim.setModelDataWrap(motorConfig2)
-        motorWrap2.ModelTag = "hingedRigidBodyPIDMotor2"
-        motorConfig2.K = 5.0
-        motorConfig2.P = 5
-        motorConfig2.I = 5
-        scSim.AddModelToTask(fswTask, motorWrap2, motorConfig2)
 
     if useThrusters:
         # Create the thrusters
@@ -823,13 +927,6 @@ def collectData(useThrusters, useSolarArrays, useSRP, att180Error, spinRate, PGa
     mrpControlConfig.vehConfigInMsg.subscribeTo(vcMsg)
     mrpControlConfig.guidInMsg.subscribeTo(sunPointConfig.attGuidanceOutMsg)
 
-    if useSolarArrays:
-        solarArrayList[0].motorTorqueInMsg.subscribeTo(motorConfig1.motorTorqueOutMsg)
-        solarArrayList[1].motorTorqueInMsg.subscribeTo(motorConfig2.motorTorqueOutMsg)
-        motorConfig1.hingedRigidBodyInMsg.subscribeTo(solarArrayList[0].spinningBodyOutMsg)
-        motorConfig1.hingedRigidBodyRefInMsg.subscribeTo(solarArrayMessage1)
-        motorConfig2.hingedRigidBodyInMsg.subscribeTo(solarArrayList[1].spinningBodyOutMsg)
-        motorConfig2.hingedRigidBodyRefInMsg.subscribeTo(solarArrayMessage2)
     if useSRP:
         newSRP.sunInMsg.subscribeTo(gravFactory.spiceObject.planetStateOutMsgs[0])
 
@@ -854,10 +951,18 @@ def collectData(useThrusters, useSolarArrays, useSRP, att180Error, spinRate, PGa
     scSim.AddModelToTask(dynTask, torqueRequest)
 
     if useSolarArrays:
-        solarArray1Log = solarArrayList[0].spinningBodyConfigLogOutMsg.recorder(samplingTime)
-        solarArray2Log = solarArrayList[1].spinningBodyConfigLogOutMsg.recorder(samplingTime)
+        solarArray1Log = solarArrayList[0].spinningBodyConfigLogOutMsgs[1].recorder(samplingTime)
+        solarArray2Log = solarArrayList[1].spinningBodyConfigLogOutMsgs[1].recorder(samplingTime)
+        array1Theta1Data = solarArrayList[0].spinningBodyOutMsgs[0].recorder(samplingTime)
+        array1Theta2Data = solarArrayList[0].spinningBodyOutMsgs[1].recorder(samplingTime)
+        array2Theta1Data = solarArrayList[1].spinningBodyOutMsgs[0].recorder(samplingTime)
+        array2Theta2Data = solarArrayList[1].spinningBodyOutMsgs[1].recorder(samplingTime)
         scSim.AddModelToTask(dynTask, solarArray1Log)
         scSim.AddModelToTask(dynTask, solarArray2Log)
+        scSim.AddModelToTask(dynTask, array1Theta1Data)
+        scSim.AddModelToTask(dynTask, array1Theta2Data)
+        scSim.AddModelToTask(dynTask, array2Theta1Data)
+        scSim.AddModelToTask(dynTask, array2Theta2Data)
     if useSRP:
         scSim.AddVariableForLogging(newSRP.ModelTag + ".forceExternal_B", samplingTime, 0, 2, 'double')
         scSim.AddVariableForLogging(newSRP.ModelTag + ".torqueExternalPntB_B", samplingTime, 0, 2, 'double')
@@ -892,6 +997,10 @@ def collectData(useThrusters, useSolarArrays, useSRP, att180Error, spinRate, PGa
     if useSolarArrays:
         sigma_S1N = solarArray1Log.sigma_BN
         sigma_S2N = solarArray2Log.sigma_BN
+        array1Theta1 = (180 / np.pi) * array1Theta1Data.theta
+        array1Theta2 = (180 / np.pi) * array1Theta2Data.theta
+        array2Theta1 = (180 / np.pi) * array2Theta1Data.theta
+        array2Theta2 = (180 / np.pi) * array2Theta2Data.theta
 
     if useSRP:
         SRPDataForce_B = scSim.GetLogVariableData(newSRP.ModelTag + ".forceExternal_B")
@@ -972,7 +1081,7 @@ def collectData(useThrusters, useSolarArrays, useSRP, att180Error, spinRate, PGa
         theta_BS1 = np.zeros(len(timespan))
         theta_BS2 = np.zeros(len(timespan))
 
-    return timespan, r_BN_N, sigma_BN, sigma_BR, omega_BR, rHatTrue_SB_B, thrForce, thrOnTimeRequest, pointingErrorAngle, theta_BS1, theta_BS2, SRPDataForce_B, SRPDataTorque_B
+    return timespan, r_BN_N, sigma_BN, array1Theta1, array1Theta2, array2Theta1, array2Theta2, sigma_BR, omega_BR, rHatTrue_SB_B, thrForce, thrOnTimeRequest, pointingErrorAngle, theta_BS1, theta_BS2, SRPDataForce_B, SRPDataTorque_B
 
 
 if __name__ == "__main__":
