@@ -673,7 +673,7 @@ def collectData(useThrusters, useSolarArrays, useSRP, att180Error, spinRate, PGa
         solarArrayList[1].c2 = (omega_n_2 / Q) * solarArrayList[1].IS2PntSc2_S2[1][1]
 
         # Connect stepperMotorProfiler output message to the spinningBodyTwoDOF input message
-        solarArrayList[1].spinningBodyRefInMsgs[1].subscribeTo(StepperMotorProfiler2.hingedRigidBodyOutMsg)
+        solarArrayList[1].spinningBodyRefInMsgs[0].subscribeTo(StepperMotorProfiler2.hingedRigidBodyOutMsg)
 
         scObject.addStateEffector(solarArrayList[0])
         scObject.addStateEffector(solarArrayList[1])
