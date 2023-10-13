@@ -6,7 +6,7 @@
 #include "fswAlgorithms/attGuidance/attTrackingError/attTrackingError.h"
 #include "fswAlgorithms/opticalNavigation/flybyODuKF/flybyODuKF.h"
 #include "architecture/alg_contain/alg_contain.h"
-#include "/Users/pake0095/Documents/Repositories/lasp-basilisk-redux/dist3/autoSource/cMsgCInterface/CameraConfigMsg_C.h"
+#include "../dist3/autoSource/cMsgCInterface/CameraConfigMsg_C.h"
 //#include "/Users/pake0095/Documents/Repositories/lasp-basilisk-redux/dist3/autoSource/cMsgCInterface/OpNavCOBMsgPayload_C.h"
 #include "architecture/messaging/messaging.h"
 
