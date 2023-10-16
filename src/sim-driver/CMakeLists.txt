@@ -9,30 +9,59 @@ set(SRC "main.cpp"
         "../architecture/system_model/sim_model.cpp"
         "../architecture/system_model/sys_model_task.h"
         "../architecture/system_model/sys_model_task.cpp"
-        "../fswAlgorithms/imageProcessing/centerOfBrightness/centerOfBrightness.h"
-        "../fswAlgorithms/opticalNavigation/cobConverter/cobConverter.h"
         "../fswAlgorithms/opticalNavigation/flybyODuKF/flybyODuKF.h"
         "../fswAlgorithms/attGuidance/flybyPoint/flybyPoint.h"
         "../architecture/alg_contain/alg_contain.h"
-        "../architecture/alg_contain/alg_contain.cpp")
+        "../architecture/alg_contain/alg_contain.cpp"
+
+
+        "../fswAlgorithms/opticalNavigation/flybyODuKF/flybyODuKF.cpp"
+        "../fswAlgorithms/attGuidance/flybyPoint/flybyPoint.cpp"
+        "../architecture/utilities/bskLogging.cpp"
+        "../architecture/_GeneralModuleFiles/sys_model.cpp"
+        "../architecture/utilities/linearAlgebra.c"
+        "../fswAlgorithms/attGuidance/attTrackingError/attTrackingError.c"
+        "/share/basilisk/dist3/autoSource/cMsgCInterface/AttGuidMsg_C.cpp"
+        "/share/basilisk/dist3/autoSource/cMsgCInterface/AttRefMsg_C.cpp"
+        "/share/basilisk/dist3/autoSource/cMsgCInterface/NavAttMsg_C.cpp"
+        "../architecture/utilities/rigidBodyKinematics.c"
+        "../architecture/utilities/avsEigenSupport.cpp"
+        "../architecture/utilities/moduleIdGenerator/moduleIdGenerator.cpp"
+
+
+
+        "round.cpp"
+        )
+
+      #        "../fswAlgorithms/imageProcessing/centerOfBrightness/centerOfBrightness.h"
+      #        "../fswAlgorithms/opticalNavigation/cobConverter/cobConverter.h"
 
 add_executable(SimulationDriver ${SRC})
+add_executable(my_program main.cpp)
+target_compile_definitions(SimulationDriver PUBLIC EIGEN_HAS_CXX11_MATH=0)
 
 #string(LENGTH ${CMAKE_SOURCE_DIR} DIR_NAME_START)
 #math(EXPR DIR_NAME_START "${DIR_NAME_START} + 1")
 #string(SUBSTRING ${CMAKE_CURRENT_SOURCE_DIR} ${DIR_NAME_START} -1 DIR_NAME_STRING)
-target_include_directories(SimulationDriver PRIVATE "${CMAKE_SOURCE_DIR}")
+target_include_directories(SimulationDriver PRIVATE 
+  "${CMAKE_SOURCE_DIR}"
+  "${CMAKE_SOURCE_DIR}/.."
+  "${CMAKE_SOURCE_DIR}/eigen"
+  "/share/basilisk/dist3/autoSource")
 set_target_properties(SimulationDriver PROPERTIES FOLDER "${DIR_NAME_STRING}")
-target_link_libraries(SimulationDriver PUBLIC ${ARCHITECTURE_LIBS})
-target_link_libraries(SimulationDriver PUBLIC centerOfBrightness)
-target_link_libraries(SimulationDriver PUBLIC cobConverter)
-target_link_libraries(SimulationDriver PUBLIC flybyODuKF)
-target_link_libraries(SimulationDriver PUBLIC flybyPoint)
-target_link_libraries(SimulationDriver PUBLIC attTrackingError)
-target_link_libraries(SimulationDriver PUBLIC attTrackingError)
+#target_link_libraries(SimulationDriver PUBLIC centerOfBrightness)
+#target_link_libraries(SimulationDriver PUBLIC cobConverter)
+
+# Commenting out for now...
+# target_link_libraries(SimulationDriver PUBLIC ${ARCHITECTURE_LIBS})
+# target_link_libraries(SimulationDriver PUBLIC flybyODuKF)
+# target_link_libraries(SimulationDriver PUBLIC flybyPoint)
+# target_link_libraries(SimulationDriver PUBLIC attTrackingError)
+# target_link_libraries(SimulationDriver PUBLIC attTrackingError)
+
 #target_link_libraries(SimulationDriver PUBLIC algContain)
 set(TARGET_NAME "SimulationDriver")
-include(usingOpenCV)
+#include(usingOpenCV)
 
 if(NOT WIN32)
   target_compile_options(SimulationDriver PUBLIC "-fPIC")

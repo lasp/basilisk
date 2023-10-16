@@ -87,7 +87,7 @@ SimThreadExecution::SimThreadExecution() {
  @return void
  */
 void SimThreadExecution::lockThread() {
-    this->selfThreadLock.acquire();
+    // this->selfThreadLock.acquire();
 }
 
 /*! This method provides a forced synchronization on the "parent" thread so that
@@ -96,7 +96,7 @@ void SimThreadExecution::lockThread() {
  @return void
  */
 void SimThreadExecution::lockParent() {
-    this->parentThreadLock.acquire();
+    // this->parentThreadLock.acquire();
 }
 
 /*! This method provides an entry point for the "parent" thread to release the
@@ -105,7 +105,7 @@ void SimThreadExecution::lockParent() {
  @return void
  */
 void SimThreadExecution::unlockThread() {
-    this->selfThreadLock.release();
+    // this->selfThreadLock.release();
 }
 
 /*! This method provides an entry point for the "child" thread to unlock the
@@ -115,7 +115,7 @@ void SimThreadExecution::unlockThread() {
  @return void
  */
 void SimThreadExecution::unlockParent() {
-    this->parentThreadLock.release();
+    // this->parentThreadLock.release();
 }
 
 /*! This method steps all of the processes forward to the current time.  It also
@@ -198,10 +198,10 @@ void SimThreadExecution::moveProcessMessages() {
  @return void
  */
 void SimThreadExecution::waitOnInit() {
-    std::unique_lock<std::mutex> lck(this->initReadyLock);
+    // std::unique_lock<std::mutex> lck(this->initReadyLock);
     while(!this->threadActive())
     {
-        (this)->initHoldVar.wait(lck);
+        // (this)->initHoldVar.wait(lck);
     }
 }
 
@@ -211,9 +211,9 @@ void SimThreadExecution::waitOnInit() {
  @return void
  */
 void SimThreadExecution::postInit() {
-    std::unique_lock<std::mutex> lck(this->initReadyLock);
+    // std::unique_lock<std::mutex> lck(this->initReadyLock);
     this->threadReady();
-    this->initHoldVar.notify_one();
+    // this->initHoldVar.notify_one();
 }
 
 /*! This method is used by the "child" thread to walk through all of its tasks
@@ -550,7 +550,7 @@ void SimModel::assignRemainingProcs() {
         (*thrIt)->NextTaskTime = 0;
         (*thrIt)->CurrentNanos = 0;
         //(*thrIt)->lockThread();
-        (*thrIt)->threadContext = new std::thread(activateNewThread, (*thrIt));
+        // (*thrIt)->threadContext = new std::thread(activateNewThread, (*thrIt));
     }
     for(thrIt=this->threadList.begin(); thrIt != this->threadList.end(); thrIt++)
     {
