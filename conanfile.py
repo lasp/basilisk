@@ -73,13 +73,13 @@ class BasiliskConan(ConanFile):
     default_options = {"generator": ""}
 
     # ensure latest pip is installed
-    if is_running_virtual_env() or platform.system() == "Windows":
-        cmakeCmdString = 'python -m pip install --upgrade pip'
-    else:
-        cmakeCmdString = 'python3 -m pip install --upgrade pip'
-    print(statusColor + "Updating pip:" + endColor)
-    print(cmakeCmdString)
-    os.system(cmakeCmdString)
+    # if is_running_virtual_env() or platform.system() == "Windows":
+    #     cmakeCmdString = 'python -m pip install --upgrade pip'
+    # else:
+    #     cmakeCmdString = 'python3 -m pip install --upgrade pip'
+    # print(statusColor + "Updating pip:" + endColor)
+    # print(cmakeCmdString)
+    # os.system(cmakeCmdString)
 
     for opt, value in bskModuleOptionsBool.items():
         options.update({opt: [True, False]})
