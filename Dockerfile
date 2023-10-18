@@ -1,18 +1,18 @@
 FROM ubuntu:22.04
 
-RUN mkdir -p /basilisk
-
-COPY ./ /basilisk/
-
-WORKDIR /basilisk
-
 RUN apt-get update -y && \
     apt-get install -y python3 \
         python3-pip \
+        python3-venv \
         cmake \
-        swig
+        swig \
+        git \
+        sudo
 
-RUN pip3 install pandas \
+RUN cd $HOME \
+    && python3 -m venv venv && \
+    . venv/bin/activate && \
+    pip install pandas \
     numpy \
     matplotlib \
     pytest \
@@ -21,6 +21,14 @@ RUN pip3 install pandas \
     parse>=1.18.0 \
     cmake
 
-RUN python3 conanfile.py
+# RUN cd $HOME \
+#     && git clone https://github.com/lasp/basilisk.git
+
+COPY ./ /root/basilisk
+
+RUN cd /root \
+    && . venv/bin/activate \
+    && cd /root/basilisk \
+    && python conanfile.py --opNav True --vizInterface True 
 
 CMD ["tail", "-f", "/dev/null"]
