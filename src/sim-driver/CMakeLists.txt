@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.14)
 
-set(SRC "main.cpp"
+# This is not clean, but as far is is needed for the prototyping effort. Any and all sources needed to compile either
+# executable main.cpp and main-mrp-steering-controllers.cpp are set into the SRC variable and then the executable.
+set(SRC
+#        "main.cpp"
+        "main-mrp-steering-controllers.cpp"
         "simulationDriver.h"
         "simulationDriver.cpp"
         "../architecture/system_model/sys_process.h"
@@ -13,14 +17,18 @@ set(SRC "main.cpp"
         "../fswAlgorithms/opticalNavigation/cobConverter/cobConverter.h"
         "../fswAlgorithms/opticalNavigation/flybyODuKF/flybyODuKF.h"
         "../fswAlgorithms/attGuidance/flybyPoint/flybyPoint.h"
+        "../fswAlgorithms/attDetermination/CSSEst/cssWlsEst.h"
+        "../fswAlgorithms/attGuidance/sunSafePoint/sunSafePoint.h"
+        "../fswAlgorithms/attControl/mrpSteering/mrpSteering.h"
+        "../fswAlgorithms/attControl/rateServoFullNonlinear/rateServoFullNonlinear.h"
+        "../fswAlgorithms/effectorInterfaces/rwMotorTorque/rwMotorTorque.h"
         "../architecture/alg_contain/alg_contain.h"
-        "../architecture/alg_contain/alg_contain.cpp")
+        "../architecture/alg_contain/alg_contain.cpp"
+        messageProvider.cpp
+        messageProvider.h)
 
 add_executable(SimulationDriver ${SRC})
 
-#string(LENGTH ${CMAKE_SOURCE_DIR} DIR_NAME_START)
-#math(EXPR DIR_NAME_START "${DIR_NAME_START} + 1")
-#string(SUBSTRING ${CMAKE_CURRENT_SOURCE_DIR} ${DIR_NAME_START} -1 DIR_NAME_STRING)
 target_include_directories(SimulationDriver PRIVATE "${CMAKE_SOURCE_DIR}")
 set_target_properties(SimulationDriver PROPERTIES FOLDER "${DIR_NAME_STRING}")
 target_link_libraries(SimulationDriver PUBLIC ${ARCHITECTURE_LIBS})
@@ -29,8 +37,13 @@ target_link_libraries(SimulationDriver PUBLIC cobConverter)
 target_link_libraries(SimulationDriver PUBLIC flybyODuKF)
 target_link_libraries(SimulationDriver PUBLIC flybyPoint)
 target_link_libraries(SimulationDriver PUBLIC attTrackingError)
-target_link_libraries(SimulationDriver PUBLIC attTrackingError)
-#target_link_libraries(SimulationDriver PUBLIC algContain)
+target_link_libraries(SimulationDriver PUBLIC rwMotorTorque)
+target_link_libraries(SimulationDriver PUBLIC cssWlsEst)
+target_link_libraries(SimulationDriver PUBLIC sunSafePoint)
+target_link_libraries(SimulationDriver PUBLIC mrpSteering)
+target_link_libraries(SimulationDriver PUBLIC rateServoFullNonlinear)
+target_link_libraries(SimulationDriver PUBLIC rwMotorTorque)
+
 set(TARGET_NAME "SimulationDriver")
 include(usingOpenCV)
 
