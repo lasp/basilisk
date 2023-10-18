@@ -31,10 +31,7 @@ namespace SimulationDriver {
     void SimulationDriver::executeSimulation() {
         uint64_t nextStopTime = this->sim.NextTaskTime;
         int nextPriority = -1;
-        std::cout << nextStopTime << std::endl;
         while (this->sim.NextTaskTime <= this->stopTime && !this->terminate) {
-            std::cout << nextStopTime << std::endl;
-            std::cout << nextPriority << std::endl;
             this->sim.StepUntilStop(nextStopTime, nextPriority);
             nextPriority = -1;
             nextStopTime = this->stopTime;
@@ -73,42 +70,6 @@ namespace SimulationDriver {
         task->TaskName = std::move(name);
         return task;
     }
-
-    /*
-        This function is responsible for passing on the logger to a module instance (model), adding the
-        model to a particular task, and defining
-        the order/priority that the model gets updated within the task.
-
-        :param TaskName (str): Name of the task
-        :param NewModel (obj): Model to add to the task
-        :param ModelData: None or struct containing, only used for C BSK modules
-        :param ModelPriority (int): Priority that determines when the model gets updated. (Higher number = Higher priority)
-    */
-//    void SimulationDriver::addModelToTask(TaskName, NewModel, ModelData=None, ModelPriority=-1):
-//        for Task in self.TaskList:
-//            if Task.Name == TaskName:
-//                Task.TaskData.AddNewObject(NewModel, ModelPriority)
-//                TaskReplaceTag = 'self.TaskList[' + str(i) + ']'
-//                TaskReplaceTag += '.TaskModels[' + str(len(Task.TaskModels)) + ']'
-//                self.NameReplace[TaskReplaceTag] = NewModel.ModelTag
-//                if ModelData is not None:
-//                    try:
-//                        ModelData.bskLogger = self.bskLogger
-//                    except:
-//                        pass
-//                    Task.TaskModels.append(ModelData)
-//                    self.simModules.add(inspect.getmodule(ModelData))
-//                else:
-//                    try:
-//                        NewModel.bskLogger = self.bskLogger
-//                    except:
-//                        pass
-//                    Task.TaskModels.append(NewModel)
-//                    self.simModules.add(inspect.getmodule(NewModel))
-//                return
-//            i += 1
-//        print("Could not find a Task with name: %(TaskName)s" % \
-//              {"TaskName": TaskName})
 
     void SimulationDriver::setStopTime(uint64_t time) {
         this->stopTime = time;
