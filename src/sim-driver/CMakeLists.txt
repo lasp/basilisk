@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.14)
 
-set(SRC "main.cpp"
+# This is not clean, but as far is is needed for the prototyping effort. Any and all sources needed to compile either
+# executable main.cpp and main-mrp-steering-controllers.cpp are set into the SRC variable and then the executable.
+set(SRC
+#        "main.cpp"
+        "main-mrp-steering-controllers.cpp"
         "simulationDriver.h"
         "simulationDriver.cpp"
         "../architecture/system_model/sys_process.h"
@@ -11,10 +15,16 @@ set(SRC "main.cpp"
         "../architecture/system_model/sys_model_task.cpp"
         "../fswAlgorithms/opticalNavigation/flybyODuKF/flybyODuKF.h"
         "../fswAlgorithms/attGuidance/flybyPoint/flybyPoint.h"
+        "../fswAlgorithms/attDetermination/CSSEst/cssWlsEst.h"
+        "../fswAlgorithms/attGuidance/sunSafePoint/sunSafePoint.h"
+        "../fswAlgorithms/attControl/mrpSteering/mrpSteering.h"
+        "../fswAlgorithms/attControl/rateServoFullNonlinear/rateServoFullNonlinear.h"
+        "../fswAlgorithms/effectorInterfaces/rwMotorTorque/rwMotorTorque.h"
         "../architecture/alg_contain/alg_contain.h"
         "../architecture/alg_contain/alg_contain.cpp"
-
-
+        messageProvider.cpp
+        messageProvider.h
+        # Added by Kevin for static linking instead of dynamic:
         "../fswAlgorithms/opticalNavigation/flybyODuKF/flybyODuKF.cpp"
         "../fswAlgorithms/attGuidance/flybyPoint/flybyPoint.cpp"
         "../architecture/utilities/bskLogging.cpp"
@@ -26,41 +36,40 @@ set(SRC "main.cpp"
         "/share/basilisk/dist3/autoSource/cMsgCInterface/NavAttMsg_C.cpp"
         "../architecture/utilities/rigidBodyKinematics.c"
         "../architecture/utilities/avsEigenSupport.cpp"
-        "../architecture/utilities/moduleIdGenerator/moduleIdGenerator.cpp"
-
-
-
-        "round.cpp"
-        )
-
-      #        "../fswAlgorithms/imageProcessing/centerOfBrightness/centerOfBrightness.h"
-      #        "../fswAlgorithms/opticalNavigation/cobConverter/cobConverter.h"
+        "../architecture/utilities/moduleIdGenerator/moduleIdGenerator.cpp")
 
 add_executable(SimulationDriver ${SRC})
-add_executable(my_program main.cpp)
+#add_executable(my_program main.cpp)
+
+# Set up eigen for embedded system.
+# Disable C11 STD library implementations, they are not available on rv32.
 target_compile_definitions(SimulationDriver PUBLIC EIGEN_HAS_CXX11_MATH=0)
 
-#string(LENGTH ${CMAKE_SOURCE_DIR} DIR_NAME_START)
-#math(EXPR DIR_NAME_START "${DIR_NAME_START} + 1")
-#string(SUBSTRING ${CMAKE_CURRENT_SOURCE_DIR} ${DIR_NAME_START} -1 DIR_NAME_STRING)
+# Setup includes (-I flags) for gcc
 target_include_directories(SimulationDriver PRIVATE 
   "${CMAKE_SOURCE_DIR}"
   "${CMAKE_SOURCE_DIR}/.."
   "${CMAKE_SOURCE_DIR}/eigen"
   "/share/basilisk/dist3/autoSource")
 set_target_properties(SimulationDriver PROPERTIES FOLDER "${DIR_NAME_STRING}")
-#target_link_libraries(SimulationDriver PUBLIC centerOfBrightness)
-#target_link_libraries(SimulationDriver PUBLIC cobConverter)
 
-# Commenting out for now...
+# Commenting out linked libraries. We going static baby.
 # target_link_libraries(SimulationDriver PUBLIC ${ARCHITECTURE_LIBS})
+# target_link_libraries(SimulationDriver PUBLIC centerOfBrightness)
+# target_link_libraries(SimulationDriver PUBLIC cobConverter)
 # target_link_libraries(SimulationDriver PUBLIC flybyODuKF)
 # target_link_libraries(SimulationDriver PUBLIC flybyPoint)
 # target_link_libraries(SimulationDriver PUBLIC attTrackingError)
-# target_link_libraries(SimulationDriver PUBLIC attTrackingError)
+# target_link_libraries(SimulationDriver PUBLIC rwMotorTorque)
+# target_link_libraries(SimulationDriver PUBLIC cssWlsEst)
+# target_link_libraries(SimulationDriver PUBLIC sunSafePoint)
+# target_link_libraries(SimulationDriver PUBLIC mrpSteering)
+# target_link_libraries(SimulationDriver PUBLIC rateServoFullNonlinear)
+# target_link_libraries(SimulationDriver PUBLIC rwMotorTorque)
 
-#target_link_libraries(SimulationDriver PUBLIC algContain)
 set(TARGET_NAME "SimulationDriver")
+
+# No open CV for rv32
 #include(usingOpenCV)
 
 if(NOT WIN32)
