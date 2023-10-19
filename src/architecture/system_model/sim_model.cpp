@@ -27,28 +27,37 @@ void activateNewThread(void *threadData)
     SimThreadExecution *theThread = static_cast<SimThreadExecution*> (threadData);
 
     //std::cout << "Starting thread yes" << std::endl;
-    theThread->postInit();
+    // theThread->postInit();
+   //
+    theThread->selfInitProcesses();
+    theThread->crossInitProcesses();
+    theThread->resetProcesses();
 
     while(theThread->threadValid())
     {
-        theThread->lockThread();
-        if(theThread->selfInitNow){
-            theThread->selfInitProcesses();
-            theThread->selfInitNow = false;
-        }
-        else if(theThread->crossInitNow){
-            theThread->crossInitProcesses();
-            theThread->crossInitNow = false;
-        }
-        else if(theThread->resetNow){
-            theThread->resetProcesses();
-            theThread->resetNow = false;
-        }
-        else{
-            theThread->StepUntilStop();
-        }
+
+    //    theThread->lockThread();
+        // if(theThread->selfInitNow){
+        // std::cout << "init" << std::endl;
+        //     theThread->selfInitProcesses();
+        //     theThread->selfInitNow = false;
+        // }
+        // else if(theThread->crossInitNow){
+        // std::cout << "cross init" << std::endl;
+        //     theThread->crossInitProcesses();
+        //     theThread->crossInitNow = false;
+        // }
+        // else if(theThread->resetNow){
+        // std::cout << "reset" << std::endl;
+        //     theThread->resetProcesses();
+        //     theThread->resetNow = false;
+        // }
+        // else{
+        // std::cout << "step" << std::endl;
+        theThread->StepUntilStop();
+        //}
         //std::cout << "Stepping thread"<<std::endl;
-        theThread->unlockParent();
+        //theThread->unlockParent();
 
     }
     //std::cout << "Killing thread" << std::endl;
@@ -87,7 +96,7 @@ SimThreadExecution::SimThreadExecution() {
  @return void
  */
 void SimThreadExecution::lockThread() {
-    // this->selfThreadLock.acquire();
+    //this->selfThreadLock.acquire();
 }
 
 /*! This method provides a forced synchronization on the "parent" thread so that
@@ -96,7 +105,7 @@ void SimThreadExecution::lockThread() {
  @return void
  */
 void SimThreadExecution::lockParent() {
-    // this->parentThreadLock.acquire();
+    //this->parentThreadLock.acquire();
 }
 
 /*! This method provides an entry point for the "parent" thread to release the
@@ -105,7 +114,7 @@ void SimThreadExecution::lockParent() {
  @return void
  */
 void SimThreadExecution::unlockThread() {
-    // this->selfThreadLock.release();
+    //this->selfThreadLock.release();
 }
 
 /*! This method provides an entry point for the "child" thread to unlock the
@@ -115,7 +124,7 @@ void SimThreadExecution::unlockThread() {
  @return void
  */
 void SimThreadExecution::unlockParent() {
-    // this->parentThreadLock.release();
+    //this->parentThreadLock.release();
 }
 
 /*! This method steps all of the processes forward to the current time.  It also
@@ -169,9 +178,12 @@ void SimThreadExecution::StepUntilStop()
      (that's less than all process priorities, so it will run through the next
      process)*/
     int64_t inPri = stopThreadNanos == this->NextTaskTime ? stopThreadPriority : -1;
-    while(this->threadValid() && (this->NextTaskTime < stopThreadNanos || (this->NextTaskTime == stopThreadNanos &&
-                                               this->nextProcPriority >= stopThreadPriority)) )
+    // while(this->threadValid() && (this->NextTaskTime < stopThreadNanos || (this->NextTaskTime == stopThreadNanos &&
+    //                                            this->nextProcPriority >= stopThreadPriority)) )
+    while(this->threadValid())
     {
+        
+        // std::cout << "single step processes" << std::endl;
         this->SingleStepProcesses(inPri);
         inPri = stopThreadNanos == this->NextTaskTime ? stopThreadPriority : -1;
     }
@@ -300,7 +312,7 @@ SimModel::~SimModel()
 void SimModel::StepUntilStop(uint64_t SimStopTime, int64_t stopPri)
 {
     std::vector<SimThreadExecution*>::iterator thrIt;
-    std::cout << std::flush;
+    //std::cout << std::flush;
     for(thrIt=this->threadList.begin(); thrIt != this->threadList.end(); thrIt++)
     {
         (*thrIt)->moveProcessMessages();
@@ -529,6 +541,9 @@ void SimModel::assignRemainingProcs() {
 
     std::vector<SysProcess *>::iterator it;
     std::vector<SimThreadExecution*>::iterator thrIt;
+    //std::cout << "num processes" << this->processList.size() << std::endl;
+    //std::cout << "num threads" << this->threadList.size() << std::endl;
+    
     for(it=this->processList.begin(), thrIt=threadList.begin(); it!= this->processList.end(); it++, thrIt++)
     {
         if(thrIt == threadList.end())
@@ -550,6 +565,8 @@ void SimModel::assignRemainingProcs() {
         (*thrIt)->NextTaskTime = 0;
         (*thrIt)->CurrentNanos = 0;
         //(*thrIt)->lockThread();
+        // Just call the new thread on main, instead of spawing thread:
+        activateNewThread(*thrIt);
         // (*thrIt)->threadContext = new std::thread(activateNewThread, (*thrIt));
     }
     for(thrIt=this->threadList.begin(); thrIt != this->threadList.end(); thrIt++)

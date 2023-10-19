@@ -31,12 +31,29 @@ set(SRC
         "../architecture/_GeneralModuleFiles/sys_model.cpp"
         "../architecture/utilities/linearAlgebra.c"
         "../fswAlgorithms/attGuidance/attTrackingError/attTrackingError.c"
+        "../architecture/utilities/rigidBodyKinematics.c"
+        "../architecture/utilities/avsEigenSupport.cpp"
+        "../architecture/utilities/moduleIdGenerator/moduleIdGenerator.cpp"
+        "../fswAlgorithms/attDetermination/CSSEst/cssWlsEst.c"
+        "../fswAlgorithms/attGuidance/sunSafePoint/sunSafePoint.c"
+        "../fswAlgorithms/attControl/mrpSteering/mrpSteering.c"
+        "../fswAlgorithms/attControl/rateServoFullNonlinear/rateServoFullNonlinear.c"
+        "../fswAlgorithms/effectorInterfaces/rwMotorTorque/rwMotorTorque.c"
+        # Add auto source - autocoded message defs
         "/share/basilisk/dist3/autoSource/cMsgCInterface/AttGuidMsg_C.cpp"
         "/share/basilisk/dist3/autoSource/cMsgCInterface/AttRefMsg_C.cpp"
         "/share/basilisk/dist3/autoSource/cMsgCInterface/NavAttMsg_C.cpp"
-        "../architecture/utilities/rigidBodyKinematics.c"
-        "../architecture/utilities/avsEigenSupport.cpp"
-        "../architecture/utilities/moduleIdGenerator/moduleIdGenerator.cpp")
+        "/share/basilisk/dist3/autoSource/cMsgCInterface/CmdTorqueBodyMsg_C.cpp"
+        "/share/basilisk/dist3/autoSource/cMsgCInterface/RWAvailabilityMsg_C.cpp"
+        "/share/basilisk/dist3/autoSource/cMsgCInterface/ArrayMotorTorqueMsg_C.cpp"
+        "/share/basilisk/dist3/autoSource/cMsgCInterface/SunlineFilterMsg_C.cpp"
+        "/share/basilisk/dist3/autoSource/cMsgCInterface/VehicleConfigMsg_C.cpp"
+        "/share/basilisk/dist3/autoSource/cMsgCInterface/RWSpeedMsg_C.cpp"
+        "/share/basilisk/dist3/autoSource/cMsgCInterface/RateCmdMsg_C.cpp"
+        "/share/basilisk/dist3/autoSource/cMsgCInterface/RWArrayConfigMsg_C.cpp"
+        "/share/basilisk/dist3/autoSource/cMsgCInterface/CSSArraySensorMsg_C.cpp"
+        "/share/basilisk/dist3/autoSource/cMsgCInterface/CSSConfigMsg_C.cpp"
+)
 
 add_executable(SimulationDriver ${SRC})
 #add_executable(my_program main.cpp)
