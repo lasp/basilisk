@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
+enable_language(ASM)
 
 # This is not clean, but as far is is needed for the prototyping effort. Any and all sources needed to compile either
 # executable main.cpp and main-mrp-steering-controllers.cpp are set into the SRC variable and then the executable.
@@ -53,6 +54,12 @@ set(SRC
         "/share/basilisk/dist3/autoSource/cMsgCInterface/RWArrayConfigMsg_C.cpp"
         "/share/basilisk/dist3/autoSource/cMsgCInterface/CSSArraySensorMsg_C.cpp"
         "/share/basilisk/dist3/autoSource/cMsgCInterface/CSSConfigMsg_C.cpp"
+        # Platform source
+        "/share/ema-fsw-simple-benchmark/RV32imaf/riscv_hal/init.c"
+        "/share/ema-fsw-simple-benchmark/RV32imaf/riscv_hal/riscv_hal.c"
+        "/share/ema-fsw-simple-benchmark/RV32imaf/riscv_hal/riscv_hal_stubs.c"
+        "/share/ema-fsw-simple-benchmark/RV32imaf/platform/hw_reg_access.s"
+        "/share/ema-fsw-simple-benchmark/RV32imaf/riscv_hal/entry.S"
 )
 
 add_executable(SimulationDriver ${SRC})
@@ -67,7 +74,16 @@ target_include_directories(SimulationDriver PRIVATE
   "${CMAKE_SOURCE_DIR}"
   "${CMAKE_SOURCE_DIR}/.."
   "${CMAKE_SOURCE_DIR}/eigen"
-  "/share/basilisk/dist3/autoSource")
+  "/share/basilisk/dist3/autoSource"
+  "/share/ema-fsw-simple-benchmark/RV32imaf/platform"
+  "/share/ema-fsw-simple-benchmark/RV32imaf/drivers/CoreGPIO"
+  "/share/ema-fsw-simple-benchmark/RV32imaf/drivers/CoreTimer"
+  "/share/ema-fsw-simple-benchmark/RV32imaf/drivers/CoreUARTapb"
+  "/share/ema-fsw-simple-benchmark/RV32imaf/drivers/riscv_hal"
+
+)
+# inc_opts="-I ./ -I RV32imaf -I RV32imaf/riscv_hal -I RV32imaf/platform -I RV32imaf/drivers/CoreGPIO -I RV32imaf/drivers/CoreTimer -I RV32imaf/drivers/CoreUARTapb"
+
 set_target_properties(SimulationDriver PROPERTIES FOLDER "${DIR_NAME_STRING}")
 
 # Commenting out linked libraries. We going static baby.
