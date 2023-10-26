@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Any, Callable, Dict, List, Tuple
 
 class Registry:
 
@@ -15,11 +15,35 @@ class Registry:
         # TODO: make a graph object to abstract this away
         self.graph = {}
 
-        # hold on to a list of names of modules that have been accessed. A module can only
-        # be accessed once. The idea here being that the graph parametrizes what the user can
-        # instantiate and modify. Therefore, a node can only be accessed once, otherwise the
-        # parametrization has been compromised.
-        self.accessed = []
+    def init_models(self, model_names=None):
+        """
+            Instantiate models. Add them to a dictionary keyed by model name.
+            Then subscribe to messages per edges in the graph using the instantiated
+            objects from the dictionary. Return the dictionary.
+        """
+        
+        if model_names is None:
+            model_names = list(self.graph.keys())
+
+        model_dict = {}
+        # initialize all models first
+        for model_name in model_names:
+            model_dict[model_name] = self.graph[model_name]["model"]()
+            
+        # go through all neighbors of all instantiated models, and subscribe
+        # their messages accordingly
+        mods_with_neighbs = {
+            x: self.graph[x]["neighbors"] for x in model_names if self.graph[x]["neighbors"]
+        }
+        for source_name in mods_with_neighbs:
+            source_model = model_dict[source_name]
+            for target_data in mods_with_neighbs[source_name]:
+                target_name = target_data[0]
+                source_msg, target_msg = target_data[1]
+                target_model = model_dict[target_name]
+                target_model.__getattribute__(target_msg).subscribeTo(source_model.__getattribute__(source_msg))
+
+        return model_dict
 
     def register_model(self, model: Callable, name: str):
         """
@@ -33,9 +57,9 @@ class Registry:
         if name in self.graph:
             raise Exception(f"model of type {model} with name {name} already exists...")
         
-        self.graph[name] = {"model": model, "in_nodes": [], "out_nodes": []}
+        self.graph[name] = {"model": model, "neighbors": []}
 
-    def register_message(self, out_name: str, in_name: str, message_data: Any):
+    def register_message(self, source_name: str, target_name: str, message_data: Any):
         """
             Message registration adds and edge between two existing nodes in the graph.
 
@@ -45,12 +69,12 @@ class Registry:
                 * in_name:
                 * message_data: 
         """
-        self.graph[out_name]["out_nodes"].append((in_name, message_data))
-        self.graph[in_name]["in_nodes"].append((out_name, message_data))
+        self.graph[source_name]["neighbors"].append((target_name, message_data))
 
-    def get_model(self, name):
+    def get_models(self, names: List[str] = None) -> Dict[str, Callable]:
         """
-            Accessor method for retrieving a node from the graph by name.
+            Accessor method for retrieving a node (model) from the graph by name. If no names
+            are passed, then return all nodes (models) in the .
 
             Params
             ------
@@ -60,13 +84,37 @@ class Registry:
             ------
                 * ret_model:
         """
-        if name not in self.graph:
-            raise Exception(f"user requested access to model with name {name} but there is no model registered with that name...")
-        
-        if name in self.accessed:
-            raise Exception(f"user tried to access model with name {name} but that model has already been accessed...")
+        ret_models = {}
+        if names is None:
+            names = list(self.graph.keys())
 
-        ret_model = self.graph[name]["model"]
-        self.accessed.append(name)
+        for name in names:
+            if name not in self.graph:
+                raise Exception(f"user requested access to model with name {name} but there is no model registered with that name...")
 
-        return ret_model
+            ret_models[name] = self.graph[name]["model"]
+
+        return ret_models
+
+    def get_messages(self, names: List[str] = None) -> Dict[str, List[Tuple[Any]]]:
+        """
+            Get messages into and out of nodes specified by names. Return a dictionary
+            implementation of the requested subgraph.
+
+            Params
+            ------
+                * names: list of string names of nodes
+
+            Return
+            ------
+                * ret_edges: a dictionary keyed by model name with values as all edges
+                    out of that node
+        """
+        ret_edges = {}
+        if names is None:
+            names = list(self.graph.keys())
+
+        for name in names:
+            ret_edges[name] = self.graph[name]["neighbors"]
+
+        return ret_edges

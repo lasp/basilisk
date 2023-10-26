@@ -26,9 +26,9 @@ RUN cd $HOME \
 
 COPY ./ /root/basilisk
 
-RUN cd /root \
-    && . venv/bin/activate \
-    && cd /root/basilisk \
-    && python conanfile.py --opNav True --vizInterface True 
+# RUN cd /root \
+#     && . venv/bin/activate \
+#     && cd /root/basilisk \
+#     && python conanfile.py
 
 CMD ["tail", "-f", "/dev/null"]
