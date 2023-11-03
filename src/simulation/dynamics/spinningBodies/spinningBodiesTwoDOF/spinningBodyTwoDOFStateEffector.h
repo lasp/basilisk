@@ -93,6 +93,7 @@ public:
                                       Eigen::Vector3d omega_BN_B);       //!< -- Method for computing energy and momentum for SBs
     void prependSpacecraftNameToStates();                   //!< Method used for multiple spacecraft
     void computeSpinningBodyInertialStates();               //!< Method for computing the SB's states
+    double theta1Ref = 0.0;         //!< [rad] spinning body reference angle
 
 private:
     static uint64_t effectorID;     //!< [] ID number of this panel
@@ -100,7 +101,6 @@ private:
     double u2 = 0.0;                //!< [N-m] optional motor torque for second axis
     int lockFlag1 = 0;              //!< [] flag for locking the first rotation axis
     int lockFlag2 = 0;              //!< [] flag for locking the second rotation axis
-    double theta1Ref = 0.0;         //!< [rad] spinning body reference angle
     double theta1DotRef = 0.0;      //!< [rad] spinning body reference angle rate
     double theta2Ref = 0.0;         //!< [rad] spinning body reference angle
     double theta2DotRef = 0.0;      //!< [rad] spinning body reference angle rate
