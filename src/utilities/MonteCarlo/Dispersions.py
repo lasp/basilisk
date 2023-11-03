@@ -856,3 +856,33 @@ class SymmetricSolarArrayAnglesWithReferenceDispersion():
             return self.refAngle1_str
         if index == 12:
             return self.refAngle2_str
+
+
+class SymmetricSolarArrayReferenceDispersion():
+    def __init__(self,
+                 angle1Ref_str,
+                 angle2Ref_str,
+                 bounds=None):
+        self.angle1Ref_str = angle1Ref_str
+        self.angle2Ref_str = angle2Ref_str
+        self.bounds = bounds
+        self.numberOfSubDisps = 2
+
+    def generate(self, sim=None):
+        dispValue = random.uniform(self.bounds[0], self.bounds[1])
+        self.angle1Ref_val = dispValue
+        self.angle2Ref_val = -dispValue
+
+    def generateString(self, index, sim=None):
+        if index == 1:
+            nextValue = self.angle1Ref_val
+        if index == 2:
+            nextValue = self.angle2Ref_val
+        val = str(nextValue)
+        return val
+
+    def getName(self, index):
+        if index == 1:
+            return self.angle1Ref_str
+        if index == 2:
+            return self.angle2Ref_str
