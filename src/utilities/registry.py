@@ -35,9 +35,13 @@ class Registry:
             model_names = list(self.graph.keys())
 
         model_dict = {}
-        # instantiate all models first
+        # instantiate all models first, and replace the reference to the class in the graph
+        # with a reference to the instantiated object -- this will modify the node as we go ahead and make
+        # modifications to the instantiated model
         for model_name in model_names:
-            model_dict[model_name] = self.graph[model_name]["model"]()
+            mod = self.graph[model_name]["model"]()
+            self.graph[model_name]["model"] = mod
+            model_dict[model_name] = mod
             
         # extract all nodes in the graph with out edges
         mods_with_neighbs = {

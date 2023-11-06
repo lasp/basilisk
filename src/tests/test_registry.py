@@ -1,4 +1,6 @@
 from utilities.registry import Registry
+from Basilisk.simulation import spacecraft, simpleNav
+from Basilisk.architecture import messaging
 
 class TestClass:
     testOutMsg = None
@@ -15,7 +17,6 @@ class OtherTestClass:
     def __init__(self, a=None, b=None):
         self.otherTestOutMsg = a if a is not None else None
         self.otherTestInMsg = b if b is not None else None
-
 
 def test_registry_is_singleton():
     reg1 = Registry()
@@ -106,4 +107,52 @@ def test_get_messages_single_message():
         """
             There should be a single model with name 'testClass' with a single neighbor 'otherTestClass'
             and message data ('testOutMsg', 'otherTestInMsg')
+        """
+
+def test_init_models_no_messages():
+    reg = Registry()
+
+    reg.register_model(TestClass, "testClass")
+    reg.register_model(OtherTestClass, "otherTestClass")
+
+    mods = reg.init_models()
+
+    assert type(mods["testClass"]) == TestClass and type(mods["otherTestClass"]) == OtherTestClass , \
+        """
+            the models should be instantiated and thus their types should be the respective classes
+            passed during the registration phase.
+        """
+
+    assert mods["testClass"] == reg.graph["testClass"]["model"] and mods["otherTestClass"] == reg.graph["otherTestClass"]["model"], \
+        """
+            the models returned from initializing models should agree with the models in the graph of the
+            registry
+        """
+
+def test_init_models_with_messages():
+    """
+        Use actual objects from built Basilisk here, so that we don't have to reconstruct the
+        entire read/write functor pattern used in messaging just to run a simple test.
+
+        However, it would be nice to have some objects built so that this can be tested locally since
+        there is no intrinsic dependency on compiled code for any of this to work...
+    """
+    reg = Registry()
+
+    reg.register_model(model=spacecraft.Spacecraft, name="scObject")
+    reg.register_model(model=simpleNav.SimpleNav, name="simpleNavObj")
+    reg.register_message(source_name="scObject", target_name="simpleNavObj", message_data=("scStateOutMsg", "scStateInMsg"))
+
+    mods = reg.init_models()
+
+    assert type(mods["scObject"]) == spacecraft.Spacecraft and type(mods["simpleNavObj"]) == simpleNav.SimpleNav , \
+        """
+            the models should be instantiated and thus their types should be the respective classes
+            passed during the registration phase.
+        """
+    
+    assert mods["scObject"].scStateOutMsg.isLinked() and mods["simpleNavObj"].scStateInMsg.isLinked(), \
+        """
+            When the models are instantiated in the call to init_models, all messages should be created
+            and subscribed to. Thus both models should be linked (to eachother)
         """
