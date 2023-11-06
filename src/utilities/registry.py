@@ -15,26 +15,36 @@ class Registry:
         # TODO: make a graph object to abstract this away
         self.graph = {}
 
-    def init_models(self, model_names=None):
+    def init_models(self, model_names=None) -> Dict[str, Callable]:
         """
             Instantiate models. Add them to a dictionary keyed by model name.
             Then subscribe to messages per edges in the graph using the instantiated
             objects from the dictionary. Return the dictionary.
+
+            Params
+            ------
+                * model_names: list of names of models we wish to initialize. Optional, defaults to 
+                    all models in the graph
+
+            Return
+            ------
+                * model_dict: dict keyed by model name of the instance of the model with that name
         """
         
         if model_names is None:
             model_names = list(self.graph.keys())
 
         model_dict = {}
-        # initialize all models first
+        # instantiate all models first
         for model_name in model_names:
             model_dict[model_name] = self.graph[model_name]["model"]()
             
-        # go through all neighbors of all instantiated models, and subscribe
-        # their messages accordingly
+        # extract all nodes in the graph with out edges
         mods_with_neighbs = {
             x: self.graph[x]["neighbors"] for x in model_names if self.graph[x]["neighbors"]
         }
+
+        # subscribe all messages for each node with an out edge in the graph
         for source_name in mods_with_neighbs:
             source_model = model_dict[source_name]
             for target_data in mods_with_neighbs[source_name]:
@@ -47,42 +57,44 @@ class Registry:
 
     def register_model(self, model: Callable, name: str):
         """
-            Model registration adds a node to the graph.
+            Add a node to the graph holding the model with the desired name
 
             Params
             ------
-                * model: 
-                * name: 
+                * model: reference to a class that we can instantiate when we want to initialize the node
+                * name: desired name of the class instance
         """
         if name in self.graph:
             raise Exception(f"model of type {model} with name {name} already exists...")
         
         self.graph[name] = {"model": model, "neighbors": []}
 
-    def register_message(self, source_name: str, target_name: str, message_data: Any):
+    def register_message(self, source_name: str, target_name: str, message_data: Tuple[str]):
         """
             Message registration adds and edge between two existing nodes in the graph.
 
             Params
             ------
-                * out_name:
-                * in_name:
-                * message_data: 
+                * source_name: name of the registered node in the graph that will be the source of the edge
+                * target_name: name of the registered node in the graph that will be the target of the edge
+                * message_data: tuple (x, y) where x is the name of the out message attribute on the source node
+                    and y is the name in the in message attribute on the target node
         """
         self.graph[source_name]["neighbors"].append((target_name, message_data))
 
     def get_models(self, names: List[str] = None) -> Dict[str, Callable]:
         """
             Accessor method for retrieving a node (model) from the graph by name. If no names
-            are passed, then return all nodes (models) in the .
+            are passed, then return all nodes (models) in the graph.
 
             Params
             ------
-                * name:
+                * names: list of model names. Optional, defaults to all node names in the graph
 
             Return
             ------
-                * ret_model:
+                * ret_models: dict keyed by model names consisting of the "model" value from that node in
+                    the graph
         """
         ret_models = {}
         if names is None:
@@ -98,7 +110,7 @@ class Registry:
 
     def get_messages(self, names: List[str] = None) -> Dict[str, List[Tuple[Any]]]:
         """
-            Get messages into and out of nodes specified by names. Return a dictionary
+            Get messages out of nodes specified by names. Return a dictionary
             implementation of the requested subgraph.
 
             Params
