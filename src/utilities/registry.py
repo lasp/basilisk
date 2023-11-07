@@ -56,8 +56,8 @@ class Registry:
                 target_model = model_dict[target_name]
                 source_msg = source_model.__getattribute__(source_msg_name)
                 target_msg = target_model.__getattribute__(target_msg_name)
-                # if type(target_msg) != type(source_msg):
-                #     raise Exception(f"source message type {type(source_msg)} != target message type {type(target_msg)}")
+                if type(target_msg).__module__ != type(source_msg).__module__:
+                    raise Exception(f"source message type {type(source_msg)} != target message type {type(target_msg)}")
                 
                 msg = type(source_msg)()
                 source_msg = msg

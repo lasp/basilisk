@@ -30,8 +30,6 @@ def run_maybe():
 
     simpleNavObj = models["simpleNavObj"]
     simpleNavObj.ModelTag = "simpleNavObject"
-    
-    breakpoint()
 
 def run():
     # get all registered models from the registry
