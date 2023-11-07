@@ -30,6 +30,8 @@ def run_maybe():
 
     simpleNavObj = models["simpleNavObj"]
     simpleNavObj.ModelTag = "simpleNavObject"
+    
+    breakpoint()
 
 def run():
     # get all registered models from the registry
@@ -59,9 +61,7 @@ def run():
     simpleNavObj.__getattribute__(simpleNavMsgName).subscribeTo(scObject.__getattribute__(scMsgName))
     simpleNavObj.scStateInMsg.subscribeTo(scObject.scStateOutMsg)
 
-    # breakpoint()
-
 if __name__ == "__main__":
     register()
     run_maybe()
-    run()
+    # run()

@@ -1,7 +1,6 @@
 from typing import Any, Callable, Dict, List, Tuple
 
 class Registry:
-
     # cache an instance of the class, return it instead of instantiating
     # a new one if it already exists
     _the_registry = None
@@ -53,9 +52,19 @@ class Registry:
             source_model = model_dict[source_name]
             for target_data in mods_with_neighbs[source_name]:
                 target_name = target_data[0]
-                source_msg, target_msg = target_data[1]
+                source_msg_name, target_msg_name = target_data[1]
                 target_model = model_dict[target_name]
-                target_model.__getattribute__(target_msg).subscribeTo(source_model.__getattribute__(source_msg))
+                source_msg = source_model.__getattribute__(source_msg_name)
+                target_msg = target_model.__getattribute__(target_msg_name)
+                # if type(target_msg) != type(source_msg):
+                #     raise Exception(f"source message type {type(source_msg)} != target message type {type(target_msg)}")
+                
+                msg = type(source_msg)()
+                source_msg = msg
+                target_msg.subscribeTo(msg)
+                self.graph[source_name]["pubs"] = msg
+
+                # target_model.__getattribute__(target_msg).subscribeTo(source_model.__getattribute__(source_msg))
 
         return model_dict
 
@@ -71,7 +80,7 @@ class Registry:
         if name in self.graph:
             raise Exception(f"model of type {model} with name {name} already exists...")
         
-        self.graph[name] = {"model": model, "neighbors": []}
+        self.graph[name] = {"model": model, "neighbors": [], "pubs": []}
 
     def register_message(self, source_name: str, target_name: str, message_data: Tuple[str]):
         """
