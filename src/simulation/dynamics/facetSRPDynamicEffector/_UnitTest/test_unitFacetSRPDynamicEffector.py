@@ -107,12 +107,9 @@ def checkFacetSRPForce(index, area, specCoeff, diffCoeff, normal_B, sigma_BN, sc
 
     # Calculate the incidence angle theta between the facet normal vector and the Sun-direction vector
     cosTheta = np.dot(sHat, normal_B)
-    intermediate = np.cross(sHat, normal_B)
-    sinTheta = np.linalg.norm(intermediate)
-    theta = np.arctan2(sinTheta, cosTheta)
 
     # Calculate the facet projected area onto the plane whose normal vector is the Sun-direction vector
-    projArea = area * np.cos(theta)
+    projArea = area * cosTheta
 
     # Calculate the solar radiation pressure acting on the facet
     numAU = AstU / np.linalg.norm(r_SB_B)
@@ -120,7 +117,7 @@ def checkFacetSRPForce(index, area, specCoeff, diffCoeff, normal_B, sigma_BN, sc
 
     # Compute the SRP force acting on the facet only if the facet is illuminated by the Sun
     if projArea > 0:
-        srp_force = -SRPPressure * projArea * np.cos(theta) * ( (1-specCoeff) * sHat + 2 * ( (diffCoeff / 3) + specCoeff * np.cos(theta)) * normal_B )
+        srp_force = -SRPPressure * projArea * ( (1-specCoeff) * sHat + 2 * ( (diffCoeff / 3) + specCoeff * cosTheta) * normal_B )
     else:
         srp_force = np.zeros([3,])
 
@@ -146,12 +143,9 @@ def checkFacetSRPTorque(index, area, specCoeff, diffCoeff, normal_B, locationPnt
 
     # Calculate the incidence angle theta between the facet normal vector and the Sun-direction vector
     cosTheta = np.dot(sHat, normal_B)
-    intermediate = np.cross(sHat, normal_B)
-    sinTheta = np.linalg.norm(intermediate)
-    theta = np.arctan2(sinTheta, cosTheta)
 
     # Calculate the facet projected area onto the plane whose normal vector is the Sun-direction vector
-    projArea = area * np.cos(theta)
+    projArea = area * cosTheta
 
     # Calculate the solar radiation pressure acting on the facet
     numAU = AstU / np.linalg.norm(r_SB_B)
@@ -159,7 +153,7 @@ def checkFacetSRPTorque(index, area, specCoeff, diffCoeff, normal_B, locationPnt
 
     # Compute the SRP force contribution from the facet only if the facet is illuminated by the Sun
     if projArea > 0:
-        srp_force = -SRPPressure * projArea * np.cos(theta) * ( (1-specCoeff) * sHat + 2 * ( (diffCoeff / 3) + specCoeff * np.cos(theta)) * normal_B )
+        srp_force = -SRPPressure * projArea * ( (1-specCoeff) * sHat + 2 * ( (diffCoeff / 3) + specCoeff * cosTheta) * normal_B )
     else:
         srp_force = np.zeros([3, ])
 
@@ -287,12 +281,12 @@ def TestfacetSRPDynamicEffector(show_plots):
     simTimeSec = 10.0  # [s]
     simulationTime = macros.sec2nano(simTimeSec)
 
+    # Add the data for logging
+    newSRPLog = newSRP.logger(["forceExternal_B", "torqueExternalPntB_B"])
+    scSim.AddModelToTask(simTaskName, newSRPLog)
+
     # Initialize the simulation
     scSim.InitializeSimulation()
-
-    # Add the data for logging
-    scSim.AddVariableForLogging(newSRP.ModelTag + ".forceExternal_B", simulationTimeStep_NS, 0, 2, 'double')
-    scSim.AddVariableForLogging(newSRP.ModelTag + ".torqueExternalPntB_B", simulationTimeStep_NS, 0, 2, 'double')
 
     # Configure the simulation stop time and execute the simulation run
     scSim.ConfigureStopTime(simulationTime)
@@ -303,8 +297,8 @@ def TestfacetSRPDynamicEffector(show_plots):
     r_BN_N = scPosDataLog.r_BN_N
     sigma_BN = scPosDataLog.sigma_BN
     r_SN_N = sunPosDataLog.PositionVector
-    SRPDataForce_B = scSim.GetLogVariableData(newSRP.ModelTag + ".forceExternal_B")
-    SRPDataTorque_B = scSim.GetLogVariableData(newSRP.ModelTag + ".torqueExternalPntB_B")
+    SRPDataForce_B = unitTestSupport.addTimeColumn(newSRPLog.times(), newSRPLog.forceExternal_B)
+    SRPDataTorque_B = unitTestSupport.addTimeColumn(newSRPLog.times(), newSRPLog.torqueExternalPntB_B)
 
     # Store the logged data for plotting
     srpForce_B_plotting = SRPDataForce_B

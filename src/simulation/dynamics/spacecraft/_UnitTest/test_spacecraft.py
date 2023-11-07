@@ -109,6 +109,9 @@ def SCTranslation(show_plots):
     scObject.hub.r_CN_NInit = [[-4020338.690396649],	[7490566.741852513],	[5248299.211589362]]
     scObject.hub.v_CN_NInit = [[-5199.77710904224],	[-3436.681645356935],	[1041.576797498721]]
 
+    scObjectLog = scObject.logger(["totOrbAngMomPntN_N", "totOrbEnergy"])
+    unitTestSim.AddModelToTask(unitTaskName, scObjectLog)
+
     unitTestSim.InitializeSimulation()
     accuracy = 1e-3
     if not unitTestSupport.isArrayEqual(scObject.scStateOutMsg.read().r_BN_N,
@@ -123,14 +126,11 @@ def SCTranslation(show_plots):
         testMessages.append("FAILED: SCHub Translation test failed init pos msg unit test")
 
 
-    unitTestSim.AddVariableForLogging(scObject.ModelTag + ".totOrbAngMomPntN_N", testProcessRate, 0, 2, 'double')
-    unitTestSim.AddVariableForLogging(scObject.ModelTag + ".totOrbEnergy", testProcessRate, 0, 0, 'double')
-
     stopTime = 10.0
     unitTestSim.ConfigureStopTime(macros.sec2nano(stopTime))
     unitTestSim.ExecuteSimulation()
-    orbAngMom_N = unitTestSim.GetLogVariableData(scObject.ModelTag + ".totOrbAngMomPntN_N")
-    orbEnergy = unitTestSim.GetLogVariableData(scObject.ModelTag + ".totOrbEnergy")
+    orbAngMom_N = unitTestSupport.addTimeColumn(scObjectLog.times(), scObjectLog.totOrbAngMomPntN_N)
+    orbEnergy = unitTestSupport.addTimeColumn(scObjectLog.times(), scObjectLog.totOrbEnergy)
 
     plt.close("all")
     plt.figure()
@@ -246,20 +246,19 @@ def SCTransAndRotation(show_plots):
     scObject.hub.sigma_BNInit = [[0.0], [0.0], [0.0]]
     scObject.hub.omega_BN_BInit = [[0.5], [-0.4], [0.7]]
 
+    scObjectLog = scObject.logger(["totOrbAngMomPntN_N", "totRotAngMomPntC_N", "totOrbEnergy", "totRotEnergy"])
+    unitTestSim.AddModelToTask(unitTaskName, scObjectLog)
+
     unitTestSim.InitializeSimulation()
-    unitTestSim.AddVariableForLogging(scObject.ModelTag + ".totOrbEnergy", testProcessRate, 0, 0, 'double')
-    unitTestSim.AddVariableForLogging(scObject.ModelTag + ".totOrbAngMomPntN_N", testProcessRate, 0, 2, 'double')
-    unitTestSim.AddVariableForLogging(scObject.ModelTag + ".totRotAngMomPntC_N", testProcessRate, 0, 2, 'double')
-    unitTestSim.AddVariableForLogging(scObject.ModelTag + ".totRotEnergy", testProcessRate, 0, 0, 'double')
 
     stopTime = 10.0
     unitTestSim.ConfigureStopTime(macros.sec2nano(stopTime))
     unitTestSim.ExecuteSimulation()
 
-    orbEnergy = unitTestSim.GetLogVariableData(scObject.ModelTag + ".totOrbEnergy")
-    orbAngMom_N = unitTestSim.GetLogVariableData(scObject.ModelTag + ".totOrbAngMomPntN_N")
-    rotAngMom_N = unitTestSim.GetLogVariableData(scObject.ModelTag + ".totRotAngMomPntC_N")
-    rotEnergy = unitTestSim.GetLogVariableData(scObject.ModelTag + ".totRotEnergy")
+    orbAngMom_N = unitTestSupport.addTimeColumn(scObjectLog.times(), scObjectLog.totOrbAngMomPntN_N)
+    rotAngMom_N = unitTestSupport.addTimeColumn(scObjectLog.times(), scObjectLog.totRotAngMomPntC_N)
+    rotEnergy = unitTestSupport.addTimeColumn(scObjectLog.times(), scObjectLog.totRotEnergy)
+    orbEnergy = unitTestSupport.addTimeColumn(scObjectLog.times(), scObjectLog.totOrbEnergy)
 
     r_BN_NOutput = dataLog.r_BN_N
     sigma_BNOutput = dataLog.sigma_BN
@@ -437,17 +436,17 @@ def SCRotation(show_plots):
     sigmaCalc = RigidBodyKinematics.C2MRP(dcm_BN)
     scObject.hub.sigma_BNInit = [[sigmaCalc[0]], [sigmaCalc[1]], [sigmaCalc[2]]]
 
-    unitTestSim.InitializeSimulation()
+    scObjectLog = scObject.logger(["totRotAngMomPntC_N", "totRotEnergy"])
+    unitTestSim.AddModelToTask(unitTaskName, scObjectLog)
 
-    unitTestSim.AddVariableForLogging(scObject.ModelTag + ".totRotAngMomPntC_N", testProcessRate, 0, 2, 'double')
-    unitTestSim.AddVariableForLogging(scObject.ModelTag + ".totRotEnergy", testProcessRate, 0, 0, 'double')
+    unitTestSim.InitializeSimulation()
 
     stopTime = 10.0
     unitTestSim.ConfigureStopTime(macros.sec2nano(stopTime))
     unitTestSim.ExecuteSimulation()
 
-    rotAngMom_N = unitTestSim.GetLogVariableData(scObject.ModelTag + ".totRotAngMomPntC_N")
-    rotEnergy = unitTestSim.GetLogVariableData(scObject.ModelTag + ".totRotEnergy")
+    rotAngMom_N = unitTestSupport.addTimeColumn(scObjectLog.times(), scObjectLog.totRotAngMomPntC_N)
+    rotEnergy = unitTestSupport.addTimeColumn(scObjectLog.times(), scObjectLog.totRotEnergy)
     rotAngMomMag = numpy.zeros(len(rotAngMom_N))
     for i in range(0,len(rotAngMom_N)):
         rotAngMomMag[i] = numpy.linalg.norm(numpy.asarray(rotAngMom_N[i,1:4]))
@@ -1076,9 +1075,11 @@ def scAccumDV():
 
     dataAccumDV_CN_B = dataLog.TotalAccumDVBdy
     dataAccumDV_BN_B = dataLog.TotalAccumDV_BN_B
+    dataAccumDV_CN_N = dataLog.TotalAccumDV_CN_N
 
     accuracy = 1e-10
     truth_dataAccumDV_CN_B = [0.0, 0.0, 0.0]
+    truth_dataAccumDV_CN_N = [0.0, 0.0, 0.0]
     v_r = numpy.cross(numpy.array(scObject.hub.omega_BN_BInit).T, -numpy.array(scObject.hub.r_BcB_B).T)[0]
     truth_dataAccumDV_BN_B = numpy.zeros(3)
     for i in range(len(dataLog.times())-1):
@@ -1093,6 +1094,10 @@ def scAccumDV():
             testFailCount += 1
             testMessages.append("FAILED: Spacecraft Point B Accumulated DV test failed pos unit test")
 
+        if not unitTestSupport.isArrayEqual(dataAccumDV_CN_N[i+1],truth_dataAccumDV_CN_N,3,accuracy):
+            testFailCount += 1
+            testMessages.append("FAILED: Spacecraft Point C Accumulated DV in inertial frame test failed pos unit test")
+
     if testFailCount == 0:
         print("PASSED: Spacecraft Accumulated DV tests with offset CoM")
 
@@ -1106,3 +1111,4 @@ if __name__ == "__main__":
     # SCTransBOE(True)
     # SCPointBVsPointC(True)
     scOptionalRef(True, 0.001)
+    # scAccumDV()

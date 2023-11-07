@@ -76,6 +76,21 @@ class UniformDispersion(SingleVariableDispersion):
         return dispValue
 
 
+class UniformDispersionSymmetricBounds(SingleVariableDispersion):
+    def __init__(self, varName, bounds=None):
+        SingleVariableDispersion.__init__(self, varName, bounds)
+        if self.bounds is None:
+             self.bounds = ([0.5, 1.0])  # defines a hard floor/ceiling
+
+    def generate(self, sim):
+        dispValue = random.uniform(self.bounds[0], self.bounds[1]) * random.choice([-1, 1])
+
+        mid = 0.0
+        scale = self.bounds[1] - mid
+        self.magnitude.append(str(round((dispValue - mid)/scale*100,2)) + " %")
+        return dispValue
+
+
 class NormalDispersion(SingleVariableDispersion):
     def __init__(self, varName, mean=0.0, stdDeviation=0.5, bounds=None):
         SingleVariableDispersion.__init__(self, varName, bounds)
@@ -113,7 +128,6 @@ class VectorVariableDispersion(object):
             rndVec[0] *= -1
         eigenAxis = np.cross(vector, rndVec)
         thrusterMisalignDCM = self.eigAxisAndAngleToDCM(eigenAxis, angle)
-        self.magnitude.append(str(round(np.arccos(np.dot(rndVec, vector)/np.linalg.norm(rndVec)/np.linalg.norm(vector))*180./np.pi,2)) + " deg")
         return np.dot(thrusterMisalignDCM, vector)
 
     def perturbCartesianVectorUniform(self, vector):
@@ -298,8 +312,8 @@ class NormalVectorAngleDispersion(VectorVariableDispersion):
         meanPhi = vectorSphere[1] # Nominal phi
         meanTheta = vectorSphere[2] # Nominal theta
 
-        phiRnd = np.random.normal(meanPhi, self.phiStd, 1)
-        thetaRnd = np.random.normal(meanTheta, self.thetaStd, 1)
+        phiRnd = np.random.normal(meanPhi, self.phiStd)
+        thetaRnd = np.random.normal(meanTheta, self.thetaStd)
 
         self.phiBounds = [meanPhi + self.phiBoundsOffNom[0], meanPhi + self.phiBoundsOffNom[1]]
         self.thetaBounds = [meanTheta + self.thetaBoundsOffNom[0],  meanTheta + self.thetaBoundsOffNom[1]]
@@ -314,6 +328,56 @@ class NormalVectorAngleDispersion(VectorVariableDispersion):
         self.magnitude.append(str(round((thetaRnd - meanTheta) / self.thetaStd, 2)) + r" $\sigma$")
 
         return dispVec
+
+
+class UniformVectorSingleAngleDispersion(VectorVariableDispersion):
+    def __init__(self, varName, bounds=None):
+        super(UniformVectorSingleAngleDispersion, self).__init__(varName, None)
+
+        self.bounds = bounds
+
+        if bounds is None:
+            self.bounds = [-np.pi, np.pi]
+
+        self.magnitude = []
+
+    def generate(self, sim=None):
+        dirVec = eval('sim.' + self.varName)
+        angle = np.random.uniform(self.bounds[0], self.bounds[1])
+        angle = self.checkBounds(angle, self.bounds)
+        dirVec = np.array(dirVec).reshape(3).tolist()
+        dispVec = self.perturbVectorByAngle(dirVec, angle)
+        angleDisp = np.arccos(np.dot(dirVec, dispVec)/np.linalg.norm(dirVec)/np.linalg.norm(dispVec))
+        midAngle = (self.bounds[1] + self.bounds[0])/2.
+        scaleAngle = self.bounds[1] - midAngle
+        self.magnitude.append(str(round((angleDisp - midAngle)/scaleAngle*100, 2)) + " %")
+
+        return dispVec
+
+
+class NormalVectorSingleAngleDispersion(VectorVariableDispersion):
+    def __init__(self, varName, phiStd=np.pi/36.0, bounds=None):
+        super(NormalVectorSingleAngleDispersion, self).__init__(varName, None)
+
+        self.phiStd = phiStd
+        self.bounds = bounds
+
+        if bounds is None:
+            self.bounds = [-np.pi, np.pi]
+
+        self.magnitude = []
+
+    def generate(self, sim=None):
+        dirVec = eval('sim.' + self.varName)
+        angle = np.random.normal(0, self.phiStd)
+        angle = self.checkBounds(angle, self.bounds)
+        dirVec = np.array(dirVec).reshape(3).tolist()
+        dispVec = self.perturbVectorByAngle(dirVec, angle)
+        angleDisp = np.arccos(np.dot(dirVec, dispVec)/np.linalg.norm(dirVec)/np.linalg.norm(dispVec))
+        self.magnitude.append(str(round(angleDisp / self.phiStd, 2)) + " sigma")
+
+        return dispVec
+
 
 class UniformEulerAngleMRPDispersion(VectorVariableDispersion):
     def __init__(self, varName, bounds=None):
@@ -476,7 +540,6 @@ class InertiaTensorDispersion:
                   + "()' dispersions will not be set for variable " + self.varName))
             return
         else:
-            vehDynObject = getattr(sim, self.varNameComponents[0])
             I = np.array(eval('sim.' + self.varName)).reshape(3, 3)
 
             # generate random values for the diagonals
@@ -608,3 +671,120 @@ class MRPDispersionPerAxis(VectorVariableDispersion):
             rndAngles[i] = (self.bounds[i][1] - self.bounds[i][0]) * np.random.random() + self.bounds[i][0]
         dispMRP = rndAngles.reshape(3)
         return dispMRP
+
+
+class SymmetricSolarArrayDispersion():
+    def __init__(self, angle1Dyn_str, angle2Dyn_str, angle1Controller_str, angle2Controller_str, angle1Profiler_str,
+                 angle2Profiler_str, bounds=None):
+        self.angle1Dyn_str = angle1Dyn_str
+        self.angle2Dyn_str = angle2Dyn_str
+        self.angle1Controller_str = angle1Controller_str
+        self.angle2Controller_str = angle2Controller_str
+        self.angle1Profiler_str = angle1Profiler_str
+        self.angle2Profiler_str = angle2Profiler_str
+        self.bounds = bounds
+        self.numberOfSubDisps = 6
+
+    def generate(self, sim=None):
+        dispValue = random.uniform(self.bounds[0], self.bounds[1])
+        self.angle1Dyn_val = dispValue
+        self.angle2Dyn_val = -dispValue
+        self.angle1Controller_val = dispValue
+        self.angle2Controller_val = -dispValue
+        self.angle1Profiler_val = dispValue
+        self.angle2Profiler_val = -dispValue
+
+    def generateString(self, index, sim=None):
+        if index == 1:
+            nextValue = self.angle1Dyn_val
+        if index == 2:
+            nextValue = self.angle2Dyn_val
+        if index == 3:
+            nextValue = self.angle1Controller_val
+        if index == 4:
+            nextValue = self.angle2Controller_val
+        if index == 5:
+            nextValue = self.angle1Profiler_val
+        if index == 6:
+            nextValue = self.angle2Profiler_val
+        val = str(nextValue)
+        return val
+
+    def getName(self, index):
+        if index == 1:
+            return self.angle1Dyn_str
+        if index == 2:
+            return self.angle2Dyn_str
+        if index == 3:
+            return self.angle1Controller_str
+        if index == 4:
+            return self.angle2Controller_str
+        if index == 5:
+            return self.angle1Profiler_str
+        if index == 6:
+            return self.angle2Profiler_str
+
+
+class SymmetricSolarArrayWithReferenceDispersion():
+    def __init__(self, angle1Dyn_str, angle2Dyn_str, angle1Controller_str, angle2Controller_str, angle1Profiler_str,
+                 angle2Profiler_str, refAngle1_str, refAngle2_str, bounds=None):
+        self.angle1Dyn_str = angle1Dyn_str
+        self.angle2Dyn_str = angle2Dyn_str
+        self.angle1Controller_str = angle1Controller_str
+        self.angle2Controller_str = angle2Controller_str
+        self.angle1Profiler_str = angle1Profiler_str
+        self.angle2Profiler_str = angle2Profiler_str
+        self.refAngle1_str = refAngle1_str
+        self.refAngle2_str = refAngle2_str
+        self.bounds = bounds
+        self.numberOfSubDisps = 8
+
+    def generate(self, sim=None):
+        dispValue = random.uniform(self.bounds[0], self.bounds[1])
+
+        self.angle1Dyn_val = dispValue
+        self.angle2Dyn_val = -dispValue
+        self.angle1Controller_val = dispValue
+        self.angle2Controller_val = -dispValue
+        self.angle1Profiler_val = dispValue
+        self.angle2Profiler_val = -dispValue
+        self.refAngle1_val = dispValue
+        self.refAngle2_val = -dispValue
+
+    def generateString(self, index, sim=None):
+        if index == 1:
+            nextValue = self.angle1Dyn_val
+        if index == 2:
+            nextValue = self.angle2Dyn_val
+        if index == 3:
+            nextValue = self.angle1Controller_val
+        if index == 4:
+            nextValue = self.angle2Controller_val
+        if index == 5:
+            nextValue = self.angle1Profiler_val
+        if index == 6:
+            nextValue = self.angle2Profiler_val
+        if index == 7:
+            nextValue = self.refAngle1_val
+        if index == 8:
+            nextValue = self.refAngle2_val
+        val = str(nextValue)
+        return val
+
+    def getName(self, index):
+        if index == 1:
+            return self.angle1Dyn_str
+        if index == 2:
+            return self.angle2Dyn_str
+        if index == 3:
+            return self.angle1Controller_str
+        if index == 4:
+            return self.angle2Controller_str
+        if index == 5:
+            return self.angle1Profiler_str
+        if index == 6:
+            return self.angle2Profiler_str
+        if index == 7:
+            return self.refAngle1_str
+        if index == 8:
+            return self.refAngle2_str
