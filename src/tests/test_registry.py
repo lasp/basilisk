@@ -151,8 +151,11 @@ def test_init_models_with_messages():
             passed during the registration phase.
         """
     
-    assert mods["scObject"].scStateOutMsg.isLinked() and mods["simpleNavObj"].scStateInMsg.isLinked(), \
+    assert mods["simpleNavObj"].scStateInMsg.isLinked(), \
         """
             When the models are instantiated in the call to init_models, all messages should be created
             and subscribed to. Thus both models should be linked (to eachother)
         """
+    
+    breakpoint()
+    assert reg.graph["scObject"]["pubs"][0].isLinked()

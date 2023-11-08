@@ -57,15 +57,21 @@ class Registry:
                 source_msg = source_model.__getattribute__(source_msg_name)
                 target_msg = target_model.__getattribute__(target_msg_name)
                 if type(target_msg).__module__ != type(source_msg).__module__:
-                    raise Exception(f"source message type {type(source_msg)} != target message type {type(target_msg)}")
+                    raise Exception(
+                        f"source message type {type(source_msg.__module__)} != target message type {type(target_msg.__module__)}"
+                    )
                 
                 # redirect the out message of the source to a standalone message, and subscribe the in message of the target node to
                 # the content of that standalone message. This will allow for external entities, e.g. BlackLion, to access all messages
                 # by type and name
-                msg = type(source_msg)()
+                try:
+                    [msg] = [x for x in self.graph[source_name]["pubs"] if type(x).__module__ == type(source_msg).__module__]
+                except ValueError:
+                    msg = type(source_msg)()
+                    self.graph[source_name]["pubs"].append(msg)
+
                 source_msg = msg
                 target_msg.subscribeTo(msg)
-                self.graph[source_name]["pubs"] = msg
 
         return model_dict
 
