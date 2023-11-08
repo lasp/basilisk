@@ -299,5 +299,11 @@ def run(show_plots, planetCase):
 
 
 if __name__ == "__main__":
+    # From the user's point of view, not very much changes except that you can now
+    # register all the modules first, and then initialize them at the beginning of the run.
+    # Then to access the models, you can use the dictionary returned from the initialization.
+    # NOTE: registering and initializing is not enforced, rather is optional. However, if you
+    #   do not register before instantiating everything then there will be no access to the
+    #   messaging graph that is generated through the singleton.
     register()
     run(True, 'Mars')
