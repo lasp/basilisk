@@ -1,5 +1,7 @@
 from typing import Any, Callable, Dict, List, Tuple
 
+from Basilisk.architecture import messaging
+
 class Registry:
     # cache an instance of the class, return it instead of instantiating
     # a new one if it already exists
@@ -56,6 +58,36 @@ class Registry:
                 target_model = model_dict[target_name]
                 source_msg = source_model.__getattribute__(source_msg_name)
                 target_msg = target_model.__getattribute__(target_msg_name)
+                # sometimes messages are written out on models as vectors; check for that case,
+                # and pick off the last element of the vector
+                target_msg_vec = None
+                if hasattr(target_msg, "__iter__"):
+                    target_msg_vec = target_msg
+                    l = target_msg_vec.size()
+                    if l == 0:
+                        msg_type = type(target_msg_vec).__module__.split(".")[-1].replace("Payload", "")
+                        msg_cls = getattr(messaging, msg_type)
+                        msg_tmp = msg_cls()
+                        target_msg_vec.append(msg_tmp)
+                        l += 1
+
+                    target_msg = target_msg_vec[l - 1]
+
+                source_msg_vec = None
+                if hasattr(source_msg, "__iter__"):
+                    source_msg_vec = source_msg
+                    l = source_msg_vec.size()
+                    if l == 0:
+                        msg_type = type(source_msg_vec).__module__.split(".")[-1].replace("Payload", "")
+                        msg_cls = getattr(messaging, msg_type)
+                        msg_tmp = msg_cls()
+                        source_msg_vec.resize(1)
+                        source_msg_vec[0] = msg_tmp
+                        # source_msg_vec.append(msg_tmp)
+                        l += 1
+
+                    source_msg = source_msg_vec[l - 1]
+
                 if type(target_msg).__module__ != type(source_msg).__module__:
                     raise Exception(
                         f"source message type {type(source_msg.__module__)} != target message type {type(target_msg.__module__)}"
@@ -64,14 +96,30 @@ class Registry:
                 # redirect the out message of the source to a standalone message, and subscribe the in message of the target node to
                 # the content of that standalone message. This will allow for external entities, e.g. BlackLion, to access all messages
                 # by type and name
-                try:
-                    [msg] = [x for x in self.graph[source_name]["pubs"] if type(x).__module__ == type(source_msg).__module__]
-                except ValueError:
+                mask = [type(x).__module__ == type(source_msg).__module__ for x in self.graph[source_name]["pubs"]]
+                val = sum(mask)
+                # if a message of the desired type already exists, then pop it from the pubs, otherwise create a new one
+                if val == 1:
+                    msg = self.graph[source_name]["pubs"].pop(mask.index(True))
+                elif val == 0:
                     msg = type(source_msg)()
-                    self.graph[source_name]["pubs"].append(msg)
+                else:
+                    raise Exception(
+                        f"There can be at most 1 publishing node associated to a node, but we found {val} for {source_name}"
+                    )
 
-                source_msg = msg
+                # subscribe the target to the standalone message
                 target_msg.subscribeTo(msg)
+                # put the message back into the pubs for this source node
+                self.graph[source_name]["pubs"].append(msg)
+                # reassign the message now that we have an additional subscriber
+                if source_msg_vec is not None:
+                    l = source_msg_vec.size()
+                    # put the modified message back into the location from which it came
+                    source_msg_vec[l - 1] = msg
+                    source_model.__setattr__(source_msg_name, source_msg_vec)
+                else:
+                    source_model.__setattr__(source_msg_name, msg)
 
         return model_dict
 
