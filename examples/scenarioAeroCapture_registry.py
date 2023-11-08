@@ -152,7 +152,6 @@ def run(show_plots, planetCase):
     scSim.AddModelToTask(dragEffectorTaskName, dragEffector)
     # clear prior gravitational body and SPICE setup definitions
 
-    # breakpoint()
     dragEffector.atmoDensInMsg.subscribeTo(tabAtmo.envOutMsgs[0])
 
     gravFactory = models["gravFactory"]

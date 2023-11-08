@@ -58,6 +58,10 @@ class Registry:
                 target_model = model_dict[target_name]
                 source_msg = source_model.__getattribute__(source_msg_name)
                 target_msg = target_model.__getattribute__(target_msg_name)
+
+                # TODO: This still doesn't work correctly. We need to figure out what to do
+                #   about models that have vectorized out messages...
+                #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<BROKEN>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                 # sometimes messages are written out on models as vectors; check for that case,
                 # and pick off the last element of the vector
                 target_msg_vec = None
@@ -81,13 +85,13 @@ class Registry:
                         msg_type = type(source_msg_vec).__module__.split(".")[-1].replace("Payload", "")
                         msg_cls = getattr(messaging, msg_type)
                         msg_tmp = msg_cls()
-                        source_msg_vec.resize(1)
-                        source_msg_vec[0] = msg_tmp
-                        # source_msg_vec.append(msg_tmp)
+                        target_msg_vec.append(msg_tmp)
                         l += 1
 
                     source_msg = source_msg_vec[l - 1]
+                #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+                # this is essentially checking that the source and target have the same payload type
                 if type(target_msg).__module__ != type(source_msg).__module__:
                     raise Exception(
                         f"source message type {type(source_msg.__module__)} != target message type {type(target_msg.__module__)}"
@@ -98,20 +102,15 @@ class Registry:
                 # by type and name
                 mask = [type(x).__module__ == type(source_msg).__module__ for x in self.graph[source_name]["pubs"]]
                 val = sum(mask)
+                msg = self.graph[source_name]["pubs"].get(source_msg_name)
                 # if a message of the desired type already exists, then pop it from the pubs, otherwise create a new one
-                if val == 1:
-                    msg = self.graph[source_name]["pubs"].pop(mask.index(True))
-                elif val == 0:
+                if msg is None:
                     msg = type(source_msg)()
-                else:
-                    raise Exception(
-                        f"There can be at most 1 publishing node associated to a node, but we found {val} for {source_name}"
-                    )
 
                 # subscribe the target to the standalone message
                 target_msg.subscribeTo(msg)
                 # put the message back into the pubs for this source node
-                self.graph[source_name]["pubs"].append(msg)
+                self.graph[source_name]["pubs"][source_msg_name] = msg
                 # reassign the message now that we have an additional subscriber
                 if source_msg_vec is not None:
                     l = source_msg_vec.size()
@@ -135,7 +134,7 @@ class Registry:
         if name in self.graph:
             raise Exception(f"model of type {model} with name {name} already exists...")
         
-        self.graph[name] = {"model": model, "neighbors": [], "pubs": []}
+        self.graph[name] = {"model": model, "neighbors": [], "pubs": {}}
 
     def register_message(self, source_name: str, target_name: str, message_data: Tuple[str]):
         """
@@ -176,25 +175,29 @@ class Registry:
 
         return ret_models
 
-    def get_messages(self, names: List[str] = None) -> Dict[str, List[Tuple[Any]]]:
+    def get_message(self, name: str) -> Dict[str, List[Tuple[Any]]]:
         """
-            Get messages out of nodes specified by names. Return a dictionary
-            implementation of the requested subgraph.
+            Collect the message with a given name from a node with a given name.
 
             Params
             ------
-                * names: list of string names of nodes
+                * names: a string formatted as <model_name>-<message_name> where model_name
+                    is the name of the model in the graph that publishes to a message named <message_name>
 
             Return
             ------
-                * ret_edges: a dictionary keyed by model name with values as all edges
-                    out of that node
+                * ret_msg: the requested message
         """
-        ret_edges = {}
-        if names is None:
-            names = list(self.graph.keys())
+        model_name, message_name = name.split("-")
+        assert model_name in self.graph.keys(), \
+            f"""
+                There is no model in the graph with name {model_name}
+            """
+        assert message_name in self.graph[model_name]["pubs"], \
+            f"""
+                There is no message published by {model_name} named {message_name}
+            """
 
-        for name in names:
-            ret_edges[name] = self.graph[name]["neighbors"]
+        ret_msg =  self.graph[model_name]["pubs"][message_name]
 
-        return ret_edges
+        return ret_msg

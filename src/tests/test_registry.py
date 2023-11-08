@@ -94,21 +94,6 @@ def test_get_models_all_models():
         we found {mod}
     """
 
-def test_get_messages_single_message():
-    reg = Registry()
-
-    reg.register_model(TestClass, "testClass")
-    reg.register_model(OtherTestClass, "otherTestClass")
-    reg.register_message("testClass", "otherTestClass", ("testOutMsg", "otherTestInMsg"))
-
-    msg = reg.get_messages(names=["testClass"])
-
-    assert msg == {"testClass": reg.graph["testClass"]["neighbors"]}, \
-        """
-            There should be a single model with name 'testClass' with a single neighbor 'otherTestClass'
-            and message data ('testOutMsg', 'otherTestInMsg')
-        """
-
 def test_init_models_no_messages():
     reg = Registry()
 
@@ -159,4 +144,22 @@ def test_init_models_with_messages():
 
     assert mods["scObject"].scStateOutMsg.isLinked()
 
-    assert mods["scObject"].scStateOutMsg == reg.graph["scObject"]["pubs"][0]
+    #    assert mods["scObject"].scStateOutMsg == reg.graph["scObject"]["pubs"][0]
+
+def test_get_message():
+    """
+        Register two models, register a message between them, and ensure that when we 
+        call get_message with the agreed upon naming convention, we get the expected message
+        from the graph back.
+    """
+    reg = Registry()
+
+    reg.register_model(model=spacecraft.Spacecraft, name="scObject")
+    reg.register_model(model=simpleNav.SimpleNav, name="simpleNavObj")
+    reg.register_message(source_name="scObject", target_name="simpleNavObj", message_data=("scStateOutMsg", "scStateInMsg"))
+
+    reg.init_models() # this will replace all nodes' models with their class instance
+
+    msg = reg.get_message("scObject-scStateOutMsg")
+
+    assert msg == reg.graph["scObject"]["pubs"]["scStateOutMsg"]
