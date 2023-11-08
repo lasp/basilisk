@@ -71,7 +71,7 @@ def register():
     # simpleNavObj.scStateInMsg.subscribeTo(scObject.scStateOutMsg)
     reg.register_message(source_name="scObject", target_name="simpleNavObj", message_data=("scStateOutMsg", "scStateInMsg"))
     # dragEffector.atmoDensInMsg.subscribeTo(tabAtmo.envOutMsgs[0])
-    reg.register_message(source_name="tabAtmo", target_name="dragEffector", message_data=("envOutMsgs", "atmoDensInMsg"))
+    # reg.register_message(source_name="tabAtmo", target_name="dragEffector", message_data=("envOutMsgs", "atmoDensInMsg"))
 
 def run(show_plots, planetCase):
     # This:
@@ -79,8 +79,6 @@ def run(show_plots, planetCase):
     #   * subscribes all messages registered above
     #   * returns a dict keyed by model name of the instantiated models.
     models = reg.init_models()
-
-    breakpoint()
 
     # Create simulation variable names
     simTaskName = "simTask"
@@ -154,8 +152,8 @@ def run(show_plots, planetCase):
     scSim.AddModelToTask(dragEffectorTaskName, dragEffector)
     # clear prior gravitational body and SPICE setup definitions
 
-    breakpoint()
-    # dragEffector.atmoDensInMsg.subscribeTo(tabAtmo.envOutMsgs[1])
+    # breakpoint()
+    dragEffector.atmoDensInMsg.subscribeTo(tabAtmo.envOutMsgs[0])
 
     gravFactory = models["gravFactory"]
     if planetCase == 'Earth':
