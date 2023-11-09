@@ -122,6 +122,10 @@ def init():
     reg.register_message("attGuidance", "attError", ("attRefOutMsg", "attRefInMsg"))
     # attError.attNavInMsg.subscribeTo(sNavObject.attOutMsg)
     reg.register_message("sNavObject", "attError", ("attOutMsg", "attNavInMsg"))
+    # extFTObject.cmdTorqueInMsg.subscribeTo(mrpControl.cmdTorqueOutMsg)
+    reg.register_message("mrpControl", "extFTObject", ("cmdTorqueOutMsg", "cmdTorqueInMsg"))
+    # mrpControl.guidInMsg.subscribeTo(attError.attGuidOutMsg)
+    reg.register_message("attError", "mrpControl", ("attGuidOutMsg", "guidInMsg"))
 
 def run(show_plots, useAltBodyFrame):
     """
@@ -256,7 +260,7 @@ def run(show_plots, useAltBodyFrame):
     mrpControl = mods["mrpControl"]
     mrpControl.ModelTag = "mrpFeedback"
     scSim.AddModelToTask(simTaskName, mrpControl)
-    mrpControl.guidInMsg.subscribeTo(attError.attGuidOutMsg)
+    # mrpControl.guidInMsg.subscribeTo(attError.attGuidOutMsg)
     mrpControl.vehConfigInMsg.subscribeTo(vcMsg)
     mrpControl.K = 3.5
     mrpControl.Ki = -1.0  # make value negative to turn off integral feedback
@@ -264,7 +268,7 @@ def run(show_plots, useAltBodyFrame):
     mrpControl.integralLimit = 2. / mrpControl.Ki * 0.1
 
     # connect torque command to external torque effector
-    extFTObject.cmdTorqueInMsg.subscribeTo(mrpControl.cmdTorqueOutMsg)
+    # extFTObject.cmdTorqueInMsg.subscribeTo(mrpControl.cmdTorqueOutMsg)
 
     #
     #   Setup data logging before the simulation is initialized
