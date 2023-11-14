@@ -21,8 +21,15 @@
 #include <cstring>
 #include <iostream>
 
+// Including simple benchmark utilities for GPIO toggling.
+extern "C" {
+    #include "benchPlatform.h"
+}
+
 void activateNewThread(void *threadData)
 {
+    // Init simple benchmark:
+    init_Platform();
 
     SimThreadExecution *theThread = static_cast<SimThreadExecution*> (threadData);
 
@@ -54,7 +61,9 @@ void activateNewThread(void *threadData)
         // }
         // else{
         // std::cout << "step" << std::endl;
+        begin_Benchmark(DOT_I16);
         theThread->StepUntilStop();
+        end_Benchmark(DOT_I16);
         //}
         //std::cout << "Stepping thread"<<std::endl;
         //theThread->unlockParent();
