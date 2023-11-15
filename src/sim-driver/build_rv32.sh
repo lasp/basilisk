@@ -9,5 +9,6 @@ cd build_rv32
 pwd
 cmake -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_TOOLCHAIN_FILE=../riscv.toolchain.cmake ..
 cmake --build . --target SimulationDriver
-file SimulationDriver
-/opt/riscv/bin/riscv32-unknown-elf-size SimulationDriver
+cp SimulationDriver SimulationDriver.elf
+file SimulationDriver.elf
+/opt/riscv/bin/riscv32-unknown-elf-size SimulationDriver.elf
