@@ -7,14 +7,16 @@ set(CMAKE_CXX_COMPILER /opt/riscv/bin/riscv32-unknown-elf-g++)
 set(CMAKE_ASM_COMPILER /opt/riscv/bin/riscv32-unknown-elf-gcc)
 
 # Compilation options
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Os")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Os")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffunction-sections -fdata-sections")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffunction-sections -fdata-sections")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=rv32imaf -mabi=ilp32 -D __riscv_xlen=32")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=rv32imaf -mabi=ilp32 -D __riscv_xlen=32")
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=rv32imaf -mabi=ilp32 -D __riscv_xlen=32")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=rv32imaf -mabi=ilp32 -D __riscv_xlen=32")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=rv32imaf_zicsr -mabi=ilp32 -D MIV_LEGACY_RV32=1")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=rv32imaf_zicsr -mabi=ilp32 -D MIV_LEGACY_RV32=1")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-use-cxa-atexit")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wabi-tag -D_GLIBCXX_USE_CXX11_ABI=0")
@@ -30,12 +32,13 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -ffunction-sections -fdata
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--print-memory-usage")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--no-warn-rwx-segments")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lm")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --specs=nano.specs")
+#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --specs=nano.specs")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nostartfiles")
 #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nostdlib")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fno-use-cxa-atexit")
 # Include linker file:
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T /share/ema-fsw-simple-benchmark/RV32imaf/platform/microsemi-riscv-ram.ld")
+#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T /share/ema-fsw-simple-benchmark/RV32imaf/platform/microsemi-riscv-ram.ld")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T /share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv-rv32-ram.ld")
 
 set(CMAKE_FIND_ROOT_PATH /opt/riscv)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
@@ -43,3 +46,9 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 set(RISCV_COMPILE TRUE)
+
+#  15 riscv_opts="-march=rv32imaf_zicsr -mabi=ilp32 -D MIV_LEGACY_RV32=1"
+#  16 #riscv_opts="-march=rv32ima_zicsr -mabi=ilp32 -D __riscv_xlen=32"
+#  17
+# # debug_opts="-Og -gstrict-dwarf -gdwarf-4 -fdebug-prefix-map=/share/benchmark=."
+#  20 inc_opts="-I ./ -I RV32imaf -I RV32imaf/platform "
