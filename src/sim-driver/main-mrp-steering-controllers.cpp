@@ -13,7 +13,9 @@ void setArrayDouble3WithVecDouble3(std::vector<double> vec, double destination[3
 void setArrayDouble9WithVecDouble9(std::vector<double> vec, double destination[9]);
 
 // https://arobenko.github.io/bare_metal_cpp/
+#ifdef RV32
 void* __dso_handle = nullptr;
+#endif
 
 int main (int argc, char* argv[] ) {
     auto simDriver = SimulationDriver::SimulationDriver();

@@ -21,6 +21,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=rv32imaf_zicsr -mabi=ilp32 -D MIV
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-use-cxa-atexit")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wabi-tag -D_GLIBCXX_USE_CXX11_ABI=0")
 
+# This forces definition of __dso_handle in main-mrp-steering-controllers.cpp, but only when using
+# this toolchain file
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D RV32=1")
+
 set(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS} -x assembler-with-cpp")
 
 #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-unwind-tables -fno-asynchronous-unwind-tables")
