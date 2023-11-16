@@ -195,5 +195,11 @@ void Update_rwMotorTorque(rwMotorTorqueConfig *configData, uint64_t callTime, in
     vCopy(us, configData->rwConfigParams.numRW, rwMotorTorques.motorTorque);
     ArrayMotorTorqueMsg_C_write(&rwMotorTorques, &configData->rwMotorTorqueOutMsg, moduleID, callTime);
     
+#ifndef MY_RV32
+    for (int i = 0; i < configData->rwConfigParams.numRW; ++i) {
+       printf("motorTorque rw-%d %g \n", i , rwMotorTorques.motorTorque[i]);
+    }
+#endif
+
     return;
 }

@@ -197,8 +197,14 @@ void Update_cssWlsEst(CSSWLSConfig *configData, uint64_t callTime,
     /*! -# Set inverse noise matrix */
     /*! -# increase the number of valid observations */
     /*! -# Otherwise just continue */
+#ifndef MY_RV32
+    printf("configData->cssConfigInBuffer.nCSS %d  \n", configData->cssConfigInBuffer.nCSS);
+#endif
     for(uint32_t i=0; i<configData->cssConfigInBuffer.nCSS; i = i+1)
     {
+#ifndef MY_RV32
+        printf("InputBuffer.CosValue[%d] %f  \n", i, InputBuffer.CosValue[i]);
+#endif
         if(InputBuffer.CosValue[i] > configData->sensorUseThresh)
         {
             v3Scale(configData->cssConfigInBuffer.cssVals[i].CBias,
