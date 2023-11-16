@@ -28,8 +28,6 @@ extern "C" {
 
 void activateNewThread(void *threadData)
 {
-    // Init simple benchmark:
-    init_Platform();
 
     SimThreadExecution *theThread = static_cast<SimThreadExecution*> (threadData);
 
@@ -61,9 +59,7 @@ void activateNewThread(void *threadData)
         // }
         // else{
         // std::cout << "step" << std::endl;
-        begin_Benchmark(DOT_I16);
         theThread->StepUntilStop();
-        end_Benchmark(DOT_I16);
         //}
         //std::cout << "Stepping thread"<<std::endl;
         //theThread->unlockParent();
@@ -193,7 +189,9 @@ void SimThreadExecution::StepUntilStop()
     {
         
         // std::cout << "single step processes" << std::endl;
+        begin_Benchmark(DOT_I16);
         this->SingleStepProcesses(inPri);
+        end_Benchmark(DOT_I16);
         inPri = stopThreadNanos == this->NextTaskTime ? stopThreadPriority : -1;
     }
 }
