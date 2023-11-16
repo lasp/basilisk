@@ -53,19 +53,19 @@ private:
     void readFilterMeasurements();
     void writeOutputMessages(uint64_t CurrentSimNanos);
     void computePostFitResiudals();
-    Eigen::MatrixXd qrDecompositionJustR(const Eigen::MatrixXd input) const;
-    Eigen::MatrixXd choleskyUpDownDate(const Eigen::MatrixXd input,
-                                       const Eigen::VectorXd inputVector,
+    Eigen::MatrixXf qrDecompositionJustR(const Eigen::MatrixXf input) const;
+    Eigen::MatrixXf choleskyUpDownDate(const Eigen::MatrixXf input,
+                                       const Eigen::VectorXf inputVector,
                                        const float coefficient) const;
-    Eigen::MatrixXd choleskyDecomposition(const Eigen::MatrixXd input) const;
-    Eigen::MatrixXd backSubstitution(const Eigen::MatrixXd U, const Eigen::MatrixXd b) const;
-    Eigen::MatrixXd forwardSubstitution(const Eigen::MatrixXd L, const Eigen::MatrixXd b) const;
+    Eigen::MatrixXf choleskyDecomposition(const Eigen::MatrixXf input) const;
+    Eigen::MatrixXf backSubstitution(const Eigen::MatrixXf U, const Eigen::MatrixXf b) const;
+    Eigen::MatrixXf forwardSubstitution(const Eigen::MatrixXf L, const Eigen::MatrixXf b) const;
 
-    Eigen::VectorXd rk4(const std::function<Eigen::VectorXd(float, Eigen::VectorXd)>& ODEfunction,
-                        const Eigen::VectorXd& X0,
+    Eigen::VectorXf rk4(const std::function<Eigen::VectorXf(float, Eigen::VectorXf)>& ODEfunction,
+                        const Eigen::VectorXf& X0,
                         float t0,
                         float dt) const;
-    Eigen::VectorXd propagate(std::array<float, 2> interval, const Eigen::VectorXd& X0, float dt) const;
+    Eigen::VectorXf propagate(std::array<float, 2> interval, const Eigen::VectorXf& X0, float dt) const;
 
 public:
     ReadFunctor<OpNavUnitVecMsgPayload> opNavHeadingMsg;
@@ -82,11 +82,11 @@ public:
     float eta;
     float muCentral;
 
-    Eigen::MatrixXd processNoise; //!< [-] process noise matrix
-    Eigen::MatrixXd measurementNoise; //!< [-] Measurement Noise
-    Eigen::VectorXd stateInitial; //!< [-] State estimate for time TimeTag at previous time
-    Eigen::MatrixXd sBarInitial; //!< [-] Time updated covariance at previous time
-    Eigen::MatrixXd covarInitial; //!< [-] covariance at previous time
+    Eigen::MatrixXf processNoise; //!< [-] process noise matrix
+    Eigen::MatrixXf measurementNoise; //!< [-] Measurement Noise
+    Eigen::VectorXf stateInitial; //!< [-] State estimate for time TimeTag at previous time
+    Eigen::MatrixXf sBarInitial; //!< [-] Time updated covariance at previous time
+    Eigen::MatrixXf covarInitial; //!< [-] covariance at previous time
 
     float measNoiseScaling = 1; //!< [s] Scale factor that can be applied on the measurement noise to over/under weight
 
@@ -98,20 +98,20 @@ private:
     float previousFilterTimeTag; //!< [s]  Time tag for statecovar/etc
     bool computePostFits; //!< [bool]  Presence of a valid measurement to process
     size_t numberSigmaPoints; //!< [s]  2n+1 sigma points for convenience
-    Eigen::VectorXd wM;
-    Eigen::VectorXd wC;
+    Eigen::VectorXf wM;
+    Eigen::VectorXf wC;
 
-    Eigen::VectorXd state; //!< [-] State estimate for time TimeTag
-    Eigen::MatrixXd sBar; //!< [-] Time updated covariance
-    Eigen::MatrixXd covar; //!< [-] covariance
-    Eigen::VectorXd xBar; //!< [-] Current mean state estimate
-    Eigen::MatrixXd sigmaPoints; //!< [-]    sigma point matrix
+    Eigen::VectorXf state; //!< [-] State estimate for time TimeTag
+    Eigen::MatrixXf sBar; //!< [-] Time updated covariance
+    Eigen::MatrixXf covar; //!< [-] covariance
+    Eigen::VectorXf xBar; //!< [-] Current mean state estimate
+    Eigen::MatrixXf sigmaPoints; //!< [-]    sigma point matrix
 
-    Eigen::VectorXd obs; //!< [-] Observation vector for frame
-    Eigen::MatrixXd yMeas; //!< [-] Measurement model data
-    Eigen::VectorXd postFits; //!< [-] PostFit residuals
-    Eigen::MatrixXd cholProcessNoise; //!< [-] cholesky of Qnoise
-    Eigen::MatrixXd cholMeasurementNoise; //!< [-] cholesky of Qnoise
+    Eigen::VectorXf obs; //!< [-] Observation vector for frame
+    Eigen::MatrixXf yMeas; //!< [-] Measurement model data
+    Eigen::VectorXf postFits; //!< [-] PostFit residuals
+    Eigen::MatrixXf cholProcessNoise; //!< [-] cholesky of Qnoise
+    Eigen::MatrixXf cholMeasurementNoise; //!< [-] cholesky of Qnoise
 
     BSKLogger bskLogger; //!< -- BSK Logging
 };

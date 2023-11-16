@@ -25,7 +25,7 @@
 
 
 //!@brief General conversion between any Eigen matrix and output array
-void eigenMatrixXd2CArray(Eigen::MatrixXd inMat, float *outArray);
+void eigenMatrixXf2CArray(Eigen::MatrixXf inMat, float *outArray);
 //!@brief General conversion between any Eigen matrix and output array
 void eigenMatrixXi2CArray(Eigen::MatrixXi inMat, int *outArray);
 //!@brief Rapid conversion between 3-vector and output array
@@ -35,7 +35,7 @@ void eigenMRPd2CArray(Eigen::Vector3f& inMat, float* outArray);
 //!@brief Rapid conversion between 3x3 matrix and output array
 void eigenMatrix3f2CArray(Eigen::Matrix3f & inMat, float *outArray);
 //!@brief General conversion between a C array and an Eigen matrix
-Eigen::MatrixXd cArray2EigenMatrixXd(float *inArray, int nRows, int nCols);
+Eigen::MatrixXf cArray2EigenMatrixXf(float *inArray, int nRows, int nCols);
 //!@brief Specific conversion between a C array and an Eigen 3-vector
 Eigen::Vector3f cArray2EigenVector3f(float *inArray);
 //!@brief Specific conversion between a C array and an Eigen MRPs

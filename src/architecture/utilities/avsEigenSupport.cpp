@@ -31,21 +31,21 @@
 
 /*! This function provides a general conversion between an Eigen matrix and
 an output C array. Note that this routine would convert an inbound type
-to a MatrixXd and then transpose the matrix which would be inefficient
+to a MatrixXf and then transpose the matrix which would be inefficient
 in a lot of cases.
 @return void
 @param inMat The source Eigen matrix that we are converting
 @param outArray The destination array (sized by the user!) we copy into
 */
-void eigenMatrixXd2CArray(Eigen::MatrixXd inMat, float *outArray)
+void eigenMatrixXf2CArray(Eigen::MatrixXf inMat, float *outArray)
 {
-	Eigen::MatrixXd tempMat = inMat.transpose();
+	Eigen::MatrixXf tempMat = inMat.transpose();
 	memcpy(outArray, tempMat.data(), inMat.rows()*inMat.cols()*sizeof(float));
 }
 
 /*! This function provides a general conversion between an Eigen matrix and
 an output C array. Note that this routine would convert an inbound type
-to a MatrixXd and then transpose the matrix which would be inefficient
+to a MatrixXf and then transpose the matrix which would be inefficient
 in a lot of cases.
 @return void
 @param inMat The source Eigen matrix that we are converting
@@ -90,7 +90,7 @@ that would have been performed by the general case.
 */
 void eigenMatrix3f2CArray(Eigen::Matrix3f & inMat, float *outArray)
 {
-	Eigen::MatrixXd tempMat = inMat.transpose();
+	Eigen::MatrixXf tempMat = inMat.transpose();
 	memcpy(outArray, tempMat.data(), 9 * sizeof(float));
 }
 
@@ -98,16 +98,16 @@ void eigenMatrix3f2CArray(Eigen::Matrix3f & inMat, float *outArray)
 and an Eigen matrix. Note that to use this function the user MUST size
 the Eigen matrix ahead of time so that the internal map call has enough
 information to ingest the C array.
-@return Eigen::MatrixXd
+@return Eigen::MatrixXf
 @param inArray The input array (row-major)
 @param nRows
 @param nCols
 */
-Eigen::MatrixXd cArray2EigenMatrixXd(float *inArray, int nRows, int nCols)
+Eigen::MatrixXf cArray2EigenMatrixXf(float *inArray, int nRows, int nCols)
 {
-    Eigen::MatrixXd outMat;
+    Eigen::MatrixXf outMat;
     outMat.resize(nRows, nCols);
-	outMat = Eigen::Map<Eigen::MatrixXd>(inArray, outMat.rows(), outMat.cols());
+	outMat = Eigen::Map<Eigen::MatrixXf>(inArray, outMat.rows(), outMat.cols());
     return outMat;
 }
 
