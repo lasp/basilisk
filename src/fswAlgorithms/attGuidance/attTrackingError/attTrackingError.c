@@ -88,10 +88,10 @@ void Update_attTrackingError(attTrackingErrorConfig *configData, uint64_t callTi
  @param ref The reference attitude
  @param attGuidOut Output attitude guidance message
  */
-void computeAttitudeError(double sigma_R0R[3], NavAttMsgPayload nav, AttRefMsgPayload ref, AttGuidMsgPayload *attGuidOut){
-    double      sigma_RR0[3];               /* MRP from the original reference frame R0 to the corrected reference frame R */
-    double      sigma_RN[3];                /* MRP from inertial to updated reference frame */
-    double      dcm_BN[3][3];               /* DCM from inertial to body frame */
+void computeAttitudeError(float sigma_R0R[3], NavAttMsgPayload nav, AttRefMsgPayload ref, AttGuidMsgPayload *attGuidOut){
+    float      sigma_RR0[3];               /* MRP from the original reference frame R0 to the corrected reference frame R */
+    float      sigma_RN[3];                /* MRP from inertial to updated reference frame */
+    float      dcm_BN[3][3];               /* DCM from inertial to body frame */
 
     /*! - compute the initial reference frame orientation that takes the corrected body frame into account */
     v3Scale(-1.0, sigma_R0R, sigma_RR0);

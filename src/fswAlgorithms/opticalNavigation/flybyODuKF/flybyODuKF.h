@@ -47,7 +47,7 @@ public:
     void UpdateState(uint64_t CurrentSimNanos) override;
 
 private:
-    void timeUpdate(const double updateTime);
+    void timeUpdate(const float updateTime);
     void measurementUpdate();
     void measurementModel();
     void readFilterMeasurements();
@@ -56,16 +56,16 @@ private:
     Eigen::MatrixXd qrDecompositionJustR(const Eigen::MatrixXd input) const;
     Eigen::MatrixXd choleskyUpDownDate(const Eigen::MatrixXd input,
                                        const Eigen::VectorXd inputVector,
-                                       const double coefficient) const;
+                                       const float coefficient) const;
     Eigen::MatrixXd choleskyDecomposition(const Eigen::MatrixXd input) const;
     Eigen::MatrixXd backSubstitution(const Eigen::MatrixXd U, const Eigen::MatrixXd b) const;
     Eigen::MatrixXd forwardSubstitution(const Eigen::MatrixXd L, const Eigen::MatrixXd b) const;
 
-    Eigen::VectorXd rk4(const std::function<Eigen::VectorXd(double, Eigen::VectorXd)>& ODEfunction,
+    Eigen::VectorXd rk4(const std::function<Eigen::VectorXd(float, Eigen::VectorXd)>& ODEfunction,
                         const Eigen::VectorXd& X0,
-                        double t0,
-                        double dt) const;
-    Eigen::VectorXd propagate(std::array<double, 2> interval, const Eigen::VectorXd& X0, double dt) const;
+                        float t0,
+                        float dt) const;
+    Eigen::VectorXd propagate(std::array<float, 2> interval, const Eigen::VectorXd& X0, float dt) const;
 
 public:
     ReadFunctor<OpNavUnitVecMsgPayload> opNavHeadingMsg;
@@ -75,12 +75,12 @@ public:
 
     //!< Variables are named closely to the reference document :
     //!< "The Square-root unscented Kalman Filter for state and parameter-estimation" by van der Merwe and Wan
-    double beta;
-    double alpha;
-    double kappa;
-    double lambda;
-    double eta;
-    double muCentral;
+    float beta;
+    float alpha;
+    float kappa;
+    float lambda;
+    float eta;
+    float muCentral;
 
     Eigen::MatrixXd processNoise; //!< [-] process noise matrix
     Eigen::MatrixXd measurementNoise; //!< [-] Measurement Noise
@@ -88,14 +88,14 @@ public:
     Eigen::MatrixXd sBarInitial; //!< [-] Time updated covariance at previous time
     Eigen::MatrixXd covarInitial; //!< [-] covariance at previous time
 
-    double measNoiseScaling = 1; //!< [s] Scale factor that can be applied on the measurement noise to over/under weight
+    float measNoiseScaling = 1; //!< [s] Scale factor that can be applied on the measurement noise to over/under weight
 
 private:
     NavTransMsgPayload navTransOutMsgBuffer; //!< Message buffer for input translational nav message
     OpNavSUKFMsgPayload opNavFilterMsgBuffer;
 
-    double dt; //!< [s] seconds since last data epoch
-    double previousFilterTimeTag; //!< [s]  Time tag for statecovar/etc
+    float dt; //!< [s] seconds since last data epoch
+    float previousFilterTimeTag; //!< [s]  Time tag for statecovar/etc
     bool computePostFits; //!< [bool]  Presence of a valid measurement to process
     size_t numberSigmaPoints; //!< [s]  2n+1 sigma points for convenience
     Eigen::VectorXd wM;

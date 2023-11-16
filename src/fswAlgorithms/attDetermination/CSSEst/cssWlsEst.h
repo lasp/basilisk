@@ -43,8 +43,8 @@ typedef struct {
     uint32_t numActiveCss;                              //!< [-] Number of currently active CSS sensors
     uint32_t useWeights;                                //!< Flag indicating whether or not to use weights for least squares
     uint32_t priorSignalAvailable;                      //!< Flag indicating if a recent prior heading estimate is available
-    double dOld[3];                                     //!< The prior sun heading estimate
-    double sensorUseThresh;                             //!< Threshold below which we discount sensors
+    float dOld[3];                                     //!< The prior sun heading estimate
+    float sensorUseThresh;                             //!< Threshold below which we discount sensors
     uint64_t priorTime;                                 //!< [ns] Last time the attitude control is called
     CSSConfigMsgPayload cssConfigInBuffer;              //!< CSS constellation configuration message buffer
     SunlineFilterMsgPayload filtStatus;                 //!< Filter message
@@ -60,10 +60,10 @@ extern "C" {
     void Update_cssWlsEst(CSSWLSConfig *configData, uint64_t callTime,
         int64_t moduleID);
     void Reset_cssWlsEst(CSSWLSConfig *configData, uint64_t callTime, int64_t moduleID);
-    int computeWlsmn(int numActiveCss, double *H, double *W,
-                     double *y, double x[3]);
-    void computeWlsResiduals(double *cssMeas, CSSConfigMsgPayload *cssConfig,
-                             double *wlsEst, double *cssResiduals);
+    int computeWlsmn(int numActiveCss, float *H, float *W,
+                     float *y, float x[3]);
+    void computeWlsResiduals(float *cssMeas, CSSConfigMsgPayload *cssConfig,
+                             float *wlsEst, float *cssResiduals);
     
 #ifdef __cplusplus
 }

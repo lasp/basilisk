@@ -45,7 +45,7 @@ void FlybyODuKF::Reset(uint64_t CurrentSimNanos)
     this->measurementNoise.resize(this->obs.size(), this->obs.size());
     this->processNoise.resize(this->state.size(), this->state.size());
 
-    this->previousFilterTimeTag = (double) CurrentSimNanos*NANO2SEC;
+    this->previousFilterTimeTag = (float) CurrentSimNanos*NANO2SEC;
     this->numberSigmaPoints = this->state.size()*2+1;
     this->dt = 0;
 
@@ -58,15 +58,15 @@ void FlybyODuKF::Reset(uint64_t CurrentSimNanos)
     this->cholProcessNoise.setZero(this->state.size(), this->state.size());
 
     /*! - Set lambda/gamma to standard value for unscented kalman filters */
-    this->lambda = (double) this->state.size()*(this->alpha*this->alpha - 1);
-    this->eta = sqrt((double) this->state.size() + this->lambda);
+    this->lambda = (float) this->state.size()*(this->alpha*this->alpha - 1);
+    this->eta = sqrt((float) this->state.size() + this->lambda);
 
     /*! - Set the wM/wC vectors to standard values for unscented kalman filters*/
-    this->wM(0) = this->lambda / ((double) this->state.size() + this->lambda);
-    this->wC(0) = this->lambda / ((double) this->state.size() + this->lambda) + (1 - this->alpha*this->alpha + this->beta);
+    this->wM(0) = this->lambda / ((float) this->state.size() + this->lambda);
+    this->wC(0) = this->lambda / ((float) this->state.size() + this->lambda) + (1 - this->alpha*this->alpha + this->beta);
     for (size_t i = 1; i < this->numberSigmaPoints; i++)
     {
-        this->wM(i) = 1.0 / (2.0 * ((double) this->state.size() + this->lambda));
+        this->wM(i) = 1.0 / (2.0 * ((float) this->state.size() + this->lambda));
         this->wC(i) = this->wM(i);
     }
 
@@ -94,9 +94,9 @@ void FlybyODuKF::UpdateState(uint64_t CurrentSimNanos)
     }
     /*! - If current clock time is further ahead than the measured time, then
      propagate to this current time-step*/
-    if((double) CurrentSimNanos*NANO2SEC >= this->previousFilterTimeTag)
+    if((float) CurrentSimNanos*NANO2SEC >= this->previousFilterTimeTag)
     {
-        this->timeUpdate((double) CurrentSimNanos * NANO2SEC);
+        this->timeUpdate((float) CurrentSimNanos * NANO2SEC);
     }
 
     this->writeOutputMessages(CurrentSimNanos);
@@ -108,13 +108,13 @@ void FlybyODuKF::UpdateState(uint64_t CurrentSimNanos)
  @return void
  @param updateTime The time that we need to fix the filter to (seconds)
  */
-void FlybyODuKF::timeUpdate(double updateTime)
+void FlybyODuKF::timeUpdate(float updateTime)
 {
-    Eigen::VectorXd propagatedSigmaPoint;
-    Eigen::MatrixXd A(this->state.size(), 3*this->state.size());
+    Eigen::VectorXf propagatedSigmaPoint;
+    Eigen::MatrixXf A(this->state.size(), 3*this->state.size());
 
     this->dt = updateTime - this->previousFilterTimeTag;
-    std::array<double, 2> time = {0, this->dt};
+    std::array<float, 2> time = {0, this->dt};
 
     /*! - Copy over the current state estimate into the 0th Sigma point and propagate by dt*/
     this->sigmaPoints.col(0) = propagate(time, this->state, this->dt);
@@ -152,7 +152,7 @@ void FlybyODuKF::timeUpdate(double updateTime)
 
     /*! - Shift the sBar matrix over by the xBar vector using the appropriate weight
      like in equation 21 in design document.*/
-    Eigen::VectorXd xError = this->sigmaPoints.col(0) - this->xBar;
+    Eigen::VectorXf xError = this->sigmaPoints.col(0) - this->xBar;
 
     /*! - Cholesky update block for vectors.*/
     this->sBar = FlybyODuKF::choleskyUpDownDate(this->sBar, xError, this->wC(0));
@@ -172,17 +172,17 @@ void FlybyODuKF::writeOutputMessages(uint64_t CurrentSimNanos) {
     this->navTransOutMsgBuffer = this->navTransOutMsg.zeroMsgPayload;
 
     /*! - Write the flyby OD estimate into the copy of the navigation message structure*/
-    eigenMatrixXd2CArray(1e3*this->state.head(3), this->navTransOutMsgBuffer.r_BN_N);
-    eigenMatrixXd2CArray(1e3*this->state.tail(3), this->navTransOutMsgBuffer.v_BN_N);
+    eigenMatrixXf2CArray(1e3*this->state.head(3), this->navTransOutMsgBuffer.r_BN_N);
+    eigenMatrixXf2CArray(1e3*this->state.tail(3), this->navTransOutMsgBuffer.v_BN_N);
 
     /*! - Populate the filter states output buffer and write the output message*/
     this->opNavFilterMsgBuffer.timeTag = this->previousFilterTimeTag;
-    eigenMatrixXd2CArray( 1e3*this->state, this->opNavFilterMsgBuffer.state);
-    eigenMatrixXd2CArray( 1e3*this->xBar, this->opNavFilterMsgBuffer.stateError);
-    eigenMatrixXd2CArray(1e6*this->covar, this->opNavFilterMsgBuffer.covar);
+    eigenMatrixXf2CArray( 1e3*this->state, this->opNavFilterMsgBuffer.state);
+    eigenMatrixXf2CArray( 1e3*this->xBar, this->opNavFilterMsgBuffer.stateError);
+    eigenMatrixXf2CArray(1e6*this->covar, this->opNavFilterMsgBuffer.covar);
 
     if (this->computePostFits){
-        eigenMatrixXd2CArray(this->postFits, this->opNavFilterMsgBuffer.postFitRes);
+        eigenMatrixXf2CArray(this->postFits, this->opNavFilterMsgBuffer.postFitRes);
     }
 
     this->navTransOutMsg.write(&this->navTransOutMsgBuffer, this->moduleID, CurrentSimNanos);
@@ -198,9 +198,9 @@ void FlybyODuKF::readFilterMeasurements() {
 
     if (this->opNavHeadingBuffer.valid){
         /*! - Read measurement and cholesky decomposition its noise*/
-        this->obs = cArray2EigenVector3d(this->opNavHeadingBuffer.rhat_BN_N);
+        this->obs = cArray2EigenVector3f(this->opNavHeadingBuffer.rhat_BN_N);
         this->obs.normalize();
-        this->measurementNoise = this->measNoiseScaling * cArray2EigenMatrixXd(this->opNavHeadingBuffer.covar_N,
+        this->measurementNoise = this->measNoiseScaling * cArray2EigenMatrixXf(this->opNavHeadingBuffer.covar_N,
                                                                                (int) this->obs.size(),
                                                                                (int) this->obs.size());
         this->cholMeasurementNoise = FlybyODuKF::choleskyDecomposition(this->measurementNoise);
@@ -233,7 +233,7 @@ void FlybyODuKF::computePostFitResiudals()
     this->measurementModel();
     /*! - Compute the value for the yBar parameter (equation 23)*/
     this->postFits.setZero(this->obs.size());
-    Eigen::VectorXd yBar;
+    Eigen::VectorXf yBar;
     yBar.setZero(this->obs.size());
     for(size_t i=0; i<this->numberSigmaPoints; i++){
         yBar += this->wM(i)*this->yMeas.col(i);
@@ -254,7 +254,7 @@ void FlybyODuKF::measurementUpdate()
     
     /*! - Compute the value for the yBar parameter (note that this is equation 23 in the
      time update section of the reference document*/
-    Eigen::VectorXd yBar;
+    Eigen::VectorXf yBar;
     yBar.setZero(this->obs.size());
     for(size_t i=0; i<this->numberSigmaPoints; i++)
     {
@@ -264,7 +264,7 @@ void FlybyODuKF::measurementUpdate()
     /*! - Populate the matrix that we perform the QR decomposition on in the measurement
      update section of the code.  This is based on the difference between the yBar
      parameter and the calculated measurement models.  Equation 24. */
-    Eigen::MatrixXd A(this->obs.size(), 2*this->state.size() + this->obs.size());
+    Eigen::MatrixXf A(this->obs.size(), 2*this->state.size() + this->obs.size());
     for(size_t i=1; i<this->numberSigmaPoints; i++)
     {
         A.col(i-1) = sqrt(this->wC(1))*(yMeas.col(i) - yBar);
@@ -274,23 +274,23 @@ void FlybyODuKF::measurementUpdate()
 
     /*! - Perform QR decomposition (only R again) of the above matrix to obtain the
      current Sy matrix*/
-    Eigen::MatrixXd sy;
+    Eigen::MatrixXf sy;
     sy.setZero(this->obs.size(), this->obs.size());
     sy = FlybyODuKF::qrDecompositionJustR(A);
 
     /*! - Cholesky update block for vectors.*/
-    Eigen::VectorXd yError = this->yMeas.col(0) - yBar;
+    Eigen::VectorXf yError = this->yMeas.col(0) - yBar;
     sy = FlybyODuKF::choleskyUpDownDate(sy, yError, this->wC(0));
 
     /*! - Construct the Pxy matrix (equation 26) which multiplies the Sigma-point cloud
      by the measurement model cloud (weighted) to get the total Pxy matrix*/
-    Eigen::VectorXd xError;
+    Eigen::VectorXf xError;
     xError.setZero(this->state.size());
-    Eigen::MatrixXd kMat;
+    Eigen::MatrixXf kMat;
     kMat.setZero(this->state.size(), this->obs.size());
-    Eigen::MatrixXd STkMatT;
+    Eigen::MatrixXf STkMatT;
     STkMatT.setZero(this->obs.size(), this->state.size());
-    Eigen::MatrixXd pXY;
+    Eigen::MatrixXf pXY;
     pXY.setZero(this->state.size(), this->obs.size());
 
     for(size_t i=0; i<this->numberSigmaPoints; i++)
@@ -313,7 +313,7 @@ void FlybyODuKF::measurementUpdate()
     this->state = this->xBar + kMat*(this->obs - yBar);
 
     /*! - Compute the updated matrix U from equation 28 */
-    Eigen::MatrixXd Umat;
+    Eigen::MatrixXf Umat;
     Umat.setZero(this->state.size(), this->obs.size());
     Umat = kMat * sy;
 
@@ -332,18 +332,18 @@ void FlybyODuKF::measurementUpdate()
     @param interval integration interval
     @param X0 initial state
     @param dt time step
-    @return Eigen::VectorXd
+    @return Eigen::VectorXf
 */
-Eigen::VectorXd FlybyODuKF::propagate(std::array<double, 2> interval, const Eigen::VectorXd& X0, double dt) const
+Eigen::VectorXf FlybyODuKF::propagate(std::array<float, 2> interval, const Eigen::VectorXf& X0, float dt) const
 {
-    double t_0 = interval[0];
-    double t_f = interval[1];
-    double t = t_0;
-    Eigen::VectorXd X = X0;
+    float t_0 = interval[0];
+    float t_f = interval[1];
+    float t = t_0;
+    Eigen::VectorXf X = X0;
 
-    std::function<Eigen::VectorXd(double, Eigen::VectorXd)> f = [this](double t, Eigen::VectorXd state)
+    std::function<Eigen::VectorXf(float, Eigen::VectorXf)> f = [this](float t, Eigen::VectorXf state)
     {
-        Eigen::VectorXd stateDerivative(state.size());
+        Eigen::VectorXf stateDerivative(state.size());
         /*! Implement point mass gravity for the propagation */
         stateDerivative.segment(0,3) = state.segment(3, 3);
         stateDerivative.segment(3,3) = - this->muCentral/(pow(state.head(3).norm(),3)) * state.head(3);
@@ -352,9 +352,9 @@ Eigen::VectorXd FlybyODuKF::propagate(std::array<double, 2> interval, const Eige
     };
 
     /*! Propagate to t_final with an RK4 integrator */
-    double N = ceil((t_f-t_0)/dt);
+    float N = ceil((t_f-t_0)/dt);
     for (int c=0; c < N; c++) {
-        double step = std::min(dt,t_f-t);
+        float step = std::min(dt,t_f-t);
         X = this->rk4(f, X, t, step);
         t = t + step;
     }
@@ -367,41 +367,41 @@ Eigen::VectorXd FlybyODuKF::propagate(std::array<double, 2> interval, const Eige
     @param X0 initial state
     @param t0 initial time
     @param dt time step
-    @return Eigen::VectorXd
+    @return Eigen::VectorXf
 */
-Eigen::VectorXd FlybyODuKF::rk4(const std::function<Eigen::VectorXd(double, Eigen::VectorXd)>& ODEfunction,
-                                const Eigen::VectorXd& X0,
-                                double t0,
-                                double dt) const
+Eigen::VectorXf FlybyODuKF::rk4(const std::function<Eigen::VectorXf(float, Eigen::VectorXf)>& ODEfunction,
+                                const Eigen::VectorXf& X0,
+                                float t0,
+                                float dt) const
 {
-    double h = dt;
+    float h = dt;
 
-    Eigen::VectorXd k1 = ODEfunction(t0, X0);
-    Eigen::VectorXd k2 = ODEfunction(t0 + h/2., X0 + h*k1/2.);
-    Eigen::VectorXd k3 = ODEfunction(t0 + h/2., X0 + h*k2/2.);
-    Eigen::VectorXd k4 = ODEfunction(t0 + h, X0 + h*k3);
+    Eigen::VectorXf k1 = ODEfunction(t0, X0);
+    Eigen::VectorXf k2 = ODEfunction(t0 + h/2., X0 + h*k1/2.);
+    Eigen::VectorXf k3 = ODEfunction(t0 + h/2., X0 + h*k2/2.);
+    Eigen::VectorXf k4 = ODEfunction(t0 + h, X0 + h*k3);
 
-    Eigen::VectorXd X = X0 + 1./6.*h*(k1 + 2.*k2 + 2.*k3 + k4);
+    Eigen::VectorXf X = X0 + 1./6.*h*(k1 + 2.*k2 + 2.*k3 + k4);
 
     return X;
 }
 
 /*! Perform a QR decomposition using HouseholderQR from Eigen, but only returns the transpose of the
  * upper triangular R matrix truncated such that it is the same size as the input matrix.
- @return Eigen::MatrixXd
- @param Eigen::MatrixXd input : The input matrix. If not square, provide it with more cols then rows
+ @return Eigen::MatrixXf
+ @param Eigen::MatrixXf input : The input matrix. If not square, provide it with more cols then rows
  */
-Eigen::MatrixXd FlybyODuKF::qrDecompositionJustR(const Eigen::MatrixXd input) const
+Eigen::MatrixXf FlybyODuKF::qrDecompositionJustR(const Eigen::MatrixXf input) const
 {
-    Eigen::HouseholderQR<Eigen::MatrixXd> qrDecomposition(input.transpose());
-    Eigen::MatrixXd R_tilde;
+    Eigen::HouseholderQR<Eigen::MatrixXf> qrDecomposition(input.transpose());
+    Eigen::MatrixXf R_tilde;
     R_tilde.setZero(input.rows(), input.rows());
-    Eigen::MatrixXd R;
+    Eigen::MatrixXf R;
     R.setZero(input.cols(), input.rows());
 
     /*! Use Eigen Householder method to perform a QR decomposition and retrieve just the R matrix.
      * Math is described in the first bullet of section 3 page 3 of the reference document */
-    Eigen::MatrixXd Q;
+    Eigen::MatrixXf Q;
     Q = qrDecomposition.householderQ();
     R = Q.transpose()*input.transpose();
     R_tilde = R.block(0,0,input.rows(), input.rows());
@@ -419,16 +419,16 @@ Eigen::MatrixXd FlybyODuKF::qrDecompositionJustR(const Eigen::MatrixXd input) co
 /*! Perform the cholesky up or down date. The sign of the value term determines weather to update or downdate
  * the input matrix using the input vector.
  * Return the QR decomposed matrix of the up/down dated input matrix.
- @return Eigen::MatrixXd
- @param Eigen::MatrixXd input : The input matrix which is recomposed into a P matrix P = S.S^T
- @param Eigen::VectorXd inputVector : Take it's outer product V.V^T to add into the recomposed P matrix
- @param Eigen::VectorXd coefficient : Factor that is square rooted and scales the outer product P +/- sqrt(v)V.V^T
+ @return Eigen::MatrixXf
+ @param Eigen::MatrixXf input : The input matrix which is recomposed into a P matrix P = S.S^T
+ @param Eigen::VectorXf inputVector : Take it's outer product V.V^T to add into the recomposed P matrix
+ @param Eigen::VectorXf coefficient : Factor that is square rooted and scales the outer product P +/- sqrt(v)V.V^T
  */
-Eigen::MatrixXd FlybyODuKF::choleskyUpDownDate(const Eigen::MatrixXd input,
-                                               const Eigen::VectorXd inputVector,
-                                               const double coefficient) const
+Eigen::MatrixXf FlybyODuKF::choleskyUpDownDate(const Eigen::MatrixXf input,
+                                               const Eigen::VectorXf inputVector,
+                                               const float coefficient) const
 {
-    Eigen::MatrixXd P;
+    Eigen::MatrixXf P;
     P.setZero(inputVector.size(), inputVector.size());
 
     /*! Perform the Cholesky factor updating.
@@ -436,32 +436,32 @@ Eigen::MatrixXd FlybyODuKF::choleskyUpDownDate(const Eigen::MatrixXd input,
     P = input * input.transpose();
     P += ((coefficient > 0) - (coefficient < 0))*abs(coefficient)*inputVector*inputVector.transpose();
 
-    Eigen::MatrixXd A;
+    Eigen::MatrixXf A;
     A = FlybyODuKF::choleskyDecomposition(P);
     return qrDecompositionJustR(A);
 }
 
 /*! Perform the cholesky decomposition of an input matrix using Eigen's LLT
- @return Eigen::MatrixXd
- @param Eigen::MatrixXd input : The input matrix
+ @return Eigen::MatrixXf
+ @param Eigen::MatrixXf input : The input matrix
  */
-Eigen::MatrixXd FlybyODuKF::choleskyDecomposition(const Eigen::MatrixXd input) const
+Eigen::MatrixXf FlybyODuKF::choleskyDecomposition(const Eigen::MatrixXf input) const
 {
-    Eigen::LLT<Eigen::MatrixXd> choleskyDecomp(input);
+    Eigen::LLT<Eigen::MatrixXf> choleskyDecomp(input);
     return choleskyDecomp.matrixL();
 }
 
 /*! Perform a generic back substitution to solve x in Ux = b
- @return Eigen::MatrixXd
- @param Eigen::MatrixXd U, an upper triangular matrix
- @param Eigen::MatrixXd b, the right hand side of the Ux = b
+ @return Eigen::MatrixXf
+ @param Eigen::MatrixXf U, an upper triangular matrix
+ @param Eigen::MatrixXf b, the right hand side of the Ux = b
  */
-Eigen::MatrixXd FlybyODuKF::backSubstitution(const Eigen::MatrixXd U, const Eigen::MatrixXd b) const
+Eigen::MatrixXf FlybyODuKF::backSubstitution(const Eigen::MatrixXf U, const Eigen::MatrixXf b) const
 {
     assert(U.rows() == b.rows());
 
-    Eigen::MatrixXd x;
-    Eigen::VectorXd xCol;
+    Eigen::MatrixXf x;
+    Eigen::VectorXf xCol;
 
     x.setZero(b.rows(), b.cols());
     for (int col =0; col < b.cols(); col++){
@@ -480,16 +480,16 @@ Eigen::MatrixXd FlybyODuKF::backSubstitution(const Eigen::MatrixXd U, const Eige
 }
 
 /*! Perform a generic forward substitution to solve x in Lx = b
- @return Eigen::MatrixXd
- @param Eigen::MatrixXd L, an lower triangular matrix
- @param Eigen::MatrixXd b, the right hand side of the Ux = b
+ @return Eigen::MatrixXf
+ @param Eigen::MatrixXf L, an lower triangular matrix
+ @param Eigen::MatrixXf b, the right hand side of the Ux = b
  */
-Eigen::MatrixXd FlybyODuKF::forwardSubstitution(const Eigen::MatrixXd L, const Eigen::MatrixXd b) const
+Eigen::MatrixXf FlybyODuKF::forwardSubstitution(const Eigen::MatrixXf L, const Eigen::MatrixXf b) const
 {
     assert(L.rows() == b.rows());
 
-    Eigen::MatrixXd x;
-    Eigen::VectorXd xCol;
+    Eigen::MatrixXf x;
+    Eigen::VectorXf xCol;
 
     x.setZero(b.rows(), b.cols());
     for (int col =0; col < b.cols(); col++){

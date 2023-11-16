@@ -27,11 +27,11 @@ typedef struct
 OpNavSUKFMsgPayload
 //@endcond
 {
-    double timeTag;                             //!< [s] Current time of validity for output
-    double covar[6*6];    //!< [-] Current covariance of the filter
-    double state[6];                 //!< [-] Current estimated state of the filter
-    double stateError[6];            //!< [-] Current deviation of the state from the reference state
-    double postFitRes[3];          //!< [-] PostFit Residuals
+    float timeTag;                             //!< [s] Current time of validity for output
+    float covar[6*6];    //!< [-] Current covariance of the filter
+    float state[6];                 //!< [-] Current estimated state of the filter
+    float stateError[6];            //!< [-] Current deviation of the state from the reference state
+    float postFitRes[3];          //!< [-] PostFit Residuals
 }OpNavSUKFMsgPayload;
 
 #endif /* OPNAV_FILTER_MESSAGE_H */

@@ -33,7 +33,7 @@
  */
 typedef struct {
     /* declare module private variables */
-    double sigma_R0R[3];                        //!< MRP from corrected reference frame to original reference frame R0. This is the same as [BcB] going from primary body frame B to the corrected body frame Bc
+    float sigma_R0R[3];                        //!< MRP from corrected reference frame to original reference frame R0. This is the same as [BcB] going from primary body frame B to the corrected body frame Bc
     AttGuidMsg_C attGuidOutMsg;              //!< output msg of attitude guidance
     NavAttMsg_C attNavInMsg;                 //!< input msg measured attitude
     AttRefMsg_C attRefInMsg;                 //!< input msg of reference attitude
@@ -47,7 +47,7 @@ extern "C" {
     void SelfInit_attTrackingError(attTrackingErrorConfig *configData, int64_t moduleID);
     void Update_attTrackingError(attTrackingErrorConfig *configData, uint64_t callTime, int64_t moduleID);
     void Reset_attTrackingError(attTrackingErrorConfig *configData, uint64_t callTime, int64_t moduleID);
-    void computeAttitudeError(double sigma_R0R[3], NavAttMsgPayload nav, AttRefMsgPayload ref, AttGuidMsgPayload *attGuidOut);
+    void computeAttitudeError(float sigma_R0R[3], NavAttMsgPayload nav, AttRefMsgPayload ref, AttGuidMsgPayload *attGuidOut);
 
 #ifdef __cplusplus
 }

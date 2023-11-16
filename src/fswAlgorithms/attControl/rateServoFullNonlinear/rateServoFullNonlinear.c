@@ -111,23 +111,23 @@ void Update_rateServoFullNonlinear(rateServoFullNonlinearConfig *configData, uin
     RateCmdMsgPayload   rateGuid;                   /*!< rate steering law message input message */
     CmdTorqueBodyMsgPayload controlOut;             /*!< commanded torque output message */
 
-    double              dt;                 /* [s] control update period */
+    float              dt;                 /* [s] control update period */
     
-    double              Lr[3];              /* required control torque vector [Nm] */
-    double              omega_BastN_B[3];   /* angular velocity of B^ast relative to inertial N, in body frame components */
-    double              omega_BBast_B[3];   /* angular velocity tracking error between actual  body frame B and desired B^ast frame */
-    double              omega_BN_B[3];      /* angular rate of the body B relative to inertial N, in body frame compononents */
-    double              *wheelGs;           /* Reaction wheel spin axis pointer */
+    float              Lr[3];              /* required control torque vector [Nm] */
+    float              omega_BastN_B[3];   /* angular velocity of B^ast relative to inertial N, in body frame components */
+    float              omega_BBast_B[3];   /* angular velocity tracking error between actual  body frame B and desired B^ast frame */
+    float              omega_BN_B[3];      /* angular rate of the body B relative to inertial N, in body frame compononents */
+    float              *wheelGs;           /* Reaction wheel spin axis pointer */
     /* Temporary variables */
-    double              v3_1[3];
-    double              v3_2[3];
-    double              v3_3[3];
-    double              v3_4[3];
-    double              v3_5[3];
-    double              v3_6[3];
-    double              v3_7[3];
+    float              v3_1[3];
+    float              v3_2[3];
+    float              v3_3[3];
+    float              v3_4[3];
+    float              v3_5[3];
+    float              v3_6[3];
+    float              v3_7[3];
     int                 i;
-    double              intLimCheck;
+    float              intLimCheck;
         
     /*! - zero the output message */
     controlOut = CmdTorqueBodyMsg_C_zeroMsgPayload();

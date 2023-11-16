@@ -9,8 +9,8 @@
 #include "fswAlgorithms/attGuidance/sunSafePoint/sunSafePoint.h"
 #include "fswAlgorithms/opticalNavigation/flybyODuKF/flybyODuKF.h"
 
-void setArrayDouble3WithVecDouble3(std::vector<double> vec, double destination[3]);
-void setArrayDouble9WithVecDouble9(std::vector<double> vec, double destination[9]);
+void setArrayDouble3WithVecDouble3(std::vector<float> vec, float destination[3]);
+void setArrayDouble9WithVecDouble9(std::vector<float> vec, float destination[9]);
 
 // https://arobenko.github.io/bare_metal_cpp/
 #ifdef MY_RV32
@@ -49,7 +49,7 @@ int main (int argc, char* argv[] ) {
     // Sun Safe Point
     auto sun_safe_point_config = new sunSafePointConfig ();
     sun_safe_point_config->bskLogger = &logger;
-    setArrayDouble3WithVecDouble3(std::vector<double>{0.0, 0.0, 1.0}, sun_safe_point_config->sHatBdyCmd);
+    setArrayDouble3WithVecDouble3(std::vector<float>{0.0, 0.0, 1.0}, sun_safe_point_config->sHatBdyCmd);
     AlgPtr sunSafePointSelfInitFunc = reinterpret_cast<AlgPtr>(SelfInit_sunSafePoint);
     AlgUpdatePtr sunSafePointUpdateFunc = reinterpret_cast<AlgUpdatePtr>(Update_sunSafePoint);
     AlgUpdatePtr sunSafePointResetFunc = reinterpret_cast<AlgUpdatePtr>(Reset_sunSafePoint);
@@ -113,7 +113,7 @@ int main (int argc, char* argv[] ) {
     // Reaction Wheel Motor Torque Mapper
     auto rw_motor_torque_config = new rwMotorTorqueConfig();
     rw_motor_torque_config->bskLogger = &logger;
-    setArrayDouble9WithVecDouble9(std::vector<double>{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0},
+    setArrayDouble9WithVecDouble9(std::vector<float>{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0},
                                   rw_motor_torque_config->controlAxes_B);
     AlgPtr rwMotorTorqueSelfInitFunc = reinterpret_cast<AlgPtr>(SelfInit_rwMotorTorque);
     AlgUpdatePtr rwMotorTorqueUpdateFunc = reinterpret_cast<AlgUpdatePtr>(Update_rwMotorTorque);
@@ -140,14 +140,14 @@ int main (int argc, char* argv[] ) {
     simDriver.run();
 }
 
-void setArrayDouble3WithVecDouble3(std::vector<double> vec, double destination[3]) {
+void setArrayDouble3WithVecDouble3(std::vector<float> vec, float destination[3]) {
     assert(vec.size() == 3);
     destination[0] = vec[0];
     destination[1] = vec[1];
     destination[2] = vec[2];
 }
 
-void setArrayDouble9WithVecDouble9(std::vector<double> vec, double destination[9]) {
+void setArrayDouble9WithVecDouble9(std::vector<float> vec, float destination[9]) {
     assert(vec.size() == 9);
     destination[0] = vec[0];
     destination[1] = vec[1];

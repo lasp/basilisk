@@ -57,11 +57,11 @@ private:
 
     void updateImuMessage();
 
-    void setArrayDouble3WithVecDouble3(std::vector<double> vec, double destination[3]);
+    void setArrayDouble3WithVecDouble3(std::vector<float> vec, float destination[3]);
 
-    void setArrayDouble9WithVecDouble9(std::vector<double> vec, double destination[9]);
+    void setArrayDouble9WithVecDouble9(std::vector<float> vec, float destination[9]);
 
-    std::vector<std::vector<double>> nHat_B_vec;
+    std::vector<std::vector<float>> nHat_B_vec;
 };
 
 

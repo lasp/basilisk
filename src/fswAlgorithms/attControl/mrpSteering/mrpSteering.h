@@ -30,9 +30,9 @@
 /*! @brief Data structure for the MRP feedback attitude control routine. */
 typedef struct {
     /* declare module public variables */
-    double K1;                          //!< [rad/sec] Proportional gain applied to MRP errors
-    double K3;                          //!< [rad/sec] Cubic gain applied to MRP error in steering saturation function
-    double omega_max;                   //!< [rad/sec] Maximum rate command of steering control
+    float K1;                          //!< [rad/sec] Proportional gain applied to MRP errors
+    float K3;                          //!< [rad/sec] Cubic gain applied to MRP error in steering saturation function
+    float omega_max;                   //!< [rad/sec] Maximum rate command of steering control
 
     uint32_t ignoreOuterLoopFeedforward;//!< []      Boolean flag indicating if outer feedforward term should be included
     
@@ -51,7 +51,7 @@ extern "C" {
     void Update_mrpSteering(mrpSteeringConfig *configData, uint64_t callTime, int64_t moduleID);
     void Reset_mrpSteering(mrpSteeringConfig *configData, uint64_t callTime, int64_t moduleID);
 
-    void MRPSteeringLaw(mrpSteeringConfig *configData, double sigma_BR[3], double omega_ast[3], double omega_ast_p[3]);
+    void MRPSteeringLaw(mrpSteeringConfig *configData, float sigma_BR[3], float omega_ast[3], float omega_ast_p[3]);
 
     
 #ifdef __cplusplus

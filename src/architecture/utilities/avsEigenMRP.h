@@ -316,7 +316,7 @@ namespace Eigen {
     typedef MRP<float> MRPf;
     /** \ingroup Geometry_Module
      * double precision MRP type */
-    typedef MRP<double> MRPd;
+    typedef MRP<float> MRPd;
 
     /***************************************************************************
      * Specialization of Map<MRP<Scalar>>
@@ -424,13 +424,13 @@ namespace Eigen {
     typedef Map<MRP<float>, 0>         MRPMapf;
     /** \ingroup Geometry_Module
      * Map an unaligned array of double precision scalars as a MRP */
-    typedef Map<MRP<double>, 0>        MRPMapd;
+    typedef Map<MRP<float>, 0>        MRPMapd;
     /** \ingroup Geometry_Module
      * Map a 16-byte aligned array of single precision scalars as a MRP */
     typedef Map<MRP<float>, Aligned>   MRPMapAlignedf;
     /** \ingroup Geometry_Module
      * Map a 16-byte aligned array of double precision scalars as a MRP */
-    typedef Map<MRP<double>, Aligned>  MRPMapAlignedd;
+    typedef Map<MRP<float>, Aligned>  MRPMapAlignedd;
 
     /***************************************************************************
      * Implementation of MRPBase methods

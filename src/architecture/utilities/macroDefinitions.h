@@ -28,9 +28,9 @@
 
 #define NANO2SEC        1e-9
 #define SEC2NANO        1e9
-#define RECAST6X6       (double (*)[6])
-#define RECAST3X3       (double (*)[3])
-#define RECAST2x2       (double (*)[2])
+#define RECAST6X6       (float (*)[6])
+#define RECAST3X3       (float (*)[3])
+#define RECAST2x2       (float (*)[2])
 #define SEC2HOUR        1./3600.
 
 

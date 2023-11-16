@@ -93,12 +93,12 @@ void Update_mrpSteering(mrpSteeringConfig *configData, uint64_t callTime,
  @param omega_ast   Commanded body rates
  @param omega_ast_p Body frame derivative of the commanded body rates
  */
-void MRPSteeringLaw(mrpSteeringConfig *configData, double sigma_BR[3], double omega_ast[3], double omega_ast_p[3])
+void MRPSteeringLaw(mrpSteeringConfig *configData, float sigma_BR[3], float omega_ast[3], float omega_ast_p[3])
 {
-    double  sigma_i;        /* ith component of sigma_B/R */
-    double  B[3][3];        /* B-matrix of MRP differential kinematic equations */
-    double  sigma_p[3];     /* MRP rates */
-    double  value;
+    float  sigma_i;        /* ith component of sigma_B/R */
+    float  B[3][3];        /* B-matrix of MRP differential kinematic equations */
+    float  sigma_p[3];     /* MRP rates */
+    float  value;
     int     i;
 
     /* Equation (18): Determine the desired steering rates  */

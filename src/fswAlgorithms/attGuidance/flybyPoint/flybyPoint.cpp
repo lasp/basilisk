@@ -69,7 +69,7 @@ void FlybyPoint::UpdateState(uint64_t CurrentSimNanos)
     AttRefMsgPayload attMsgBuffer = this->attRefOutMsg.zeroMsgPayload;
 
     /*! compute dt from current time and last filter read time [s] */
-    double dt = (CurrentSimNanos - this->lastFilterReadTime)*NANO2SEC;
+    float dt = (CurrentSimNanos - this->lastFilterReadTime)*NANO2SEC;
 
     if ((dt >= this->dtFilterData) || this->firstRead) {
         /*! set firstRead to false if this was the first read after a reset */
@@ -84,12 +84,12 @@ void FlybyPoint::UpdateState(uint64_t CurrentSimNanos)
         this->f0 = v3Norm(relativeState.v_BN_N) / v3Norm(relativeState.r_BN_N);
 
         /*! compute radial (ur_N), velocity (uv_N), along-track (ut_N), and out-of-plane (uh_N) unit direction vectors */
-        double ur_N[3];
+        float ur_N[3];
         v3Normalize(relativeState.r_BN_N, ur_N);
-        double uv_N[3];
+        float uv_N[3];
         v3Normalize(relativeState.v_BN_N, uv_N);
-        double uh_N[3];
-        double ut_N[3];
+        float uh_N[3];
+        float ut_N[3];
         if (1 - v3Dot(ur_N, uv_N) < this->epsilon) {
             v3Perpendicular(ur_N, uh_N);
             v3Normalize(uh_N, uh_N);
@@ -128,7 +128,7 @@ void FlybyPoint::UpdateState(uint64_t CurrentSimNanos)
     }
 
     /*! compute rotation angle of reference frame from last read time */
-    double theta;
+    float theta;
     if (this->singularityFlag == nonSingular) {
         theta = atan(tan(this->gamma0) + this->f0 / cos(this->gamma0) * dt) - this->gamma0;
     }
@@ -137,20 +137,20 @@ void FlybyPoint::UpdateState(uint64_t CurrentSimNanos)
     }
 
     /*! compute DCM (RtR0) of reference frame from last read time */
-    double PRV_theta[3] = {0, 0, theta};
-    double RtR0[3][3];
+    float PRV_theta[3] = {0, 0, theta};
+    float RtR0[3][3];
     PRV2C(PRV_theta, RtR0);
 
     /*! compute DCM of reference frame at time t_0 + dt with respect to inertial frame */
-    double RtN[3][3];
+    float RtN[3][3];
     m33MultM33(RtR0, this->R0N, RtN);
 
     /*! compute scalar angular rate and acceleration of the reference frame in R-frame coordinates */
-    double den = (this->f0*this->f0*dt*dt + 2*this->f0*sin(this->gamma0)*dt + 1);
-    double thetaDot = this->f0 * cos(this->gamma0) / den;
-    double thetaDDot = -2*this->f0*this->f0*cos(this->gamma0) * (this->f0*dt + sin(this->gamma0)) / (den*den);
-    double omega_RN_R[3] = {0, 0, thetaDot};
-    double omegaDot_RN_R[3] = {0, 0, thetaDDot};
+    float den = (this->f0*this->f0*dt*dt + 2*this->f0*sin(this->gamma0)*dt + 1);
+    float thetaDot = this->f0 * cos(this->gamma0) / den;
+    float thetaDDot = -2*this->f0*this->f0*cos(this->gamma0) * (this->f0*dt + sin(this->gamma0)) / (den*den);
+    float omega_RN_R[3] = {0, 0, thetaDot};
+    float omegaDot_RN_R[3] = {0, 0, thetaDDot};
 
     /*! populate attRefOut with reference frame information */
     C2MRP(RtN, attMsgBuffer.sigma_RN);

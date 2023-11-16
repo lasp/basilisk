@@ -38,78 +38,78 @@ extern "C" {
 #endif
 
     /* N element vectors */
-    void    vElementwiseMult(double *v1, size_t dim, double *v2, double *result);
-    void    vCopy(double *v, size_t dim, double *result);
-    void    vSetZero(double *v, size_t dim);
-    void    vSetOnes(double *v, size_t dim);
-    void    vAdd(double *v1, size_t dim, double *v2, double *result);
-    void    vSubtract(double *v1, size_t dim, double *v2, double *result);
-    void    vScale(double scaleFactor, double *v, size_t dim, double *result);
-    double  vDot(double *v1, size_t dim, double *v2);
-    void    vOuterProduct(double *v1, size_t dim1, double *v2, size_t dim2, void *result);
-    void    vtMultM(double *v, void *mx, size_t dim1, size_t dim2, void *result);
-    void    vtMultMt(double *v, void *mx, size_t dim1, size_t dim2, void *result);
-    double  vNorm(double *v, size_t dim);
-    double  vMax(double *v, size_t dim); /* Non-sorted, non-optimized algorithm for finding the max of a small 1-D array*/
-    double  vMaxAbs(double *v, size_t dim); /* Non-sorted, non-optimized algorithm for finding the max of the absolute values of the elements of a small 1-D array*/
-    void    vNormalize(double *v, size_t dim, double *result);
-    int     vIsEqual(double *v1, size_t dim, double *v2, double accuracy);
-    int     vIsZero(double *v, size_t dim, double accuracy);
-    void    vPrint(FILE *pFile, const char *name, double *v, size_t dim);
-    void    vSort(double *Input, double *Output, size_t dim);
+    void    vElementwiseMult(float *v1, size_t dim, float *v2, float *result);
+    void    vCopy(float *v, size_t dim, float *result);
+    void    vSetZero(float *v, size_t dim);
+    void    vSetOnes(float *v, size_t dim);
+    void    vAdd(float *v1, size_t dim, float *v2, float *result);
+    void    vSubtract(float *v1, size_t dim, float *v2, float *result);
+    void    vScale(float scaleFactor, float *v, size_t dim, float *result);
+    float  vDot(float *v1, size_t dim, float *v2);
+    void    vOuterProduct(float *v1, size_t dim1, float *v2, size_t dim2, void *result);
+    void    vtMultM(float *v, void *mx, size_t dim1, size_t dim2, void *result);
+    void    vtMultMt(float *v, void *mx, size_t dim1, size_t dim2, void *result);
+    float  vNorm(float *v, size_t dim);
+    float  vMax(float *v, size_t dim); /* Non-sorted, non-optimized algorithm for finding the max of a small 1-D array*/
+    float  vMaxAbs(float *v, size_t dim); /* Non-sorted, non-optimized algorithm for finding the max of the absolute values of the elements of a small 1-D array*/
+    void    vNormalize(float *v, size_t dim, float *result);
+    int     vIsEqual(float *v1, size_t dim, float *v2, float accuracy);
+    int     vIsZero(float *v, size_t dim, float accuracy);
+    void    vPrint(FILE *pFile, const char *name, float *v, size_t dim);
+    void    vSort(float *Input, float *Output, size_t dim);
 
     /* 2 element vectors */
-    void    v2Set(double v0, double v1, double result[2]);
-    void    v2Copy(double v[2], double result[2]);
-    void    v2Scale(double scaleFactor, double v[2], double result[2]);
-    void    v2SetZero(double v[2]);
-    double  v2Dot(double v1[2], double v2[2]);
-    int     v2IsEqual(double v1[2], double v2[2], double accuracy);
-    int     v2IsZero(double v[2], double accuracy);
-    void    v2Add(double v1[2], double v2[2], double result[2]);
-    void    v2Subtract(double v1[2], double v2[2], double result[2]);
-    double  v2Norm(double v1[2]);
-    void    v2Normalize(double v1[2], double result[2]);
+    void    v2Set(float v0, float v1, float result[2]);
+    void    v2Copy(float v[2], float result[2]);
+    void    v2Scale(float scaleFactor, float v[2], float result[2]);
+    void    v2SetZero(float v[2]);
+    float  v2Dot(float v1[2], float v2[2]);
+    int     v2IsEqual(float v1[2], float v2[2], float accuracy);
+    int     v2IsZero(float v[2], float accuracy);
+    void    v2Add(float v1[2], float v2[2], float result[2]);
+    void    v2Subtract(float v1[2], float v2[2], float result[2]);
+    float  v2Norm(float v1[2]);
+    void    v2Normalize(float v1[2], float result[2]);
 
     /* 3 element vectors */
-    void    v3Set(double v0, double v1, double v2, double result[3]);
-    void    v3Copy(double v[3], double result[3]);
-    void    v3SetZero(double v[3]);
-    void    v3Add(double v1[3], double v2[3], double result[3]);
-    void    v3Subtract(double v1[3], double v2[3], double result[3]);
-    void    v3Scale(double scaleFactor, double v[3], double result[3]);
-    double  v3Dot(double v1[3], double v2[3]);
-    void    v3OuterProduct(double v1[3], double v2[3], double result[3][3]);
-    void    v3tMultM33(double v[3], double mx[3][3], double result[3]);
-    void    v3tMultM33t(double v[3], double mx[3][3], double result[3]);
-    double  v3Norm(double v[3]);
-    void    v3Normalize(double v[3], double result[3]);
-    int     v3IsEqual(double v1[3], double v2[3], double accuracy);
-    int     v3IsEqualRel(double v1[3], double v2[3], double accuracy);
-    int     v3IsZero(double v[3], double accuracy);
-    void    v3Print(FILE *pFile, const char *name, double v[3]);
-    void    v3Cross(double v1[3], double v2[3], double result[3]);
-    void    v3Perpendicular(double v[3], double result[3]);
-    void    v3Tilde(double v[3], double result[3][3]);
-    void    v3Sort(double v[3], double result[3]);
-    void    v3PrintScreen(const char *name, double v[3]);
+    void    v3Set(float v0, float v1, float v2, float result[3]);
+    void    v3Copy(float v[3], float result[3]);
+    void    v3SetZero(float v[3]);
+    void    v3Add(float v1[3], float v2[3], float result[3]);
+    void    v3Subtract(float v1[3], float v2[3], float result[3]);
+    void    v3Scale(float scaleFactor, float v[3], float result[3]);
+    float  v3Dot(float v1[3], float v2[3]);
+    void    v3OuterProduct(float v1[3], float v2[3], float result[3][3]);
+    void    v3tMultM33(float v[3], float mx[3][3], float result[3]);
+    void    v3tMultM33t(float v[3], float mx[3][3], float result[3]);
+    float  v3Norm(float v[3]);
+    void    v3Normalize(float v[3], float result[3]);
+    int     v3IsEqual(float v1[3], float v2[3], float accuracy);
+    int     v3IsEqualRel(float v1[3], float v2[3], float accuracy);
+    int     v3IsZero(float v[3], float accuracy);
+    void    v3Print(FILE *pFile, const char *name, float v[3]);
+    void    v3Cross(float v1[3], float v2[3], float result[3]);
+    void    v3Perpendicular(float v[3], float result[3]);
+    void    v3Tilde(float v[3], float result[3][3]);
+    void    v3Sort(float v[3], float result[3]);
+    void    v3PrintScreen(const char *name, float v[3]);
 
     /* 4 element vectors */
-    void    v4Set(double v0, double v1, double v2, double v3, double result[4]);
-    void    v4Copy(double v[4], double result[4]);
-    void    v4SetZero(double v[4]);
-    double  v4Dot(double v1[4], double v2[4]);
-    double  v4Norm(double v[4]);
-    int     v4IsEqual(double v1[4], double v2[4], double accuracy);
-    int     v4IsZero(double v[4], double accuracy);
+    void    v4Set(float v0, float v1, float v2, float v3, float result[4]);
+    void    v4Copy(float v[4], float result[4]);
+    void    v4SetZero(float v[4]);
+    float  v4Dot(float v1[4], float v2[4]);
+    float  v4Norm(float v[4]);
+    int     v4IsEqual(float v1[4], float v2[4], float accuracy);
+    int     v4IsZero(float v[4], float accuracy);
 
     /* 6 element vectors */
-    void    v6Set(double v0, double v1, double v2, double v3, double v4, double v5, double result[6]);
-    void    v6Copy(double v[6], double result[6]);
-    double  v6Dot(double v1[6], double v2[6]);
-    void    v6Scale(double scaleFactor, double v[6], double result[6]);
-    void    v6OuterProduct(double v1[6], double v2[6], double result[6][6]);
-    int     v6IsEqual(double v1[6], double v2[6], double accuracy);
+    void    v6Set(float v0, float v1, float v2, float v3, float v4, float v5, float result[6]);
+    void    v6Copy(float v[6], float result[6]);
+    float  v6Dot(float v1[6], float v2[6]);
+    void    v6Scale(float scaleFactor, float v[6], float result[6]);
+    void    v6OuterProduct(float v1[6], float v2[6], float result[6][6]);
+    int     v6IsEqual(float v1[6], float v2[6], float accuracy);
 
     /* NxM matrices */
     void    mLeastSquaresInverse(void *mx, size_t dim1, size_t dim2, void *result);
@@ -121,7 +121,7 @@ extern "C" {
     void    mTranspose(void *mx, size_t dim1, size_t dim2, void *result);
     void    mAdd(void *mx1, size_t dim1, size_t dim2, void *mx2, void *result);
     void    mSubtract(void *mx1, size_t dim1, size_t dim2, void *mx2, void *result);
-    void    mScale(double scaleFactor, void *mx, size_t dim1, size_t dim2, void *result);
+    void    mScale(float scaleFactor, void *mx, size_t dim1, size_t dim2, void *result);
     void    mMultM(void *mx1, size_t dim11, size_t dim12,
                    void *mx2, size_t dim21, size_t dim22,
                    void *result);
@@ -140,12 +140,12 @@ extern "C" {
     void    mtMultV(void *mx, size_t dim1, size_t dim2,
                     void *v,
                     void *result);
-    double  mTrace(void *mx, size_t dim);
-    double  mDeterminant(void *mx, size_t dim);
+    float  mTrace(void *mx, size_t dim);
+    float  mDeterminant(void *mx, size_t dim);
     void    mCofactor(void *mx, size_t dim, void *result);
     int     mInverse(void *mx, size_t dim, void *result);
-    int     mIsEqual(void *mx1, size_t dim1, size_t dim2, void *mx2, double accuracy);
-    int     mIsZero(void *mx, size_t dim1, size_t dim2, double accuracy);
+    int     mIsEqual(void *mx1, size_t dim1, size_t dim2, void *mx2, float accuracy);
+    int     mIsZero(void *mx, size_t dim1, size_t dim2, float accuracy);
     void mPrintScreen(const char *name, void *mx, size_t dim1, size_t dim2);
     void    mPrint(FILE *pFile, const char *name, void *mx, size_t dim1, size_t dim2);
     void    mGetSubMatrix(void *mx, size_t dim1, size_t dim2,
@@ -156,105 +156,105 @@ extern "C" {
                           size_t dim1Start, size_t dim2Start);
 
     /* 2x2 matrices */
-    void    m22Set(double m00, double m01,
-                   double m10, double m11,
-                   double m[2][2]);
-    void    m22Copy(double mx[2][2], double result[2][2]);
-    void    m22SetZero(double result[2][2]);
-    void    m22SetIdentity(double result[2][2]);
-    void    m22Transpose(double mx[2][2], double result[2][2]);
-    void    m22Add(double mx1[2][2], double mx2[2][2], double result[2][2]);
-    void    m22Subtract(double mx1[2][2], double mx2[2][2], double result[2][2]);
-    void    m22Scale(double scaleFactor, double mx[2][2], double result[2][2]);
-    void    m22MultM22(double mx1[2][2], double mx2[2][2], double result[2][2]);
-    void    m22tMultM22(double mx1[2][2], double mx2[2][2], double result[2][2]);
-    void    m22MultM22t(double mx1[2][2], double mx2[2][2], double result[2][2]);
-    void    m22MultV2(double mx[2][2], double v[2], double result[2]);
-    void    m22tMultV2(double mx[2][2], double v[2], double result[2]);
-    double  m22Trace(double mx[2][2]);
-    double  m22Determinant(double mx[2][2]);
-    int     m22IsEqual(double mx1[2][2], double mx2[2][2], double accuracy);
-    int     m22IsZero(double mx[2][2], double accuracy);
-    void    m22Print(FILE *pFile, const char *name, double mx[2][2]);
-    int     m22Inverse(double mx[2][2], double result[2][2]);
-    void    m22PrintScreen(const char *name, double mx[2][2]);
+    void    m22Set(float m00, float m01,
+                   float m10, float m11,
+                   float m[2][2]);
+    void    m22Copy(float mx[2][2], float result[2][2]);
+    void    m22SetZero(float result[2][2]);
+    void    m22SetIdentity(float result[2][2]);
+    void    m22Transpose(float mx[2][2], float result[2][2]);
+    void    m22Add(float mx1[2][2], float mx2[2][2], float result[2][2]);
+    void    m22Subtract(float mx1[2][2], float mx2[2][2], float result[2][2]);
+    void    m22Scale(float scaleFactor, float mx[2][2], float result[2][2]);
+    void    m22MultM22(float mx1[2][2], float mx2[2][2], float result[2][2]);
+    void    m22tMultM22(float mx1[2][2], float mx2[2][2], float result[2][2]);
+    void    m22MultM22t(float mx1[2][2], float mx2[2][2], float result[2][2]);
+    void    m22MultV2(float mx[2][2], float v[2], float result[2]);
+    void    m22tMultV2(float mx[2][2], float v[2], float result[2]);
+    float  m22Trace(float mx[2][2]);
+    float  m22Determinant(float mx[2][2]);
+    int     m22IsEqual(float mx1[2][2], float mx2[2][2], float accuracy);
+    int     m22IsZero(float mx[2][2], float accuracy);
+    void    m22Print(FILE *pFile, const char *name, float mx[2][2]);
+    int     m22Inverse(float mx[2][2], float result[2][2]);
+    void    m22PrintScreen(const char *name, float mx[2][2]);
 
     /* 3x3 matrices */
-    void    m33Set(double m00, double m01, double m02,
-                   double m10, double m11, double m12,
-                   double m20, double m21, double m22,
-                   double m[3][3]);
-    void    m33Copy(double mx[3][3], double result[3][3]);
-    void    m33SetZero(double result[3][3]);
-    void    m33SetIdentity(double result[3][3]);
-    void    m33Transpose(double mx[3][3], double result[3][3]);
-    void    m33Add(double mx1[3][3], double mx2[3][3], double result[3][3]);
-    void    m33Subtract(double mx1[3][3], double mx2[3][3], double result[3][3]);
-    void    m33Scale(double scaleFactor, double mx[3][3], double result[3][3]);
-    void    m33MultM33(double mx1[3][3], double mx2[3][3], double result[3][3]);
-    void    m33tMultM33(double mx1[3][3], double mx2[3][3], double result[3][3]);
-    void    m33MultM33t(double mx1[3][3], double mx2[3][3], double result[3][3]);
-    void    m33MultV3(double mx[3][3], double v[3], double result[3]);
-    void    m33tMultV3(double mx[3][3], double v[3], double result[3]);
-    double  m33Trace(double mx[3][3]);
-    double  m33Determinant(double mx[3][3]);
-    int     m33IsEqual(double mx1[3][3], double mx2[3][3], double accuracy);
-    int     m33IsZero(double mx[3][3], double accuracy);
-    void    m33Print(FILE *pfile, const char *name, double mx[3][3]);
-    int     m33Inverse(double mx[3][3], double result[3][3]);
-    void    m33SingularValues(double mx[3][3], double result[3]);
-    void    m33EigenValues(double mx[3][3], double result[3]);
-    double  m33ConditionNumber(double mx[3][3]);
-    void    m33PrintScreen(const char *name, double mx[3][3]);
+    void    m33Set(float m00, float m01, float m02,
+                   float m10, float m11, float m12,
+                   float m20, float m21, float m22,
+                   float m[3][3]);
+    void    m33Copy(float mx[3][3], float result[3][3]);
+    void    m33SetZero(float result[3][3]);
+    void    m33SetIdentity(float result[3][3]);
+    void    m33Transpose(float mx[3][3], float result[3][3]);
+    void    m33Add(float mx1[3][3], float mx2[3][3], float result[3][3]);
+    void    m33Subtract(float mx1[3][3], float mx2[3][3], float result[3][3]);
+    void    m33Scale(float scaleFactor, float mx[3][3], float result[3][3]);
+    void    m33MultM33(float mx1[3][3], float mx2[3][3], float result[3][3]);
+    void    m33tMultM33(float mx1[3][3], float mx2[3][3], float result[3][3]);
+    void    m33MultM33t(float mx1[3][3], float mx2[3][3], float result[3][3]);
+    void    m33MultV3(float mx[3][3], float v[3], float result[3]);
+    void    m33tMultV3(float mx[3][3], float v[3], float result[3]);
+    float  m33Trace(float mx[3][3]);
+    float  m33Determinant(float mx[3][3]);
+    int     m33IsEqual(float mx1[3][3], float mx2[3][3], float accuracy);
+    int     m33IsZero(float mx[3][3], float accuracy);
+    void    m33Print(FILE *pfile, const char *name, float mx[3][3]);
+    int     m33Inverse(float mx[3][3], float result[3][3]);
+    void    m33SingularValues(float mx[3][3], float result[3]);
+    void    m33EigenValues(float mx[3][3], float result[3]);
+    float  m33ConditionNumber(float mx[3][3]);
+    void    m33PrintScreen(const char *name, float mx[3][3]);
 
     /* 4x4 matrices */
-    void    m44Set(double m00, double m01, double m02, double m03,
-                   double m10, double m11, double m12, double m13,
-                   double m20, double m21, double m22, double m23,
-                   double m30, double m31, double m32, double m33,
-                   double m[4][4]);
-    void    m44Copy(double mx[4][4], double result[4][4]);
-    void    m44SetZero(double result[4][4]);
-    void    m44MultV4(double mx[4][4], double v[4], double result[4]);
-    double  m44Determinant(double mx[4][4]);
-    int     m44IsEqual(double mx1[4][4], double mx2[4][4], double accuracy);
-    int     m44Inverse(double mx[4][4], double result[4][4]);
+    void    m44Set(float m00, float m01, float m02, float m03,
+                   float m10, float m11, float m12, float m13,
+                   float m20, float m21, float m22, float m23,
+                   float m30, float m31, float m32, float m33,
+                   float m[4][4]);
+    void    m44Copy(float mx[4][4], float result[4][4]);
+    void    m44SetZero(float result[4][4]);
+    void    m44MultV4(float mx[4][4], float v[4], float result[4]);
+    float  m44Determinant(float mx[4][4]);
+    int     m44IsEqual(float mx1[4][4], float mx2[4][4], float accuracy);
+    int     m44Inverse(float mx[4][4], float result[4][4]);
 
     /* 6x6 matrices */
-    void    m66Set(double m00, double m01, double m02, double m03, double m04, double m05,
-                   double m10, double m11, double m12, double m13, double m14, double m15,
-                   double m20, double m21, double m22, double m23, double m24, double m25,
-                   double m30, double m31, double m32, double m33, double m34, double m35,
-                   double m40, double m41, double m42, double m43, double m44, double m45,
-                   double m50, double m51, double m52, double m53, double m54, double m55,
-                   double m[6][6]);
-    void    m66Copy(double mx[6][6], double result[6][6]);
-    void    m66SetZero(double result[6][6]);
-    void    m66SetIdentity(double result[6][6]);
-    void    m66Transpose(double mx[6][6], double result[6][6]);
-    void    m66Get33Matrix(size_t row, size_t col, double m[6][6], double mij[3][3]);
-    void    m66Set33Matrix(size_t row, size_t col, double mij[3][3], double m[6][6]);
-    void    m66Scale(double scaleFactor, double mx[6][6], double result[6][6]);
-    void    m66Add(double mx1[6][6], double mx2[6][6], double result[6][6]);
-    void    m66Subtract(double mx1[6][6], double mx2[6][6], double result[6][6]);
-    void    m66MultM66(double mx1[6][6], double mx2[6][6], double result[6][6]);
-    void    m66tMultM66(double mx1[6][6], double mx2[6][6], double result[6][6]);
-    void    m66MultM66t(double mx1[6][6], double mx2[6][6], double result[6][6]);
-    void    m66MultV6(double mx[6][6], double v[6], double result[6]);
-    void    m66tMultV6(double mx[6][6], double v[6], double result[6]);
-    int     m66IsEqual(double mx1[6][6], double mx2[6][6], double accuracy);
-    int     m66IsZero(double mx[6][6], double accuracy);
+    void    m66Set(float m00, float m01, float m02, float m03, float m04, float m05,
+                   float m10, float m11, float m12, float m13, float m14, float m15,
+                   float m20, float m21, float m22, float m23, float m24, float m25,
+                   float m30, float m31, float m32, float m33, float m34, float m35,
+                   float m40, float m41, float m42, float m43, float m44, float m45,
+                   float m50, float m51, float m52, float m53, float m54, float m55,
+                   float m[6][6]);
+    void    m66Copy(float mx[6][6], float result[6][6]);
+    void    m66SetZero(float result[6][6]);
+    void    m66SetIdentity(float result[6][6]);
+    void    m66Transpose(float mx[6][6], float result[6][6]);
+    void    m66Get33Matrix(size_t row, size_t col, float m[6][6], float mij[3][3]);
+    void    m66Set33Matrix(size_t row, size_t col, float mij[3][3], float m[6][6]);
+    void    m66Scale(float scaleFactor, float mx[6][6], float result[6][6]);
+    void    m66Add(float mx1[6][6], float mx2[6][6], float result[6][6]);
+    void    m66Subtract(float mx1[6][6], float mx2[6][6], float result[6][6]);
+    void    m66MultM66(float mx1[6][6], float mx2[6][6], float result[6][6]);
+    void    m66tMultM66(float mx1[6][6], float mx2[6][6], float result[6][6]);
+    void    m66MultM66t(float mx1[6][6], float mx2[6][6], float result[6][6]);
+    void    m66MultV6(float mx[6][6], float v[6], float result[6]);
+    void    m66tMultV6(float mx[6][6], float v[6], float result[6]);
+    int     m66IsEqual(float mx1[6][6], float mx2[6][6], float accuracy);
+    int     m66IsZero(float mx[6][6], float accuracy);
 
     /* 9x9 matrices */
-    void    m99SetZero(double result[9][9]);
+    void    m99SetZero(float result[9][9]);
 
     /* additional routines */
     /* Solve cubic formula for x^3 + a[2]*x^2 + a[1]*x + a[0] = 0 */
-    void    cubicRoots(double a[3], double result[3]);
+    void    cubicRoots(float a[3], float result[3]);
 
-    double safeAcos(double x);
-    double safeAsin(double x);
-    double safeSqrt(double x);
+    float safeAcos(float x);
+    float safeAsin(float x);
+    float safeSqrt(float x);
 
 #ifdef __cplusplus
 }

@@ -37,7 +37,7 @@ void MessageProvider::SelfInit() {}
 
 void MessageProvider::updateImuMessage() {
     auto imuOutMsgPayload = NavAttMsgPayload();
-    setArrayDouble3WithVecDouble3(std::vector<double>{1, 0, 0}, imuOutMsgPayload.omega_BN_B);
+    setArrayDouble3WithVecDouble3(std::vector<float>{1, 0, 0}, imuOutMsgPayload.omega_BN_B);
     this->imuOutMsg.write(&imuOutMsgPayload, 1, 0);
 }
 
@@ -83,7 +83,7 @@ void MessageProvider::writeRWConfigurationMessage() {
 
 void MessageProvider::writeVehicleConfigurationMessage() {
     auto vehicleConfigMsgPayloadGlobal = VehicleConfigMsgPayload();
-    setArrayDouble9WithVecDouble9(std::vector{900.0, 0.0, 0.0, 0.0, 800.0, 0.0, 0.0, 0.0, 600.0},
+    setArrayDouble9WithVecDouble9(std::vector<float>{900.0, 0.0, 0.0, 0.0, 800.0, 0.0, 0.0, 0.0, 600.0},
                                   vehicleConfigMsgPayloadGlobal.ISCPntB_B);
     vehicleConfigMsgPayloadGlobal.massSC = 2210.0;
     vehConfigOutMsg.write(&vehicleConfigMsgPayloadGlobal, 1, 0);
@@ -118,18 +118,18 @@ void MessageProvider::updateCSSArraySensorOutMsg() {
 
 void MessageProvider::updateSunDirectionOutMsg() {
     auto sunDirectionOutMsgPayload = NavAttMsgPayload();
-    setArrayDouble3WithVecDouble3(std::vector<double>{0, 1, 0}, sunDirectionOutMsgPayload.vehSunPntBdy);
+    setArrayDouble3WithVecDouble3(std::vector<float>{0, 1, 0}, sunDirectionOutMsgPayload.vehSunPntBdy);
     sunDirectionOutMsg.write(&sunDirectionOutMsgPayload, 1, 0);
 }
 
-void MessageProvider::setArrayDouble3WithVecDouble3(std::vector<double> vec, double destination[3]) {
+void MessageProvider::setArrayDouble3WithVecDouble3(std::vector<float> vec, float destination[3]) {
     assert(vec.size() == 3);
     destination[0] = vec[0];
     destination[1] = vec[1];
     destination[2] = vec[2];
 }
 
-void MessageProvider::setArrayDouble9WithVecDouble9(std::vector<double> vec, double destination[9]) {
+void MessageProvider::setArrayDouble9WithVecDouble9(std::vector<float> vec, float destination[9]) {
     assert(vec.size() == 9);
     destination[0] = vec[0];
     destination[1] = vec[1];

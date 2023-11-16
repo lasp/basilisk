@@ -33,12 +33,12 @@
 /*! @brief Top level structure for the sub-module routines. */
 typedef struct {
     /* declare module private variables */
-    double   controlAxes_B[3*3];        //!< [-] array of the control unit axes
+    float   controlAxes_B[3*3];        //!< [-] array of the control unit axes
     uint32_t numControlAxes;            //!< [-] counter indicating how many orthogonal axes are controlled
     int      numAvailRW;                //!< [-] number of reaction wheels available
     RWArrayConfigMsgPayload rwConfigParams; //!< [-] struct to store message containing RW config parameters in body B frame
-    double GsMatrix_B[3*MAX_EFF_CNT];   //!< [-] The RW spin axis matrix in body frame components
-    double CGs[3][MAX_EFF_CNT];         //!< [-] Projection matrix that defines the controlled body axes
+    float GsMatrix_B[3*MAX_EFF_CNT];   //!< [-] The RW spin axis matrix in body frame components
+    float CGs[3][MAX_EFF_CNT];         //!< [-] Projection matrix that defines the controlled body axes
 
     /* declare module IO interfaces */
     ArrayMotorTorqueMsg_C rwMotorTorqueOutMsg;   //!< RW motor torque output message

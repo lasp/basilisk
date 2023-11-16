@@ -82,12 +82,12 @@ void Reset_cssWlsEst(CSSWLSConfig *configData, uint64_t callTime, int64_t module
     @param wlsEst The WLS estimate computed for the CSS measurements
     @param cssResiduals The measurement residuals output by this function
 */
-void computeWlsResiduals(double *cssMeas, CSSConfigMsgPayload *cssConfig,
-                         double *wlsEst, double *cssResiduals)
+void computeWlsResiduals(float *cssMeas, CSSConfigMsgPayload *cssConfig,
+                         float *wlsEst, float *cssResiduals)
 {
-    double cssDotProd;
+    float cssDotProd;
     
-    memset(cssResiduals, 0x0, cssConfig->nCSS*sizeof(double));
+    memset(cssResiduals, 0x0, cssConfig->nCSS*sizeof(float));
     /*! The method loops through the sensors and performs: */
     for(uint32_t i=0; i<cssConfig->nCSS; i++)
     {
@@ -111,16 +111,16 @@ void computeWlsResiduals(double *cssMeas, CSSConfigMsgPayload *cssConfig,
  @param y the observation vector for the valid sensors
  @param x The output least squares fit for the observations
  */
-int computeWlsmn(int numActiveCss, double *H, double *W,
-                 double *y, double x[3])
+int computeWlsmn(int numActiveCss, float *H, float *W,
+                 float *y, float x[3])
 {
-    double m22[2*2];
-    double m32[3*2];
+    float m22[2*2];
+    float m32[3*2];
     int status = 0;
-    double  m33[3*3];
-    double  m33_2[3*3];
-    double  m3N[3*MAX_NUM_CSS_SENSORS];
-    double  m3N_2[3*MAX_NUM_CSS_SENSORS];
+    float  m33[3*3];
+    float  m33_2[3*3];
+    float  m3N[3*MAX_NUM_CSS_SENSORS];
+    float  m3N_2[3*MAX_NUM_CSS_SENSORS];
     uint32_t i;
     
     /*! - If we only have one sensor, output best guess (cone of possiblities)*/
@@ -162,14 +162,14 @@ void Update_cssWlsEst(CSSWLSConfig *configData, uint64_t callTime,
     int64_t moduleID)
 {
     CSSArraySensorMsgPayload InputBuffer;        /* CSS measurements */
-    double H[MAX_NUM_CSS_SENSORS*3];             /* The predicted pointing vector for each measurement */
-    double y[MAX_NUM_CSS_SENSORS];               /* Measurements */
-    double W[MAX_NUM_CSS_SENSORS*MAX_NUM_CSS_SENSORS];  /* Matrix of measurement weights */
+    float H[MAX_NUM_CSS_SENSORS*3];             /* The predicted pointing vector for each measurement */
+    float y[MAX_NUM_CSS_SENSORS];               /* Measurements */
+    float W[MAX_NUM_CSS_SENSORS*MAX_NUM_CSS_SENSORS];  /* Matrix of measurement weights */
     int status = 0;                              /* Quality of the module estimate */
-    double dOldDotNew;                           /* Intermediate value for dot product between new and old estimates for rate estimation */
-    double dHatNew[3];                           /* New normalized sun heading estimate */
-    double dHatOld[3];                           /* Prior normalized sun heading estimate */
-    double  dt;                                  /* [s] Control update period */
+    float dOldDotNew;                           /* Intermediate value for dot product between new and old estimates for rate estimation */
+    float dHatNew[3];                           /* New normalized sun heading estimate */
+    float dHatOld[3];                           /* Prior normalized sun heading estimate */
+    float dt;                                  /* [s] Control update period */
     NavAttMsgPayload sunlineOutBuffer;               /* Output Nav message*/
     
     /* Zero output message*/
@@ -268,7 +268,7 @@ void Update_cssWlsEst(CSSWLSConfig *configData, uint64_t callTime,
     /*! - If the residual fit output message is set, then compute the residuals and stor them in the output message */
     if (SunlineFilterMsg_C_isLinked(&configData->cssWLSFiltResOutMsg)) {
         configData->filtStatus.numObs = (int) configData->numActiveCss;
-        configData->filtStatus.timeTag = (double) (callTime*NANO2SEC);
+        configData->filtStatus.timeTag = (float) (callTime*NANO2SEC);
         v3Copy(sunlineOutBuffer.vehSunPntBdy, configData->filtStatus.state);
         SunlineFilterMsg_C_write(&configData->filtStatus, &configData->cssWLSFiltResOutMsg, moduleID, callTime);
 

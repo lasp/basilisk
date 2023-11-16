@@ -23,10 +23,10 @@
 
 /*! @brief Structure used to define the output definition for translatoin guidance*/
 typedef struct {
-    double timeTag;          //!< [s]   Current vehicle time-tag associated with measurements*/
-    double r_BN_N[3];        //!< [m]   Current inertial spacecraft position vector in inertial frame N components
-    double v_BN_N[3];        //!< [m/s] Current inertial velocity of the spacecraft in inertial frame N components
-    double vehAccumDV[3];    //!< [m/s] Total accumulated delta-velocity for s/c
+    float timeTag;          //!< [s]   Current vehicle time-tag associated with measurements*/
+    float r_BN_N[3];        //!< [m]   Current inertial spacecraft position vector in inertial frame N components
+    float v_BN_N[3];        //!< [m/s] Current inertial velocity of the spacecraft in inertial frame N components
+    float vehAccumDV[3];    //!< [m/s] Total accumulated delta-velocity for s/c
 }NavTransMsgPayload;
 
 

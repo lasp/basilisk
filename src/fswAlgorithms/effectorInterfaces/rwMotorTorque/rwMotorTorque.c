@@ -45,7 +45,7 @@ void SelfInit_rwMotorTorque(rwMotorTorqueConfig *configData, int64_t moduleID)
  */
 void Reset_rwMotorTorque(rwMotorTorqueConfig *configData, uint64_t callTime, int64_t moduleID)
 {
-    double *pAxis;                 /* pointer to the current control axis */
+    float *pAxis;                 /* pointer to the current control axis */
     int i;
     
     /*!- configure the number of axes that are controlled.
@@ -92,10 +92,10 @@ void Update_rwMotorTorque(rwMotorTorqueConfig *configData, uint64_t callTime, in
     CmdTorqueBodyMsgPayload LrInputMsg;             /*!< Msg containing Lr control torque */
     CmdTorqueBodyMsgPayload LrInput2Msg;            /*!< Msg containing optional Lr control torque */
     ArrayMotorTorqueMsgPayload rwMotorTorques;      /*!< Msg struct to store the output message */
-    double Lr_B[3];                             /*!< [Nm]    commanded ADCS control torque in body frame*/
-    double Lr_C[3];                             /*!< [Nm]    commanded ADCS control torque projected onto control axes */
-    double us[MAX_EFF_CNT];                     /*!< [Nm]    commanded ADCS control torque projected onto RWs g_s-Frames */
-    double CGs[3][MAX_EFF_CNT];                 /*!< []      projection matrix from gs_i onto control axes */
+    float Lr_B[3];                             /*!< [Nm]    commanded ADCS control torque in body frame*/
+    float Lr_C[3];                             /*!< [Nm]    commanded ADCS control torque projected onto control axes */
+    float us[MAX_EFF_CNT];                     /*!< [Nm]    commanded ADCS control torque projected onto RWs g_s-Frames */
+    float CGs[3][MAX_EFF_CNT];                 /*!< []      projection matrix from gs_i onto control axes */
 
     /*! - zero control torque and RW motor torque variables */
     v3SetZero(Lr_C);
@@ -153,9 +153,9 @@ void Update_rwMotorTorque(rwMotorTorqueConfig *configData, uint64_t callTime, in
     /*! - Compute minimum norm inverse for us = [CGs].T inv([CGs][CGs].T) [Lr_C]
      Having at least the same # of RW as # of control axes is necessary condition to guarantee inverse matrix exists. If matrix to invert it not full rank, the control torque output is zero. */
     if (configData->numAvailRW >= (int) configData->numControlAxes){
-        double v3_temp[3]; /* inv([M]) [Lr_C] */
-        double M33[3][3]; /* [M] = [CGs][CGs].T */
-        double us_avail[MAX_EFF_CNT];   /* matrix of available RW motor torques */
+        float v3_temp[3]; /* inv([M]) [Lr_C] */
+        float M33[3][3]; /* [M] = [CGs][CGs].T */
+        float us_avail[MAX_EFF_CNT];   /* matrix of available RW motor torques */
         
         v3SetZero(v3_temp);
         mSetIdentity(M33, 3, 3);

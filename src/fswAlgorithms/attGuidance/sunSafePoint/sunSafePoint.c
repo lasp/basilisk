@@ -47,7 +47,7 @@ void SelfInit_sunSafePoint(sunSafePointConfig *configData, int64_t moduleID)
  */
 void Reset_sunSafePoint(sunSafePointConfig *configData, uint64_t callTime, int64_t moduleID)
 {
-    double v1[3];
+    float v1[3];
 
     // check if the required input messages are included
     if (!NavAttMsg_C_isLinked(&configData->sunDirectionInMsg)) {
@@ -90,11 +90,11 @@ void Update_sunSafePoint(sunSafePointConfig *configData, uint64_t callTime,
     int64_t moduleID)
 {
     NavAttMsgPayload navMsg;
-    double ctSNormalized;
-    double sNorm;                   /*!< --- Norm of measured direction vector */
-    double e_hat[3];                /*!< --- Eigen Axis */
-    double omega_BN_B[3];           /*!< r/s inertial body angular velocity vector in B frame components */
-    double omega_RN_B[3];           /*!< r/s local copy of the desired reference frame rate */
+    float ctSNormalized;
+    float sNorm;                   /*!< --- Norm of measured direction vector */
+    float e_hat[3];                /*!< --- Eigen Axis */
+    float omega_BN_B[3];           /*!< r/s inertial body angular velocity vector in B frame components */
+    float omega_RN_B[3];           /*!< r/s local copy of the desired reference frame rate */
 
     NavAttMsgPayload localImuDataInBuffer;
     configData->attGuidanceOutBuffer = AttGuidMsg_C_zeroMsgPayload();

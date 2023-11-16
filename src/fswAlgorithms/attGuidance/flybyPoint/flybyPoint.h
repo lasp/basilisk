@@ -50,8 +50,8 @@ public:
     void Reset(uint64_t CurrentSimNanos);
     void UpdateState(uint64_t CurrentSimNanos);
     
-    double     dtFilterData = 0;       //!< time between two subsequent reads of the filter information
-    double     epsilon = 0;            //!< tolerance for singular conditions when position and velocity are collinear
+    float     dtFilterData = 0;       //!< time between two subsequent reads of the filter information
+    float     epsilon = 0;            //!< tolerance for singular conditions when position and velocity are collinear
     FlybyModel flybyModel;             //!< flag to indicate which flyby model is being used
 
     ReadFunctor<NavTransMsgPayload>  filterInMsg;               //!< input msg relative position w.r.t. asteroid
@@ -61,9 +61,9 @@ public:
 
 private:
     bool            firstRead;           //!< variable to attest if this is the first read after a Reset
-    double          f0;                  //!< ratio between relative velocity and position norms at time of read [Hz]
-    double          gamma0;              //!< flight path angle of the spacecraft at time of read [rad]
-    double          R0N[3][3];           //!< inertial-to-reference DCM at time of read
+    float          f0;                  //!< ratio between relative velocity and position norms at time of read [Hz]
+    float          gamma0;              //!< flight path angle of the spacecraft at time of read [rad]
+    float          R0N[3][3];           //!< inertial-to-reference DCM at time of read
     SingularityFlag singularityFlag;     //!< +1 or -1 during singular configurations, 0 otherwise
     uint64_t        lastFilterReadTime;  //!< time of last filter read
 
