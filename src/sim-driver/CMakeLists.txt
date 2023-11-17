@@ -4,7 +4,6 @@ enable_language(ASM)
 # This is not clean, but as far is is needed for the prototyping effort. Any and all sources needed to compile either
 # executable main.cpp and main-mrp-steering-controllers.cpp are set into the SRC variable and then the executable.
 set(COMMON_SRC
-#        "main.cpp"
         "main-mrp-steering-controllers.cpp"
         "simulationDriver.h"
         "simulationDriver.cpp"
@@ -54,40 +53,11 @@ set(COMMON_SRC
         "cMsgCInterface/RWArrayConfigMsg_C.cpp"
         "cMsgCInterface/CSSArraySensorMsg_C.cpp"
         "cMsgCInterface/CSSConfigMsg_C.cpp"
-        #  # Platform source
-        #  # TODO - change all this.
-        #  # "/share/ema-fsw-simple-benchmark/RV32imaf/riscv_hal/init.c"
-        #  # "/share/ema-fsw-simple-benchmark/RV32imaf/riscv_hal/riscv_hal.c"
-        #  # "/share/ema-fsw-simple-benchmark/RV32imaf/riscv_hal/riscv_hal_stubs.c"
-        #  # "/share/ema-fsw-simple-benchmark/RV32imaf/drivers/CoreGPIO/core_gpio.c"
-        #  # "/share/ema-fsw-simple-benchmark/RV32imaf/platform/hw_reg_access.s"
-        #  # "/share/ema-fsw-simple-benchmark/RV32imaf/riscv_hal/entry.S"
-        #  "/share/ema-fsw-simple-benchmark/RV32imaf/benchPlatform.c"
-        #  "/share/ema-fsw-simple-benchmark/RV32imaf/fpga_design_config/fpga_design_config.h"
-        #  "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_hal.h"
-        #  "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_hal.c"
-        #  "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_init.c"
-        #  "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_hal_version.h"
-        #  "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_assert.h"
-        #  "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_plic.h"
-        #  "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_regs.h"
-        #  "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_stubs.c"
-        #  "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_subsys.h"
-        #  "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_syscall.c"
-        #  "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/sample_fpga_design_config.h"
-        #  "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_entry.S"
 )
 
 if(CMAKE_TOOLCHAIN_FILE MATCHES "riscv.toolchain.cmake")
   set(PLATFORM_SRC
         # Platform source
-        # TODO - change all this.
-        # "/share/ema-fsw-simple-benchmark/RV32imaf/riscv_hal/init.c"
-        # "/share/ema-fsw-simple-benchmark/RV32imaf/riscv_hal/riscv_hal.c"
-        # "/share/ema-fsw-simple-benchmark/RV32imaf/riscv_hal/riscv_hal_stubs.c"
-        # "/share/ema-fsw-simple-benchmark/RV32imaf/drivers/CoreGPIO/core_gpio.c"
-        # "/share/ema-fsw-simple-benchmark/RV32imaf/platform/hw_reg_access.s"
-        # "/share/ema-fsw-simple-benchmark/RV32imaf/riscv_hal/entry.S"
 
         # This is for rocketchip
         #"/share/ema-fsw-simple-benchmark/RV32imaf/benchPlatform.c"
@@ -146,33 +116,11 @@ target_include_directories(SimulationDriver PRIVATE
   "/share/ema-fsw-simple-benchmark/"
   "/share/ema-fsw-simple-benchmark/RV32imaf"
   "/share/ema-fsw-simple-benchmark/RV32imaf/platform"
-  #  "/share/ema-fsw-simple-benchmark/RV32imaf/drivers/CoreGPIO"
-  #  "/share/ema-fsw-simple-benchmark/RV32imaf/drivers/CoreTimer"
-  #  "/share/ema-fsw-simple-benchmark/RV32imaf/drivers/CoreUARTapb"
-  #  "/share/ema-fsw-simple-benchmark/RV32imaf/drivers/riscv_hal"
 )
-# inc_opts="-I ./ -I RV32imaf -I RV32imaf/riscv_hal -I RV32imaf/platform -I RV32imaf/drivers/CoreGPIO -I RV32imaf/drivers/CoreTimer -I RV32imaf/drivers/CoreUARTapb"
 
 set_target_properties(SimulationDriver PROPERTIES FOLDER "${DIR_NAME_STRING}")
 
-# Commenting out linked libraries. We going static baby.
-# target_link_libraries(SimulationDriver PUBLIC ${ARCHITECTURE_LIBS})
-# target_link_libraries(SimulationDriver PUBLIC centerOfBrightness)
-# target_link_libraries(SimulationDriver PUBLIC cobConverter)
-# target_link_libraries(SimulationDriver PUBLIC flybyODuKF)
-# target_link_libraries(SimulationDriver PUBLIC flybyPoint)
-# target_link_libraries(SimulationDriver PUBLIC attTrackingError)
-# target_link_libraries(SimulationDriver PUBLIC rwMotorTorque)
-# target_link_libraries(SimulationDriver PUBLIC cssWlsEst)
-# target_link_libraries(SimulationDriver PUBLIC sunSafePoint)
-# target_link_libraries(SimulationDriver PUBLIC mrpSteering)
-# target_link_libraries(SimulationDriver PUBLIC rateServoFullNonlinear)
-# target_link_libraries(SimulationDriver PUBLIC rwMotorTorque)
-
 set(TARGET_NAME "SimulationDriver")
-
-# No open CV for rv32
-#include(usingOpenCV)
 
 if(NOT WIN32)
   target_compile_options(SimulationDriver PUBLIC "-fPIC")
