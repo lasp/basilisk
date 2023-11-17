@@ -6,6 +6,11 @@ set(CMAKE_C_COMPILER /opt/riscv/bin/riscv32-unknown-elf-gcc)
 set(CMAKE_CXX_COMPILER /opt/riscv/bin/riscv32-unknown-elf-g++)
 set(CMAKE_ASM_COMPILER /opt/riscv/bin/riscv32-unknown-elf-gcc)
 
+# Make sure flags are completely reset.
+set(CMAKE_CXX_FLAGS "")
+set(CMAKE_C_FLAGS "")
+set(CMAKE_EXE_LINKER_FLAGS "")
+
 # Compilation options
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
