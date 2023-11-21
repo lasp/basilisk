@@ -2,6 +2,8 @@ name: "Publish Develop Basilisk"
 
 on:
   pull_request:
+    branches:
+      - ci/build-publish-develop-docker-image
 
 jobs:
   build-linux:
@@ -17,7 +19,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: nschloe/action-checkout-with-lfs-cache@v1
-        
+
 #on:
 #  pull_request:
 #    branches:
