@@ -1,22 +1,22 @@
 name: "Pull Request Test"
-#
-#on:
-#  pull_request:
-#
-#jobs:
-#  build-linux:
-#    name: Build Linux
-#    runs-on: ubuntu-20.04
-#    strategy:
-#      matrix:
-#        python-version: ["3.9"]
-#    permissions:
-#      actions: read
-#      contents: read
-#      security-events: write
-#    steps:
-#      - name: Checkout code
-#        uses: nschloe/action-checkout-with-lfs-cache@v1
+
+on:
+  pull_request:
+
+jobs:
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        python-version: ["3.9"]
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout code
+        uses: nschloe/action-checkout-with-lfs-cache@v1
 #      - name: Set up Python ${{ matrix.python-version }}
 #        uses: actions/setup-python@v4
 #        with:
@@ -75,22 +75,22 @@ name: "Pull Request Test"
 #          name: ctest-results-${{ matrix.python-version }}
 #          path: ctest/ctest-results-${{ matrix.python-version }}.json
 #        if: ${{ always() }}
-#
-#  build-windows:
-#    name: Build Windows
-#    runs-on: windows-2019
-#    strategy:
-#      matrix:
-#        python-version: ["3.9"]
-#    permissions:
-#      actions: read
-#      contents: read
-#      security-events: write
-#    env:
-#      MPLBACKEND: agg
-#    steps:
-#      - name: Checkout code
-#        uses: nschloe/action-checkout-with-lfs-cache@v1
+
+  build-windows:
+    name: Build Windows
+    runs-on: windows-2019
+    strategy:
+      matrix:
+        python-version: ["3.9"]
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    env:
+      MPLBACKEND: agg
+    steps:
+      - name: Checkout code
+        uses: nschloe/action-checkout-with-lfs-cache@v1
 #      - name: Set up Python ${{ matrix.python-version }}
 #        uses: actions/setup-python@v4
 #        with:
