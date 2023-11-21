@@ -1,6 +1,9 @@
 name: "Publish Develop Basilisk"
 
 on:
+  pull_request:
+    branches:
+      - ci/build-publish-develop-docker-image
   push:
     branches:
       - develop
