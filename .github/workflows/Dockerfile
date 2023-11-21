@@ -46,6 +46,6 @@ RUN conan remote add bincrafters https://bincrafters.jfrog.io/artifactory/api/co
 RUN conan install . --build=missing -s build_type=Release -if dist3/conan \
     -o opNav=True \
     -o vizInterface=False \
-    -o generator="Ninja" \
+    -o generator="Ninja"
 
 RUN conan build . -if dist3/conan
