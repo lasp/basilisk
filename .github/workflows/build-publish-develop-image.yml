@@ -4,11 +4,11 @@ on:
   pull_request:
     branches:
       - ci/build-publish-develop-docker-image
-  push:
-    branches:
-      - develop
-    tags:
-      - v*
+#  push:
+#    branches:
+#      - develop
+#    tags:
+#      - v*
 
 env:
   REGISTRY: ghcr.io
@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-  containers:
+  container:
     runs-on: ubuntu-latest
     needs: init
     permissions:
