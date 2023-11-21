@@ -3,7 +3,7 @@ name: "Publish Develop Basilisk"
 on:
   pull_request:
     branches:
-      - ci/build-publish-develop-docker-image
+      - 'ci/build-publish-develop-docker-image'
 
 jobs:
   build-linux:
