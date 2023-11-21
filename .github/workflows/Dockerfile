@@ -1,8 +1,9 @@
-FROM ubuntu:focal
+FROM ubuntu:jammy
+
+ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update && apt-get install --no-install-recommends -y build-essential \
         cmake \
-        curl \
         git \
         git-lfs \
         gtk2.0 \
@@ -14,20 +15,22 @@ RUN apt-get update && apt-get install --no-install-recommends -y build-essential
         python3-pip \
         python3-setuptools \
         python3-tk \
-        python3.9-venv \
-        python-is-python3 \
         swig \
         vim \
         vim-youcompleteme \
         && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && apt-get install --no-install-recommends -y g++-9 \
+    gcc-9 \
+    && rm -rf /var/lib/apt/lists/*
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 100 --slave /usr/bin/g++ g++ /usr/bin/g++-9
+
 RUN adduser basiliskuser
 USER basiliskuser
-
 WORKDIR /home/basiliskuser
 
-RUN git clone --branch develop https://github.com/lasp/basilisk.git
-#WORKDIR basilisk
+RUN git clone https://github.com/lasp/basilisk.git
+
 WORKDIR /home/basiliskuser/basilisk
 
 # The local path has to be added otherwise the pip install command in the conanfile
@@ -45,5 +48,4 @@ RUN conan install . --build=missing -s build_type=Release -if dist3/conan \
     -o vizInterface=False \
     -o generator="Ninja" \
 
-# RUN python conanfile.py --buildType Release --opNav True --vizInterface False --autoKey u
 RUN conan build . -if dist3/conan
