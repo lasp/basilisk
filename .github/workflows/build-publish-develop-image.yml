@@ -29,14 +29,8 @@ jobs:
     permissions:
       contents: read
       packages: write
-    strategy:
-      matrix:
-        components:
-          - image: lasp-basilisk
-            context: lasp-basilisk
-            file: .github/workflows/Dockerfile
 
-    name: ${{ matrix.components.image }}
+    name: lasp-basilisk
     steps:
       - uses: actions/checkout@v3
 
@@ -55,16 +49,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
-      - name: Extract metadata (tags, labels) for ${{ matrix.components.image }}
+      - name: Extract metadata (tags, labels) for lasp-basilisk
         id: metadata-step
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ matrix.components.image }}
+          images: ${{ env.REGISTRY }}/${{ env.OWNER }}/lasp-basilisk
 
-      - name: Build and push ${{ matrix.components.image }}
+      - name: Build and push lasp-basilisk
         uses: docker/build-push-action@v3
         with:
-          file: ${{ matrix.components.file }}
+          file: .github/workflows/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.metadata-step.outputs.tags }}
