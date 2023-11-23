@@ -51,7 +51,8 @@ jobs:
         id: metadata-step
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ env.OWNER }}/lasp-basilisk-develop
+          images: ${{ env.REGISTRY }}/${{ env.OWNER }}/lasp-basilisk
+          tags: type=raw
 
       - name: Build and push lasp-basilisk
         uses: docker/build-push-action@v3
