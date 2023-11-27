@@ -14,7 +14,8 @@ class Registry:
 
     def __init__(self):
         # TODO: make a graph object to abstract this away
-        self.graph = {}
+        if hasattr(self, "graph") is False:
+            self.graph = {}
 
     def init_models(self, model_names=None) -> Dict[str, Callable]:
         """
