@@ -24,6 +24,8 @@ def test_registry_is_singleton():
 
     assert reg1 == reg2
 
+    reg1.graph = {}
+
 def test_register_single_model():
     reg = Registry()
 
@@ -47,6 +49,8 @@ def test_register_single_model():
             there were no neighbors specified in the registration of that model
         """
     
+    reg.graph = {}
+    
 def test_register_single_message():
     reg = Registry()
 
@@ -66,6 +70,8 @@ def test_register_single_message():
             model 'otherTestClass' as a source, but we found {reg.graph["otherTestClass"]["neighbors"]}
         """
     
+    reg.graph = {}
+    
 def test_get_models_single_model():
     reg = Registry()
 
@@ -80,6 +86,8 @@ def test_get_models_single_model():
         we found {mod}
     """
 
+    reg.graph = {}
+
 def test_get_models_all_models():
     reg = Registry()
 
@@ -93,6 +101,8 @@ def test_get_models_all_models():
         the result of the call to get_models should contain all models but
         we found {mod}
     """
+
+    reg.graph = {}
 
 def test_init_models_no_messages():
     reg = Registry()
@@ -113,6 +123,8 @@ def test_init_models_no_messages():
             the models returned from initializing models should agree with the models in the graph of the
             registry
         """
+    
+    reg.graph = {}
 
 def test_init_models_with_messages():
     """
@@ -144,7 +156,7 @@ def test_init_models_with_messages():
 
     assert mods["scObject"].scStateOutMsg.isLinked()
 
-    #    assert mods["scObject"].scStateOutMsg == reg.graph["scObject"]["pubs"][0]
+    reg.graph = {}
 
 def test_get_message():
     """
@@ -163,3 +175,15 @@ def test_get_message():
     msg = reg.get_message("scObject-scStateOutMsg")
 
     assert msg == reg.graph["scObject"]["pubs"]["scStateOutMsg"]
+
+    reg.graph = {}
+
+def test_registry_maintains_graph():
+    reg1 = Registry()
+    reg1.graph = {"a": [1, 2, 3]}
+
+    reg2 = Registry()
+
+    assert reg2.graph == {"a": [1, 2, 3]}
+
+    reg1.graph = {}
