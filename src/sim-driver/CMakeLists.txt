@@ -55,42 +55,44 @@ set(COMMON_SRC
         "cMsgCInterface/CSSConfigMsg_C.cpp"
 )
 
-if(CMAKE_TOOLCHAIN_FILE MATCHES "riscv.toolchain.cmake")
-  set(PLATFORM_SRC
-        # Platform source
 
-        # This is for rocketchip
-        #"/share/ema-fsw-simple-benchmark/RV32imaf/benchPlatform.c"
-        #"/share/ema-fsw-simple-benchmark/RV32imaf/fpga_design_config/fpga_design_config.h"
-        #"/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_hal.h"
-        #"/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_hal.c"
-        #"/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_init.c"
-        #"/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_hal_version.h"
-        #"/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_assert.h"
-        #"/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_plic.h"
-        #"/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_regs.h"
-        #"/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_stubs.c"
-        #"/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_subsys.h"
-        #"/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_syscall.c"
-        #"/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/sample_fpga_design_config.h"
-        #"/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_entry.S"
-
-        # This is for microchip
-        "/share/ema-fsw-simple-benchmark/RV32imc/benchPlatform.c"
-        "/share/ema-fsw-simple-benchmark/RV32imc/fpga_design_config/fpga_design_config.h"
-        "/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/miv_rv32_hal.h"
-        "/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/miv_rv32_hal.c"
-        "/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/miv_rv32_init.c"
-        "/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/miv_rv32_hal_version.h"
-        "/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/miv_rv32_assert.h"
-        "/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/miv_rv32_plic.h"
-        "/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/miv_rv32_regs.h"
-        "/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/miv_rv32_stubs.c"
-        "/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/miv_rv32_subsys.h"
-        "/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/miv_rv32_syscall.c"
-        "/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/sample_fpga_design_config.h"
-        "/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/miv_rv32_entry.S"
-  )
+if(CMAKE_TOOLCHAIN_FILE)
+  # if(CMAKE_TOOLCHAIN_FILE MATCHES "riscv.toolchain.cmake")
+  #   set(PLATFORM_SRC
+  #         # Platform source
+  # 
+  #         # This is for rocketchip
+  #         "/share/ema-fsw-simple-benchmark/RV32imaf/benchPlatform.c"
+  #         "/share/ema-fsw-simple-benchmark/RV32imaf/fpga_design_config/fpga_design_config.h"
+  #         "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_hal.h"
+  #         "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_hal.c"
+  #         "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_init.c"
+  #         "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_hal_version.h"
+  #         "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_assert.h"
+  #         "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_plic.h"
+  #         "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_regs.h"
+  #         "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_stubs.c"
+  #         "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_subsys.h"
+  #         "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_syscall.c"
+  #         "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/sample_fpga_design_config.h"
+  #         "/share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv_rv32_entry.S"
+  # 
+  #         # This is for microchip
+  #         #"/share/ema-fsw-simple-benchmark/RV32imc/benchPlatform.c"
+  #         #"/share/ema-fsw-simple-benchmark/RV32imc/fpga_design_config/fpga_design_config.h"
+  #         #"/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/miv_rv32_hal.h"
+  #         #"/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/miv_rv32_hal.c"
+  #         #"/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/miv_rv32_init.c"
+  #         #"/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/miv_rv32_hal_version.h"
+  #         #"/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/miv_rv32_assert.h"
+  #         #"/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/miv_rv32_plic.h"
+  #         #"/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/miv_rv32_regs.h"
+  #         #"/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/miv_rv32_stubs.c"
+  #         #"/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/miv_rv32_subsys.h"
+  #         #"/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/miv_rv32_syscall.c"
+  #         #"/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/sample_fpga_design_config.h"
+  #         #"/share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/miv_rv32_entry.S"
+  #   )
 else()
   set(PLATFORM_SRC
     linux_benchPlatform.c
@@ -114,8 +116,12 @@ target_include_directories(SimulationDriver PRIVATE
   "${CMAKE_SOURCE_DIR}/eigen"
   "/share/basilisk/dist3/autoSource"
   "/share/ema-fsw-simple-benchmark/"
+  # IMAF
   "/share/ema-fsw-simple-benchmark/RV32imaf"
   "/share/ema-fsw-simple-benchmark/RV32imaf/platform"
+  # IMC
+  #"/share/ema-fsw-simple-benchmark/RV32imc"
+  #"/share/ema-fsw-simple-benchmark/RV32imc/platform"
 )
 
 set_target_properties(SimulationDriver PROPERTIES FOLDER "${DIR_NAME_STRING}")
