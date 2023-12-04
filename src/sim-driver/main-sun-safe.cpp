@@ -1,113 +1,156 @@
-//
-// Created by Patrick Kenneally on 9/26/23.
-//
-#include "iostream"
 #include "simulationDriver.h"
-#include "fswAlgorithms/opticalNavigation/cobConverter/cobConverter.h"
-#include "fswAlgorithms/imageProcessing/centerOfBrightness/centerOfBrightness.h"
-#include "fswAlgorithms/attGuidance/flybyPoint/flybyPoint.h"
-#include "fswAlgorithms/attGuidance/attTrackingError/attTrackingError.h"
-#include "fswAlgorithms/opticalNavigation/flybyODuKF/flybyODuKF.h"
-#include "architecture/alg_contain/alg_contain.h"
-#include "/Users/pake0095/Documents/Repositories/lasp-basilisk-redux/dist3/autoSource/cMsgCInterface/CameraConfigMsg_C.h"
-//#include "/Users/pake0095/Documents/Repositories/lasp-basilisk-redux/dist3/autoSource/cMsgCInterface/OpNavCOBMsgPayload_C.h"
-#include "architecture/messaging/messaging.h"
+#include "messageProvider.h"
 
-void setCenterOfBrightness(CenterOfBrightness* model);
-void setCobConverter(CobConverter* model);
-void setFlybyODuKF(FlybyODuKF* model);
-void setFlybyPoint(FlybyPoint* model);
+#include "architecture/alg_contain/alg_contain.h"
+#include "fswAlgorithms/attControl/mrpPD/mrpPD.h"
+#include "fswAlgorithms/attDetermination/CSSEst/cssWlsEst.h"
+#include "fswAlgorithms/attGuidance/sunSafePoint/sunSafePoint.h"
+#include "fswAlgorithms/effectorInterfaces/thrForceMapping/thrForceMapping.h"
+#include "fswAlgorithms/effectorInterfaces/thrFiringSchmitt/thrFiringSchmitt.h"
+
+void setArrayDouble3WithVecDouble3(std::vector<double> vec, double destination[3]);
+void setArrayDouble9WithVecDouble9(std::vector<double> vec, double destination[9]);
 
 int main (int argc, char* argv[] ) {
     auto simDriver = SimulationDriver::SimulationDriver();
     simDriver.setStopTime(10000000000);
     auto proc = simDriver.createProcess("proc1", 1);
-    auto taskTalonsFlyby = simDriver.createTask("talonsFlyby", 10000000);
-    proc->addNewTask(taskTalonsFlyby.get());
+    auto taskSunSafe = simDriver.createTask("sunSafe", 10000000);
+    proc->addNewTask(taskSunSafe.get());
+    auto logger = BSKLogger();
+    auto message_provider = new MessageProvider();
 
-    auto center_of_brightness = new CenterOfBrightness;
-    setCenterOfBrightness(center_of_brightness);
-    auto cob_converter = new CobConverter();
-    setCobConverter(cob_converter);
+     // CSS Weighted Least Squares Estimator
+    auto css_wls_config = new CSSWLSConfig();
+    css_wls_config->bskLogger = &logger;
 
-    auto flyby_od = new FlybyODuKF();
-    setFlybyODuKF(flyby_od);
-    auto flyby_guid = new FlybyPoint();
-    setFlybyPoint(flyby_guid);
+    CSSArraySensorMsg_cpp_subscribe(&css_wls_config->cssDataInMsg,
+                                    &message_provider->cssArraySensorOutMsg);
 
-    auto tracking_error_cam_config = new attTrackingErrorConfig();
-    AlgPtr selfInitFunc = reinterpret_cast<AlgPtr>(SelfInit_attTrackingError);
-    AlgUpdatePtr updateFunc = reinterpret_cast<AlgUpdatePtr>(Update_attTrackingError);
-    AlgUpdatePtr resetFunc = reinterpret_cast<AlgUpdatePtr>(Reset_attTrackingError);
-    auto tracking_error_cam_container = new AlgContain();
-    tracking_error_cam_container->UseData(tracking_error_cam_config);
-    tracking_error_cam_container->UseSelfInit(selfInitFunc);
-    tracking_error_cam_container->UseUpdate(updateFunc);
-    tracking_error_cam_container->UseReset(resetFunc);
+    CSSConfigMsg_cpp_subscribe(&css_wls_config->cssConfigInMsg,
+                               &message_provider->cssConfigLogOutMsg);
 
-    taskTalonsFlyby->AddNewObject((SysModel *)center_of_brightness, 15);
-    taskTalonsFlyby->AddNewObject((SysModel *)cob_converter, 12);
-    taskTalonsFlyby->AddNewObject((SysModel *)flyby_od, 9);
-    taskTalonsFlyby->AddNewObject((SysModel *)flyby_guid, 8);
+    AlgPtr cssWlsEstSelfInitFunc = reinterpret_cast<AlgPtr>(SelfInit_cssWlsEst);
+    AlgUpdatePtr cssWlsEstUpdateFunc = reinterpret_cast<AlgUpdatePtr>(Update_cssWlsEst);
+    AlgUpdatePtr cssWlsEstResetFunc = reinterpret_cast<AlgUpdatePtr>(Reset_cssWlsEst);
+    auto css_wls_container = new AlgContain();
+    css_wls_container->ModelTag = "css_wls";
+    css_wls_container->UseData(css_wls_config);
+    css_wls_container->UseSelfInit(cssWlsEstSelfInitFunc);
+    css_wls_container->UseUpdate(cssWlsEstUpdateFunc);
+    css_wls_container->UseReset(cssWlsEstResetFunc);
 
-    flyby_od->opNavHeadingMsg.subscribeTo(&cob_converter->opnavUnitVecOutMsg);
+    // Sun Safe Point
+    auto sun_safe_point_config = new sunSafePointConfig ();
+    sun_safe_point_config->bskLogger = &logger;
+    setArrayDouble3WithVecDouble3(std::vector<double>{0.0, 0.0, 1.0}, sun_safe_point_config->sHatBdyCmd);
+    AlgPtr sunSafePointSelfInitFunc = reinterpret_cast<AlgPtr>(SelfInit_sunSafePoint);
+    AlgUpdatePtr sunSafePointUpdateFunc = reinterpret_cast<AlgUpdatePtr>(Update_sunSafePoint);
+    AlgUpdatePtr sunSafePointResetFunc = reinterpret_cast<AlgUpdatePtr>(Reset_sunSafePoint);
+    auto sun_safe_point_container = new AlgContain();
+    sun_safe_point_container->ModelTag = "sun_safe_point";
+    sun_safe_point_container->UseData(sun_safe_point_config);
+    sun_safe_point_container->UseSelfInit(sunSafePointSelfInitFunc);
+    sun_safe_point_container->UseUpdate(sunSafePointUpdateFunc);
+    sun_safe_point_container->UseReset(sunSafePointResetFunc);
 
+    NavAttMsg_cpp_subscribe(&sun_safe_point_config->sunDirectionInMsg,
+                            &message_provider->sunDirectionOutMsg);
+    NavAttMsg_cpp_subscribe(&sun_safe_point_config->imuInMsg,
+                            &message_provider->imuOutMsg);
 
-    double cameraResolution[2] = {2048, 2048};
-    double sigma_CB[3] = {-1., -0.3, -0.1};
-    double sigma_BN[3] = {-0.6, -1., -0.1};
-    double centerOfBrightness[2] = {1021, 1891};
-    int numberOfPixels = 1000;
+    // MRP PD Controller
+    auto mrp_pd_control_config = new MrpPDConfig ();
+    mrp_pd_control_config->K = 4.652242213692045;
+    mrp_pd_control_config->P = 97.15034930362553;
+    mrp_pd_control_config->bskLogger = &logger;
+    AlgPtr mrpPDSelfInitFunc = reinterpret_cast<AlgPtr>(SelfInit_mrpPD);
+    AlgUpdatePtr mrpPDUpdateFunc = reinterpret_cast<AlgUpdatePtr>(Update_mrpPD);
+    AlgUpdatePtr mrpPDResetFunc = reinterpret_cast<AlgUpdatePtr>(Reset_mrpPD);
+    auto mrp_pd_container = new AlgContain();
+    mrp_pd_container->ModelTag = "mrp_pd";
+    mrp_pd_container->UseData(mrp_pd_control_config);
+    mrp_pd_container->UseSelfInit(mrpPDSelfInitFunc);
+    mrp_pd_container->UseUpdate(mrpPDUpdateFunc);
+    mrp_pd_container->UseReset(mrpPDResetFunc);
 
-    // Set camera parameters
-    auto inputCamera = CameraConfigMsgPayload();
-    auto camInMsg = Message<CameraConfigMsgPayload>();
-    // inputCamera.fieldOfView = 2.0 * math.arctan(10*1e-3 / 2.0 / (1.*1e-3) )  # 2*arctan(size/2 / focal)
-    memcpy(inputCamera.resolution, cameraResolution, sizeof(inputCamera.resolution));
-    memcpy(inputCamera.sigma_CB, sigma_CB, sizeof(inputCamera.sigma_CB));
-    camInMsg.write(&inputCamera, 1, 0);
-    cob_converter->cameraConfigInMsg.subscribeTo(&camInMsg);
+    AttGuidMsg_C_subscribe(&mrp_pd_control_config->guidInMsg,
+                           &sun_safe_point_config->attGuidanceOutMsg);
+    VehicleConfigMsg_cpp_subscribe(&mrp_pd_control_config->vehConfigInMsg,
+                                   &message_provider->vehConfigOutMsg);
 
-    // Set center of brightness
-    auto inputCob = OpNavCOBMsgPayload();
-    auto cobInMsg = Message<OpNavCOBMsgPayload>();
-    memcpy(inputCob.centerOfBrightness, centerOfBrightness, sizeof(inputCob.centerOfBrightness));
-    inputCob.pixelsFound = numberOfPixels;
-    inputCob.timeTag = 12345;
-    cobInMsg.write(&inputCob, 1, 0);
-    cob_converter->opnavCOBInMsg.subscribeTo(&cobInMsg);
+    // Thruster Force Mapping
+    auto thruster_force_mapping_config = new thrForceMappingConfig();
+    thruster_force_mapping_config->thrForceSign = +1;
+    setArrayDouble9WithVecDouble9(std::vector<double>{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0},
+                                  thruster_force_mapping_config->controlAxes_B);
+    thruster_force_mapping_config->numThrusters = 8;
+    thruster_force_mapping_config->bskLogger = &logger;
+    AlgPtr thrForceMappingSelfInitFunc = reinterpret_cast<AlgPtr>(SelfInit_thrForceMapping);
+    AlgUpdatePtr thrForceMappingUpdateFunc = reinterpret_cast<AlgUpdatePtr>(Update_thrForceMapping);
+    AlgUpdatePtr thrForceMappingResetFunc = reinterpret_cast<AlgUpdatePtr>(Reset_thrForceMapping);
+    auto thruster_force_mapping_container = new AlgContain();
+    thruster_force_mapping_container->ModelTag = "thruster_force_mapping";
+    thruster_force_mapping_container->UseData(thruster_force_mapping_config);
+    thruster_force_mapping_container->UseSelfInit(thrForceMappingSelfInitFunc);
+    thruster_force_mapping_container->UseUpdate(thrForceMappingUpdateFunc);
+    thruster_force_mapping_container->UseReset(thrForceMappingResetFunc);
 
-    // Set body attitude relative to inertial
-    auto inputAtt = NavAttMsgPayload();
-    auto inputAttInMsg = Message<NavAttMsgPayload>();
-    memcpy(inputAtt.sigma_BN, sigma_BN, sizeof(inputAtt.sigma_BN));
-    inputAttInMsg.write(&inputAtt, 1, 0);
-    cob_converter->navAttInMsg.subscribeTo(&inputAttInMsg);
+    CmdTorqueBodyMsg_C_subscribe(&thruster_force_mapping_config->cmdTorqueInMsg,
+                           &mrp_pd_control_config->cmdTorqueOutMsg);
+    THRArrayConfigMsg_cpp_subscribe(&thruster_force_mapping_config->thrConfigInMsg,
+                           &message_provider->thrusterArrayConfigMsg);
+    VehicleConfigMsg_cpp_subscribe(&thruster_force_mapping_config->vehConfigInMsg,
+                                   &message_provider->vehConfigOutMsg);
 
-    //    taskTalonsFlyby->AddNewObject(tracking_error_cam, 6);
+    // Thruster Firing Schmitt
+    auto thruster_firing_schmitt_config = new thrFiringSchmittConfig();
+    thruster_firing_schmitt_config->thrMinFireTime = 0.0001;
+    thruster_firing_schmitt_config->level_on = .75;
+    thruster_firing_schmitt_config->level_off = .25;
+    AlgPtr thrFiringSchmittSelfInitFunc = reinterpret_cast<AlgPtr>(SelfInit_thrFiringSchmitt);
+    AlgUpdatePtr thrFiringSchmittUpdateFunc = reinterpret_cast<AlgUpdatePtr>(Update_thrFiringSchmitt);
+    AlgUpdatePtr thrFiringSchmittResetFunc = reinterpret_cast<AlgUpdatePtr>(Reset_thrFiringSchmitt);
+    auto thruster_firing_schmitt_container = new AlgContain();
+    thruster_firing_schmitt_container->ModelTag = "thruster_firing_schmitt";
+    thruster_firing_schmitt_container->UseData(thruster_firing_schmitt_config);
+    thruster_firing_schmitt_container->UseSelfInit(thrFiringSchmittSelfInitFunc);
+    thruster_firing_schmitt_container->UseUpdate(thrFiringSchmittUpdateFunc);
+    thruster_firing_schmitt_container->UseReset(thrFiringSchmittResetFunc);
 
-    flyby_guid->filterInMsg.subscribeTo(&flyby_od->navTransOutMsg);
+    THRArrayCmdForceMsg_C_subscribe(&thruster_firing_schmitt_config->thrForceInMsg,
+                                    &thruster_force_mapping_config->thrForceCmdOutMsg);
+    THRArrayConfigMsg_cpp_subscribe(&thruster_firing_schmitt_config->thrConfInMsg,
+                                    &message_provider->thrusterArrayConfigMsg);
+    THRArrayOnTimeCmdMsg_C_addAuthor(&thruster_firing_schmitt_config->onTimeOutMsg,
+                                     &message_provider->thrOnTimeCmdMsg);
+
+    taskSunSafe->AddNewObject(message_provider, 11);
+    taskSunSafe->AddNewObject(css_wls_container, 10);
+    taskSunSafe->AddNewObject(sun_safe_point_container, 9);
+    taskSunSafe->AddNewObject(mrp_pd_container, 8);
+    taskSunSafe->AddNewObject(thruster_force_mapping_container, 7);
+    taskSunSafe->AddNewObject(thruster_firing_schmitt_container, 6);
 
     simDriver.run();
 }
 
-void setCobConverter(CobConverter & model) {
-    model.ModelTag = "CobConverter";
+void setArrayDouble3WithVecDouble3(std::vector<double> vec, double destination[3]) {
+    assert(vec.size() == 3);
+    destination[0] = vec[0];
+    destination[1] = vec[1];
+    destination[2] = vec[2];
 }
 
-void setFlybyODuKF(FlybyODuKF & model) {
-    model.ModelTag = "FlybyODuKF";
-}
-
-void setFlybyPoint(FlybyPoint & model) {
-    model.ModelTag = "FlybyPoint";
-}
-
-void setCenterOfBrightness(CenterOfBrightness & model) {
-    model.filename = "imagePath";
-    model.blurSize = 5;
-    model.threshold = 50;
-//    module.saveDir = path + '/result_save.png'
-//    if saveTest:
-//        module.saveImages = True
+void setArrayDouble9WithVecDouble9(std::vector<double> vec, double destination[9]) {
+    assert(vec.size() == 9);
+    destination[0] = vec[0];
+    destination[1] = vec[1];
+    destination[2] = vec[2];
+    destination[3] = vec[3];
+    destination[4] = vec[4];
+    destination[5] = vec[5];
+    destination[6] = vec[6];
+    destination[7] = vec[7];
+    destination[8] = vec[8];
 }

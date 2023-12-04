@@ -16,11 +16,14 @@
 #include "architecture/msgPayloadDefC/EclipseMsgPayload.h"
 #include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
 #include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/THRArrayConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/THRConfigMsgPayload.h"
 #include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
 #include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-#include "cMsgCInterface/VehicleConfigMsg_C.h"
 #include "cMsgCInterface/RateCmdMsg_C.h"
-
+#include "cMsgCInterface/THRArrayCmdForceMsg_C.h"
+#include "cMsgCInterface/THRArrayOnTimeCmdMsg_C.h"
+#include "cMsgCInterface/VehicleConfigMsg_C.h"
 #include <Eigen/Dense>
 
 class MessageProvider : public SysModel {
@@ -41,7 +44,9 @@ public:
     Message<NavAttMsgPayload> sunDirectionOutMsg;
     Message<VehicleConfigMsgPayload> vehConfigOutMsg;
     Message<RWArrayConfigMsgPayload> rwConfigOutMsg;
+    Message<THRArrayConfigMsgPayload> thrusterArrayConfigMsg;
     Message<NavAttMsgPayload> imuOutMsg;
+    THRArrayOnTimeCmdMsg_C thrOnTimeCmdMsg;
     RateCmdMsg_C rateSteeringOutMsg;
 
 private:
@@ -50,6 +55,8 @@ private:
     void writeVehicleConfigurationMessage();
 
     void writeRWConfigurationMessage();
+
+    void writeAcsThrusterConfigurationMessage();
 
     void updateCSSArraySensorOutMsg();
 

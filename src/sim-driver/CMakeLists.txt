@@ -4,7 +4,8 @@ cmake_minimum_required(VERSION 3.14)
 # executable main.cpp and main-mrp-steering-controllers.cpp are set into the SRC variable and then the executable.
 set(SRC
 #        "main.cpp"
-        "main-mrp-steering-controllers.cpp"
+#        "main-mrp-steering-controllers.cpp"
+        "main-sun-safe.cpp"
         "simulationDriver.h"
         "simulationDriver.cpp"
         "../architecture/system_model/sys_process.h"
@@ -32,17 +33,19 @@ add_executable(SimulationDriver ${SRC})
 target_include_directories(SimulationDriver PRIVATE "${CMAKE_SOURCE_DIR}")
 set_target_properties(SimulationDriver PROPERTIES FOLDER "${DIR_NAME_STRING}")
 target_link_libraries(SimulationDriver PUBLIC ${ARCHITECTURE_LIBS})
+target_link_libraries(SimulationDriver PUBLIC attTrackingError)
 target_link_libraries(SimulationDriver PUBLIC centerOfBrightness)
 target_link_libraries(SimulationDriver PUBLIC cobConverter)
+target_link_libraries(SimulationDriver PUBLIC cssWlsEst)
 target_link_libraries(SimulationDriver PUBLIC flybyODuKF)
 target_link_libraries(SimulationDriver PUBLIC flybyPoint)
-target_link_libraries(SimulationDriver PUBLIC attTrackingError)
-target_link_libraries(SimulationDriver PUBLIC rwMotorTorque)
-target_link_libraries(SimulationDriver PUBLIC cssWlsEst)
-target_link_libraries(SimulationDriver PUBLIC sunSafePoint)
+target_link_libraries(SimulationDriver PUBLIC mrpPD)
 target_link_libraries(SimulationDriver PUBLIC mrpSteering)
 target_link_libraries(SimulationDriver PUBLIC rateServoFullNonlinear)
 target_link_libraries(SimulationDriver PUBLIC rwMotorTorque)
+target_link_libraries(SimulationDriver PUBLIC sunSafePoint)
+target_link_libraries(SimulationDriver PUBLIC thrFiringSchmitt)
+target_link_libraries(SimulationDriver PUBLIC thrForceMapping)
 
 set(TARGET_NAME "SimulationDriver")
 include(usingOpenCV)

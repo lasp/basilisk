@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "messageProvider.h"
 #include "architecture/msgPayloadDefC/CSSConfigMsgPayload.h"
 
@@ -25,6 +27,7 @@ void MessageProvider::Reset(uint64_t CurrentClock) {
     this->writeCSSConfigurationMessage();
     this->writeVehicleConfigurationMessage();
     this->writeRWConfigurationMessage();
+    this->writeAcsThrusterConfigurationMessage();
 }
 
 void MessageProvider::UpdateState(uint64_t CurrentSimNanos) {
@@ -105,6 +108,51 @@ void MessageProvider::writeCSSConfigurationMessage() {
     }
     cssConfigMsgPayload.nCSS = this->nHat_B_vec.size();
     cssConfigLogOutMsg.write(&cssConfigMsgPayload, 1, 0);
+}
+
+void MessageProvider::writeAcsThrusterConfigurationMessage() {
+    double inch2meter = 0.0254;
+    double a = 37.98*inch2meter;
+    double b1 = 34.2807*inch2meter;
+    double b2 = 34.0307*inch2meter;
+    double c1 = 71.2943*inch2meter;
+    double c2 = 16.4307*inch2meter;
+    double d = 1/sqrt(2);
+    double max_thrust = 4.893;
+
+    auto tmpThusterArrayConfigPaylod = THRArrayConfigMsgPayload();
+    tmpThusterArrayConfigPaylod.numThrusters = 8;
+    std::vector<std::array<double, 3>> th_pos = {{a, b1, c1},
+                                                 {a,  b2,  c2},
+                                                 {-a, b1,  c1},
+                                                 {-a, b2,  c2},
+                                                 {-a, -b1, c1},
+                                                 {-a, -b2, c2},
+                                                 {a,  -b1, c1},
+                                                 {a,  -b2, c2}};
+
+    std::vector<std::array<double, 3>> th_dir = {{0, -d, d},
+                                                 {0, -d, -d},
+                                                 {0, -d, d},
+                                                 {0, -d, -d},
+                                                 {0, d,  d},
+                                                 {0, d,  -d},
+                                                 {0, d,  d},
+                                                 {0, d,  -d}};
+
+    for (int i = 0; i < tmpThusterArrayConfigPaylod.numThrusters; ++i) {
+        auto tmpThruster = THRConfigMsgPayload();
+        tmpThruster.rThrust_B[0] = th_pos.at(i)[0];
+        tmpThruster.rThrust_B[1] = th_pos.at(i)[1];
+        tmpThruster.rThrust_B[2] = th_pos.at(i)[2];
+        tmpThruster.tHatThrust_B[0] = th_dir.at(i)[0];
+        tmpThruster.tHatThrust_B[1] = th_dir.at(i)[1];
+        tmpThruster.tHatThrust_B[2] = th_dir.at(i)[2];
+        tmpThruster.maxThrust = max_thrust;
+        tmpThusterArrayConfigPaylod.thrusters[i] = tmpThruster;
+    }
+
+    this->thrusterArrayConfigMsg.write(&tmpThusterArrayConfigPaylod, 1, 0);
 }
 
 void MessageProvider::updateCSSArraySensorOutMsg() {
