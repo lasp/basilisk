@@ -7,7 +7,7 @@ set -x
 mkdir -p build_rv32_imfc
 cd build_rv32_imfc
 pwd
-cmake -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_TOOLCHAIN_FILE=../riscv_imfc.toolchain.cmake ..
+cmake -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_TOOLCHAIN_FILE=../../riscv_imfc.toolchain.cmake ..
 cmake --build . --target SimulationDriver
 cp SimulationDriver SimulationDriver.elf
 file SimulationDriver.elf
