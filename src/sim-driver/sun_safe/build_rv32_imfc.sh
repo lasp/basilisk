@@ -4,11 +4,11 @@ set -x
 
 # git clone --branch 3.3.9 --single-branch https://gitlab.com/libeigen/eigen.git
 
-mkdir -p build_rv32
-cd build_rv32
+mkdir -p build_rv32_imfc
+cd build_rv32_imfc
 pwd
-cmake -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_TOOLCHAIN_FILE=../riscv.toolchain.cmake ..
+cmake -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_TOOLCHAIN_FILE=../../riscv_imfc.toolchain.cmake ..
 cmake --build . --target SimulationDriver
 cp SimulationDriver SimulationDriver.elf
 file SimulationDriver.elf
-/opt/riscv/bin/riscv32-unknown-elf-size SimulationDriver.elf
+/opt/riscv_imfc/bin/riscv32-unknown-elf-size SimulationDriver.elf
