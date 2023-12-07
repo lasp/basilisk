@@ -90,9 +90,9 @@ void Reset_thrFiringSchmitt(thrFiringSchmittConfig *configData, uint64_t callTim
 void Update_thrFiringSchmitt(thrFiringSchmittConfig *configData, uint64_t callTime, int64_t moduleID)
 {
 	int 				i;
-	double 				level;					/* [-] duty cycle fraction */
-	double				controlPeriod;			/* [s] control period */
-	double				onTime[MAX_EFF_CNT];	/* [s] array of commanded on time for thrusters */
+	float 				level;					/* [-] duty cycle fraction */
+	float				controlPeriod;			/* [s] control period */
+	float				onTime[MAX_EFF_CNT];	/* [s] array of commanded on time for thrusters */
     THRArrayCmdForceMsgPayload thrForceIn;          /* -- copy of the thruster force input message */
     THRArrayOnTimeCmdMsgPayload thrOnTimeOut;       /* -- copy of the thruster on-time output message */
 
@@ -105,7 +105,7 @@ void Update_thrFiringSchmitt(thrFiringSchmittConfig *configData, uint64_t callTi
 		configData->prevCallTime = callTime;
 
 		for(i = 0; i < configData->numThrusters; i++) {
-			thrOnTimeOut.OnTimeRequest[i] = (double)(configData->baseThrustState) * 2.0;
+			thrOnTimeOut.OnTimeRequest[i] = (float)(configData->baseThrustState) * 2.0;
 		}
 
         THRArrayOnTimeCmdMsg_C_write(&thrOnTimeOut, &configData->onTimeOutMsg, moduleID, callTime);
@@ -113,7 +113,7 @@ void Update_thrFiringSchmitt(thrFiringSchmittConfig *configData, uint64_t callTi
 	}
 
     /*! - compute control time period Delta_t */
-	controlPeriod = ((double)(callTime - configData->prevCallTime)) * NANO2SEC;
+	controlPeriod = ((float)(callTime - configData->prevCallTime)) * NANO2SEC;
 	configData->prevCallTime = callTime;
 
     /*! - read the input thruster force message */

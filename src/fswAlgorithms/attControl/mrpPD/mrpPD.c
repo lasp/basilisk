@@ -75,14 +75,14 @@ void Reset_mrpPD(MrpPDConfig *configData, uint64_t callTime, int64_t moduleID)
 void Update_mrpPD(MrpPDConfig *configData, uint64_t callTime,
     int64_t moduleID)
 {
-    double              Lr[3];                  /*!< required control torque vector [Nm] */
-    double              omega_BN_B[3];          /*!< Inertial angular body vector in body B-frame components */
+    float              Lr[3];                  /*!< required control torque vector [Nm] */
+    float              omega_BN_B[3];          /*!< Inertial angular body vector in body B-frame components */
     CmdTorqueBodyMsgPayload controlOutMsg;      /*!< Control output requests */
     AttGuidMsgPayload       guidInMsg;          /*!< Guidance Message */
-    double              v3_temp1[3];
-    double              v3_temp2[3];
-    double              v3_temp3[3];
-    double              v3_temp4[3];
+    float              v3_temp1[3];
+    float              v3_temp2[3];
+    float              v3_temp3[3];
+    float              v3_temp4[3];
 
     /*! - zero the output message copy */
     controlOutMsg = CmdTorqueBodyMsg_C_zeroMsgPayload();

@@ -36,14 +36,14 @@
 /*! @brief Top level structure for the sub-module routines. */
 typedef struct {
     /* declare module public variables */
-    double              level_on;                               //!< [-] ON duty cycle fraction
-    double              level_off;                              //!< [-] OFF duty cycle fraction 
-    double              thrMinFireTime;                         //!< [s] Minimum ON time for thrusters
+    float              level_on;                               //!< [-] ON duty cycle fraction
+    float              level_off;                              //!< [-] OFF duty cycle fraction 
+    float              thrMinFireTime;                         //!< [s] Minimum ON time for thrusters
     int                 baseThrustState;                        //!< [-] Indicates on-pulsing (0) or off-pusling (1)
 
     /* declare module private variables */
 	int                 numThrusters;							//!< [-] The number of thrusters available on vehicle
-	double				maxThrust[MAX_EFF_CNT];					//!< [N] Max thrust
+	float				maxThrust[MAX_EFF_CNT];					//!< [N] Max thrust
 	boolean_t			lastThrustState[MAX_EFF_CNT];			//!< [-] ON/OFF state of thrusters from previous call
 
 	uint64_t			prevCallTime;							//!< callTime from previous function call

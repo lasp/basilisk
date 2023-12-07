@@ -31,12 +31,12 @@
 /*! @brief Module configuration message definition. */
 typedef struct {
     /* declare public module variables */
-    double K;                           //!< [rad/sec] Proportional gain applied to MRP errors
-    double P;                           //!< [N*m*s]   Rate error feedback gain applied
-    double knownTorquePntB_B[3];        //!< [N*m]     known external torque in body frame vector components
+    float K;                           //!< [rad/sec] Proportional gain applied to MRP errors
+    float P;                           //!< [N*m*s]   Rate error feedback gain applied
+    float knownTorquePntB_B[3];        //!< [N*m]     known external torque in body frame vector components
 
     /* declare private module variables */
-    double ISCPntB_B[9];                //!< [kg m^2] Spacecraft Inertia
+    float ISCPntB_B[9];                //!< [kg m^2] Spacecraft Inertia
 
     /* declare module IO interfaces */
     CmdTorqueBodyMsg_C cmdTorqueOutMsg;                 //!< commanded torque output message

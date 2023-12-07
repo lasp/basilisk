@@ -8,8 +8,8 @@
 #include "fswAlgorithms/effectorInterfaces/thrForceMapping/thrForceMapping.h"
 #include "fswAlgorithms/effectorInterfaces/thrFiringSchmitt/thrFiringSchmitt.h"
 
-void setArrayDouble3WithVecDouble3(std::vector<double> vec, double destination[3]);
-void setArrayDouble9WithVecDouble9(std::vector<double> vec, double destination[9]);
+void setArrayFloat3WithVecFloat3(std::vector<float> vec, float destination[3]);
+void setArrayFloat9WithVecFloat9(std::vector<float> vec, float destination[9]);
 
 int main (int argc, char* argv[] ) {
     auto simDriver = SimulationDriver::SimulationDriver();
@@ -43,7 +43,7 @@ int main (int argc, char* argv[] ) {
     // Sun Safe Point
     auto sun_safe_point_config = new sunSafePointConfig ();
     sun_safe_point_config->bskLogger = &logger;
-    setArrayDouble3WithVecDouble3(std::vector<double>{0.0, 0.0, 1.0}, sun_safe_point_config->sHatBdyCmd);
+    setArrayFloat3WithVecFloat3(std::vector<float>{0.0, 0.0, 1.0}, sun_safe_point_config->sHatBdyCmd);
     AlgPtr sunSafePointSelfInitFunc = reinterpret_cast<AlgPtr>(SelfInit_sunSafePoint);
     AlgUpdatePtr sunSafePointUpdateFunc = reinterpret_cast<AlgUpdatePtr>(Update_sunSafePoint);
     AlgUpdatePtr sunSafePointResetFunc = reinterpret_cast<AlgUpdatePtr>(Reset_sunSafePoint);
@@ -82,7 +82,7 @@ int main (int argc, char* argv[] ) {
     // Thruster Force Mapping
     auto thruster_force_mapping_config = new thrForceMappingConfig();
     thruster_force_mapping_config->thrForceSign = +1;
-    setArrayDouble9WithVecDouble9(std::vector<double>{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0},
+    setArrayFloat9WithVecFloat9(std::vector<float>{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0},
                                   thruster_force_mapping_config->controlAxes_B);
     thruster_force_mapping_config->numThrusters = 8;
     thruster_force_mapping_config->bskLogger = &logger;
@@ -135,14 +135,14 @@ int main (int argc, char* argv[] ) {
     simDriver.run();
 }
 
-void setArrayDouble3WithVecDouble3(std::vector<double> vec, double destination[3]) {
+void setArrayFloat3WithVecFloat3(std::vector<float> vec, float destination[3]) {
     assert(vec.size() == 3);
     destination[0] = vec[0];
     destination[1] = vec[1];
     destination[2] = vec[2];
 }
 
-void setArrayDouble9WithVecDouble9(std::vector<double> vec, double destination[9]) {
+void setArrayFloat9WithVecFloat9(std::vector<float> vec, float destination[9]) {
     assert(vec.size() == 9);
     destination[0] = vec[0];
     destination[1] = vec[1];
