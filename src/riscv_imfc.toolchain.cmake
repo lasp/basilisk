@@ -46,8 +46,8 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nostartfiles")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fno-use-cxa-atexit")
 
 # Options for MicroChip IMFC
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=rv32imfc_zicsr -mabi=ilp32")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=rv32imfc_zicsr -mabi=ilp32")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=rv32imfc_zicsr -mabi=ilp32f")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=rv32imfc_zicsr -mabi=ilp32f")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T /share/ema-fsw-simple-benchmark/RV32imc/platform/miv_rv32_hal/miv-rv32-ram.ld")
 
 # Ozone happiness

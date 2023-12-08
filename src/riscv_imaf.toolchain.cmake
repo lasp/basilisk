@@ -46,8 +46,8 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nostartfiles")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fno-use-cxa-atexit")
 
 # Options for RocketChip IMAF:
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=rv32imaf_zicsr -mabi=ilp32 -D MIV_LEGACY_RV32=1")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=rv32imaf_zicsr -mabi=ilp32 -D MIV_LEGACY_RV32=1")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=rv32imaf_zicsr -mabi=ilp32f -D MIV_LEGACY_RV32=1")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=rv32imaf_zicsr -mabi=ilp32f -D MIV_LEGACY_RV32=1")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T /share/ema-fsw-simple-benchmark/RV32imaf/platform/miv_rv32_hal/miv-rv32-ram.ld")
 
 # Ozone happiness
