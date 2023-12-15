@@ -29,7 +29,7 @@ def test_registry_is_singleton():
 def test_register_single_model():
     reg = Registry()
 
-    reg.register_model(TestClass, "testClass")
+    reg.register_model("testClass", TestClass)
 
     assert "testClass" in reg.graph.keys(), \
         """
@@ -50,12 +50,49 @@ def test_register_single_model():
         """
     
     reg.graph = {}
+
+def test_register_external_model():
+    reg = Registry()
+
+    reg.register_model(name="blackLion")
+
+    assert "blackLion" in reg.graph, \
+        """
+            There should be an external node in the graph with the name 'blackLion',
+            but no such node exists.
+        """
+
+    assert reg.graph["blackLion"]["model"].__name__ == "ExternalModel", \
+        f"""
+            The node in the graph by the name of 'blackLion' should be of type 'ExternalModel',
+            but is of type {type(type(reg.graph["blackLion"]["model"]).__name__)}
+        """
+    
+    reg.graph = {}
+
+def test_register_external_message():
+    reg = Registry()
+
+    reg.register_model("blackLion")
+    reg.register_model("testClass", TestClass)
+    reg.register_message(
+        source_name="blackLion",
+        target_name="testClass",
+        message_data=("scStateOutMsg", "testInMsg"),
+        message_type=messaging.SCStatesMsgPayload
+    )
+
+    assert reg.graph["blackLion"]["neighbors"] == [("testClass", ("scStateOutMsg", "testInMsg"))]
+
+    # assert reg.graph["blackLion"]["pubs"]["scStateOutMsg"].__name__ == "SCStatesMsgPayload"
+
+    reg.graph = {}
     
 def test_register_single_message():
     reg = Registry()
 
-    reg.register_model(TestClass, "testClass")
-    reg.register_model(OtherTestClass, "otherTestClass")
+    reg.register_model("testClass", TestClass)
+    reg.register_model("otherTestClass", OtherTestClass)
     reg.register_message(source_name="testClass", target_name="otherTestClass", message_data=("testOutMsg", "otherTestInMsg"))
 
     assert reg.graph["testClass"]["neighbors"] == [("otherTestClass", ("testOutMsg", "otherTestInMsg"))], \
@@ -71,44 +108,12 @@ def test_register_single_message():
         """
     
     reg.graph = {}
-    
-def test_get_models_single_model():
-    reg = Registry()
-
-    reg.register_model(TestClass, "testClass")
-    reg.register_model(OtherTestClass, "otherTestClass")
-
-    mod = reg.get_models(names=["testClass"])
-
-    assert mod == {"testClass": TestClass}, \
-    f"""
-        the result of the call to get_models should be 'testClass': TestClass but
-        we found {mod}
-    """
-
-    reg.graph = {}
-
-def test_get_models_all_models():
-    reg = Registry()
-
-    reg.register_model(TestClass, "testClass")
-    reg.register_model(OtherTestClass, "otherTestClass")
-
-    mod = reg.get_models()
-
-    assert mod == {"testClass": TestClass, "otherTestClass": OtherTestClass}, \
-    f"""
-        the result of the call to get_models should contain all models but
-        we found {mod}
-    """
-
-    reg.graph = {}
 
 def test_init_models_no_messages():
     reg = Registry()
 
-    reg.register_model(TestClass, "testClass")
-    reg.register_model(OtherTestClass, "otherTestClass")
+    reg.register_model("testClass", TestClass)
+    reg.register_model("otherTestClass", OtherTestClass)
 
     mods = reg.init_models()
 
@@ -158,6 +163,35 @@ def test_init_models_with_messages():
 
     reg.graph = {}
 
+def test_init_external_model():
+    reg = Registry()
+
+    reg.register_model(name="blackLion")
+    
+    mods = reg.init_models()
+
+    assert type(mods["blackLion"]).__name__ == "ExternalModel"
+
+    reg.graph = {}
+
+def test_init_external_model_with_messages():
+    reg = Registry()
+
+    reg.register_model(name="blackLion")
+    reg.register_model(name="simpleNavObj", model=simpleNav.SimpleNav)
+    reg.register_message(
+        source_name="blackLion",
+        target_name="simpleNavObj",
+        message_data=("scStateOutMsg", "scStateInMsg"),
+        message_type=messaging.SCStatesMsg
+    )
+
+    mods = reg.init_models()
+
+    assert mods["blackLion"].scStateOutMsg.isLinked()
+
+    reg.graph = {}
+
 def test_get_message():
     """
         Register two models, register a message between them, and ensure that when we 
@@ -175,6 +209,26 @@ def test_get_message():
     msg = reg.get_message("scObject-scStateOutMsg")
 
     assert msg == reg.graph["scObject"]["pubs"]["scStateOutMsg"]
+
+    reg.graph = {}
+
+def test_get_external_message():
+    reg = Registry()
+
+    reg.register_model(name="blackLion")
+    reg.register_model(name="simpleNavObj", model=simpleNav.SimpleNav)
+    reg.register_message(
+        source_name="blackLion",
+        target_name="simpleNavObj",
+        message_data=("scStateOutMsg", "scStateInMsg"),
+        message_type=messaging.SCStatesMsg
+    )
+
+    mods = reg.init_models()
+
+    msg = reg.get_message("blackLion-scStateOutMsg")
+
+    assert msg == mods["blackLion"].scStateOutMsg
 
     reg.graph = {}
 

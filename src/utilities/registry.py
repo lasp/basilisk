@@ -1,6 +1,16 @@
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Tuple, Union
 
 from Basilisk.architecture import messaging
+
+class ExternalModel:
+    """
+        A placeholder class for external facing models.
+        This is essentially so that we can incorporate the nodes
+        in the graph external to Basilisk into the registration and
+        initialization pattern for internal models.
+    """
+    def __init__(self):
+        pass
 
 class Registry:
     # cache an instance of the class, return it instead of instantiating
@@ -13,7 +23,6 @@ class Registry:
         return cls._the_registry
 
     def __init__(self):
-        # TODO: make a graph object to abstract this away
         if hasattr(self, "graph") is False:
             self.graph = {}
 
@@ -45,7 +54,7 @@ class Registry:
             self.graph[model_name]["model"] = mod
             model_dict[model_name] = mod
             
-        # extract all nodes in the graph with out edges
+        # extract all nodes in the graph that have out edges
         mods_with_neighbs = {
             x: self.graph[x]["neighbors"] for x in model_names if self.graph[x]["neighbors"]
         }
@@ -53,10 +62,15 @@ class Registry:
         # subscribe all messages for each node with an out edge in the graph
         for source_name in mods_with_neighbs:
             source_model = model_dict[source_name]
+            if self.graph[source_name]["pubs"] is not None:
+                # to this point, ExternalModel objects are empty so add in attributes based on
+                # their pubs, which should have been added as placeholders during registration
+                for att_name in self.graph[source_name]["pubs"]:
+                    source_model.__setattr__(att_name, self.graph[source_name]["pubs"][att_name])
             for target_data in mods_with_neighbs[source_name]:
                 target_name = target_data[0]
-                source_msg_name, target_msg_name = target_data[1]
                 target_model = model_dict[target_name]
+                source_msg_name, target_msg_name = target_data[1]
                 source_msg = source_model.__getattribute__(source_msg_name)
                 target_msg = target_model.__getattribute__(target_msg_name)
 
@@ -93,20 +107,30 @@ class Registry:
                 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
                 # this is essentially checking that the source and target have the same payload type
-                if type(target_msg).__module__ != type(source_msg).__module__:
+                if callable(source_msg):
+                    a = source_msg.__module__
+                else:
+                    a = type(source_msg).__module__
+
+                if callable(target_msg):
+                    b = target_msg.__module__
+                else:
+                    b = type(target_msg).__module__
+
+                if a != b:
                     raise Exception(
-                        f"source message type {type(source_msg.__module__)} != target message type {type(target_msg.__module__)}"
+                        f"source message type {a} != target message type {b}"
                     )
                 
                 # redirect the out message of the source to a standalone message, and subscribe the in message of the target node to
                 # the content of that standalone message. This will allow for external entities, e.g. BlackLion, to access all messages
                 # by type and name
-                mask = [type(x).__module__ == type(source_msg).__module__ for x in self.graph[source_name]["pubs"]]
-                val = sum(mask)
                 msg = self.graph[source_name]["pubs"].get(source_msg_name)
                 # if a message of the desired type already exists, then pop it from the pubs, otherwise create a new one
                 if msg is None:
                     msg = type(source_msg)()
+                elif callable(msg) is True:
+                    msg = msg()  # external messages have a class ref, so instantiate in that case.
 
                 # subscribe the target to the standalone message
                 target_msg.subscribeTo(msg)
@@ -123,7 +147,20 @@ class Registry:
 
         return model_dict
 
-    def register_model(self, model: Callable, name: str):
+    def register_external_model(self, name: str):
+        """
+        """
+        if hasattr(self, "external_graph") is False:
+            self.external_graph = {}
+
+        self.external_graph[name] = {"pubs": {}, "neighbors": []}
+
+    def register_external_message(self, source_name: str, payload: Callable, message_data: Tuple[str]):
+        """
+        """
+        self.external_graph[source_name]["neighbors"].append(())
+
+    def register_model(self, name: str, model: Callable = None):
         """
             Add a node to the graph holding the model with the desired name
 
@@ -135,9 +172,14 @@ class Registry:
         if name in self.graph:
             raise Exception(f"model of type {model} with name {name} already exists...")
         
+        # If no class reference for the model is passed, then create an empty ExternalModel
+        # container for the node in the graph.
+        if model is None:
+            model = ExternalModel
+
         self.graph[name] = {"model": model, "neighbors": [], "pubs": {}}
 
-    def register_message(self, source_name: str, target_name: str, message_data: Tuple[str]):
+    def register_message(self, source_name: str, target_name: str, message_data: Tuple[str], message_type: Callable = None):
         """
             Message registration adds and edge between two existing nodes in the graph.
 
@@ -147,34 +189,14 @@ class Registry:
                 * target_name: name of the registered node in the graph that will be the target of the edge
                 * message_data: tuple (x, y) where x is the name of the out message attribute on the source node
                     and y is the name in the in message attribute on the target node
+                * message_type: class reference to the type of message we want to add to the model object. This is intended
+                    to be used only for external messages. Optional, default = None
         """
+        if message_type is not None:
+            source_msg_name, _ = message_data
+            self.graph[source_name]["pubs"][source_msg_name] = message_type
+
         self.graph[source_name]["neighbors"].append((target_name, message_data))
-
-    def get_models(self, names: List[str] = None) -> Dict[str, Callable]:
-        """
-            Accessor method for retrieving a node (model) from the graph by name. If no names
-            are passed, then return all nodes (models) in the graph.
-
-            Params
-            ------
-                * names: list of model names. Optional, defaults to all node names in the graph
-
-            Return
-            ------
-                * ret_models: dict keyed by model names consisting of the "model" value from that node in
-                    the graph
-        """
-        ret_models = {}
-        if names is None:
-            names = list(self.graph.keys())
-
-        for name in names:
-            if name not in self.graph:
-                raise Exception(f"user requested access to model with name {name} but there is no model registered with that name...")
-
-            ret_models[name] = self.graph[name]["model"]
-
-        return ret_models
 
     def get_message(self, name: str) -> Dict[str, List[Tuple[Any]]]:
         """
