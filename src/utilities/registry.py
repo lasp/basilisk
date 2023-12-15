@@ -147,19 +147,6 @@ class Registry:
 
         return model_dict
 
-    def register_external_model(self, name: str):
-        """
-        """
-        if hasattr(self, "external_graph") is False:
-            self.external_graph = {}
-
-        self.external_graph[name] = {"pubs": {}, "neighbors": []}
-
-    def register_external_message(self, source_name: str, payload: Callable, message_data: Tuple[str]):
-        """
-        """
-        self.external_graph[source_name]["neighbors"].append(())
-
     def register_model(self, name: str, model: Callable = None):
         """
             Add a node to the graph holding the model with the desired name
