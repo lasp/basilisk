@@ -26,7 +26,7 @@ class Registry:
         if hasattr(self, "graph") is False:
             self.graph = {}
 
-    def init_models(self, model_names=None) -> Dict[str, Callable]:
+    def init_models(self, model_names: List[str] = None) -> Dict[str, Callable]:
         """
             Instantiate models. Add them to a dictionary keyed by model name.
             Then subscribe to messages per edges in the graph using the instantiated
@@ -62,11 +62,18 @@ class Registry:
         # subscribe all messages for each node with an out edge in the graph
         for source_name in mods_with_neighbs:
             source_model = model_dict[source_name]
+
+            # to this point, ExternalModel objects are empty so add in attributes based on
+            # their pubs, which should have been added as placeholders during registration.
+            # check to see if either the source or target have had pubs set before connecting.
             if self.graph[source_name]["pubs"] is not None:
-                # to this point, ExternalModel objects are empty so add in attributes based on
-                # their pubs, which should have been added as placeholders during registration
                 for att_name in self.graph[source_name]["pubs"]:
                     source_model.__setattr__(att_name, self.graph[source_name]["pubs"][att_name])
+
+            if self.graph[target_name]["pubs"] is not None:
+                for att_name in self.graph[target_name]["pubs"]:
+                    target_model.__setattr__(att_name, self.graph[target_name]["pubs"][att_name])
+
             for target_data in mods_with_neighbs[source_name]:
                 target_name = target_data[0]
                 target_model = model_dict[target_name]
