@@ -1,5 +1,6 @@
 from utilities.registry import Registry
 from Basilisk.simulation import spacecraft, simpleNav
+from Basilisk.moduleTemplates import cppModuleTemplate
 from Basilisk.architecture import messaging
 
 class TestClass:
@@ -241,3 +242,24 @@ def test_registry_maintains_graph():
     assert reg2.graph == {"a": [1, 2, 3]}
 
     reg1.graph = {}
+
+
+def test_target_external_node():
+    reg = Registry()
+
+    reg.register_model(name="blackLion")
+    reg.register_model(name="cppModule1", model=cppModuleTemplate.CppModuleTemplate)
+    reg.register_message(
+        source_name="cppModule1",
+        target_name="blackLion",
+        message_data=("dataOutMsg", "dataInMsg"),
+        message_type=messaging.CModuleTemplateMsgReader
+    )
+
+    reg.init_models()
+
+    msg = reg.get_message("cppModule1-dataOutMsg")
+
+    assert msg == reg.graph["cppModule1"]["pubs"]["dataOutMsg"]
+
+    reg.graph = {}

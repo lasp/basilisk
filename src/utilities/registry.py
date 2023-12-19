@@ -65,53 +65,18 @@ class Registry:
 
             # to this point, ExternalModel objects are empty so add in attributes based on
             # their pubs, which should have been added as placeholders during registration.
-            # check to see if either the source or target have had pubs set before connecting.
-            if self.graph[source_name]["pubs"] is not None:
-                for att_name in self.graph[source_name]["pubs"]:
-                    source_model.__setattr__(att_name, self.graph[source_name]["pubs"][att_name])
-
-            if self.graph[target_name]["pubs"] is not None:
-                for att_name in self.graph[target_name]["pubs"]:
-                    target_model.__setattr__(att_name, self.graph[target_name]["pubs"][att_name])
+            for att_name in self.graph[source_name]["pubs"]:
+                source_model.__setattr__(att_name, self.graph[source_name]["pubs"][att_name])
 
             for target_data in mods_with_neighbs[source_name]:
                 target_name = target_data[0]
                 target_model = model_dict[target_name]
+                for att_name in self.graph[target_name]["pubs"]:
+                    target_model.__setattr__(att_name, self.graph[target_name]["pubs"][att_name])
+
                 source_msg_name, target_msg_name = target_data[1]
                 source_msg = source_model.__getattribute__(source_msg_name)
                 target_msg = target_model.__getattribute__(target_msg_name)
-
-                # TODO: This still doesn't work correctly. We need to figure out what to do
-                #   about models that have vectorized out messages...
-                #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<BROKEN>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-                # sometimes messages are written out on models as vectors; check for that case,
-                # and pick off the last element of the vector
-                target_msg_vec = None
-                if hasattr(target_msg, "__iter__"):
-                    target_msg_vec = target_msg
-                    l = target_msg_vec.size()
-                    if l == 0:
-                        msg_type = type(target_msg_vec).__module__.split(".")[-1].replace("Payload", "")
-                        msg_cls = getattr(messaging, msg_type)
-                        msg_tmp = msg_cls()
-                        target_msg_vec.append(msg_tmp)
-                        l += 1
-
-                    target_msg = target_msg_vec[l - 1]
-
-                source_msg_vec = None
-                if hasattr(source_msg, "__iter__"):
-                    source_msg_vec = source_msg
-                    l = source_msg_vec.size()
-                    if l == 0:
-                        msg_type = type(source_msg_vec).__module__.split(".")[-1].replace("Payload", "")
-                        msg_cls = getattr(messaging, msg_type)
-                        msg_tmp = msg_cls()
-                        target_msg_vec.append(msg_tmp)
-                        l += 1
-
-                    source_msg = source_msg_vec[l - 1]
-                #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
                 # this is essentially checking that the source and target have the same payload type
                 if callable(source_msg):
@@ -136,21 +101,19 @@ class Registry:
                 # if a message of the desired type already exists, then pop it from the pubs, otherwise create a new one
                 if msg is None:
                     msg = type(source_msg)()
-                elif callable(msg) is True:
+                elif type(msg) == type:
                     msg = msg()  # external messages have a class ref, so instantiate in that case.
+
+                # instantiate the target message if we haven't yet
+                if type(target_msg) == type:
+                    target_msg = target_msg()
 
                 # subscribe the target to the standalone message
                 target_msg.subscribeTo(msg)
                 # put the message back into the pubs for this source node
                 self.graph[source_name]["pubs"][source_msg_name] = msg
                 # reassign the message now that we have an additional subscriber
-                if source_msg_vec is not None:
-                    l = source_msg_vec.size()
-                    # put the modified message back into the location from which it came
-                    source_msg_vec[l - 1] = msg
-                    source_model.__setattr__(source_msg_name, source_msg_vec)
-                else:
-                    source_model.__setattr__(source_msg_name, msg)
+                source_model.__setattr__(source_msg_name, msg)
 
         return model_dict
 
@@ -186,9 +149,19 @@ class Registry:
                 * message_type: class reference to the type of message we want to add to the model object. This is intended
                     to be used only for external messages. Optional, default = None
         """
-        if message_type is not None:
+        source_node = self.graph[source_name]["model"]
+        if source_node == ExternalModel:
+            if message_type is None:
+                raise Exception("source node is ExternalModel, but message_type is None")
             source_msg_name, _ = message_data
             self.graph[source_name]["pubs"][source_msg_name] = message_type
+
+        target_node = self.graph[target_name]["model"]
+        if target_node == ExternalModel:
+            if message_type is None:
+                raise Exception("source node is ExternalModel, but message_type is None")
+            _, target_msg_name = message_data
+            self.graph[target_name]["pubs"][target_msg_name] = message_type
 
         self.graph[source_name]["neighbors"].append((target_name, message_data))
 
