@@ -5,9 +5,10 @@ cmake_minimum_required(VERSION 3.14)
 set(SRC
 #        "main.cpp"
 #        "main-mrp-steering-controllers.cpp"
-        "main-sun-safe.cpp"
-        "simulationDriver.h"
-        "simulationDriver.cpp"
+#        "main-sun-safe.cpp"
+        simulationDriver.h
+        simulationDriver.cpp
+        main-centroiding.cpp
         "../architecture/system_model/sys_process.h"
         "../architecture/system_model/sys_process.cpp"
         "../architecture/system_model/sim_model.h"
@@ -48,7 +49,7 @@ target_link_libraries(SimulationDriver PUBLIC thrFiringSchmitt)
 target_link_libraries(SimulationDriver PUBLIC thrForceMapping)
 
 set(TARGET_NAME "SimulationDriver")
-include(usingOpenCV)
+#include(usingOpenCV)
 
 if(NOT WIN32)
   target_compile_options(SimulationDriver PUBLIC "-fPIC")
