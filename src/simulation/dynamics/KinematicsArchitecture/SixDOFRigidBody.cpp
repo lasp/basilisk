@@ -38,8 +38,8 @@ SixDOFRigidBody::SixDOFRigidBody(std::shared_ptr<KinematicsEngine> kinematicsEng
     this->mass = this->body->mass;
     this->IScPntC = this->body->IPntSc_S;
 
-    this->LPntC = Vector(Eigen::Vector3d::Zero(), this->baseFrame);
-    this->F = Vector(Eigen::Vector3d::Zero(), this->inertialFrame);
+    this->L = Vector(Eigen::Vector3d::Zero(), this->baseFrame);
+    this->F_C = Vector(Eigen::Vector3d::Zero(), this->inertialFrame);
 }
 
 
@@ -89,14 +89,31 @@ void SixDOFRigidBody::preIntegration(double callTime) {
 void SixDOFRigidBody::equationsOfMotion(double t, double timeStep) {
     this->updateKinematics();
 
-    // Grab the states
+    this->body->clearForceList();
+    this->body->clearTorqueList();
+    for (const auto& actuator: this->actuatorList) {
+        actuator->actuate();
+    }
+
+        // Grab the states
     auto rDot_CN = Vector(this->velocityState_N->getState(), this->inertialFrame);
     auto omega_BN = Vector(this->omegaState_B->getState(), this->baseFrame);
     Eigen::MRPd sigma_BN;
     sigma_BN = (Eigen::Vector3d)this->sigmaState->getState();  // this conversion is so dumb
 
-    auto omegaDot_BN = this->IScPntC.inverse() * (-omega_BN.cross(this->IScPntC * omega_BN) + this->LPntC);
-    auto rDDot_CN = this->F / this->mass;
+    this->F_C.setZero();
+    this->L.setZero();
+    for (const auto& force: this->body->getForceList()) {
+        this->F_C += force;
+        auto arm = this->kinematicsEngine->findRelativePosition(this->body->CoMPoint, force.applicationPoint.lock());
+        this->L += arm.cross(force);
+    }
+    for (const auto& torque: this->body->getTorqueList()) {
+        this->L += torque;
+    }
+
+    auto omegaDot_BN = this->IScPntC.inverse() * (-omega_BN.cross(this->IScPntC * omega_BN) + this->L);
+    auto rDDot_CN = this->F_C / this->mass;
 
     this->sigmaState->setDerivative(1.0/4.0 * sigma_BN.Bmat() * omega_BN.getMatrix(this->baseFrame));
     this->omegaState_B->setDerivative(omegaDot_BN.getMatrix(this->baseFrame));
@@ -141,12 +158,4 @@ void SixDOFRigidBody::updateKinematics() {
     this->baseFrame->r_SP->setVelocity(rDot_BN, this->inertialFrame);
     this->baseFrame->sigma_SP->setAttitude(sigma_BN);
     this->baseFrame->sigma_SP->setAngularVelocity(omega_BN);
-}
-
-void SixDOFRigidBody::setExternalForce(Eigen::Vector3d matrix, const std::shared_ptr<Frame> &writtenFrame) {
-    this->F = Vector(std::move(matrix), writtenFrame);
-}
-
-void SixDOFRigidBody::setExternalTorque(Eigen::Vector3d matrix, const std::shared_ptr<Frame> &writtenFrame) {
-    this->LPntC = Vector(std::move(matrix), writtenFrame);
 }

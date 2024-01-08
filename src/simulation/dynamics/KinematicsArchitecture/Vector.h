@@ -127,6 +127,7 @@ public:
     std::weak_ptr<Point> applicationPoint;
 };
 
+// TODO: Call this PureTorque?
 class TorqueVector : public Vector {
 public:
     explicit TorqueVector(Vector vector);

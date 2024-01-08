@@ -24,6 +24,9 @@
 
 #include "simulation/dynamics/KinematicsArchitecture/KinematicsEngine.h"
 #include "simulation/dynamics/_GeneralModuleFiles/dynamicObject.h"
+#include "simulation/dynamics/KinematicsArchitecture/Actuator.h"
+#include "simulation/dynamics/KinematicsArchitecture/ExtForce.h"
+#include "simulation/dynamics/KinematicsArchitecture/ExtTorque.h"
 
 class DynamicsEngine: public DynamicObject {
 public:
@@ -33,12 +36,17 @@ public:
     std::shared_ptr<KinematicsEngine> kinematicsEngine;
     std::shared_ptr<Frame> inertialFrame;
 
+    std::vector<std::shared_ptr<Actuator>> actuatorList;
+
     void UpdateState(uint64_t callTime) override = 0;
     void equationsOfMotion(double t, double timeStep) override = 0;
     void preIntegration(double callTime) override = 0;
     void postIntegration(double callTime) override = 0;
 
     virtual void updateKinematics() = 0;
+
+    std::shared_ptr<ExtForce> createExtForce(const ForceVector& force, const std::shared_ptr<Part>& part);
+    std::shared_ptr<ExtTorque> createExtTorque(const TorqueVector& torque, const std::shared_ptr<Part>& part);
 };
 
 

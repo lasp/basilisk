@@ -42,8 +42,6 @@ public:
 
     // DynamicEngine functions
     void updateKinematics() final;
-    void setExternalForce(Eigen::Vector3d matrix, const std::shared_ptr<Frame>& writtenFrame);
-    void setExternalTorque(Eigen::Vector3d matrix, const std::shared_ptr<Frame>& writtenFrame);
 
     void writeOutputMessages(uint64_t callTime);
 
@@ -66,8 +64,8 @@ private:
 
     std::shared_ptr<Part> body;
     std::shared_ptr<Frame> baseFrame;
-    Vector LPntC;
-    Vector F;
+    Vector L;
+    Vector F_C;
 };
 
 

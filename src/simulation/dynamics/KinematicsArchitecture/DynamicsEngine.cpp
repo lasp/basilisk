@@ -17,3 +17,17 @@
 
  */
 #include "DynamicsEngine.h"
+
+std::shared_ptr<ExtForce> DynamicsEngine::createExtForce(const ForceVector &force, const std::shared_ptr<Part>& part) {
+    auto extForce = std::make_shared<ExtForce>(force, part);
+    this->actuatorList.push_back(extForce);
+
+    return extForce;
+}
+
+std::shared_ptr<ExtTorque> DynamicsEngine::createExtTorque(const TorqueVector &torque, const std::shared_ptr<Part>& part) {
+    auto extTorque = std::make_shared<ExtTorque>(torque, part);
+    this->actuatorList.push_back(extTorque);
+
+    return extTorque;
+}
