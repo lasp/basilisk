@@ -30,8 +30,8 @@ class Point;
 class Vector {
 public:
     Vector() = default;
-    ~Vector() = default;
     Vector(Eigen::Vector3d  newMatrix, const std::shared_ptr<Frame>& newWrittenFrame); // do we change this to const std::shared_ptr<const Frame>&?
+    ~Vector() = default;
 
     void set(Eigen::Vector3d newMatrix, const std::shared_ptr<Frame>& newWrittenFrame);
     void setZero();
@@ -120,10 +120,18 @@ private:
 
 class ForceVector : public Vector {
 public:
-    ForceVector() = default;
+    ForceVector(Vector vector, const std::shared_ptr<Point>& point);
+    ForceVector(Eigen::Vector3d newMatrix, const std::shared_ptr<Frame>& newWrittenFrame, const std::shared_ptr<Point>& point);
     ~ForceVector() = default;
 
-    std::shared_ptr<Point> applicationPoint;
+    std::weak_ptr<Point> applicationPoint;
+};
+
+class TorqueVector : public Vector {
+public:
+    explicit TorqueVector(Vector vector);
+    TorqueVector(Eigen::Vector3d newMatrix, const std::shared_ptr<Frame>& newWrittenFrame);
+    ~TorqueVector() = default;
 };
 
 

@@ -281,3 +281,20 @@ std::shared_ptr<Frame> Rotation::getUpperFrame() const {
 std::shared_ptr<Frame> Rotation::getLowerFrame() const {
     return this->lowerFrame;
 }
+
+ForceVector::ForceVector(Vector vector, const std::shared_ptr<Point> &point)
+        : Vector(vector), applicationPoint(point) {
+}
+
+ForceVector::ForceVector(Eigen::Vector3d  newMatrix, const std::shared_ptr<Frame>& newWrittenFrame, const std::shared_ptr<Point>& point)
+: Vector(std::move(newMatrix), newWrittenFrame), applicationPoint(point) {
+}
+
+TorqueVector::TorqueVector(Vector vector)
+: Vector(vector) {
+}
+
+TorqueVector::TorqueVector(Eigen::Vector3d newMatrix, const std::shared_ptr<Frame> &newWrittenFrame)
+: Vector(std::move(newMatrix), newWrittenFrame) {
+}
+

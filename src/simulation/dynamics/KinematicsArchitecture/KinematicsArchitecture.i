@@ -11,3 +11,5 @@
 %include "simulation/dynamics/KinematicsArchitecture/Tensor.i"
 %include "simulation/dynamics/KinematicsArchitecture/Vector.i"
 %include "simulation/dynamics/KinematicsArchitecture/Frame.i"
+%include "simulation/dynamics/KinematicsArchitecture/ExtForce.i"
+%include "simulation/dynamics/KinematicsArchitecture/ExtTorque.i"
