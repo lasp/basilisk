@@ -22,3 +22,27 @@
 
 Part::Part(std::shared_ptr<Frame> frame)
     : frame(std::move(frame)) {}
+
+void Part::addForceVector(const ForceVector& force) {
+    this->forceList.push_back(force);
+}
+
+void Part::addTorqueVector(const TorqueVector& torque) {
+    this->torqueList.push_back(torque);
+}
+
+std::vector<ForceVector> Part::getForceList() const {
+    return this->forceList;
+}
+
+std::vector<TorqueVector> Part::getTorqueList() const {
+    return this->torqueList;
+}
+
+void Part::clearForceList() {
+    this->forceList.clear();
+}
+
+void Part::clearTorqueList() {
+    this->torqueList.clear();
+}

@@ -42,7 +42,18 @@ public:
     std::shared_ptr<Point> CoMPoint;
     std::shared_ptr<Frame> frame;
 
+    void addForceVector(const ForceVector& force);
+    void addTorqueVector(const TorqueVector& torque);
+    void clearForceList();
+    void clearTorqueList();
+    std::vector<ForceVector> getForceList() const;
+    std::vector<TorqueVector> getTorqueList() const;
+
     Message<SCStatesMsgPayload> bodyStateOutMsg;
+
+private:
+    std::vector<ForceVector> forceList;
+    std::vector<TorqueVector> torqueList;
 };
 
 #endif
