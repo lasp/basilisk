@@ -37,10 +37,12 @@ fileName = os.path.basename(os.path.splitext(__file__)[0])
 from Basilisk.simulation.KinematicsArchitecture import KinematicsEngine
 from Basilisk.simulation.KinematicsArchitecture import Frame
 from Basilisk.simulation.KinematicsArchitecture import Vector
+from Basilisk.simulation.KinematicsArchitecture import ForceVector
+from Basilisk.simulation.KinematicsArchitecture import TorqueVector
 from Basilisk.simulation.KinematicsArchitecture import Tensor
 from Basilisk.simulation.KinematicsArchitecture import Part
-from Basilisk.simulation.KinematicsArchitecture import Joint
-from Basilisk.simulation.KinematicsArchitecture import Hinge
+from Basilisk.simulation.KinematicsArchitecture import ExtForce
+from Basilisk.simulation.KinematicsArchitecture import ExtTorque
 
 from Basilisk.simulation import SixDOFRigidBody
 from Basilisk.simulation import spacecraft
@@ -181,6 +183,8 @@ def translation(show_plots):
     myDynamicsEngine.ModelTag = "myDynamicsEngine"
     scSim.AddModelToTask(unitTaskName, myDynamicsEngine)
 
+    myExtForce = myDynamicsEngine.createExtForce(ForceVector([0, 0, 0], myInertialFrame, myPart.CoMPoint), myPart)
+
     #
     #   Logging
     #
@@ -198,7 +202,8 @@ def translation(show_plots):
     numSegments = 4
     forceMatrix = [[random.uniform(-1, 1) for _ in range(3)] for _ in range(numSegments)]
     for segment in range(numSegments):
-        myDynamicsEngine.setExternalForce(forceMatrix[segment], myInertialFrame)
+        force = ForceVector(forceMatrix[segment], myInertialFrame, myPart.CoMPoint)
+        myExtForce.setForce(force)
         scSim.ConfigureStopTime(simulationTime * (segment + 1))
         scSim.ExecuteSimulation()
 
@@ -316,6 +321,8 @@ def rotationTorque(show_plots):
     myDynamicsEngine.ModelTag = "myDynamicsEngine"
     scSim.AddModelToTask(unitTaskName, myDynamicsEngine)
 
+    myExtTorque = myDynamicsEngine.createExtTorque(TorqueVector([0, 0, 0], myPart.frame), myPart)
+
     #
     #   Logging
     #
@@ -332,7 +339,8 @@ def rotationTorque(show_plots):
     torqueMatrix = [[0.0, 0.0, 0.0] for _ in range(numSegments)]
     for segment in range(numSegments):
         torqueMatrix[segment][torqueIdx] = random.uniform(-1, 1)
-        myDynamicsEngine.setExternalTorque(torqueMatrix[segment], myPart.frame)
+        torque = TorqueVector(torqueMatrix[segment], myPart.frame)
+        myExtTorque.setTorque(torque)
         scSim.ConfigureStopTime(simulationTime * (segment + 1))
         scSim.ExecuteSimulation()
 
