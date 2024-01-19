@@ -64,7 +64,7 @@ def energyAngularMomentumConservation(show_plots):
     unitTaskName = "unitTask"
     unitProcessName = "TestProcess"
     scSim = SimulationBaseClass.SimBaseClass()
-    simulationTimeStep = macros.sec2nano(0.01)
+    simulationTimeStep = macros.sec2nano(0.00001)
     dynProcess = scSim.CreateNewProcess(unitProcessName)
     dynProcess.addTask(scSim.CreateNewTask(unitTaskName, simulationTimeStep))
 
@@ -83,7 +83,7 @@ def energyAngularMomentumConservation(show_plots):
     myPart.r_ScS.setPosition([1.0, -0.5, 1.5], myPart.frame)
     myPart.r_ScS.setVelocity([0.0, 0.0, 0.0], myPart.frame, myPart.frame)
     myPart.frame.r_SP.setPosition([10.0, 50.0, -30.0], myInertialFrame)
-    myPart.frame.r_SP.setVelocity([1.0, -3.0, 2.0], myInertialFrame, myInertialFrame)
+    myPart.frame.r_SP.setVelocity([-1, 1, 0.5], myInertialFrame, myInertialFrame)
     myPart.frame.sigma_SP.setAttitude([0.1, 0.2, -0.3])
     myPart.frame.sigma_SP.setAngularVelocity([0.05, 0.03, -0.02], myPart.frame)
 
@@ -99,7 +99,7 @@ def energyAngularMomentumConservation(show_plots):
     #
     samplingTime = simulationTimeStep
     stateLog = myPart.bodyStateOutMsg.recorder(samplingTime)
-    testingLog = myDynamicsEngine.logger(["rotEnergy", "rotAngMomPntC_N"], samplingTime)
+    testingLog = myDynamicsEngine.logger(["transAngMomPntN_N", "rotEnergy", "rotAngMomPntC_N"], samplingTime)
     scSim.AddModelToTask(unitTaskName, stateLog)
     scSim.AddModelToTask(unitTaskName, testingLog)
 
@@ -107,7 +107,7 @@ def energyAngularMomentumConservation(show_plots):
     # Simulation
     #
     scSim.InitializeSimulation()
-    simulationTime = macros.sec2nano(10.)
+    simulationTime = macros.sec2nano(0.01)
     scSim.ConfigureStopTime(simulationTime)
     scSim.ExecuteSimulation()
 
@@ -115,22 +115,34 @@ def energyAngularMomentumConservation(show_plots):
     # Plotting
     #
     timeAxis = testingLog.times() * macros.NANO2SEC
-    angularMomentum_N = testingLog.rotAngMomPntC_N
-    initialRotAngMom_N = [angularMomentum_N[0, 0], angularMomentum_N[0, 1], angularMomentum_N[0, 2]]
+    transAngularMomentum_N = testingLog.transAngMomPntN_N
+    initialTransAngMom_N = [transAngularMomentum_N[0, 0], transAngularMomentum_N[0, 1], transAngularMomentum_N[0, 2]]
+    rotAngularMomentum_N = testingLog.rotAngMomPntC_N
+    initialRotAngMom_N = [rotAngularMomentum_N[0, 0], rotAngularMomentum_N[0, 1], rotAngularMomentum_N[0, 2]]
     energy = testingLog.rotEnergy
     initialRotEnergy = energy[0]
 
     plt.figure(1)
     for idx in range(3):
         plt.plot(timeAxis,
-                 (angularMomentum_N[:, idx] - initialRotAngMom_N[idx]) / initialRotAngMom_N[idx],
+                 (transAngularMomentum_N[:, idx] - initialTransAngMom_N[idx]) / initialTransAngMom_N[idx],
                  color=unitTestSupport.getLineColor(idx, 3),
                  label=r'$H_' + str(idx) + '$')
     plt.legend(loc='best')
     plt.xlabel('Time [sec]')
-    plt.ylabel(r'Angular Momentum')
+    plt.ylabel(r'Translational Angular Momentum')
 
     plt.figure(2)
+    for idx in range(3):
+        plt.plot(timeAxis,
+                 (rotAngularMomentum_N[:, idx] - initialRotAngMom_N[idx]) / initialRotAngMom_N[idx],
+                 color=unitTestSupport.getLineColor(idx, 3),
+                 label=r'$H_' + str(idx) + '$')
+    plt.legend(loc='best')
+    plt.xlabel('Time [sec]')
+    plt.ylabel(r'Rotational Angular Momentum')
+
+    plt.figure(3)
     plt.plot(timeAxis, (energy - initialRotEnergy) / initialRotEnergy)
     plt.xlabel('Time [sec]')
     plt.ylabel(r'Energy')
@@ -143,10 +155,12 @@ def energyAngularMomentumConservation(show_plots):
     # Verification
     #
 
+    # TODO: change to relative accuracy
     accuracy = 1e-13
-    np.testing.assert_allclose(initialRotEnergy, energy, atol=accuracy)
+    np.testing.assert_allclose(initialRotEnergy, energy, rtol=accuracy)
     for i in range(3):
-        np.testing.assert_allclose(initialRotAngMom_N[i], angularMomentum_N[:, i], atol=accuracy)
+        np.testing.assert_allclose(initialRotAngMom_N[i], rotAngularMomentum_N[:, i], rtol=accuracy)
+        np.testing.assert_allclose(initialTransAngMom_N[i], transAngularMomentum_N[:, i], rtol=accuracy)
 
 
 def translation(show_plots):
@@ -214,8 +228,8 @@ def translation(show_plots):
     dataPos = stateLog.r_CN_N
     dataVel = stateLog.v_CN_N
 
-    angularMomentum_N = testingLog.rotAngMomPntC_N
-    initialRotAngMom_N = [angularMomentum_N[0, 0], angularMomentum_N[0, 1], angularMomentum_N[0, 2]]
+    rotAngularMomentum_N = testingLog.rotAngMomPntC_N
+    initialRotAngMom_N = [rotAngularMomentum_N[0, 0], rotAngularMomentum_N[0, 1], rotAngularMomentum_N[0, 2]]
     energy = testingLog.rotEnergy
     initialRotEnergy = energy[0]
 
@@ -241,7 +255,7 @@ def translation(show_plots):
     plt.figure(3)
     for idx in range(3):
         plt.plot(timeAxis,
-                 (angularMomentum_N[:, idx] - initialRotAngMom_N[idx]) / initialRotAngMom_N[idx],
+                 (rotAngularMomentum_N[:, idx] - initialRotAngMom_N[idx]) / initialRotAngMom_N[idx],
                  color=unitTestSupport.getLineColor(idx, 3),
                  label=r'$H_' + str(idx) + '$')
     plt.legend(loc='best')
@@ -280,7 +294,7 @@ def translation(show_plots):
     np.testing.assert_allclose(trueVel, dataVel, atol=accuracy)
     np.testing.assert_allclose(initialRotEnergy, energy, atol=accuracy)
     for i in range(3):
-        np.testing.assert_allclose(initialRotAngMom_N[i], angularMomentum_N[:, i], atol=accuracy)
+        np.testing.assert_allclose(initialRotAngMom_N[i], rotAngularMomentum_N[:, i], atol=accuracy)
 
 
 def rotationTorque(show_plots):
@@ -453,8 +467,8 @@ def rotationTorqueFree(show_plots):
     dataSigmaBN = stateLog.sigma_BN
     dataOmegaBN = stateLog.omega_BN_B
 
-    angularMomentum_N = testingLog.rotAngMomPntC_N
-    initialRotAngMom_N = [angularMomentum_N[0, 0], angularMomentum_N[0, 1], angularMomentum_N[0, 2]]
+    rotAngularMomentum_N = testingLog.rotAngMomPntC_N
+    initialRotAngMom_N = [rotAngularMomentum_N[0, 0], rotAngularMomentum_N[0, 1], rotAngularMomentum_N[0, 2]]
     energy = testingLog.rotEnergy
     initialRotEnergy = energy[0]
 
@@ -479,7 +493,7 @@ def rotationTorqueFree(show_plots):
 
     plt.figure(3)
     plt.plot(timeAxis,
-             (angularMomentum_N[:, 2] - initialRotAngMom_N[2]) / initialRotAngMom_N[2],
+             (rotAngularMomentum_N[:, 2] - initialRotAngMom_N[2]) / initialRotAngMom_N[2],
              label=r'$H_3$')
     plt.legend(loc='best')
     plt.xlabel('Time [sec]')
@@ -520,11 +534,11 @@ def rotationTorqueFree(show_plots):
     np.testing.assert_allclose(trueAngVel, dataOmegaBN, atol=accuracy)
     np.testing.assert_allclose(initialRotEnergy, energy, atol=accuracy)
     for i in range(3):
-        np.testing.assert_allclose(initialRotAngMom_N[i], angularMomentum_N[:, i], atol=accuracy)
+        np.testing.assert_allclose(initialRotAngMom_N[i], rotAngularMomentum_N[:, i], atol=accuracy)
 
 
 if __name__ == "__main__":
-    # energyAngularMomentumConservation(True)
+    energyAngularMomentumConservation(True)
     # translation(True)
-    rotationTorque(True)
+    # rotationTorque(True)
     # rotationTorqueFree(True)
