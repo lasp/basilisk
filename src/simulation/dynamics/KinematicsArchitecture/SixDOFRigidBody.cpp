@@ -67,6 +67,7 @@ void SixDOFRigidBody::initializeDynamics() {
     auto omega_BN = this->baseFrame->sigma_SP->getAngularVelocity();
 
     // Get position and velocity from the center of mass
+    // TODO: change this to use the kinematics engine to find these properties between points
     auto r_CN = this->baseFrame->r_SP->getPosition() + this->body->r_ScS->getPosition();
     auto rDot_CN = this->baseFrame->r_SP->getVelocity(this->inertialFrame)
             + this->body->r_ScS->getVelocity(this->inertialFrame);
@@ -137,13 +138,6 @@ void SixDOFRigidBody::postIntegration(double callTime) {
     this->computeEnergyMomentum(callTime);
 }
 
-void SixDOFRigidBody::computeEnergyMomentum(double time) {
-    auto omega_BN = Vector(this->omegaState_B->getState(), this->baseFrame);
-
-    this->rotAngMomPntC_N = (this->IScPntC * omega_BN).getMatrix(this->inertialFrame);
-    this->rotEnergy = 1.0 / 2.0 * omega_BN.dot(this->IScPntC * omega_BN);
-}
-
 void SixDOFRigidBody::updateKinematics() {
     auto r_CN = Vector(this->positionState_N->getState(), this->inertialFrame);
     auto rDot_CN = Vector(this->velocityState_N->getState(), this->inertialFrame);
@@ -158,4 +152,15 @@ void SixDOFRigidBody::updateKinematics() {
     this->baseFrame->r_SP->setVelocity(rDot_BN, this->inertialFrame);
     this->baseFrame->sigma_SP->setAttitude(sigma_BN);
     this->baseFrame->sigma_SP->setAngularVelocity(omega_BN);
+}
+
+void SixDOFRigidBody::computeEnergyMomentum(double time) {
+    // TODO: change this to use class info instead of grabbing from stateData since it's called after updateKinematics
+    auto r_CN = Vector(this->positionState_N->getState(), this->inertialFrame);
+    auto rDot_CN = Vector(this->velocityState_N->getState(), this->inertialFrame);
+    auto omega_BN = Vector(this->omegaState_B->getState(), this->baseFrame);
+
+    this->transAngMomPntN_N = this->body->mass * r_CN.cross(rDot_CN).getMatrix(this->inertialFrame);
+    this->rotAngMomPntC_N = (this->IScPntC * omega_BN).getMatrix(this->inertialFrame);
+    this->rotEnergy = 1.0 / 2.0 * omega_BN.dot(this->IScPntC * omega_BN);
 }

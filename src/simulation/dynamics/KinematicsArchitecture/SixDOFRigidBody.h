@@ -52,6 +52,7 @@ public:
 
     double rotEnergy = 0.0;
     Eigen::Vector3d rotAngMomPntC_N = Eigen::Vector3d::Zero();
+    Eigen::Vector3d transAngMomPntN_N = Eigen::Vector3d::Zero();
 
 private:
     StateData* sigmaState = nullptr;
