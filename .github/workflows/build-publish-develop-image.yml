@@ -57,7 +57,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ matrix.components.image }}
 
       - name: Build and push ${{ matrix.components.image }}
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           context: ${{ matrix.components.context }}
           file: ${{ matrix.components.file }}
