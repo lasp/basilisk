@@ -3,7 +3,7 @@ name: "Publish Develop Basilisk"
 on:
   push:
     branches:
-      - develop
+      - ci/docker-container-build-fail-dockerfile-path
     tags:
       - v*
 
