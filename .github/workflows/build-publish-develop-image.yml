@@ -30,7 +30,6 @@ jobs:
       matrix:
         components:
           - image: lasp-basilisk
-            context: lasp-basilisk
             file: .github/workflows/Dockerfile
 
     name: ${{ matrix.components.image }}
@@ -59,7 +58,6 @@ jobs:
       - name: Build and push ${{ matrix.components.image }}
         uses: docker/build-push-action@v5
         with:
-          context: ${{ matrix.components.context }}
           file: ${{ matrix.components.file }}
           platforms: linux/amd64,linux/arm64
           push: true
