@@ -40,8 +40,8 @@ RUN python -m pip install conan==1.61.0 pandas parse matplotlib numpy Pillow pyt
 ENV CONAN_REVISIONS_ENABLED=1
 ENV PYTHONUNBUFFERED=1
 RUN conan remote add bincrafters https://bincrafters.jfrog.io/artifactory/api/conan/public-conan
-RUN conan install . --build=missing -s build_type=Release -if dist3/conan \
-    -o opNav=True \
+RUN conan install . --build=missing -s build_type=Debug -if dist3/conan \
+    -o opNav=False \
     -o vizInterface=False \
     -o generator="Ninja"
 
