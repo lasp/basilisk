@@ -206,14 +206,33 @@ function(generate_package_libraries INIT_DIRECTORY AllLibs)
       PARENT_SCOPE)
 endfunction(generate_package_libraries)
 
-function(find_package_targets PKG_DIR ALL_TARGET_LIST)
+function(find_package_targets PKG_DIR ALL_TARGET_LIST TARGETS_TO_INCLUDE)
   file(
-    GLOB_RECURSE SWIG_TARGETS
+    GLOB_RECURSE SWIG_INTERFACES
     RELATIVE ${CMAKE_SOURCE_DIR}
     "${PKG_DIR}/*.i")
-  set(${ALL_TARGET_LIST}
-      ${SWIG_TARGETS}
+
+  if(NOT TARGETS_TO_INCLUDE STREQUAL "")
+    set(SWIG_INTERFACES_TO_BUILD "")
+    foreach (INTERFACE ${SWIG_INTERFACES})
+      get_filename_component(INTERFACE_NAME ${INTERFACE} NAME_WE)
+      message("${INTERFACE_NAME}")
+      if (${INTERFACE_NAME} IN_LIST TARGETS_TO_INCLUDE)
+        message("Target: ${INTERFACE} will be built")
+        list(APPEND SWIG_INTERFACES_TO_BUILD ${INTERFACE})
+      endif ()
+    endforeach ()
+
+    set(${ALL_TARGET_LIST}
+      ${SWIG_INTERFACES_TO_BUILD}
       PARENT_SCOPE)
+  else ()
+
+    set(${ALL_TARGET_LIST}
+      ${SWIG_INTERFACES}
+      PARENT_SCOPE)
+  endif ()
+
 endfunction(find_package_targets)
 
 function(generate_package_targets TARGET_LIST LIB_DEP_LIST MODULE_DIR)
@@ -517,21 +536,21 @@ set(ARCHITECTURE_LIBS architectureLib ArchitectureUtilities ModuleIdGenerator cM
 # (dynamicsLib), 3) Look for custom CMakeLists.txt to link additional libraries.
 
 # Finds relative path of all .i files within the directory
-find_package_targets("${CMAKE_SOURCE_DIR}/simulation/dynamics" DYN_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/simulation/environment" ENV_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/simulation/onboardDataHandling" DATA_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/simulation/deviceInterface" DEVICE_INTERFACE_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/simulation/power" POWER_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/simulation/navigation" NAV_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/simulation/sensors" SENSORS_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/simulation/simSynch" SIM_SYNCH_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/simulation/vizard" VIZ_INTERFACE_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/simulation/thermal" THERMAL_TARGETS)
+find_package_targets("${CMAKE_SOURCE_DIR}/simulation/dynamics" DYN_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/simulation/environment" ENV_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/simulation/onboardDataHandling" DATA_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/simulation/deviceInterface" DEVICE_INTERFACE_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/simulation/power" POWER_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/simulation/navigation" NAV_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/simulation/sensors" SENSORS_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/simulation/simSynch" SIM_SYNCH_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/simulation/vizard" VIZ_INTERFACE_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/simulation/thermal" THERMAL_TARGETS "${TARGETS_TO_INCLUDE}")
 
 if(NOT "${EXTERNAL_MODULES_PATH}" STREQUAL "")
   string(REPLACE "\\" "/" EXTERNAL_MODULES_PATH "${EXTERNAL_MODULES_PATH}")
   include_directories("${EXTERNAL_MODULES_PATH}")
-  find_package_targets("${EXTERNAL_MODULES_PATH}" EXTERNAL_MODULE_TARGETS)
+  find_package_targets("${EXTERNAL_MODULES_PATH}" EXTERNAL_MODULE_TARGETS "")
   if(EXISTS "${EXTERNAL_MODULES_PATH}/ExternalModules/_GeneralModuleFiles")
     generate_package_libraries("${EXTERNAL_MODULES_PATH}" "${AllLibs}")
   endif()
@@ -551,24 +570,6 @@ generate_package_targets("${VIZ_INTERFACE_TARGETS}" "${ARCHITECTURE_LIBS};" "sim
 generate_package_targets("${THERMAL_TARGETS}" "${ARCHITECTURE_LIBS};" "simulation")
 
 # FSW ALGORITHMS
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/attControl" ATT_CONTROL_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/attDetermination" ATT_DET_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/attGuidance" ATT_GUID_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/dvGuidance" DV_GUID_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/effectorInterfaces" EFF_INTERFACES_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/formationFlying" FORM_FLYING_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/fswUtilities" FSW_UTIL_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/imageProcessing" IMAGE_PROC_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/opticalNavigation" OPT_NAV_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/pointCloudProcessing" PNT_CLOUD_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/rwConfigData" RW_CONFIG_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/sensorInterfaces" SENSOR_INTERFACE_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/smallBodyNavigation" SMALLBODY_NAV_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/stateEstimation" STATE_EST_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/orbitControl" ORBIT_CONTROL_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/transDetermination" TRANS_DET_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/vehicleConfigData" VEH_CONFIG_TARGETS)
-
 generate_package_targets("${ATT_CONTROL_TARGETS}" "${ARCHITECTURE_LIBS};" "fswAlgorithms")
 generate_package_targets("${ATT_DET_TARGETS}" "${ARCHITECTURE_LIBS};" "fswAlgorithms")
 generate_package_targets("${ATT_GUID_TARGETS}" "attGuidanceLib;${ARCHITECTURE_LIBS};" "fswAlgorithms")
@@ -586,9 +587,27 @@ generate_package_targets("${STATE_EST_TARGETS}" "${ARCHITECTURE_LIBS};" "fswAlgo
 generate_package_targets("${ORBIT_CONTROL_TARGETS}" "${ARCHITECTURE_LIBS};" "fswAlgorithms")
 generate_package_targets("${TRANS_DET_TARGETS}" "transDeterminationLib;${ARCHITECTURE_LIBS};" "fswAlgorithms")
 generate_package_targets("${VEH_CONFIG_TARGETS}" "${ARCHITECTURE_LIBS};" "fswAlgorithms")
+find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/attControl" ATT_CONTROL_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/attDetermination" ATT_DET_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/attGuidance" ATT_GUID_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/dvGuidance" DV_GUID_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/effectorInterfaces" EFF_INTERFACES_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/formationFlying" FORM_FLYING_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/fswUtilities" FSW_UTIL_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/imageProcessing" IMAGE_PROC_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/opticalNavigation" OPT_NAV_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/pointCloudProcessing" PNT_CLOUD_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/rwConfigData" RW_CONFIG_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/sensorInterfaces" SENSOR_INTERFACE_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/smallBodyNavigation" SMALLBODY_NAV_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/stateEstimation" STATE_EST_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/orbitControl" ORBIT_CONTROL_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/transDetermination" TRANS_DET_TARGETS "${TARGETS_TO_INCLUDE}")
+find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/vehicleConfigData" VEH_CONFIG_TARGETS "${TARGETS_TO_INCLUDE}")
+
 
 # TEMPLATE MODULES
-find_package_targets("${CMAKE_SOURCE_DIR}/moduleTemplates" TEMPLATE_MODULES_TARGETS)
+find_package_targets("${CMAKE_SOURCE_DIR}/moduleTemplates" TEMPLATE_MODULES_TARGETS "")
 
 generate_package_targets("${TEMPLATE_MODULES_TARGETS}" "${ARCHITECTURE_LIBS};" "moduleTemplates")
 
@@ -596,13 +615,12 @@ generate_package_targets("${TEMPLATE_MODULES_TARGETS}" "${ARCHITECTURE_LIBS};" "
 add_message_headers()
 
 # ARCHITECTURE
-find_package_targets("${CMAKE_SOURCE_DIR}/architecture" ARCHITECTURE_TARGETS)
 generate_package_targets("${ARCHITECTURE_TARGETS}" "${ARCHITECTURE_LIBS};" "architecture")
+find_package_targets("${CMAKE_SOURCE_DIR}/architecture" ARCHITECTURE_TARGETS "")
 
 # Pyswice
-find_package_targets("${CMAKE_SOURCE_DIR}/topLevelModules/pyswice" PYSWICE_TARGETS) # Finds relative path of all .i
-                                                                                    # files within the directory
 generate_package_targets("${PYSWICE_TARGETS}" "${ARCHITECTURE_LIBS};${library_dependencies}" "topLevelModules")
+find_package_targets("${CMAKE_SOURCE_DIR}/topLevelModules/pyswice" PYSWICE_TARGETS "")
 
 # PYTHON PACKAGE CONFIGURATION
 # Must make the build directories first, so that cmake can insert empty init files before build (linux specific need)
