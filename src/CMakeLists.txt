@@ -50,6 +50,17 @@ include(bskTargetExcludeBuildOptions)
 # dependencies will often be met with the compiler that CMake ends up finding.
 set(CONAN_DISABLE_CHECK_COMPILER TRUE CACHE BOOL "" FORCE )
 
+# ! get_required_basilisk_modules_list : reads the required modules .txt file for modules to include in build.
+# If the file is absent or empty all modules are included for build
+#
+function(get_required_basilisk_modules_list TARGETS)
+  set(TARGET_NAMES "")
+  if(EXISTS "${CMAKE_SOURCE_DIR}/requiredModules.txt")
+    file(STRINGS "requiredModules.txt" TARGET_NAMES)
+  endif ()
+  set(${TARGETS} ${TARGET_NAMES} PARENT_SCOPE)
+endfunction(get_required_basilisk_modules_list)
+
 # ! create_symlinks : create symlinks to support files in source rather than keeping them in dist The function takes one
 # required argument and N optional arguments. \argn: a list of supporting file paths
 #
@@ -338,6 +349,8 @@ endfunction(generate_package_targets)
 # Start of main projection configuration
 find_package(PythonInterp 3 REQUIRED)
 find_package(PythonLibs 3 REQUIRED)
+
+get_required_basilisk_modules_list(TARGETS_TO_INCLUDE)
 
 include(FetchContent)
 FetchContent_Declare(
