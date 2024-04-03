@@ -4,7 +4,7 @@ name: Deploy Latest Basilisk Documentation to Pages
 on:
   # Runs on pushes targeting the default branch:
   pull_request:
-    branches: ["origin/ci/publish-docs-to-pages-on-pr"]
+    branches: ["ci/publish-docs-to-pages-on-pr"]
   push:
     branches: ["develop"]
     tags:
