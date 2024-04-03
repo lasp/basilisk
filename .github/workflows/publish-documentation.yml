@@ -7,7 +7,9 @@ on:
     branches:
       - 'ci/publish-docs-to-pages-on-pr'
   push:
-    branches: ["develop"]
+    branches:
+      - 'develop'
+      - 'ci/publish-docs-to-pages-on-pr'
     tags:
       - v*
 
