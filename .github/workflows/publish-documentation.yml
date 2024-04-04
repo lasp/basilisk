@@ -88,7 +88,7 @@ jobs:
         run: source .venv/bin/activate && pip3 install wheel conan==1.61.0 pytest datashader holoviews pytest-xdist
 
       - name: "Build basilisk"
-        run: source .venv/bin/activate && python3 conanfile.py --opNav True --vizInterface True
+        run: source .venv/bin/activate && python3 conanfile.py --opNav False --vizInterface False
 
       - name: "Run Python Tests"
         run: |
@@ -101,6 +101,9 @@ jobs:
 
       - id: deployment
         uses: sphinx-notes/pages@v3
+        with:
+          checkout: false
+          requirements_path: ./docs/source/bskPkgOptions.txt
 
 #      - name: Setup Pages
 #        uses: actions/configure-pages@v5
