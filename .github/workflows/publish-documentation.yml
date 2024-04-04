@@ -105,6 +105,7 @@ jobs:
           checkout: false
           requirements_path: ./docs/source/bskPkgOptions.txt
           sphinx_version: 4.5.0
+          sphinx_build_options: -c ./docs/source/conf.py
 
 #      - name: Setup Pages
 #        uses: actions/configure-pages@v5
