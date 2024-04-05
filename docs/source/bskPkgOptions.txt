@@ -6,3 +6,5 @@ pytest-xdist
 pytest-html
 pytest-html
 docutils
+numpy
+matplotlib
