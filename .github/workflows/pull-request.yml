@@ -92,6 +92,8 @@ jobs:
       security-events: write
     env:
       MPLBACKEND: agg
+      CONAN_USER_HOME: "${{ github.workspace }}/release/"
+      CONAN_USER_HOME_SHORT: "${{ github.workspace }}/release/short"
     steps:
       - name: Checkout code
         uses: nschloe/action-checkout-with-lfs-cache@v1
@@ -101,6 +103,17 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
           cache-dependency-path: '**/bskPkgRequired.txt'
+      - name: Cache conan packages
+        id: cache-conan
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-conan-packages
+        with:
+          # conan cache files are stored in `~/.conan` on Linux/macOS
+          path: ~/.conan
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('conanfile.py') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
       - name: Choco help
         uses: crazy-max/ghaction-chocolatey@v3
         with:
