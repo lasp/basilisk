@@ -92,8 +92,6 @@ jobs:
       security-events: write
     env:
       MPLBACKEND: agg
-      CONAN_USER_HOME: "${{ github.workspace }}/release/"
-      CONAN_USER_HOME_SHORT: "${{ github.workspace }}/release/short"
     steps:
       - name: Checkout code
         uses: nschloe/action-checkout-with-lfs-cache@v1
