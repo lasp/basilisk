@@ -109,8 +109,7 @@ jobs:
         env:
           cache-name: cache-conan-packages
         with:
-          # conan cache files are stored in `~/.conan` on Linux/macOS
-          path: ~/.conan
+          path: c:\data\.conan
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('conanfile.py') }}
           restore-keys: |
             ${{ runner.os }}-build-${{ env.cache-name }}-
