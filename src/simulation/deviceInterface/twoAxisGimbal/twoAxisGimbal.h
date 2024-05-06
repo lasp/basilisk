@@ -21,6 +21,12 @@
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/bskLogging.h"
+#include "architecture/messaging/messaging.h"
+#include "cMsgCInterface/HingedRigidBodyMsg_C.h"
+#include "cMsgCInterface/MotorStepCommandMsg_C.h"
+#include "cMsgCInterface/StepperMotorMsg_C.h"
+#include "cMsgCInterface/TwoAxisGimbalMsg_C.h"
+#include "cMsgCInterface/PrescribedRotationMsg_C.h"
 
 /*! @brief Two Axis Gimbal Class */
 class TwoAxisGimbal: public SysModel {
@@ -30,6 +36,15 @@ public:
 
     void Reset(uint64_t CurrentSimNanos) override;                                  //!< Reset member function
     void UpdateState(uint64_t CurrentSimNanos) override;                            //!< Update member function
+
+    ReadFunctor<HingedRigidBodyMsgPayload> motor1InitStateInMsg;                    //!< Input msg for stepper motor 1 initial state
+    ReadFunctor<HingedRigidBodyMsgPayload> motor2InitStateInMsg;                    //!< Input msg for stepper motor 2 initial state
+    ReadFunctor<MotorStepCommandMsgPayload> motor1StepCmdInMsg;                     //!< Input msg for stepper motor 1 steps commanded
+    ReadFunctor<MotorStepCommandMsgPayload> motor2StepCmdInMsg;                     //!< Input msg for stepper motor 2 steps commanded
+    ReadFunctor<StepperMotorMsgPayload> motor1StateInMsg;                           //!< Input msg for stepper motor 1 state information
+    ReadFunctor<StepperMotorMsgPayload> motor2StateInMsg;                           //!< Input msg for stepper motor 2 state information
+    Message<TwoAxisGimbalMsgPayload> twoAxisGimbalOutMsg;                           //!< Output msg for the gimbal tip and tilt angles
+    Message<PrescribedRotationMsgPayload> prescribedRotationOutMsg;                 //!< Output msg for the hub-relative prescribed rotational states
 
     BSKLogger *bskLogger;                                                           //!< BSK Logging
 

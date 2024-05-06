@@ -30,6 +30,21 @@ from Basilisk.architecture.swig_common_model import *
 %include "sys_model.i"
 %include "twoAxisGimbal.h"
 
+%include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
+struct HingedRigidBodyMsg_C;
+
+%include "architecture/msgPayloadDefC/MotorStepCommandMsgPayload.h"
+struct MotorStepCommandMsg_C;
+
+%include "architecture/msgPayloadDefC/StepperMotorMsgPayload.h"
+struct StepperMotorMsg_C;
+
+%include "architecture/msgPayloadDefC/TwoAxisGimbalMsgPayload.h"
+struct TwoAxisGimbalMsg_C;
+
+%include "architecture/msgPayloadDefC/PrescribedRotationMsgPayload.h"
+struct PrescribedRotationMsg_C;
+
 %pythoncode %{
 import sys
 protectAllClasses(sys.modules[__name__])

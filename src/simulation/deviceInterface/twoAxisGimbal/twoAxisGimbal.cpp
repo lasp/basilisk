@@ -24,6 +24,24 @@
  @param callTime [ns] Time the method is called
 */
 void TwoAxisGimbal::Reset(uint64_t callTime) {
+    if (!this->motor1InitStateInMsg.isLinked()) {
+        _bskLog(this->bskLogger, BSK_ERROR, "twoAxisGimbal.motor1InitStateInMsg wasn't connected.");
+    }
+    if (!this->motor2InitStateInMsg.isLinked()) {
+        _bskLog(this->bskLogger, BSK_ERROR, "twoAxisGimbal.motor2InitStateInMsg wasn't connected.");
+    }
+    if (!this->motor1StepCmdInMsg.isLinked()) {
+        _bskLog(this->bskLogger, BSK_ERROR, "twoAxisGimbal.motor1StepCmdInMsg wasn't connected.");
+    }
+    if (!this->motor2StepCmdInMsg.isLinked()) {
+        _bskLog(this->bskLogger, BSK_ERROR, "twoAxisGimbal.motor2StepCmdInMsg wasn't connected.");
+    }
+    if (!this->motor1StateInMsg.isLinked()) {
+        _bskLog(this->bskLogger, BSK_ERROR, "twoAxisGimbal.motor1StateInMsg wasn't connected.");
+    }
+    if (!this->motor2StateInMsg.isLinked()) {
+        _bskLog(this->bskLogger, BSK_ERROR, "twoAxisGimbal.motor2StateInMsg wasn't connected.");
+    }
 }
 
 /*! This method determines the two-axis gimbal tip and tilt angles and profiles its prescribed hub-relative rotational
