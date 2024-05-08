@@ -32,6 +32,7 @@
 /*! @brief Two Axis Gimbal Class */
 class TwoAxisGimbal: public SysModel {
 public:
+
     TwoAxisGimbal() = default;                                                      //!< Constructor
     ~TwoAxisGimbal() = default;                                                     //!< Destructor
 
@@ -59,6 +60,18 @@ public:
     BSKLogger *bskLogger;                                                           //!< BSK Logging
 
 private:
+    void computeGimbalActuationParameters();
+    Eigen::Vector3d interpolateMotorAnglesToGimbalPRV();
+    void actuateGimbal(double t);                                                   //!< High-level method used to simulate the gimbal states in time
+    void resetGimbal(double t);                                                     //!< Method used to reset the gimbal states when the current request is complete and a new request is received
+    void updateGimbalRotationParameters();                                          //!< Method used to update the gimbal rotation parameters after a step is completed
+    bool isInGimbalStepFirstHalf(double t);                                         //!< Method used to determine if the gimbal is in the first half of a step
+    void computeGimbalStepFirstHalf(double t);                                      //!< Method used to compute the gimbal states during the first half of each step
+    bool isInGimbalStepSecondHalf(double t);                                        //!< Method used to determine if the gimbal is in the second half of a step
+    void computeGimbalStepSecondHalf(double t);                                     //!< Method used to compute the gimbal states during the second half of each step
+    void computeGimbalStepComplete(double t);
+    void writeOutputMessages(uint64_t CurrentSimNanos);                             //!< Method for writing the module output messages and computing the output message data
+
     // Stepper motor state data
     double motorStepAngle;                                                          //!< [rad] Angle the stepper motor moves through for a single step
     double motorStepTime;                                                           //!< [s] Time required for a single motor step (constant)
