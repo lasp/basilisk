@@ -27,6 +27,7 @@
 #include "cMsgCInterface/StepperMotorMsg_C.h"
 #include "cMsgCInterface/TwoAxisGimbalMsg_C.h"
 #include "cMsgCInterface/PrescribedRotationMsg_C.h"
+#include <Eigen/Dense>
 
 /*! @brief Two Axis Gimbal Class */
 class TwoAxisGimbal: public SysModel {
@@ -36,6 +37,15 @@ public:
 
     void Reset(uint64_t CurrentSimNanos) override;                                  //!< Reset member function
     void UpdateState(uint64_t CurrentSimNanos) override;                            //!< Update member function
+
+    void setGimbalRotHat1_M(const Eigen::Vector3d &rotHat1_M);                      //!< Setter for the gimbal rotation axis 1
+    void setGimbalRotHat2_F(const Eigen::Vector3d &rotHat2_F);                      //!< Setter for the gimbal rotation axis 2
+    void setMotorStepAngle(const double stepAngle);                                 //!< Setter method for the motor step angle
+    void setMotorStepTime(const double stepTime);                                   //!< Setter method for the motor step time
+    const Eigen::Vector3d &getGimbalRotHat1_M() const;                              //!< Getter for the gimbal rotation axis 1
+    const Eigen::Vector3d &getGimbalRotHat2_F() const;                              //!< Getter for the gimbal rotation axis 2
+    double getMotorStepAngle() const;                                               //!< Getter method for the motor step angle
+    double getMotorStepTime() const;                                                //!< Getter method for the motor step time
 
     ReadFunctor<HingedRigidBodyMsgPayload> motor1InitStateInMsg;                    //!< Input msg for stepper motor 1 initial state
     ReadFunctor<HingedRigidBodyMsgPayload> motor2InitStateInMsg;                    //!< Input msg for stepper motor 2 initial state
@@ -49,6 +59,10 @@ public:
     BSKLogger *bskLogger;                                                           //!< BSK Logging
 
 private:
+    double motorStepAngle;                                                          //!< [rad] Angle the stepper motor moves through for a single step
+    double motorStepTime;                                                           //!< [s] Time required for a single motor step (constant)
+    Eigen::Vector3d gimbalRotHat1_M;                                                //!< Gimbal tip angle axis of rotation 1 expressed in M frame components
+    Eigen::Vector3d gimbalRotHat2_F;                                                //!< Gimbal tilt angle axis of rotation 2 expressed in F frame components
 };
 
 #endif

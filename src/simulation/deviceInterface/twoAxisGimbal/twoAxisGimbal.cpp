@@ -52,3 +52,63 @@ rotational states are then written to the output messages.
 */
 void TwoAxisGimbal::UpdateState(uint64_t callTime) {
 }
+
+/*! Setter method for the gimbal rotation axis 1.
+ @return void
+ @param rotHat1_M Gimbal tip angle axis of rotation 1 expressed in M frame components (unit vector)
+*/
+void TwoAxisGimbal::setGimbalRotHat1_M(const Eigen::Vector3d &rotHat1_M) {
+    this->gimbalRotHat1_M = rotHat1_M / rotHat1_M.norm();
+}
+
+/*! Setter method for the gimbal rotation axis 2.
+ @return void
+ @param rotHat2_F Gimbal tilt angle axis of rotation 2 expressed in F frame components (unit vector)
+*/
+void TwoAxisGimbal::setGimbalRotHat2_F(const Eigen::Vector3d &rotHat2_F) {
+    this->gimbalRotHat2_F = rotHat2_F / rotHat2_F.norm();
+}
+
+/*! Setter method for the motor step angle.
+ @return void
+ @param stepAngle [rad] Motor step angle
+*/
+void TwoAxisGimbal::setMotorStepAngle(const double stepAngle) {
+    this->motorStepAngle = stepAngle;
+}
+
+/*! Setter method for the motor step time.
+ @return void
+ @param stepTime [s] Motor step time
+*/
+void TwoAxisGimbal::setMotorStepTime(const double stepTime) {
+    this->motorStepTime = stepTime;
+}
+
+/*! Getter method for the gimbal rotation axis 1.
+ @return const Eigen::Vector3d
+*/
+const Eigen::Vector3d &TwoAxisGimbal::getGimbalRotHat1_M() const {
+    return this->gimbalRotHat1_M;
+}
+
+/*! Getter method for the gimbal rotation axis 2.
+ @return const Eigen::Vector3d
+*/
+const Eigen::Vector3d &TwoAxisGimbal::getGimbalRotHat2_F() const {
+    return this->gimbalRotHat2_F;
+}
+
+/*! Getter method for the motor step angle.
+ @return double
+*/
+double TwoAxisGimbal::getMotorStepAngle() const {
+    return this->motorStepAngle;
+}
+
+/*! Getter method for the motor step time.
+ @return double
+*/
+double TwoAxisGimbal::getMotorStepTime() const {
+    return this->motorStepTime;
+}
