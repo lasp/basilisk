@@ -33,7 +33,7 @@
 class TwoAxisGimbal: public SysModel {
 public:
 
-    TwoAxisGimbal() = default;                                                      //!< Constructor
+    TwoAxisGimbal();                                                      //!< Constructor
     ~TwoAxisGimbal() = default;                                                     //!< Destructor
 
     void Reset(uint64_t CurrentSimNanos) override;                                  //!< Reset member function
@@ -60,8 +60,25 @@ public:
     BSKLogger *bskLogger;                                                           //!< BSK Logging
 
 private:
+    double motor_to_gimbal_tip_angle[321][321];
+    double motor_to_gimbal_tilt_angle[321][321];
+
+    double pullGimbalTipAngle(double motor1Angle, double motor2Angle);
+    double pullGimbalTiltAngle(double motor1Angle, double motor2Angle);
+    double linearInterpolation(double x1, double x2, double z1, double z2, double x);
+    double bilinearInterpolation(double x1,
+                                 double x2,
+                                 double y1,
+                                 double y2,
+                                 double z11,
+                                 double z12,
+                                 double z21,
+                                 double z22,
+                                 double x,
+                                 double y);
+
     void computeGimbalActuationParameters();
-    Eigen::Vector3d interpolateMotorAnglesToGimbalPRV();
+    void interpolateMotorAngles();
     void actuateGimbal(double t);                                                   //!< High-level method used to simulate the gimbal states in time
     void resetGimbal(double t);                                                     //!< Method used to reset the gimbal states when the current request is complete and a new request is received
     void updateGimbalRotationParameters();                                          //!< Method used to update the gimbal rotation parameters after a step is completed
@@ -99,6 +116,8 @@ private:
     double gimbalPRVThetaDDot;                                                      //!< [rad/s^2] Current profiled gimbal prv angular acceleration
     double gimbalTheta1;                                                            //!< [rad] Current gimbal tip angle
     double gimbalTheta2;                                                            //!< [rad] Current gimbal tilt angle
+    double gimbalTheta1Ref;                                                         //!< [rad] Reference gimbal tip angle
+    double gimbalTheta2Ref;                                                         //!< [rad] Reference gimbal tilt angle
 
     /* Temporal parameters */
     double previousWrittenTime;                                                     //!< [ns] Time the last input message was written
