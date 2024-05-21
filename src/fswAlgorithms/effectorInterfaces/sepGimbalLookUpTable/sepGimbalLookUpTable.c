@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <float.h>
+#include <cstdio>
 
 /* Other required files to import */
 #include <stdbool.h>
@@ -31,6 +32,7 @@
 #include "architecture/utilities/linearAlgebra.h"
 #include "architecture/utilities/rigidBodyKinematics.h"
 #include "architecture/utilities/macroDefinitions.h"
+
 #define MAXCHAR 4091
 #define MAX_ROWS 4091
 #include <stdio.h>  /* defines FILENAME_MAX */
@@ -54,7 +56,8 @@ void SelfInit_sepGimbalLookUpTable(SepGimbalLookUpTableConfig* configData, int64
     // Initialize the output messages
     HingedRigidBodyMsg_C_init(&configData->motor1AngleOutMsg);
     HingedRigidBodyMsg_C_init(&configData->motor2AngleOutMsg);
-    const char* fileName = "C:\\Users\\ShamsaS\\Documents\\software-projects\\basilisk-lasp\\src\\fswAlgorithms\\effectorInterfaces\\sepGimbalLookUpTable\\platformAngle_motorAngle.csv";
+    const char* fileName_1 = "C:\\Users\\ShamsaS\\Documents\\software-projects\\basilisk-lasp\\src\\fswAlgorithms\\effectorInterfaces\\sepGimbalLookUpTable\\P_M1.csv";
+    const char* fileName_2 = "C:\\Users\\ShamsaS\\Documents\\software-projects\\basilisk-lasp\\src\\fswAlgorithms\\effectorInterfaces\\sepGimbalLookUpTable\\P_M2.csv";
 
     // Allocate memory for rows
     for (int i = 0; i < MAX_ROWS; i++) {
@@ -73,7 +76,9 @@ void SelfInit_sepGimbalLookUpTable(SepGimbalLookUpTableConfig* configData, int64
             exit(1); // Handle the error gracefully
         }
     }
-    int result = readData(fileName, configData->rows);
+    int result_1 = readData(fileName_1, configData->rows);
+    int result_2 = readData(fileName_2, configData->rows);
+
 }
 
 /*! This method performs a complete reset of the module. The input messages are checked to ensure they are linked.
@@ -100,106 +105,75 @@ void Reset_sepGimbalLookUpTable(SepGimbalLookUpTableConfig* configData, uint64_t
 
     // Set the motor2 angle to zero  
     configData->motor2Angle = 0.0;   
-
-    //Set the norm to zero  
-    configData->norm = 0.0;
-
 }
 
-int findMatchingTipAngles(LookUpTableRowElements *rows[], double inputTipAngle, double inputTiltAngle, LookUpTableRowElements **selectedTipRows) {
-    int numMatches = 0;
-    double minDifferences[2] = {DBL_MAX, DBL_MAX}; // Initialize the minimum differences to large floating values
+int BilinearInterpolation(LookUpTableRowElements *rows[], double inputTipAngle, double inputTiltAngle, double z11, double z12, double z21, double z22, double x1, double x2, double y1, double y2) 
+{
+    double x2x1, y2y1, x2x, y2y, yy1, xx1;
+    x2x1 = x2 - x1;
+    y2y1 = y2 - y1;
+    x2x = x2 - inputTipAngle;
+    y2y = y2 - inputTiltAngle;
+    yy1 = inputTiltAngle - y1;
+    xx1 = inputTipAngle - x1;
+    return (1.0 / (x2x1 * y2y1)) * (
+        z11 * x2x * y2y +
+        z21 * xx1 * y2y +
+        z12 * x2x * yy1 +
+        z22 * xx1 * yy1
+    );
+}
 
-    //changes  made was adding norm, 2 arrays in .h file and addding the if len loop 
+// Function to find the nearest 2 rows with equal or nearest tilt angle value
+int findMatchingTiltAngle(LookUpTableRowElements *rows[], double inputTiltAngle, LookUpTableRowElements **selectedTiltRows) {
+    int numMatches = 0;
+    double minDifference = DBL_MAX; // Initialize the minimum difference 
     
-    // Iterate through all rows to find the two closest tip angle values
+    // Iterate through all rows to find the closest tilt angles values
     for (int i = 0; i < MAX_ROWS; i++) {
-        double norm = sqrt((inputTipAngle - rows[i]->desiredTipAngle)*(inputTipAngle - rows[i]->desiredTipAngle) + (inputTiltAngle - rows[i]->desiredTiltAngle)*(inputTiltAngle - rows[i]->desiredTiltAngle));
-    
-    if len LookUpTableRowElements *smallest_distances[] < 4 or double norm < maxLookUpTableRowElements *smallest_distances[]:
-        # If there are less than 4 smallest distances recorded or the current distance is smaller than the largest recorded distance
-        # Add the current distance and its corresponding index to the lists
-        if len(smallest_distances) == 4:
-            # If there are already 4 smallest distances recorded, remove the largest one
-            max_distance_index = smallest_distances.index(max(smallest_distances))
-            del smallest_distances[max_distance_index]
-            del smallest_index[max_distance_index]
-        smallest_distances.append(norm)
-        smallest_index.append(i)
-
-        // Update the minimum differences and select the nearest rows
-        if (difference < minDifferences[0]) {
-            // Shift the current closest row to the second position
-            minDifferences[1] = minDifferences[0];
-            selectedTipRows[1] = selectedTipRows[0];
-            // Store the new closest row
-            minDifferences[0] = difference;
-            selectedTipRows[0] = rows[i];
-            numMatches = 1; // Reset the count to 1 since we found a closer row
-        } else if (difference == minDifferences[0]) {
-            // If the current difference is equal to the minimum difference, store this row
-            // Increment numMatches to account for the duplicate closest row
-            selectedTipRows[++numMatches] = rows[i];
-        } else if (difference < minDifferences[1]) {
-            // If the difference is less than the second minimum difference, update
-            // Only update minDifferences[1] and selectedTipRows[1] here, don't reset numMatches
-            minDifferences[1] = difference;
-            selectedTipRows[1] = rows[i];
-        }   
-    }
-    
-    return numMatches + 1; // Return the number of nearest rows found (plus one for indexing)
-}
-
-// // Function to find the rows with equal or nearest tip angle value
-// int findMatchingTipAngle(LookUpTableRowElements *rows[], double inputTipAngle, LookUpTableRowElements **selectedTipRows) {
-//     int numMatches = 0;
-//     double minDifference = DBL_MAX; // Initialize the minimum difference to a large floating value
-    
-//     // Iterate through all rows to find the closest tip angle values
-//     for (int i = 0; i < MAX_ROWS; i++) {
-//         double difference = fabs(inputTipAngle - rows[i]->desiredTipAngle); // Calculate the absolute difference
-
-//         if (difference < minDifference) {
-//             // If the current difference is less than the minimum difference,
-//             // update the minimum difference and select this row.
-//             numMatches = 0; // Reset selected rows
-//             minDifference = difference;
-//             selectedTipRows[numMatches++] = rows[i];
-//         } else if (difference == minDifference) {
-//             // If the current difference is equal to the minimum difference,
-//             // store this row as well (multiple rows with the same difference).
-//             selectedTipRows[numMatches++] = rows[i];
-//         }
-//     }
-    
-//     return numMatches;
-// }
-
-// Function to find the rows with equal or nearest tilt angle value
-    int findMatchingTiltAngle(LookUpTableRowElements *matchingRowsTip[], int numMatchingRowsTip, double inputTiltAngle, LookUpTableRowElements **selectedTiltRows) {
-    int numMatches = 0;
-    double minDifference = DBL_MAX; // Initialize the minimum difference to a large floating value
-    
-    // Iterate through all rows to find the closest tilt angle values
-    for (int i = 0; i < numMatchingRowsTip; i++) {
-        double difference = fabs(inputTiltAngle - matchingRowsTip[i]->desiredTiltAngle); // Calculate the absolute difference
+        double difference = fabs(inputTiltAngle - rows[i]->desiredTiltAngle); // Calculate the absolute difference
 
         if (difference < minDifference) {
             // If the current difference is less than the minimum difference,
             // update the minimum difference and select this row.
             numMatches = 0; // Reset selected rows
             minDifference = difference;
-            selectedTiltRows[numMatches++] = matchingRowsTip[i];
+            selectedTiltRows[numMatches++] = rows[i];
         } else if (difference == minDifference) {
             // If the current difference is equal to the minimum difference,
             // store this row as well (multiple rows with the same difference).
-            selectedTiltRows[numMatches++] = matchingRowsTip[i];
+            selectedTiltRows[numMatches++] = rows[i];
         }
     }
     
     return numMatches;
 }
+
+// Function to find the nearest 2 rows tip angle value
+int findMatchingTipAngle(LookUpTableRowElements *columns[], double inputTipAngle, LookUpTableRowElements **selectedTipColumns) {
+    int numMatches = 0;
+    double minDifference = DBL_MAX; // Initialize the minimum difference 
+    
+    // Iterate through all rows to find the closest tip angles values
+    for (int i = 0; i < MAX_COLUMNS; i++) {
+        double difference = fabs(inputTipAngle - columns[i]->desiredTipAngle); // Calculate the absolute difference
+
+        if (difference < minDifference) {
+            // If the current difference is less than the minimum difference,
+            // update the minimum difference and select this column.
+            numMatches = 0; // Reset selected columns
+            minDifference = difference;
+            selectedTipColumns[numMatches++] = columns[i];
+        } else if (difference == minDifference) {
+            // If the current difference is equal to the minimum difference,
+            // store this row as well (multiple rows with the same difference).
+            selectedTipColumns[numMatches++] = columns[i];
+        }
+    }
+    
+    return numMatches;
+}
+
 
 /*! This method recieves the desired tip and tilt angles and outputs the motor angles.
 The desired gimbal angles are then written to the output message to find the corresponding motor angles from the lookup table.
@@ -298,26 +272,26 @@ void Update_sepGimbalLookUpTable(SepGimbalLookUpTableConfig *configData, uint64_
         motor2Angle = matchingRowsTilt[i]->motor2Angle;
         printf("\nmotor1Angle=%.2f\nmotor2Angle=%.2f\n", motor1Angle, motor2Angle);
         
-        // // Output the desired motor 1 angle
-        // motor1AngleOut.theta = motor1Angle;
-        // HingedRigidBodyMsg_C_write(&motor1AngleOut, &configData->motor1AngleOutMsg, moduleID, callTime);
-        // printf("\n motor1 Out Msg %.2f", motor1AngleOut.theta);
+        // Output the desired motor 1 angle
+        motor1AngleOut.theta = motor1Angle;
+        HingedRigidBodyMsg_C_write(&motor1AngleOut, &configData->motor1AngleOutMsg, moduleID, callTime);
+        printf("\n motor1 Out Msg %.2f", motor1AngleOut.theta);
 
-        // // Output the desired motor 2 angle
-        // motor2AngleOut.theta = motor2Angle;
-        // HingedRigidBodyMsg_C_write(&motor2AngleOut, &configData->motor2AngleOutMsg, moduleID, callTime);
-        // printf("\n motor2 Out Msg %.2f", motor2AngleOut.theta);
+        // Output the desired motor 2 angle
+        motor2AngleOut.theta = motor2Angle;
+        HingedRigidBodyMsg_C_write(&motor2AngleOut, &configData->motor2AngleOutMsg, moduleID, callTime);
+        printf("\n motor2 Out Msg %.2f", motor2AngleOut.theta);
     }
 }
 
-int readData(const char *filename, LookUpTableRowElements* rows[]) {
+int readData(const char *filename_1, LookUpTableRowElements* rows[]) {
     FILE *csvFile;
-    printf("%s\n", filename);
+    printf("%s\n", filename_1);
     char cwd[2000];
     GetCurrentDir( cwd, FILENAME_MAX );
     printf("Current working dir: %s\n", cwd);
     
-    csvFile = fopen("platformAngle_motorAngle_small.csv", "r");
+    csvFile = fopen("p_M1.csv", "r");
     if (csvFile == NULL) {
         printf("Error opening CSV file.\n");
         return 1;
@@ -391,5 +365,4 @@ int readData(const char *filename, LookUpTableRowElements* rows[]) {
     return 0;
 
 }    
-
 

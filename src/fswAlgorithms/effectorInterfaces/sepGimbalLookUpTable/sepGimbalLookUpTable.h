@@ -23,12 +23,16 @@
 #include <stdbool.h>
 #include "architecture/utilities/bskLogging.h"
 #include "cMsgCInterface/HingedRigidBodyMsg_C.h"
-#define MAX_ROWS 4091
+#define MAX_ROWS 114
+#define MAX_COLUMNS 78
+
 
 /*! @brief Top level structure for the sub-module routines. */
 
 typedef struct {
     double rowNum;
+    double columnNum;
+
     double desiredTipAngle;                                     //!< [deg] Desired platform tip angle
     double desiredTiltAngle;                                    //!< [deg] Desired platform tilt angle
     double motor1Angle;                                         //!< [deg] Desired motor angle 1
@@ -38,20 +42,27 @@ typedef struct {
 
 typedef struct {
     double rowNum;
+    double columnNum;
     double inputTipAngle;                                       //!< [deg] Desired platform tip angle
     double inputTiltAngle;                                      //!< [deg] Desired platform tilt angle
     double motor1Angle;                                         //!< [deg] Desired motor angle 1
     double motor2Angle;                                         //!< [deg] Desired motor angle 2
-    double norm;                                                //!< [m] norm distance value
-    int arrayLength;
-    double findMax;
+    double z11;
+    double z12;
+    double z21;
+    double z22;
+    double x1;
+    double x2;
+    double y1;
+    double y2;
 
-    char* fileName;                                             //!< CSV File 
+
+    char* fileName_1;                                           //!< CSV File for motor 1
+    char* fileName_2;                                           //!< CSV File for motor 2
     LookUpTableRowElements* rows[MAX_ROWS];                     //!< Array to save csv file rows
     LookUpTableRowElements* selectedTipRows[MAX_ROWS];          //!< Array to save rows with desired tip angle 
-    LookUpTableRowElements* smallestDistances[MAX_ROWS];        //!< Array to save the rows with shortest distances from desired tip and tilt angles
-    LookUpTableRowElements* smallestIndex[MAX_ROWS];            //!< Array to save the index rows with shortest distances
-    
+    LookUpTableRowElements* columns[MAX_COLUMNS];                     //!< Array to save csv file rows
+    LookUpTableRowElements* selectedTipColumns[MAX_COLUMNS];          //!< Array to save rows with desired tip angle 
 
     BSKLogger* bskLogger;                                        //!< BSK Logging
 
@@ -73,9 +84,11 @@ extern "C" {
     void Update_sepGimbalLookUpTable(SepGimbalLookUpTableConfig *configData, uint64_t callTime, int64_t moduleID);    //!< Method for module time update
 
     // Function to read data from a CSV file
-    int readData(const char *filename, LookUpTableRowElements* rows[]);
-    int findMatchingTipAngle(LookUpTableRowElements *rows[], double inputTipAngle, LookUpTableRowElements **selectedTipRows);
-    int findMatchingTiltAngle(LookUpTableRowElements *matchingRowsTip[], int numMatchingRowsTip, double inputTiltAngle, LookUpTableRowElements **selectedTiltRows);
+    int readData(const char *filename_1, LookUpTableRowElements* rows[], LookUpTableRowElements *columns[]);
+    int readData(const char *filename_2, LookUpTableRowElements* rows[], LookUpTableRowElements *columns[]);
+    int BilinearInterpolation(LookUpTableRowElements *rows[],LookUpTableRowElements *columns[], double inputTipAngle, double inputTitAngle, double z11, double z12, double z21, double z22, double x1, double x2, double y1, double y2);
+    int findMatchingTiltAngle(LookUpTableRowElements *matchingRowsTilt[], int numMatchingRowsTilt, double inputTiltAngle, LookUpTableRowElements **selectedTiltRows);
+    int findMatchingTipAngle(LookUpTableRowElements *matchingColumnsTip[], int numMatchingColumnsTip, double inputTipAngle, LookUpTableRowElements **selectedTipColumns);
 
 #ifdef __cplusplus
 }
