@@ -268,6 +268,7 @@ class BasiliskConan(ConanFile):
         cmake.definitions["BUILD_VIZINTERFACE"] = self.options.vizInterface
         cmake.definitions["EXTERNAL_MODULES_PATH"] = self.options.pathToExternalModules
         cmake.definitions["PYTHON_VERSION"] = f"{sys.version_info.major}.{sys.version_info.minor}"
+        cmake.definitions["CMAKE_EXPORT_COMPILE_COMMANDS"] = "on"
         cmake.parallel = True
         print(statusColor + "Configuring cmake..." + endColor)
         cmake.configure()
