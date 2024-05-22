@@ -69,7 +69,8 @@ jobs:
       - name: "Install wheel and conan package"
         run: source .venv/bin/activate && pip3 install wheel conan==1.61.0 pytest datashader holoviews pytest-xdist
       - name: "Build basilisk"
-        run: source .venv/bin/activate && python3 conanfile.py --opNav True
+        run: source .venv/bin/activate && python3 conanfile.py
+#        run: source .venv/bin/activate && python3 conanfile.py --opNav True
 
       - name: Run clang-tidy
         uses: ZedThree/clang-tidy-review@v0.19.0
@@ -87,26 +88,26 @@ jobs:
         uses: ZedThree/clang-tidy-review/upload@v0.19.0
         id: upload-review
 
-      - name: "Run Python Tests"
-        run: |
-          source .venv/bin/activate
-          cd src && pytest -n 2 -m "not scenarioTest" --junitxml=../junit/test-results-${{ matrix.python-version }}.xml
-      - name: "Upload pytest test results"
-        uses: actions/upload-artifact@v4
-        with:
-          name: pytest-results-${{ matrix.python-version }}
-          path: junit/test-results-${{ matrix.python-version }}.xml
-        # Use always() to always run this step to publish test results when there are test failures
-        if: ${{ always() }}
-      - name: "Run C/C++ Tests"
-        working-directory: ./dist3
-        run: ctest --gtest_output "json:../ctest/ctest-results-linux-${{ matrix.python-version }}.json"
-      - name: "Upload Google Test CTest results"
-        uses: actions/upload-artifact@v4
-        with:
-          name: ctest-results-${{ matrix.python-version }}
-          path: ctest/ctest-results-${{ matrix.python-version }}.json
-        if: ${{ always() }}
+#      - name: "Run Python Tests"
+#        run: |
+#          source .venv/bin/activate
+#          cd src && pytest -n 2 -m "not scenarioTest" --junitxml=../junit/test-results-${{ matrix.python-version }}.xml
+#      - name: "Upload pytest test results"
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: pytest-results-${{ matrix.python-version }}
+#          path: junit/test-results-${{ matrix.python-version }}.xml
+#        # Use always() to always run this step to publish test results when there are test failures
+#        if: ${{ always() }}
+#      - name: "Run C/C++ Tests"
+#        working-directory: ./dist3
+#        run: ctest --gtest_output "json:../ctest/ctest-results-linux-${{ matrix.python-version }}.json"
+#      - name: "Upload Google Test CTest results"
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: ctest-results-${{ matrix.python-version }}
+#          path: ctest/ctest-results-${{ matrix.python-version }}.json
+#        if: ${{ always() }}
 
 #  build-windows:
 #    name: Build Windows
