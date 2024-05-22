@@ -3,7 +3,7 @@ name: Post clang-tidy review comments
 on:
   workflow_run:
     # The name field of the lint action
-    workflows: ["pull-requst"]
+    workflows: ["pull-request"]
     types:
       - completed
 
