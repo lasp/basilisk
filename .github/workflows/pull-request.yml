@@ -84,10 +84,11 @@ jobs:
           # the unit tests until they're fixed
           exclude: "src/achitecture/utilities/test/*cxx"
           cmake_command: ""
+          split_workflow: true
 
-      - name: Upload clang-tidy fixes
-        uses: ZedThree/clang-tidy-review/upload@v0.19.0
-        id: upload-review
+#      - name: Upload clang-tidy fixes
+#        uses: ZedThree/clang-tidy-review/upload@v0.19.0
+#        id: upload-review
 
 #      - name: "Run Python Tests"
 #        run: |
