@@ -99,6 +99,8 @@ jobs:
 
     steps:
       - uses: ZedThree/clang-tidy-review/post@v0.14.0
+        with:
+          workflow_id: ${{github.event.workflow_run.id }}
         # lgtm_comment_body, max_comments, and annotations need to be set on the posting workflow in a split setup
 
 
