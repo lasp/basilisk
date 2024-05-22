@@ -75,7 +75,7 @@ jobs:
 
       - name: Run clang-tidy
         uses: ZedThree/clang-tidy-review@v0.19.0
-        id: review
+        id: static-analysis
         with:
           build_dir: dist3
 #          apt_packages: "libfftw3-dev,libnetcdf-c++4-dev,libopenmpi-dev,petsc-dev,slepc-dev,liblapack-dev,libparpack2-dev,libsundials-dev,uuid-dev"
@@ -85,6 +85,10 @@ jobs:
           exclude: "src/achitecture/utilities/test/*cxx"
           cmake_command: ""
           split_workflow: true
+
+      - name: Upload clang-tidy fixes
+        uses: ZedThree/clang-tidy-review/upload@v0.19.0
+        id: upload-static-analysis-review
 
   post-clang-tidy-review-comments:
     name: Post clang-tidy review comments
@@ -97,9 +101,7 @@ jobs:
       - uses: ZedThree/clang-tidy-review/post@v0.14.0
         # lgtm_comment_body, max_comments, and annotations need to be set on the posting workflow in a split setup
 
-#      - name: Upload clang-tidy fixes
-#        uses: ZedThree/clang-tidy-review/upload@v0.19.0
-#        id: upload-review
+
 
 #      - name: "Run Python Tests"
 #        run: |
