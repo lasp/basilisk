@@ -1,0 +1,17 @@
+diff a/src/architecture/msgPayloadDefC/StepperMotorMsgPayload.h b/src/architecture/msgPayloadDefC/StepperMotorMsgPayload.h	(rejected hunks)
+@@ -29,6 +29,15 @@
+ +    double thetaDDot;           //!< [rad/s^2] Current motor angular acceleration
+ +    int stepsCommanded;         //!< Current number of commanded motor steps
+ +    int stepCount;              //!< Current motor step count (number of steps taken)
+++=======
++  /*! @brief Structure containing stepper motor step count information */
++ typedef struct {
++     double theta;           //!< Current motor angle
++     double thetaDot;        //!< Current motor angle rate
++     double thetaDDot;       //!< Current motor angular acceleration
++     int numSteps;           //!< Current number of commanded motor steps
++     int stepCount;          //!< Current motor step count
+++>>>>>>> b37e2ea79 (adding new stepper motor data msg)
+  }StepperMotorMsgPayload;
+  
+  

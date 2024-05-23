@@ -34,7 +34,9 @@
 #include "architecture/utilities/macroDefinitions.h"
 
 #define MAXCHAR 4091
-#define MAX_ROWS 4091
+#define MAX_ROWS 114
+#define MAX_COLUMNS 78
+
 #include <stdio.h>  /* defines FILENAME_MAX */
 #define WINDOWS  /* uncomment this line to use it for windows.*/
 #ifdef WINDOWS
@@ -64,20 +66,42 @@ void SelfInit_sepGimbalLookUpTable(SepGimbalLookUpTableConfig* configData, int64
         configData->rows[i] = malloc(sizeof(LookUpTableRowElements));
         if (configData->rows[i] == NULL) {
             printf("Memory allocation error.\n");
-            exit(1); // Handle the error gracefully
+            exit(1); // Handle the error of rows
         }
     }
 
-    // Allocate memory for stored
+    // Allocate memory for stored rows
     for (int i = 0; i < MAX_ROWS; i++) {
         configData->selectedTipRows[i] = malloc(sizeof(LookUpTableRowElements));
         if (configData->selectedTipRows[i] == NULL) {
             printf("Memory allocation error.\n");
+            exit(1); // Handle the error of columns
+        }
+    }
+
+    int result_row1 = readData1(fileName_1, configData->rows);
+    int result_row2 = readData2(fileName_2, configData->rows);
+
+    // Allocate memory for columns
+    for (int j = 0; j< MAX_COLUMNS; ij+) {
+        configData->columns[j] = malloc(sizeof(LookUpTableRowElements));
+        if (configData->columns[j] == NULL) {
+            printf("Memory allocation error.\n");
             exit(1); // Handle the error gracefully
         }
     }
-    int result_1 = readData(fileName_1, configData->rows);
-    int result_2 = readData(fileName_2, configData->rows);
+
+    // Allocate memory for stored columns
+    for (int j = 0; j < MAX_COLUMNS; j++) {
+        configData->selectedTipColumnss[j] = malloc(sizeof(LookUpTableRowElements));
+        if (configData->selectedTipColumns[j] == NULL) {
+            printf("Memory allocation error.\n");
+            exit(1); // Handle the error gracefully
+        }
+    }
+
+    int result_column1 = readData1(fileName_1, configData->columns);
+    int result_column2 = readData2(fileName_2, configData->columns);
 
 }
 
@@ -107,15 +131,88 @@ void Reset_sepGimbalLookUpTable(SepGimbalLookUpTableConfig* configData, uint64_t
     configData->motor2Angle = 0.0;   
 }
 
-int BilinearInterpolation(LookUpTableRowElements *rows[], double inputTipAngle, double inputTiltAngle, double z11, double z12, double z21, double z22, double x1, double x2, double y1, double y2) 
+
+
+// Function to find the nearest 2 rows with equal or nearest tilt angle value
+int findMatchingTiltAngle(LookUpTableRowElements *rows[], double inputTiltAngle, LookUpTableRowElements **selectedTiltRows) {
+    int numMatchesRows = 0;
+    double minDifference = DBL_MAX; // Initialize the minimum difference 
+    double minDifference2 = DBL_MAX; // Initialize the minimum difference 
+    LookUpTableRowElements *nearestValue1 = 0.0;
+    LookUpTableRowElements *nearestValue2 = 0.0;
+
+    // Iterate through all rows to find the closest tilt angles values
+    for (int i = 0; i < MAX_ROWS; i++) {
+        double difference = fabs(inputTiltAngle - rows[i]->desiredTiltAngle); // Calculate the absolute difference
+
+        if (difference < minDifference) {
+            // If the current difference is less than the minimum difference1, update the minimum difference and select this row.
+            numMatchesRows = 0; // Reset selected rows
+            minDifference = difference;
+            nearestValue1 = rows[i]
+            i_nearestValue1 = i;
+        } else if (minDifference < minDifference2) {
+            // If the current difference is equal to the minimum difference,
+            // store this row as well (multiple rows with the same difference).
+            minDifference2 = minDifference;
+            nearestValue2 = rows[i]   
+            i_nearestValue2 = i;     }
+    }
+    selectedTiltRows[0] = nearestValue1;
+    selectedTiltRows[1] = nearestValue2;
+    return selectedTiltRows;
+}
+
+// Function to find the nearest 2 columns tip angle value
+int findMatchingTipAngle(LookUpTableRowElements *columns[], double inputTipAngle, LookUpTableRowElements **selectedTipColumns) {
+    int numMatchesColumns = 0;
+    double minDifference = DBL_MAX; // Initialize the minimum difference 
+    double minDifference2 = DBL_MAX;
+    LookUpTableRowElements *nearestValue1 = 0.0;
+    LookUpTableRowElements *nearestValue2 = 0.0;
+
+    // Iterate through all columns to find the closest tip angles values
+    for (int j = 0; j < MAX_COLUMNS; j++) {
+        double difference = fabs(inputTipAngle - columns[j]->desiredTipAngle); // Calculate the absolute difference
+
+        if (difference < minDifference) {
+            // If the current difference is less than the minimum difference1, update the minimum difference and select this row.
+            numMatchesColumns = 0; // Reset selected rows
+            minDifference = difference;
+            nearestValue1 = columns[j];
+            j_nearestValue1 = j;
+        } else if (minDifference < minDifference2) {
+            // If the current difference is equal to the minimum difference,
+            // store this row as well (multiple rows with the same difference).
+            minDifference2 = minDifference;
+            nearestValue2 = columns[j];
+            j_nearestValue2 = j;        }
+    }
+
+    selectedTipColumns[0] = nearestValue1;
+    selectedTipColumns[1] = nearestValue2;
+    return selectedTiltColumns;
+}
+
+int BilinearInterpolation(LookUpTableRowElements *rows[], LookUpTableRowElements *columns[], double inputTipAngle, double inputTiltAngle, double z11, double z12, double z21, double z22, double x1, double x2, double y1, double y2) 
 {
+    double x1 = selectedTiltRows[0];
+    double x2 = selectedTiltRows[1];
+    double y1 = selectedTipColumns[0];
+    double y2 = selectedTipColumns[1];
+    z11 = rows[i_nearestValue1]->columns[j_nearestValue1].value;
+    z12 = rows[i_nearestValue1]->columns[j_nearestValue2].value;
+    z21 = rows[i_nearestValue2]->columns[j_nearestValue1].value;
+    z22 = rows[i_nearestValue2]->columns[j_nearestValue2].value;
+
+
     double x2x1, y2y1, x2x, y2y, yy1, xx1;
     x2x1 = x2 - x1;
     y2y1 = y2 - y1;
-    x2x = x2 - inputTipAngle;
-    y2y = y2 - inputTiltAngle;
-    yy1 = inputTiltAngle - y1;
-    xx1 = inputTipAngle - x1;
+    x2x = x2 - configData->inputTipAngle;
+    y2y = y2 - configData->inputTiltAngle;
+    yy1 = configData->inputTiltAngle - y1;
+    xx1 = configData->inputTipAngle - x1;
     return (1.0 / (x2x1 * y2y1)) * (
         z11 * x2x * y2y +
         z21 * xx1 * y2y +
@@ -123,57 +220,6 @@ int BilinearInterpolation(LookUpTableRowElements *rows[], double inputTipAngle, 
         z22 * xx1 * yy1
     );
 }
-
-// Function to find the nearest 2 rows with equal or nearest tilt angle value
-int findMatchingTiltAngle(LookUpTableRowElements *rows[], double inputTiltAngle, LookUpTableRowElements **selectedTiltRows) {
-    int numMatches = 0;
-    double minDifference = DBL_MAX; // Initialize the minimum difference 
-    
-    // Iterate through all rows to find the closest tilt angles values
-    for (int i = 0; i < MAX_ROWS; i++) {
-        double difference = fabs(inputTiltAngle - rows[i]->desiredTiltAngle); // Calculate the absolute difference
-
-        if (difference < minDifference) {
-            // If the current difference is less than the minimum difference,
-            // update the minimum difference and select this row.
-            numMatches = 0; // Reset selected rows
-            minDifference = difference;
-            selectedTiltRows[numMatches++] = rows[i];
-        } else if (difference == minDifference) {
-            // If the current difference is equal to the minimum difference,
-            // store this row as well (multiple rows with the same difference).
-            selectedTiltRows[numMatches++] = rows[i];
-        }
-    }
-    
-    return numMatches;
-}
-
-// Function to find the nearest 2 rows tip angle value
-int findMatchingTipAngle(LookUpTableRowElements *columns[], double inputTipAngle, LookUpTableRowElements **selectedTipColumns) {
-    int numMatches = 0;
-    double minDifference = DBL_MAX; // Initialize the minimum difference 
-    
-    // Iterate through all rows to find the closest tip angles values
-    for (int i = 0; i < MAX_COLUMNS; i++) {
-        double difference = fabs(inputTipAngle - columns[i]->desiredTipAngle); // Calculate the absolute difference
-
-        if (difference < minDifference) {
-            // If the current difference is less than the minimum difference,
-            // update the minimum difference and select this column.
-            numMatches = 0; // Reset selected columns
-            minDifference = difference;
-            selectedTipColumns[numMatches++] = columns[i];
-        } else if (difference == minDifference) {
-            // If the current difference is equal to the minimum difference,
-            // store this row as well (multiple rows with the same difference).
-            selectedTipColumns[numMatches++] = columns[i];
-        }
-    }
-    
-    return numMatches;
-}
-
 
 /*! This method recieves the desired tip and tilt angles and outputs the motor angles.
 The desired gimbal angles are then written to the output message to find the corresponding motor angles from the lookup table.
@@ -284,14 +330,95 @@ void Update_sepGimbalLookUpTable(SepGimbalLookUpTableConfig *configData, uint64_
     }
 }
 
-int readData(const char *filename_1, LookUpTableRowElements* rows[]) {
+int readData1(const char *filename_1, LookUpTableRowElements *rows[], LookUpTableRowElements *columns[]) {
     FILE *csvFile;
     printf("%s\n", filename_1);
     char cwd[2000];
-    GetCurrentDir( cwd, FILENAME_MAX );
+    GetCurrentDir( cwd, FILENAME1_MAX );
     printf("Current working dir: %s\n", cwd);
     
     csvFile = fopen("p_M1.csv", "r");
+    if (csvFile == NULL) {
+        printf("Error opening CSV file.\n");
+        return 1;
+    }
+
+    // SepGimbalLookUpTableConfig lookup[MAXCHAR];
+    int numColumnsMatched = 0;
+    int record = 0;
+    int numRecords = 0;
+    
+    do
+    {
+        LookUpTableRowElements tempRowArray;
+        // Initialize the struct with default values
+        tempRowArray.rowNum = 0.0; // Default character value
+        tempRowArray.desiredTipAngle = 0.0; // Default double value
+        tempRowArray.desiredTiltAngle = 0.0; // Default double value
+        tempRowArray.motor1Angle = 0.0; // Default double value
+        tempRowArray.motor2Angle = 0.0; // Default double value
+        
+        numColumnsMatched = fscanf(csvFile,
+                            "%lf, %lf, %lf, %lf, %lf\n",
+                            &tempRowArray.rowNum,
+                            &tempRowArray.desiredTipAngle,
+                            &tempRowArray.desiredTiltAngle,
+                            &tempRowArray.motor1Angle,
+                            &tempRowArray.motor2Angle);
+
+        if (numColumnsMatched == 5) {
+            // Allocate memory for a new LookUpTableRowElements pointer and copy the data
+            rows[record] = malloc(sizeof(LookUpTableRowElements));
+            if (rows[record] == NULL) {
+                printf("Memory allocation error.\n");
+                return 1;
+            }
+            
+            // Copy the data field by field
+            rows[record]->rowNum = tempRowArray.rowNum;
+            rows[record]->desiredTipAngle = tempRowArray.desiredTipAngle;
+            rows[record]->desiredTiltAngle = tempRowArray.desiredTiltAngle;
+            rows[record]->motor1Angle = tempRowArray.motor1Angle;
+            rows[record]->motor2Angle = tempRowArray.motor2Angle;
+
+            record++;
+        }
+
+        if (numColumnsMatched !=5 && feof(csvFile)){
+            printf("error file format.\n");
+            return 1;
+        }
+
+        if (ferror(csvFile)){
+            printf("error file reading.\n");
+            return 1;
+        }
+
+    } while (!feof(csvFile));
+
+    fclose(csvFile);
+    printf("\n%d records read.\n\n", record);
+
+    for (int i=0; i<record; i++) {
+        printf("%.3f %.3f %.3f %.3f %.3f",
+                rows[i]->rowNum,
+                rows[i]->desiredTipAngle,
+                rows[i]->desiredTiltAngle,
+                rows[i]->motor1Angle,
+                rows[i]->motor2Angle);
+        printf("\n");
+    }
+    return 0;
+
+}    
+int readData2(const char *filename_2, LookUpTableRowElements *rows[], LookUpTableRowElements *columns[]) {
+    FILE *csvFile;
+    printf("%s\n", filename_2);
+    char cwd[2000];
+    GetCurrentDir( cwd, FILENAME2_MAX );
+    printf("Current working dir: %s\n", cwd);
+    
+    csvFile = fopen("p_M.csv", "r");
     if (csvFile == NULL) {
         printf("Error opening CSV file.\n");
         return 1;

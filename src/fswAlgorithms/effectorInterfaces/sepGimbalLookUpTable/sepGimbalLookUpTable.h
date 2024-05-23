@@ -58,19 +58,22 @@ typedef struct {
 
 
     char* fileName_1;                                           //!< CSV File for motor 1
+
+
+    
     char* fileName_2;                                           //!< CSV File for motor 2
     LookUpTableRowElements* rows[MAX_ROWS];                     //!< Array to save csv file rows
-    LookUpTableRowElements* selectedTipRows[MAX_ROWS];          //!< Array to save rows with desired tip angle 
-    LookUpTableRowElements* columns[MAX_COLUMNS];                     //!< Array to save csv file rows
-    LookUpTableRowElements* selectedTipColumns[MAX_COLUMNS];          //!< Array to save rows with desired tip angle 
+    LookUpTableRowElements* selectedTiltRows[MAX_ROWS];         //!< Array to save rows with desired tilt angle 
+    LookUpTableRowElements* columns[MAX_COLUMNS];               //!< Array to save csv file rows
+    LookUpTableRowElements* selectedTipColumns[MAX_COLUMNS];    //!< Array to save rows with desired tip angle 
 
     BSKLogger* bskLogger;                                        //!< BSK Logging
 
     /* Messages */
-    HingedRigidBodyMsg_C desiredGimbalTipAngleInMsg;              //!< Intput msg for the tip angle (theta)
-    HingedRigidBodyMsg_C desiredGimbalTiltAngleInMsg;             //!< Intput msg for the tilt angle (theta)
-    HingedRigidBodyMsg_C motor1AngleOutMsg;                       //!< Output msg for motor 1 angle (theta)
-    HingedRigidBodyMsg_C motor2AngleOutMsg;                       //!< Output msg for motor 2 angle (theta)
+    HingedRigidBodyMsg_C desiredGimbalTipAngleInMsg;             //!< Intput msg for the tip angle (theta)
+    HingedRigidBodyMsg_C desiredGimbalTiltAngleInMsg;            //!< Intput msg for the tilt angle (theta)
+    HingedRigidBodyMsg_C motor1AngleOutMsg;                      //!< Output msg for motor 1 angle (theta)
+    HingedRigidBodyMsg_C motor2AngleOutMsg;                      //!< Output msg for motor 2 angle (theta)
     
 }SepGimbalLookUpTableConfig;
 
@@ -84,11 +87,12 @@ extern "C" {
     void Update_sepGimbalLookUpTable(SepGimbalLookUpTableConfig *configData, uint64_t callTime, int64_t moduleID);    //!< Method for module time update
 
     // Function to read data from a CSV file
-    int readData(const char *filename_1, LookUpTableRowElements* rows[], LookUpTableRowElements *columns[]);
-    int readData(const char *filename_2, LookUpTableRowElements* rows[], LookUpTableRowElements *columns[]);
-    int BilinearInterpolation(LookUpTableRowElements *rows[],LookUpTableRowElements *columns[], double inputTipAngle, double inputTitAngle, double z11, double z12, double z21, double z22, double x1, double x2, double y1, double y2);
+    int readData1(const char *filename_1, LookUpTableRowElements* rows[], LookUpTableRowElements *columns[]);
+    int readData2(const char *filename_2, LookUpTableRowElements* rows[], LookUpTableRowElements *columns[]);
     int findMatchingTiltAngle(LookUpTableRowElements *matchingRowsTilt[], int numMatchingRowsTilt, double inputTiltAngle, LookUpTableRowElements **selectedTiltRows);
     int findMatchingTipAngle(LookUpTableRowElements *matchingColumnsTip[], int numMatchingColumnsTip, double inputTipAngle, LookUpTableRowElements **selectedTipColumns);
+    int BilinearInterpolation(LookUpTableRowElements *rows[], LookUpTableRowElements *columns[], double inputTipAngle, double inputTiltAngle, double z11, double z12, double z21, double z22, double x1, double x2, double y1, double y2);
+
 
 #ifdef __cplusplus
 }
