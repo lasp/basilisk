@@ -161,11 +161,13 @@ void TwoAxisGimbal::UpdateState(uint64_t callTime) {
                 std::pair<double, double> gimbalAnglesInit = this->motorToGimbalAngles(this->motor1ThetaInit, this->motor2ThetaInit);
                 double gimbalTheta1Init = gimbalAnglesInit.first;
                 double gimbalTheta2Init = gimbalAnglesInit.second;
+                cout << "Init gimbal angles: " << endl;
+                cout << gimbalTheta1Init * RAD2DEG << endl;
+                cout << gimbalTheta2Init * RAD2DEG << endl;
 
                 Eigen::Vector3d prvTipInit = gimbalTheta1Init * this->gimbalRotHat1_M;
                 Eigen::Vector3d prvTiltInit = gimbalTheta2Init * this->gimbalRotHat2_F;
-                this->gimbalPRV_F0M = addPrv(prvTiltInit, prvTipInit);
-//                this->gimbalPRV_FIntM = this->gimbalPRV_F0M;
+                this->gimbalPRV_F0M = addPrv(prvTipInit, prvTiltInit);
                 this->computeGimbalActuationParameters();
             } else {
                 this->completion = true;
@@ -179,7 +181,7 @@ void TwoAxisGimbal::UpdateState(uint64_t callTime) {
         this->actuateGimbal(callTime * NANO2SEC);
     }
 
-    cout << "gimbal prv angle: " << this->gimbalPRVTheta << endl;
+//    cout << "gimbal prv angle: " << this->gimbalPRVTheta << endl;
 
     // Write the module output messages
     this->writeOutputMessages(callTime);
@@ -357,26 +359,14 @@ void TwoAxisGimbal::writeOutputMessages(uint64_t callTime) {
     // Determine the DCM dcm_FM representing the current gimbal attitude relative to the mount frame
     Eigen::Vector3d relativePRV = this->gimbalPRVTheta * this->gimbalPRVRotHat;
 
-    Eigen::Vector3d prv_FM = {0.0, 0.0, 0.0};
-    if (!this->segment1Complete && this->segment2Complete) {
-        prv_FM = addPrv(relativePRV, this->gimbalPRV_F0M);
-    } else if (this->segment1Complete && !this->segment2Complete) {
-        prv_FM = addPrv(relativePRV, this->gimbalPRV_FIntM);
-    } else {
-        if (this->motor1StepsCommanded == this->motor2StepsCommanded) {
-            prv_FM = addPrv(relativePRV, this->gimbalPRV_F0M);
-        } else {
-            prv_FM = addPrv(relativePRV, this->gimbalPRV_FIntM);
-        }
-    }
-
+    Eigen::Vector3d prv_FM = addPrv(this->gimbalPRV_F0M, relativePRV);
     Eigen::Matrix3d dcm_FM = prvToDcm(prv_FM);
 
     // Compute the MRP sigma_FM representing the current gimbal attitude relative to the mount frame
     Eigen::Vector3d sigma_FM = dcmToMrp(dcm_FM);
 
     // Determine the gimbal tip and tilt angles
-    this->gimbalTheta1 = atan(dcm_FM(1,2) / dcm_FM(1,0));
+    this->gimbalTheta1 = atan(dcm_FM(1,2) / dcm_FM(1,1));
     this->gimbalTheta2 = atan(dcm_FM(2,0) / dcm_FM(0,0));
 
     // Copy the module variables to the output buffer messages
@@ -409,9 +399,9 @@ void TwoAxisGimbal::computeGimbalActuationParameters() {
             this->gimbalTheta2Ref = gimbalAnglesRef.second;
             Eigen::Vector3d prvTip = this->gimbalTheta1Ref * this->gimbalRotHat1_M;
             Eigen::Vector3d prvTilt = this->gimbalTheta2Ref * this->gimbalRotHat2_F;
-            gimbalPRV_FM = addPrv(prvTilt, prvTip);
+            gimbalPRV_FM = addPrv(prvTip, prvTilt);
             // Find the relative gimbal prv for the rotation prv_FF0
-            gimbalPRV_FF0 = subPrv(this->gimbalPRV_F0M, gimbalPRV_FM);
+            gimbalPRV_FF0 = subPrv(gimbalPRV_FM, this->gimbalPRV_F0M);
             // Find the angle the gimbal must rotate through for the rotation
             this->gimbalPRVThetaRef = gimbalPRV_FF0.norm();
             this->gimbalPRVRotHat = gimbalPRV_FF0 / this->gimbalPRVThetaRef;
@@ -428,9 +418,9 @@ void TwoAxisGimbal::computeGimbalActuationParameters() {
             this->gimbalTheta2Ref = gimbalAnglesRef.second;
             Eigen::Vector3d prvTip = this->gimbalTheta1Ref * this->gimbalRotHat1_M;
             Eigen::Vector3d prvTilt = this->gimbalTheta2Ref * this->gimbalRotHat2_F;
-            gimbalPRV_FM = addPrv(prvTilt, prvTip);
+            gimbalPRV_FM = addPrv(prvTip, prvTilt);
             // Find the relative gimbal prv for the rotation prv_FF0
-            gimbalPRV_FF0 = subPrv(this->gimbalPRV_F0M, gimbalPRV_FM);
+            gimbalPRV_FF0 = subPrv(gimbalPRV_FM, this->gimbalPRV_F0M);
             // Find the angle the gimbal must rotate through for the rotation
             this->gimbalPRVThetaRef = gimbalPRV_FF0.norm();
             this->gimbalPRVRotHat = gimbalPRV_FF0 / this->gimbalPRVThetaRef;
@@ -447,9 +437,9 @@ void TwoAxisGimbal::computeGimbalActuationParameters() {
             this->gimbalTheta2Ref = gimbalAnglesRef.second;
             Eigen::Vector3d prvTip = this->gimbalTheta1Ref * this->gimbalRotHat1_M;
             Eigen::Vector3d prvTilt = this->gimbalTheta2Ref * this->gimbalRotHat2_F;
-            gimbalPRV_FM = addPrv(prvTilt, prvTip);
+            gimbalPRV_FM = addPrv(prvTip, prvTilt);
             // Find the relative gimbal prv for the rotation prv_FF0
-            gimbalPRV_FF0 = subPrv(this->gimbalPRV_F0M, gimbalPRV_FM);
+            gimbalPRV_FF0 = subPrv(gimbalPRV_FM, this->gimbalPRV_F0M);
             // Find the angle the gimbal must rotate through for the rotation
             this->gimbalPRVThetaRef = gimbalPRV_FF0.norm();
             this->gimbalPRVRotHat = gimbalPRV_FF0 / this->gimbalPRVThetaRef;
@@ -469,9 +459,10 @@ void TwoAxisGimbal::computeGimbalActuationParameters() {
             this->gimbalTheta2Ref = gimbalAnglesRef.second;
             Eigen::Vector3d prvTip = this->gimbalTheta1Ref * this->gimbalRotHat1_M;
             Eigen::Vector3d prvTilt = this->gimbalTheta2Ref * this->gimbalRotHat2_F;
-            this->gimbalPRV_FIntM = addPrv(prvTilt, prvTip);
+            this->gimbalPRV_FIntM = addPrv(prvTip, prvTilt);
             // Find the relative gimbal prv for the rotation prv_FF0
-            gimbalPRV_FIntF0 = subPrv(this->gimbalPRV_F0M, this->gimbalPRV_FIntM);
+            gimbalPRV_FIntF0 = subPrv(this->gimbalPRV_FIntM, this->gimbalPRV_F0M);
+            this->gimbalPRV_F0M = this->gimbalPRV_FIntM;
             // Find the angle the gimbal must rotate through for the rotation
             this->gimbalPRVThetaRef = gimbalPRV_FIntF0.norm();
             this->gimbalPRVRotHat = gimbalPRV_FIntF0 / this->gimbalPRVThetaRef;
@@ -487,9 +478,10 @@ void TwoAxisGimbal::computeGimbalActuationParameters() {
             this->gimbalTheta2Ref = gimbalAnglesRef.second;
             Eigen::Vector3d prvTip = this->gimbalTheta1Ref * this->gimbalRotHat1_M;
             Eigen::Vector3d prvTilt = this->gimbalTheta2Ref * this->gimbalRotHat2_F;
-            this->gimbalPRV_FIntM = addPrv(prvTilt, prvTip);
+            this->gimbalPRV_FIntM = addPrv(prvTip, prvTilt);
             // Find the relative gimbal prv for the rotation prv_FF0
-            gimbalPRV_FIntF0 = subPrv(this->gimbalPRV_F0M, this->gimbalPRV_FIntM);
+            gimbalPRV_FIntF0 = subPrv(this->gimbalPRV_FIntM, this->gimbalPRV_F0M);
+            this->gimbalPRV_F0M = this->gimbalPRV_FIntM;
             // Find the angle the gimbal must rotate through for the rotation
             this->gimbalPRVThetaRef = gimbalPRV_FIntF0.norm();
             this->gimbalPRVRotHat = gimbalPRV_FIntF0 / this->gimbalPRVThetaRef;
@@ -508,9 +500,9 @@ void TwoAxisGimbal::computeGimbalActuationParameters() {
             this->gimbalTheta2Ref = gimbalAnglesRef.second;
             Eigen::Vector3d prvTip = this->gimbalTheta1Ref * this->gimbalRotHat1_M;
             Eigen::Vector3d prvTilt = this->gimbalTheta2Ref * this->gimbalRotHat2_F;
-            gimbalPRV_FM = addPrv(prvTilt, prvTip);
+            gimbalPRV_FM = addPrv(prvTip, prvTilt);
             // Find the relative gimbal prv for the rotation prv_FF0
-            gimbalPRV_FFInt = subPrv(this->gimbalPRV_FIntM, gimbalPRV_FM);
+            gimbalPRV_FFInt = subPrv(gimbalPRV_FM, this->gimbalPRV_FIntM);
             // Find the angle the gimbal must rotate through for the rotation
             this->gimbalPRVThetaRef = gimbalPRV_FFInt.norm();
             this->gimbalPRVRotHat = gimbalPRV_FFInt / this->gimbalPRVThetaRef;
@@ -526,9 +518,9 @@ void TwoAxisGimbal::computeGimbalActuationParameters() {
             this->gimbalTheta2Ref = gimbalAnglesRef.second;
             Eigen::Vector3d prvTip = this->gimbalTheta1Ref * this->gimbalRotHat1_M;
             Eigen::Vector3d prvTilt = this->gimbalTheta2Ref * this->gimbalRotHat2_F;
-            gimbalPRV_FM = addPrv(prvTilt, prvTip);
+            gimbalPRV_FM = addPrv(prvTip, prvTilt);
             // Find the relative gimbal prv for the rotation prv_FF0
-            gimbalPRV_FFInt = subPrv(this->gimbalPRV_FIntM, gimbalPRV_FM);
+            gimbalPRV_FFInt = subPrv(gimbalPRV_FM, this->gimbalPRV_FIntM);
             // Find the angle the gimbal must rotate through for the rotation
             this->gimbalPRVThetaRef = gimbalPRV_FFInt.norm();
             this->gimbalPRVRotHat = gimbalPRV_FFInt / this->gimbalPRVThetaRef;

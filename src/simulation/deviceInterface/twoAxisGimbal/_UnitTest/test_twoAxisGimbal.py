@@ -61,7 +61,7 @@ def test_twoAxisGimbal(show_plots):
     # Create a sim module as an empty container
     unitTestSim = SimulationBaseClass.SimBaseClass()
 
-    testTimeStepSec = 0.1  # [s]
+    testTimeStepSec = 0.001  # [s]
     testProcessRate = macros.sec2nano(testTimeStepSec)
     testProc = unitTestSim.CreateNewProcess(unitProcessName)
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
@@ -80,8 +80,8 @@ def test_twoAxisGimbal(show_plots):
     Motor2ThetaInitMessage = messaging.HingedRigidBodyMsg().write(Motor2ThetaInitMessageData)
 
     # Create the stepper motors using two instances of the stepperMotor module
-    motorStepAngle = 0.1 * macros.D2R  # [rad]
-    motorStepTime = 0.1  # [s]
+    motorStepAngle = 0.008 * macros.D2R  # [rad]
+    motorStepTime = 0.008  # [s]
     stepperMotor1 = stepperMotor.StepperMotor()
     stepperMotor1.ModelTag = "stepperMotor1"
     stepperMotor1.setThetaInit(motor1ThetaInit)
@@ -99,8 +99,8 @@ def test_twoAxisGimbal(show_plots):
     unitTestSim.AddModelToTask(unitTaskName, stepperMotor2)
 
     # Create the StepperMotor input messages
-    motor1StepsCommanded = 500
-    motor2StepsCommanded = 200
+    motor1StepsCommanded = 50000
+    motor2StepsCommanded = 20000
     Motor1StepCommandMessageData = messaging.MotorStepCommandMsgPayload()
     Motor1StepCommandMessageData.stepsCommanded = motor1StepsCommanded
     Motor1StepCommandMessage = messaging.MotorStepCommandMsg().write(Motor1StepCommandMessageData)
@@ -152,10 +152,19 @@ def test_twoAxisGimbal(show_plots):
     # Unit Test Verification:
     #
 
+    # Calculate the initial gimbal tip and tilt angles
+    gimbalTipAngleInit , gimbalTiltAngleInit = motorToGimbalAngles(motorStepAngle, motor1ThetaInit, motor2ThetaInit, 0, 0)
+
+
     # Calculate the final gimbal tip and tilt angles
     gimbalTipAngleFinal , gimbalTiltAngleFinal = motorToGimbalAngles(motorStepAngle, motor1ThetaInit, motor2ThetaInit, motor1StepsCommanded, motor2StepsCommanded)
 
     # Print interpolation results
+    print("\nInitial Gimbal Tip Angle: ")
+    print(gimbalTipAngleInit)
+    print("\nInitial Gimbal Tilt Angle: ")
+    print(gimbalTiltAngleInit)
+
     print("\nGimbal Tip Reference Angle: ")
     print(gimbalTipAngleFinal)
     print("\nGimbal Tilt Reference Angle: ")
@@ -176,11 +185,21 @@ def test_twoAxisGimbal(show_plots):
 
     if show_plots:
         # 1. Plot the gimbal tip and tilt angles
+        # 1A. Plot gimbal tip angle
         plt.figure()
         plt.clf()
         plt.plot(timespan, gimbalTipAngle, label=r"$\psi$")
+        plt.title(r'Gimbal Tip Angle $\psi$', fontsize=14)
+        plt.ylabel('(deg)', fontsize=14)
+        plt.xlabel('Time (s)', fontsize=14)
+        plt.legend(loc='upper right', prop={'size': 12})
+        plt.grid(True)
+
+        # 1B. Plot gimbal tilt angle
+        plt.figure()
+        plt.clf()
         plt.plot(timespan, gimbalTiltAngle, label=r"$\phi$")
-        plt.title(r'Two-Axis Gimbal Tip $\psi$ and Tilt $\phi$ Angles', fontsize=14)
+        plt.title(r'Gimbal Tilt Angle $\phi$', fontsize=14)
         plt.ylabel('(deg)', fontsize=14)
         plt.xlabel('Time (s)', fontsize=14)
         plt.legend(loc='upper right', prop={'size': 12})
