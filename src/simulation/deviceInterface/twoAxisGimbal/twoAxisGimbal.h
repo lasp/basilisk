@@ -33,7 +33,7 @@
 class TwoAxisGimbal: public SysModel {
 public:
 
-    TwoAxisGimbal();                                                      //!< Constructor
+    TwoAxisGimbal();                                                                //!< Constructor
     ~TwoAxisGimbal() = default;                                                     //!< Destructor
 
     void Reset(uint64_t CurrentSimNanos) override;                                  //!< Reset member function
@@ -60,8 +60,12 @@ public:
     BSKLogger *bskLogger;                                                           //!< BSK Logging
 
 private:
-    double motor_to_gimbal_tip_angle[321][321];
-    double motor_to_gimbal_tilt_angle[321][321];
+    double motor_to_gimbal_tip_angle[320][320];
+    double motor_to_gimbal_tilt_angle[320][320];
+
+    Eigen::Vector3d gimbalPRV_FIntM;
+
+    std::pair<double, double> motorToGimbalAngles(double motor1Angle, double motor2Angle);
 
     double pullGimbalTipAngle(double motor1Angle, double motor2Angle);
     double pullGimbalTiltAngle(double motor1Angle, double motor2Angle);
@@ -78,7 +82,7 @@ private:
                                  double y);
 
     void computeGimbalActuationParameters();
-    void interpolateMotorAngles();
+//    void interpolateMotorAngles();
     void actuateGimbal(double t);                                                   //!< High-level method used to simulate the gimbal states in time
     void resetGimbal(double t);                                                     //!< Method used to reset the gimbal states when the current request is complete and a new request is received
     void updateGimbalRotationParameters();                                          //!< Method used to update the gimbal rotation parameters after a step is completed

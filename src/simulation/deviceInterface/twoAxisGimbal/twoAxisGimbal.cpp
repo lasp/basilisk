@@ -22,7 +22,6 @@
 #include "architecture/utilities/rigidBodyKinematics.hpp"
 #include "architecture/utilities/macroDefinitions.h"
 #include <cmath>
-#include <math.h>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -31,38 +30,43 @@ using namespace std;
 
 TwoAxisGimbal::TwoAxisGimbal() {
     // Read the motor-to-gimbal tip angle data file
-    ifstream file("motor_to_gimbal_tip_angle.csv");
+    ifstream file("/Users/leahkiner/Repositories/LASP_Basilisk/src/simulation/deviceInterface/twoAxisGimbal/motor_to_gimbal_tip_angle.csv");
+    if (!file.is_open()) {
+        cout << "Error opening tip file!" << endl;
+    }
     string line;
     int row = 0;
-    while (getline(file, line) && row < 321) {
+    while (getline(file, line) && row < 320) {
         stringstream ss(line);
         string cell;
         int col = 0;
-        while (getline(ss, cell, ',') && col < 321) {
-            cout << "\nCell: " << cell << endl;
-            this->motor_to_gimbal_tip_angle[row][col] = stod(cell);
-            cout << "Table element: " << endl;
-            cout << this->motor_to_gimbal_tip_angle[row][col] << endl;
+        while (getline(ss, cell, ',') && col < 320) {
+            this->motor_to_gimbal_tip_angle[row][col] = DEG2RAD * stod(cell);
             col++;
         }
+        row++;
     }
-    row++;
+
     file.close();
 
     // Read the motor-to-gimbal tilt angle data file
-    ifstream file2("motor_to_gimbal_tilt_angle.csv");
+    ifstream file2("/Users/leahkiner/Repositories/LASP_Basilisk/src/simulation/deviceInterface/twoAxisGimbal/motor_to_gimbal_tilt_angle.csv");
+    if (!file2.is_open()) {
+        cout << "Error opening tilt file!" << endl;
+    }
     string line2;
     int row2 = 0;
-    while (getline(file2, line2) && row2 < 321) {
+    while (getline(file2, line2) && row2 < 320) {
         stringstream ss(line2);
         string cell2;
         int col2 = 0;
-        while (getline(ss, cell2, ',') && col2 < 321) {
-            this->motor_to_gimbal_tilt_angle[row2][col2] = stod(cell2);
+        while (getline(ss, cell2, ',') && col2 < 320) {
+            this->motor_to_gimbal_tilt_angle[row2][col2] = DEG2RAD * stod(cell2);
             col2++;
         }
+        row2++;
     }
-    row2++;
+
     file2.close();
 }
 
@@ -135,7 +139,8 @@ void TwoAxisGimbal::UpdateState(uint64_t callTime) {
         motor1StateIn = this->motor1StateInMsg();
         motor2StateIn = this->motor2StateInMsg();
 
-        if (this->previousWrittenTime <  this->motor1InitStateInMsg.timeWritten()) {
+        if (this->previousWrittenTime < this->motor1InitStateInMsg.timeWritten()) {
+            cout << "NEW MESSAGE!" << endl;
             this->previousWrittenTime = this->motor1InitStateInMsg.timeWritten();
 
             // Store the initial motor angles
@@ -148,12 +153,19 @@ void TwoAxisGimbal::UpdateState(uint64_t callTime) {
 
             if (this->motor1StepsCommanded != 0 || this->motor2StepsCommanded != 0) {
                 this->completion = false;
-                if ((this->motor1StepsCommanded == 0 || this->motor2StepsCommanded == 0)
-                    || (this->motor1StepsCommanded == this->motor2StepsCommanded)) {
+                if ((this->motor1StepsCommanded == 0 || this->motor2StepsCommanded == 0) || (this->motor1StepsCommanded == this->motor2StepsCommanded)) {
                     this->segment2Complete = true;
                 }
-                // Interpolate to find the initial gimbal attitude prv_F0M
-                this->gimbalPRV_F0M = {0.0, 0.0, 0.0};  // INTERPOLATE
+
+                // Find the initial gimbal attitude prv_F0M
+                std::pair<double, double> gimbalAnglesInit = this->motorToGimbalAngles(this->motor1ThetaInit, this->motor2ThetaInit);
+                double gimbalTheta1Init = gimbalAnglesInit.first;
+                double gimbalTheta2Init = gimbalAnglesInit.second;
+
+                Eigen::Vector3d prvTipInit = gimbalTheta1Init * this->gimbalRotHat1_M;
+                Eigen::Vector3d prvTiltInit = gimbalTheta2Init * this->gimbalRotHat2_F;
+                this->gimbalPRV_F0M = addPrv(prvTiltInit, prvTipInit);
+//                this->gimbalPRV_FIntM = this->gimbalPRV_F0M;
                 this->computeGimbalActuationParameters();
             } else {
                 this->completion = true;
@@ -167,236 +179,10 @@ void TwoAxisGimbal::UpdateState(uint64_t callTime) {
         this->actuateGimbal(callTime * NANO2SEC);
     }
 
+    cout << "gimbal prv angle: " << this->gimbalPRVTheta << endl;
+
     // Write the module output messages
     this->writeOutputMessages(callTime);
-}
-
-void TwoAxisGimbal::computeGimbalActuationParameters() {
-    Eigen::Vector3d gimbalPRV_F0M = {0.0, 0.0, 0.0};
-    Eigen::Vector3d gimbalPRV_FM = {0.0, 0.0, 0.0};
-    Eigen::Vector3d gimbalPRV_FF0 = {0.0, 0.0, 0.0};
-    Eigen::Vector3d gimbalPRV_FIntM = {0.0, 0.0, 0.0};
-    Eigen::Vector3d gimbalPRV_FIntF0 = {0.0, 0.0, 0.0};
-    Eigen::Vector3d gimbalPRV_FFInt = {0.0, 0.0, 0.0};
-
-    if (!this->segment1Complete && this->segment2Complete) { // Single prv
-        if (this->motor1StepsCommanded == this->motor2StepsCommanded) { // Actuate both motors
-            this->gimbalStepsCommanded = this->motor1StepsCommanded;
-            this->motor1ThetaRef = this->motor1ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
-            this->motor2ThetaRef = this->motor2ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
-            // Interpolate to find the reference gimbal attitude prv_FM
-            this->interpolateMotorAngles();
-            Eigen::Vector3d prvTip = this->gimbalTheta1Ref * this->gimbalRotHat1_M;
-            Eigen::Vector3d prvTilt = this->gimbalTheta2Ref * this->gimbalRotHat2_F;
-            gimbalPRV_FM = addPrv(prvTilt, prvTip);
-            // Find the relative gimbal prv for the rotation prv_FF0
-            gimbalPRV_FF0 = subPrv(gimbalPRV_FM, this->gimbalPRV_F0M);
-            // Find the angle the gimbal must rotate through for the rotation
-            this->gimbalPRVThetaRef = gimbalPRV_FF0.norm();
-            this->gimbalStepAngle = fabs(this->gimbalPRVThetaRef) / this->gimbalStepsCommanded;
-            this->gimbalPRVThetaDDotMax = (4 * this->gimbalStepAngle) / (this->motorStepTime * this->motorStepTime);
-        } else if (this->motor2StepsCommanded == 0) {  // Actuate motor 1
-            this->gimbalStepsCommanded = this->motor1StepsCommanded;
-            this->motor1ThetaRef = this->motor1ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
-            this->motor2ThetaRef = this->motor2ThetaInit;
-            // Interpolate to find the reference gimbal attitude prv_FM
-            this->interpolateMotorAngles();
-            Eigen::Vector3d prvTip = this->gimbalTheta1Ref * this->gimbalRotHat1_M;
-            Eigen::Vector3d prvTilt = this->gimbalTheta2Ref * this->gimbalRotHat2_F;
-            gimbalPRV_FM = addPrv(prvTilt, prvTip);
-            // Find the relative gimbal prv for the rotation prv_FF0
-            gimbalPRV_FF0 = subPrv(gimbalPRV_FM, this->gimbalPRV_F0M);
-            // Find the angle the gimbal must rotate through for the rotation
-            this->gimbalPRVThetaRef = gimbalPRV_FF0.norm();
-            this->gimbalStepAngle = fabs(this->gimbalPRVThetaRef) / this->gimbalStepsCommanded;
-            this->gimbalPRVThetaDDotMax = (4 * this->gimbalStepAngle) / (this->motorStepTime * this->motorStepTime);
-        } else if (this->motor1StepsCommanded == 0) {  // Actuate motor 2
-            this->gimbalStepsCommanded = this->motor2StepsCommanded;
-            this->motor1ThetaRef = this->motor1ThetaInit;
-            this->motor2ThetaRef = this->motor2ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
-            // Interpolate to find the reference gimbal attitude prv_FM
-            this->interpolateMotorAngles();
-            Eigen::Vector3d prvTip = this->gimbalTheta1Ref * this->gimbalRotHat1_M;
-            Eigen::Vector3d prvTilt = this->gimbalTheta2Ref * this->gimbalRotHat2_F;
-            gimbalPRV_FM = addPrv(prvTilt, prvTip);
-            // Find the relative gimbal prv for the rotation prv_FF0
-            gimbalPRV_FF0 = subPrv(gimbalPRV_FM, this->gimbalPRV_F0M);
-            // Find the angle the gimbal must rotate through for the rotation
-            this->gimbalPRVThetaRef = gimbalPRV_FF0.norm();
-            this->gimbalStepAngle = fabs(this->gimbalPRVThetaRef) / this->gimbalStepsCommanded;
-            this->gimbalPRVThetaDDotMax = (4 * this->gimbalStepAngle) / (this->motorStepTime * this->motorStepTime);
-        }
-    } else if  (!this->segment1Complete && !this->segment2Complete) { // Set first of two prvs
-        if (this->motor1StepsCommanded > this->motor2StepsCommanded) {
-            this->gimbalStepsCommanded = this->motor2StepsCommanded;
-            this->motor1ThetaRef = this->motor1ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
-            this->motor2ThetaRef = this->motor2ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
-            // Interpolate to find the reference gimbal attitude prv_FM
-            this->interpolateMotorAngles();
-            Eigen::Vector3d prvTip = this->gimbalTheta1Ref * this->gimbalRotHat1_M;
-            Eigen::Vector3d prvTilt = this->gimbalTheta2Ref * this->gimbalRotHat2_F;
-            gimbalPRV_FIntM = addPrv(prvTilt, prvTip);
-            // Find the relative gimbal prv for the rotation prv_FF0
-            gimbalPRV_FIntF0 = subPrv(gimbalPRV_FIntM, this->gimbalPRV_F0M);
-            // Find the angle the gimbal must rotate through for the rotation
-            this->gimbalPRVThetaRef = gimbalPRV_FF0.norm();
-            this->gimbalStepAngle = fabs(this->gimbalPRVThetaRef) / this->gimbalStepsCommanded;
-            this->gimbalPRVThetaDDotMax = (4 * this->gimbalStepAngle) / (this->motorStepTime * this->motorStepTime);
-        } else {
-            this->gimbalStepsCommanded = this->motor1StepsCommanded;
-            this->motor1ThetaRef = this->motor1ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
-            this->motor2ThetaRef = this->motor2ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
-            // Interpolate to find the reference gimbal attitude prv_FM
-            this->interpolateMotorAngles();
-            Eigen::Vector3d prvTip = this->gimbalTheta1Ref * this->gimbalRotHat1_M;
-            Eigen::Vector3d prvTilt = this->gimbalTheta2Ref * this->gimbalRotHat2_F;
-            gimbalPRV_FIntM = addPrv(prvTilt, prvTip);
-            // Find the relative gimbal prv for the rotation prv_FF0
-            gimbalPRV_FIntF0 = subPrv(gimbalPRV_FIntM, this->gimbalPRV_F0M);
-            // Find the angle the gimbal must rotate through for the rotation
-            this->gimbalPRVThetaRef = gimbalPRV_FF0.norm();
-            this->gimbalStepAngle = fabs(this->gimbalPRVThetaRef) / this->gimbalStepsCommanded;
-            this->gimbalPRVThetaDDotMax = (4 * this->gimbalStepAngle) / (this->motorStepTime * this->motorStepTime);
-        }
-    } else if  (this->segment1Complete && !this->segment2Complete) {  // Set second of two prvs
-        if (this->motor1StepsCommanded > this->motor2StepsCommanded) {
-            this->gimbalStepsCommanded = (this->motor1StepsCommanded - this->motor2StepsCommanded);
-            this->motor1ThetaRef = this->motor1ThetaRef + this->gimbalStepsCommanded * this->motorStepAngle;
-            // Interpolate to find the reference gimbal attitude prv_FM
-            this->interpolateMotorAngles();
-            Eigen::Vector3d prvTip = this->gimbalTheta1Ref * this->gimbalRotHat1_M;
-            Eigen::Vector3d prvTilt = this->gimbalTheta2Ref * this->gimbalRotHat2_F;
-            gimbalPRV_FM = addPrv(prvTilt, prvTip);
-            // Find the relative gimbal prv for the rotation prv_FF0
-            gimbalPRV_FFInt = subPrv(gimbalPRV_FM, gimbalPRV_FIntM);
-            // Find the angle the gimbal must rotate through for the rotation
-            this->gimbalPRVThetaRef = gimbalPRV_FFInt.norm();
-            this->gimbalStepAngle = fabs(this->gimbalPRVThetaRef) / this->gimbalStepsCommanded;
-            this->gimbalPRVThetaDDotMax = (4 * this->gimbalStepAngle) / (this->motorStepTime * this->motorStepTime);
-        } else {
-            this->gimbalStepsCommanded = (this->motor2StepsCommanded - this->motor1StepsCommanded);
-            this->motor2ThetaRef = this->motor2ThetaRef + this->gimbalStepsCommanded * this->motorStepAngle;
-            // Interpolate to find the reference gimbal attitude prv_FM
-            this->interpolateMotorAngles();
-            Eigen::Vector3d prvTip = this->gimbalTheta1Ref * this->gimbalRotHat1_M;
-            Eigen::Vector3d prvTilt = this->gimbalTheta2Ref * this->gimbalRotHat2_F;
-            gimbalPRV_FM = addPrv(prvTilt, prvTip);
-            // Find the relative gimbal prv for the rotation prv_FF0
-            gimbalPRV_FFInt = subPrv(gimbalPRV_FM, gimbalPRV_FIntM);
-            // Find the angle the gimbal must rotate through for the rotation
-            this->gimbalPRVThetaRef = gimbalPRV_FFInt.norm();
-            this->gimbalStepAngle = fabs(this->gimbalPRVThetaRef) / this->gimbalStepsCommanded;
-            this->gimbalPRVThetaDDotMax = (4 * this->gimbalStepAngle) / (this->motorStepTime * this->motorStepTime);
-        }
-    }
-}
-
-void TwoAxisGimbal::interpolateMotorAngles() {
-    double tableStepAngle = 0.5;  // [deg]
-
-    int compare1a = this->motor1ThetaRef / tableStepAngle;
-    double compare2a = this->motor1ThetaRef / tableStepAngle;
-    double compare3a = compare2a - compare1a;
-
-    int compare1b = this->motor2ThetaRef / tableStepAngle;
-    double compare2b = this->motor2ThetaRef / tableStepAngle;
-    double compare3b = compare2b - compare1b;
-
-    if (compare3a == 0.0 && compare3b == 0.0) {  // Do not need to interpolate
-        this->gimbalTheta1Ref = this->pullGimbalTipAngle(this->motor1ThetaRef, this->motor2ThetaRef);
-        this->gimbalTheta2Ref = this->pullGimbalTiltAngle(this->motor1ThetaRef, this->motor2ThetaRef);
-    } else if (compare3a == 0.0 || compare3b == 0.0) {  // Linear interpolation required
-        if (compare3a == 0.0) {
-            double lowerMotor2Angle = tableStepAngle * floor(this->motor2ThetaRef / tableStepAngle);
-            double upperMotor2Angle = tableStepAngle * ceil(this->motor2ThetaRef / tableStepAngle);
-
-            double z1_tip = this->pullGimbalTipAngle(this->motor1ThetaRef, lowerMotor2Angle);
-            double z2_tip = this->pullGimbalTiltAngle(this->motor1ThetaRef, upperMotor2Angle);
-            this->gimbalTheta1Ref = this->linearInterpolation(lowerMotor2Angle, upperMotor2Angle, z1_tip, z2_tip, this->motor1ThetaRef);
-
-            double z1_tilt = this->pullGimbalTiltAngle(this->motor1ThetaRef, lowerMotor2Angle);
-            double z2_tilt = this->pullGimbalTiltAngle(this->motor1ThetaRef, upperMotor2Angle);
-            this->gimbalTheta2Ref = this->linearInterpolation(lowerMotor2Angle, upperMotor2Angle, z1_tilt, z2_tilt, this->motor2ThetaRef);
-        } else {
-            double lowerMotor1Angle = tableStepAngle * floor(this->motor1ThetaRef / tableStepAngle);
-            double upperMotor1Angle = tableStepAngle * ceil(this->motor1ThetaRef / tableStepAngle);
-
-            double z1_tip = this->pullGimbalTipAngle(lowerMotor1Angle, this->motor2ThetaRef);
-            double z2_tip = this->pullGimbalTipAngle(upperMotor1Angle, this->motor2ThetaRef);
-            this->gimbalTheta1Ref = this->linearInterpolation(lowerMotor1Angle, upperMotor1Angle, z1_tip, z2_tip, this->motor1ThetaRef);
-
-            double z1_tilt = this->pullGimbalTiltAngle(lowerMotor1Angle, this->motor2ThetaRef);
-            double z2_tilt = this->pullGimbalTiltAngle(upperMotor1Angle, this->motor2ThetaRef);
-            this->gimbalTheta2Ref = this->linearInterpolation(lowerMotor1Angle, upperMotor1Angle, z1_tilt, z2_tilt, this->motor1ThetaRef);
-        }
-    } else {  // Bilinear interpolation required
-        double lowerMotor1Angle = tableStepAngle * floor(this->motor1ThetaRef / tableStepAngle);
-        double upperMotor1Angle = tableStepAngle * ceil(this->motor1ThetaRef / tableStepAngle);
-        double lowerMotor2Angle = tableStepAngle * floor(this->motor2ThetaRef / tableStepAngle);
-        double upperMotor2Angle = tableStepAngle * ceil(this->motor2ThetaRef / tableStepAngle);
-
-        double z11_tip = this->pullGimbalTipAngle(lowerMotor1Angle, lowerMotor2Angle);
-        double z12_tip = this->pullGimbalTipAngle(lowerMotor1Angle, upperMotor2Angle);
-        double z21_tip = this->pullGimbalTipAngle(upperMotor1Angle, lowerMotor2Angle);
-        double z22_tip = this->pullGimbalTipAngle(upperMotor1Angle, upperMotor2Angle);
-
-        double z11_tilt = this->pullGimbalTiltAngle(lowerMotor1Angle, lowerMotor2Angle);
-        double z12_tilt = this->pullGimbalTiltAngle(lowerMotor1Angle, upperMotor2Angle);
-        double z21_tilt = this->pullGimbalTiltAngle(upperMotor1Angle, lowerMotor2Angle);
-        double z22_tilt = this->pullGimbalTiltAngle(upperMotor1Angle, upperMotor2Angle);
-
-        this->gimbalTheta1Ref = this->bilinearInterpolation(lowerMotor1Angle,
-                                                            upperMotor1Angle,
-                                                            lowerMotor2Angle,
-                                                            upperMotor2Angle,
-                                                            z11_tip,
-                                                            z12_tip,
-                                                            z21_tip,
-                                                            z22_tip,
-                                                            this->motor1ThetaRef,
-                                                            this->motor2ThetaRef);
-        this->gimbalTheta2Ref = this->bilinearInterpolation(lowerMotor1Angle,
-                                                            upperMotor1Angle,
-                                                            lowerMotor2Angle,
-                                                            upperMotor2Angle,
-                                                            z11_tilt,
-                                                            z12_tilt,
-                                                            z21_tilt,
-                                                            z22_tilt,
-                                                            this->motor1ThetaRef,
-                                                            this->motor2ThetaRef);
-    }
-}
-
-double TwoAxisGimbal::pullGimbalTipAngle(double motor1Angle, double motor2Angle) {
-    int motor1Idx = motor1Angle / 0.5 + 1;
-    int motor2Idx = motor2Angle / 0.5 + 1;
-    return this->motor_to_gimbal_tip_angle[motor2Idx][motor1Idx];
-}
-
-double TwoAxisGimbal::pullGimbalTiltAngle(double motor1Angle, double motor2Angle) {
-    int motor1Idx = motor1Angle / 0.5 + 1;
-    int motor2Idx = motor2Angle / 0.5 + 1;
-    return this->motor_to_gimbal_tilt_angle[motor2Idx][motor1Idx];
-}
-
-double TwoAxisGimbal::linearInterpolation(double x1, double x2, double z1, double z2, double x) {
-    return z1 * (x2 - x) / (x2 - x1) + z2 * (x - x1) / (x2 - x1);
-}
-
-double TwoAxisGimbal::bilinearInterpolation(double x1,
-                             double x2,
-                             double y1,
-                             double y2,
-                             double z11,
-                             double z12,
-                             double z21,
-                             double z22,
-                             double x,
-                             double y) {
-    return 1 / ((x2 - x1) * (y2 - y1)) * (z11 * (x2 - x) * (y2 - y) + z21 * (x - x1) * (y2 - y)
-                                                                    + z12 * (x2 - x) * (y - y1)
-                                                                    + z22 * (x - x1) * (y - y1));
 }
 
 /*! This high-level method is used to simulate the gimbal prv states in time.
@@ -405,7 +191,7 @@ double TwoAxisGimbal::bilinearInterpolation(double x1,
 */
 void TwoAxisGimbal::actuateGimbal(double t) {
     // Reset the gimbal states when the current request is complete and a new request is received
-    if ((this->newMsg && this->gimbalStepComplete) || this->segment1Complete) {
+    if (this->newMsg && this->gimbalStepComplete) {
         this->resetGimbal(t);
     }
 
@@ -439,8 +225,8 @@ void TwoAxisGimbal::resetGimbal(double t) {
     // Update the initial time as the current simulation time
     this->tInit = t;
 
-    // Compute the actuation parameters if a second actuation segment is required
-    if (!this->segment2Complete) {
+    // Re-compute the actuation parameters if the first segment is complete and a second actuation segment is required
+    if (this->segment1Complete && !this->segment2Complete) {
         this->computeGimbalActuationParameters();
     }
 
@@ -540,6 +326,10 @@ void TwoAxisGimbal::computeGimbalStepComplete(double t) {
     // Update the completion boolean variable only when motor actuation is complete
     if ((this->gimbalStepCount == this->gimbalStepsCommanded) && !this->newMsg && !this->segment1Complete) {
         this->segment1Complete = true;
+        this->newMsg = true;
+        if (this->segment2Complete) {
+            this->completion = true;
+        }
     } else if ((this->gimbalStepCount == this->gimbalStepsCommanded) && !this->newMsg && this->segment1Complete) {
         this->segment2Complete = true;
         this->completion = true;
@@ -565,7 +355,21 @@ void TwoAxisGimbal::writeOutputMessages(uint64_t callTime) {
     Eigen::Vector3d omegaPrime_FM_F = this->gimbalPRVThetaDDot * this->gimbalPRVRotHat;  // [rad/s^2]
 
     // Determine the DCM dcm_FM representing the current gimbal attitude relative to the mount frame
-    Eigen::Vector3d prv_FM = this->gimbalPRVTheta * this->gimbalPRVRotHat;
+    Eigen::Vector3d relativePRV = this->gimbalPRVTheta * this->gimbalPRVRotHat;
+
+    Eigen::Vector3d prv_FM = {0.0, 0.0, 0.0};
+    if (!this->segment1Complete && this->segment2Complete) {
+        prv_FM = addPrv(relativePRV, this->gimbalPRV_F0M);
+    } else if (this->segment1Complete && !this->segment2Complete) {
+        prv_FM = addPrv(relativePRV, this->gimbalPRV_FIntM);
+    } else {
+        if (this->motor1StepsCommanded == this->motor2StepsCommanded) {
+            prv_FM = addPrv(relativePRV, this->gimbalPRV_F0M);
+        } else {
+            prv_FM = addPrv(relativePRV, this->gimbalPRV_FIntM);
+        }
+    }
+
     Eigen::Matrix3d dcm_FM = prvToDcm(prv_FM);
 
     // Compute the MRP sigma_FM representing the current gimbal attitude relative to the mount frame
@@ -585,6 +389,271 @@ void TwoAxisGimbal::writeOutputMessages(uint64_t callTime) {
     // Write the output messages
     this->twoAxisGimbalOutMsg.write(&twoAxisGimbalOut, moduleID, callTime);
     this->prescribedRotationOutMsg.write(&prescribedRotationOut, moduleID, callTime);
+}
+
+void TwoAxisGimbal::computeGimbalActuationParameters() {
+    Eigen::Vector3d gimbalPRV_FM = {0.0, 0.0, 0.0};
+    Eigen::Vector3d gimbalPRV_FF0 = {0.0, 0.0, 0.0};
+    Eigen::Vector3d gimbalPRV_FIntF0 = {0.0, 0.0, 0.0};
+    Eigen::Vector3d gimbalPRV_FFInt = {0.0, 0.0, 0.0};
+
+    if (!this->segment1Complete && this->segment2Complete) { // Single prv
+        if (this->motor1StepsCommanded == this->motor2StepsCommanded) { // Actuate both motors
+            cout << "Commanded motor 1 and motor 2 steps match: ACTUATE BOTH MOTORS" << endl;
+            this->gimbalStepsCommanded = this->motor1StepsCommanded;
+            this->motor1ThetaRef = this->motor1ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
+            this->motor2ThetaRef = this->motor2ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
+            // Interpolate to find the reference gimbal attitude prv_FM
+            std::pair<double, double> gimbalAnglesRef = this->motorToGimbalAngles(this->motor1ThetaRef, this->motor2ThetaRef);
+            this->gimbalTheta1Ref = gimbalAnglesRef.first;
+            this->gimbalTheta2Ref = gimbalAnglesRef.second;
+            Eigen::Vector3d prvTip = this->gimbalTheta1Ref * this->gimbalRotHat1_M;
+            Eigen::Vector3d prvTilt = this->gimbalTheta2Ref * this->gimbalRotHat2_F;
+            gimbalPRV_FM = addPrv(prvTilt, prvTip);
+            // Find the relative gimbal prv for the rotation prv_FF0
+            gimbalPRV_FF0 = subPrv(this->gimbalPRV_F0M, gimbalPRV_FM);
+            // Find the angle the gimbal must rotate through for the rotation
+            this->gimbalPRVThetaRef = gimbalPRV_FF0.norm();
+            this->gimbalPRVRotHat = gimbalPRV_FF0 / this->gimbalPRVThetaRef;
+            this->gimbalStepAngle = fabs(this->gimbalPRVThetaRef) / this->gimbalStepsCommanded;
+            this->gimbalPRVThetaDDotMax = (4 * this->gimbalStepAngle) / (this->motorStepTime * this->motorStepTime);
+        } else if (this->motor2StepsCommanded == 0) {  // Actuate motor 1
+            cout << "Commanded motor 2 steps is zero: ACTUATE MOTOR 1 ONLY" << endl;
+            this->gimbalStepsCommanded = this->motor1StepsCommanded;
+            this->motor1ThetaRef = this->motor1ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
+            this->motor2ThetaRef = this->motor2ThetaInit;
+            // Interpolate to find the reference gimbal attitude prv_FM
+            std::pair<double, double> gimbalAnglesRef = this->motorToGimbalAngles(this->motor1ThetaRef, this->motor2ThetaRef);
+            this->gimbalTheta1Ref = gimbalAnglesRef.first;
+            this->gimbalTheta2Ref = gimbalAnglesRef.second;
+            Eigen::Vector3d prvTip = this->gimbalTheta1Ref * this->gimbalRotHat1_M;
+            Eigen::Vector3d prvTilt = this->gimbalTheta2Ref * this->gimbalRotHat2_F;
+            gimbalPRV_FM = addPrv(prvTilt, prvTip);
+            // Find the relative gimbal prv for the rotation prv_FF0
+            gimbalPRV_FF0 = subPrv(this->gimbalPRV_F0M, gimbalPRV_FM);
+            // Find the angle the gimbal must rotate through for the rotation
+            this->gimbalPRVThetaRef = gimbalPRV_FF0.norm();
+            this->gimbalPRVRotHat = gimbalPRV_FF0 / this->gimbalPRVThetaRef;
+            this->gimbalStepAngle = fabs(this->gimbalPRVThetaRef) / this->gimbalStepsCommanded;
+            this->gimbalPRVThetaDDotMax = (4 * this->gimbalStepAngle) / (this->motorStepTime * this->motorStepTime);
+        } else if (this->motor1StepsCommanded == 0) {  // Actuate motor 2
+            cout << "Commanded motor 1 steps is zero: ACTUATE MOTOR 2 ONLY" << endl;
+            this->gimbalStepsCommanded = this->motor2StepsCommanded;
+            this->motor1ThetaRef = this->motor1ThetaInit;
+            this->motor2ThetaRef = this->motor2ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
+            // Interpolate to find the reference gimbal attitude prv_FM
+            std::pair<double, double> gimbalAnglesRef = this->motorToGimbalAngles(this->motor1ThetaRef, this->motor2ThetaRef);
+            this->gimbalTheta1Ref = gimbalAnglesRef.first;
+            this->gimbalTheta2Ref = gimbalAnglesRef.second;
+            Eigen::Vector3d prvTip = this->gimbalTheta1Ref * this->gimbalRotHat1_M;
+            Eigen::Vector3d prvTilt = this->gimbalTheta2Ref * this->gimbalRotHat2_F;
+            gimbalPRV_FM = addPrv(prvTilt, prvTip);
+            // Find the relative gimbal prv for the rotation prv_FF0
+            gimbalPRV_FF0 = subPrv(this->gimbalPRV_F0M, gimbalPRV_FM);
+            // Find the angle the gimbal must rotate through for the rotation
+            this->gimbalPRVThetaRef = gimbalPRV_FF0.norm();
+            this->gimbalPRVRotHat = gimbalPRV_FF0 / this->gimbalPRVThetaRef;
+            this->gimbalStepAngle = fabs(this->gimbalPRVThetaRef) / this->gimbalStepsCommanded;
+            this->gimbalPRVThetaDDotMax = (4 * this->gimbalStepAngle) / (this->motorStepTime * this->motorStepTime);
+        }
+    } else if  (!this->segment1Complete && !this->segment2Complete) { // Set first of two prvs
+        cout << "Commanded motor 1 steps > Commanded motor 2 steps: ACTUATE BOTH MOTORS FOLLOWED BY ACTUATION OF SINGLE MOTOR" << endl;
+        cout << "STEP 1: ACTUATE BOTH MOTORS" << endl;
+        if (this->motor1StepsCommanded > this->motor2StepsCommanded) {
+            this->gimbalStepsCommanded = this->motor2StepsCommanded;
+            this->motor1ThetaRef = this->motor1ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
+            this->motor2ThetaRef = this->motor2ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
+            // Interpolate to find the reference gimbal attitude prv_FM
+            std::pair<double, double> gimbalAnglesRef = this->motorToGimbalAngles(this->motor1ThetaRef, this->motor2ThetaRef);
+            this->gimbalTheta1Ref = gimbalAnglesRef.first;
+            this->gimbalTheta2Ref = gimbalAnglesRef.second;
+            Eigen::Vector3d prvTip = this->gimbalTheta1Ref * this->gimbalRotHat1_M;
+            Eigen::Vector3d prvTilt = this->gimbalTheta2Ref * this->gimbalRotHat2_F;
+            this->gimbalPRV_FIntM = addPrv(prvTilt, prvTip);
+            // Find the relative gimbal prv for the rotation prv_FF0
+            gimbalPRV_FIntF0 = subPrv(this->gimbalPRV_F0M, this->gimbalPRV_FIntM);
+            // Find the angle the gimbal must rotate through for the rotation
+            this->gimbalPRVThetaRef = gimbalPRV_FIntF0.norm();
+            this->gimbalPRVRotHat = gimbalPRV_FIntF0 / this->gimbalPRVThetaRef;
+            this->gimbalStepAngle = fabs(this->gimbalPRVThetaRef) / this->gimbalStepsCommanded;
+            this->gimbalPRVThetaDDotMax = (4 * this->gimbalStepAngle) / (this->motorStepTime * this->motorStepTime);
+        } else {
+            this->gimbalStepsCommanded = this->motor1StepsCommanded;
+            this->motor1ThetaRef = this->motor1ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
+            this->motor2ThetaRef = this->motor2ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
+            // Interpolate to find the reference gimbal attitude prv_FM
+            std::pair<double, double> gimbalAnglesRef = this->motorToGimbalAngles(this->motor1ThetaRef, this->motor2ThetaRef);
+            this->gimbalTheta1Ref = gimbalAnglesRef.first;
+            this->gimbalTheta2Ref = gimbalAnglesRef.second;
+            Eigen::Vector3d prvTip = this->gimbalTheta1Ref * this->gimbalRotHat1_M;
+            Eigen::Vector3d prvTilt = this->gimbalTheta2Ref * this->gimbalRotHat2_F;
+            this->gimbalPRV_FIntM = addPrv(prvTilt, prvTip);
+            // Find the relative gimbal prv for the rotation prv_FF0
+            gimbalPRV_FIntF0 = subPrv(this->gimbalPRV_F0M, this->gimbalPRV_FIntM);
+            // Find the angle the gimbal must rotate through for the rotation
+            this->gimbalPRVThetaRef = gimbalPRV_FIntF0.norm();
+            this->gimbalPRVRotHat = gimbalPRV_FIntF0 / this->gimbalPRVThetaRef;
+            this->gimbalStepAngle = fabs(this->gimbalPRVThetaRef) / this->gimbalStepsCommanded;
+            this->gimbalPRVThetaDDotMax = (4 * this->gimbalStepAngle) / (this->motorStepTime * this->motorStepTime);
+        }
+    } else if  (this->segment1Complete && !this->segment2Complete) {  // Set second of two prvs
+        cout << "Commanded motor 2 steps > Commanded motor 1 steps: ACTUATE BOTH MOTORS FOLLOWED BY ACTUATION OF SINGLE MOTOR" << endl;
+        if (this->motor1StepsCommanded > this->motor2StepsCommanded) {
+            cout << "STEP 2: ACTUATE MOTOR 1" << endl;
+            this->gimbalStepsCommanded = (this->motor1StepsCommanded - this->motor2StepsCommanded);
+            this->motor1ThetaRef = this->motor1ThetaRef + this->gimbalStepsCommanded * this->motorStepAngle;
+            // Interpolate to find the reference gimbal attitude prv_FM
+            std::pair<double, double> gimbalAnglesRef = this->motorToGimbalAngles(this->motor1ThetaRef, this->motor2ThetaRef);
+            this->gimbalTheta1Ref = gimbalAnglesRef.first;
+            this->gimbalTheta2Ref = gimbalAnglesRef.second;
+            Eigen::Vector3d prvTip = this->gimbalTheta1Ref * this->gimbalRotHat1_M;
+            Eigen::Vector3d prvTilt = this->gimbalTheta2Ref * this->gimbalRotHat2_F;
+            gimbalPRV_FM = addPrv(prvTilt, prvTip);
+            // Find the relative gimbal prv for the rotation prv_FF0
+            gimbalPRV_FFInt = subPrv(this->gimbalPRV_FIntM, gimbalPRV_FM);
+            // Find the angle the gimbal must rotate through for the rotation
+            this->gimbalPRVThetaRef = gimbalPRV_FFInt.norm();
+            this->gimbalPRVRotHat = gimbalPRV_FFInt / this->gimbalPRVThetaRef;
+            this->gimbalStepAngle = fabs(this->gimbalPRVThetaRef) / this->gimbalStepsCommanded;
+            this->gimbalPRVThetaDDotMax = (4 * this->gimbalStepAngle) / (this->motorStepTime * this->motorStepTime);
+        } else {
+            cout << "STEP 2: ACTUATE MOTOR 2" << endl;
+            this->gimbalStepsCommanded = (this->motor2StepsCommanded - this->motor1StepsCommanded);
+            this->motor2ThetaRef = this->motor2ThetaRef + this->gimbalStepsCommanded * this->motorStepAngle;
+            // Interpolate to find the reference gimbal attitude prv_FM
+            std::pair<double, double> gimbalAnglesRef = this->motorToGimbalAngles(this->motor1ThetaRef, this->motor2ThetaRef);
+            this->gimbalTheta1Ref = gimbalAnglesRef.first;
+            this->gimbalTheta2Ref = gimbalAnglesRef.second;
+            Eigen::Vector3d prvTip = this->gimbalTheta1Ref * this->gimbalRotHat1_M;
+            Eigen::Vector3d prvTilt = this->gimbalTheta2Ref * this->gimbalRotHat2_F;
+            gimbalPRV_FM = addPrv(prvTilt, prvTip);
+            // Find the relative gimbal prv for the rotation prv_FF0
+            gimbalPRV_FFInt = subPrv(this->gimbalPRV_FIntM, gimbalPRV_FM);
+            // Find the angle the gimbal must rotate through for the rotation
+            this->gimbalPRVThetaRef = gimbalPRV_FFInt.norm();
+            this->gimbalPRVRotHat = gimbalPRV_FFInt / this->gimbalPRVThetaRef;
+            this->gimbalStepAngle = fabs(this->gimbalPRVThetaRef) / this->gimbalStepsCommanded;
+            this->gimbalPRVThetaDDotMax = (4 * this->gimbalStepAngle) / (this->motorStepTime * this->motorStepTime);
+        }
+    }
+    cout << "computeGimbalActuationParameters - - - gimbalStepsCommanded " << this->gimbalStepsCommanded << endl;
+    cout << "computeGimbalActuationParameters - - - gimbalPRVThetaRef " << this->gimbalPRVThetaRef << endl;
+    cout << "computeGimbalActuationParameters - - - gimbalStepAngle " << this->gimbalStepAngle << endl;
+    cout << "computeGimbalActuationParameters - - - gimbalPRVThetaDDotMax " << this->gimbalPRVThetaDDotMax << endl;
+}
+
+std::pair<double, double> TwoAxisGimbal::motorToGimbalAngles(double motor1Angle, double motor2Angle) {
+    double tableStepAngle = 0.5;  // [deg]
+
+    int compare1a = motor1Angle / tableStepAngle;
+    double compare2a = motor1Angle / tableStepAngle;
+    double compare3a = compare2a - compare1a;
+
+    int compare1b = motor2Angle / tableStepAngle;
+    double compare2b = motor2Angle / tableStepAngle;
+    double compare3b = compare2b - compare1b;
+
+    double gimbalTipAngle;
+    double gimbalTiltAngle;
+
+    if (compare3a == 0.0 && compare3b == 0.0) {  // Do not need to interpolate
+        gimbalTipAngle = this->pullGimbalTipAngle(motor1Angle, motor2Angle);
+        gimbalTiltAngle = this->pullGimbalTiltAngle(motor1Angle, motor2Angle);
+    } else if (compare3a == 0.0 || compare3b == 0.0) {  // Linear interpolation required
+        if (compare3a == 0.0) {
+            double lowerMotor2Angle = tableStepAngle * floor(motor2Angle / tableStepAngle);
+            double upperMotor2Angle = tableStepAngle * ceil(motor2Angle / tableStepAngle);
+
+            double z1_tip = this->pullGimbalTipAngle(motor1Angle, lowerMotor2Angle);
+            double z2_tip = this->pullGimbalTiltAngle(motor1Angle, upperMotor2Angle);
+            gimbalTipAngle = this->linearInterpolation(lowerMotor2Angle, upperMotor2Angle, z1_tip, z2_tip, motor1Angle);
+
+            double z1_tilt = this->pullGimbalTiltAngle(motor1Angle, lowerMotor2Angle);
+            double z2_tilt = this->pullGimbalTiltAngle(motor1Angle, upperMotor2Angle);
+            gimbalTiltAngle = this->linearInterpolation(lowerMotor2Angle, upperMotor2Angle, z1_tilt, z2_tilt, motor2Angle);
+        } else {
+            double lowerMotor1Angle = tableStepAngle * floor(motor1Angle / tableStepAngle);
+            double upperMotor1Angle = tableStepAngle * ceil(motor1Angle / tableStepAngle);
+
+            double z1_tip = this->pullGimbalTipAngle(lowerMotor1Angle, motor2Angle);
+            double z2_tip = this->pullGimbalTipAngle(upperMotor1Angle, motor2Angle);
+            gimbalTipAngle = this->linearInterpolation(lowerMotor1Angle, upperMotor1Angle, z1_tip, z2_tip, motor1Angle);
+
+            double z1_tilt = this->pullGimbalTiltAngle(lowerMotor1Angle, motor2Angle);
+            double z2_tilt = this->pullGimbalTiltAngle(upperMotor1Angle, motor2Angle);
+            gimbalTiltAngle = this->linearInterpolation(lowerMotor1Angle, upperMotor1Angle, z1_tilt, z2_tilt, motor1Angle);
+        }
+    } else {  // Bilinear interpolation required
+        double lowerMotor1Angle = tableStepAngle * floor(motor1Angle / tableStepAngle);
+        double upperMotor1Angle = tableStepAngle * ceil(motor1Angle / tableStepAngle);
+        double lowerMotor2Angle = tableStepAngle * floor(motor2Angle / tableStepAngle);
+        double upperMotor2Angle = tableStepAngle * ceil(motor2Angle / tableStepAngle);
+
+        double z11_tip = this->pullGimbalTipAngle(lowerMotor1Angle, lowerMotor2Angle);
+        double z12_tip = this->pullGimbalTipAngle(lowerMotor1Angle, upperMotor2Angle);
+        double z21_tip = this->pullGimbalTipAngle(upperMotor1Angle, lowerMotor2Angle);
+        double z22_tip = this->pullGimbalTipAngle(upperMotor1Angle, upperMotor2Angle);
+
+        double z11_tilt = this->pullGimbalTiltAngle(lowerMotor1Angle, lowerMotor2Angle);
+        double z12_tilt = this->pullGimbalTiltAngle(lowerMotor1Angle, upperMotor2Angle);
+        double z21_tilt = this->pullGimbalTiltAngle(upperMotor1Angle, lowerMotor2Angle);
+        double z22_tilt = this->pullGimbalTiltAngle(upperMotor1Angle, upperMotor2Angle);
+
+        gimbalTipAngle = this->bilinearInterpolation(lowerMotor1Angle,
+                                                     upperMotor1Angle,
+                                                     lowerMotor2Angle,
+                                                     upperMotor2Angle,
+                                                     z11_tip,
+                                                     z12_tip,
+                                                     z21_tip,
+                                                     z22_tip,
+                                                     motor1Angle,
+                                                     motor2Angle);
+        gimbalTiltAngle = this->bilinearInterpolation(lowerMotor1Angle,
+                                                      upperMotor1Angle,
+                                                      lowerMotor2Angle,
+                                                      upperMotor2Angle,
+                                                      z11_tilt,
+                                                      z12_tilt,
+                                                      z21_tilt,
+                                                      z22_tilt,
+                                                      motor1Angle,
+                                                      motor2Angle);
+    }
+
+    std::pair<double, double> gimbalAngles = {gimbalTipAngle, gimbalTiltAngle};
+    return gimbalAngles;
+}
+
+double TwoAxisGimbal::pullGimbalTipAngle(double motor1Angle, double motor2Angle) {
+    int motor1Idx = motor1Angle / 0.5;
+    int motor2Idx = motor2Angle / 0.5;
+    return this->motor_to_gimbal_tip_angle[motor2Idx][motor1Idx];
+}
+
+double TwoAxisGimbal::pullGimbalTiltAngle(double motor1Angle, double motor2Angle) {
+    int motor1Idx = motor1Angle / 0.5;
+    int motor2Idx = motor2Angle / 0.5;
+    return this->motor_to_gimbal_tilt_angle[motor2Idx][motor1Idx];
+}
+
+double TwoAxisGimbal::linearInterpolation(double x1, double x2, double z1, double z2, double x) {
+    return z1 * (x2 - x) / (x2 - x1) + z2 * (x - x1) / (x2 - x1);
+}
+
+double TwoAxisGimbal::bilinearInterpolation(double x1,
+                                            double x2,
+                                            double y1,
+                                            double y2,
+                                            double z11,
+                                            double z12,
+                                            double z21,
+                                            double z22,
+                                            double x,
+                                            double y) {
+    return 1 / ((x2 - x1) * (y2 - y1)) * (z11 * (x2 - x) * (y2 - y) + z21 * (x - x1) * (y2 - y)
+                                          + z12 * (x2 - x) * (y - y1)
+                                          + z22 * (x - x1) * (y - y1));
 }
 
 /*! Setter method for the gimbal rotation axis 1.
