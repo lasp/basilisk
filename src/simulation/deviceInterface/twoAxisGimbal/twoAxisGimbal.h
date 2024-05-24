@@ -60,8 +60,8 @@ public:
     BSKLogger *bskLogger;                                                           //!< BSK Logging
 
 private:
-    double motor_to_gimbal_tip_angle[320][320];
-    double motor_to_gimbal_tilt_angle[320][320];
+    double motor_to_gimbal_tip_angle[319][319];
+    double motor_to_gimbal_tilt_angle[319][319];
 
     Eigen::Vector3d gimbalPRV_FIntM;
 
@@ -82,7 +82,6 @@ private:
                                  double y);
 
     void computeGimbalActuationParameters();
-//    void interpolateMotorAngles();
     void actuateGimbal(double t);                                                   //!< High-level method used to simulate the gimbal states in time
     void resetGimbal(double t);                                                     //!< Method used to reset the gimbal states when the current request is complete and a new request is received
     void updateGimbalRotationParameters();                                          //!< Method used to update the gimbal rotation parameters after a step is completed
