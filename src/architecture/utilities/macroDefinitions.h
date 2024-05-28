@@ -32,8 +32,6 @@
 #define RECAST3X3       (double (*)[3])
 #define RECAST2x2       (double (*)[2])
 #define SEC2HOUR        1./3600.
-#define DEG2RAD         3.14159265359 / 180
-#define RAD2DEG         180 / 3.14159265359
 
 
 
