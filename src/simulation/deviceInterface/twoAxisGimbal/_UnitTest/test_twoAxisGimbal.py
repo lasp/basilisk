@@ -38,7 +38,8 @@ from Basilisk.utilities import SimulationBaseClass
 from Basilisk.utilities import macros
 
 
-def test_twoAxisGimbal(show_plots):
+@pytest.mark.parametrize("accuracy", [1e-3])
+def test_twoAxisGimbal(show_plots, accuracy):
     r"""
     **Validation Test Description**
 
@@ -66,54 +67,64 @@ def test_twoAxisGimbal(show_plots):
     testProc = unitTestSim.CreateNewProcess(unitProcessName)
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
-    # Create the messages for the initial motor angles
+    # Create the initial angle message for stepper motor 1
     motor1ThetaInit = 0.0 * macros.D2R  # [rad]
     Motor1ThetaInitMessageData = messaging.HingedRigidBodyMsgPayload()
     Motor1ThetaInitMessageData.theta = motor1ThetaInit
     Motor1ThetaInitMessageData.thetaDot = 0.0
     Motor1ThetaInitMessage = messaging.HingedRigidBodyMsg().write(Motor1ThetaInitMessageData)
 
+    # Create the initial angle message for stepper motor 2
     motor2ThetaInit = 0.0 * macros.D2R  # [rad]
     Motor2ThetaInitMessageData = messaging.HingedRigidBodyMsgPayload()
     Motor2ThetaInitMessageData.theta = motor2ThetaInit
     Motor2ThetaInitMessageData.thetaDot = 0.0
     Motor2ThetaInitMessage = messaging.HingedRigidBodyMsg().write(Motor2ThetaInitMessageData)
 
-    # Create the stepper motors using two instances of the stepperMotor module
+    # Define stepper motor parameters
     motorStepAngle = 0.008 * macros.D2R  # [rad]
     motorStepTime = 0.008  # [s]
+    motorThetaDDotMax = motorStepAngle / (0.25 * motorStepTime * motorStepTime)  # [rad/s^2]
+
+    # Create stepper motor 1
     stepperMotor1 = stepperMotor.StepperMotor()
     stepperMotor1.ModelTag = "stepperMotor1"
     stepperMotor1.setThetaInit(motor1ThetaInit)
     stepperMotor1.setStepAngle(motorStepAngle)
     stepperMotor1.setStepTime(motorStepTime)
-    stepperMotor1.setThetaDDotMax(motorStepAngle / (0.25 * motorStepTime * motorStepTime))
+    stepperMotor1.setThetaDDotMax(motorThetaDDotMax)
     unitTestSim.AddModelToTask(unitTaskName, stepperMotor1)
 
+    # Create stepper motor 2
     stepperMotor2 = stepperMotor.StepperMotor()
     stepperMotor2.ModelTag = "stepperMotor2"
     stepperMotor2.setThetaInit(motor2ThetaInit)
     stepperMotor2.setStepAngle(motorStepAngle)
     stepperMotor2.setStepTime(motorStepTime)
-    stepperMotor2.setThetaDDotMax(motorStepAngle / (0.25 * motorStepTime * motorStepTime))
+    stepperMotor2.setThetaDDotMax(motorThetaDDotMax)
     unitTestSim.AddModelToTask(unitTaskName, stepperMotor2)
 
-    # Create the StepperMotor input messages
-    motor1StepsCommanded = 50000
-    motor2StepsCommanded = 20000
+    # Define the steps commanded for each stepper motor
+    motor1StepsCommanded = 5000
+    motor2StepsCommanded = 2000
+
+    # Create the step command message for stepper motor 1
     Motor1StepCommandMessageData = messaging.MotorStepCommandMsgPayload()
     Motor1StepCommandMessageData.stepsCommanded = motor1StepsCommanded
     Motor1StepCommandMessage = messaging.MotorStepCommandMsg().write(Motor1StepCommandMessageData)
     stepperMotor1.motorStepCommandInMsg.subscribeTo(Motor1StepCommandMessage)
 
+    # Create the step command message for stepper motor 2
     Motor2StepCommandMessageData = messaging.MotorStepCommandMsgPayload()
     Motor2StepCommandMessageData.stepsCommanded = motor2StepsCommanded
     Motor2StepCommandMessage = messaging.MotorStepCommandMsg().write(Motor2StepCommandMessageData)
     stepperMotor2.motorStepCommandInMsg.subscribeTo(Motor2StepCommandMessage)
 
-    # Create the two axis gimbal using the twoAxisGimbal module
+    # Define the two-axis gimbal parameters
     rotHat1_M = np.array([1.0, 0.0, 0.0])
     rotHat2_F = np.array([0.0, 1.0, 0.0])
+
+    # Create the two-axis gimbal (Module tested in this script)
     gimbal = twoAxisGimbal.TwoAxisGimbal()
     gimbal.ModelTag = "twoAxisGimbal"
     gimbal.setGimbalRotHat1_M(rotHat1_M)
@@ -128,16 +139,28 @@ def test_twoAxisGimbal(show_plots):
     gimbal.motor2StateInMsg.subscribeTo(stepperMotor2.stepperMotorOutMsg)
     unitTestSim.AddModelToTask(unitTaskName, gimbal)
 
-    # Log module data for module unit test validation
+    # Set up data logging for the gimbal module unit test
     gimbalPrescribedRotStateData = gimbal.prescribedRotationOutMsg.recorder()
     gimbalTipTiltAngleData = gimbal.twoAxisGimbalOutMsg.recorder()
     unitTestSim.AddModelToTask(unitTaskName, gimbalPrescribedRotStateData)
     unitTestSim.AddModelToTask(unitTaskName, gimbalTipTiltAngleData)
 
+    # Determine the simulation time
+    if motor1StepsCommanded > motor2StepsCommanded:
+        simSegment1Time = motor2StepsCommanded * motorStepTime  # [s]
+        simSegment2Time = (motor1StepsCommanded - motor2StepsCommanded) * motorStepTime  # [s]
+    elif motor1StepsCommanded < motor2StepsCommanded:
+        simSegment1Time = motor1StepsCommanded * motorStepTime  # [s]
+        simSegment2Time = (motor2StepsCommanded - motor1StepsCommanded) * motorStepTime  # [s]
+    else:
+        simSegment1Time = motor1StepsCommanded * motorStepTime  # [s]
+        simSegment2Time = 0  # [s]
+    simExtraTime = 10.0  # [s]
+    simTimeTotal = simSegment1Time + simSegment2Time + simExtraTime  # [s]
+
     # Run the simulation
-    simTime = motor1StepsCommanded * motorStepTime + motor2StepsCommanded * motorStepTime + 5.0  # [s]
     unitTestSim.InitializeSimulation()
-    unitTestSim.ConfigureStopTime(macros.sec2nano(simTime))
+    unitTestSim.ConfigureStopTime(macros.sec2nano(simTimeTotal))
     unitTestSim.ExecuteSimulation()
 
     # Extract the logged data for plotting and data comparison
@@ -153,11 +176,7 @@ def test_twoAxisGimbal(show_plots):
     #
 
     # Calculate the initial gimbal tip and tilt angles
-    gimbalTipAngleInit , gimbalTiltAngleInit = motorToGimbalAngles(motorStepAngle, motor1ThetaInit, motor2ThetaInit, 0, 0)
-
-
-    # Calculate the final gimbal tip and tilt angles
-    gimbalTipAngleFinal , gimbalTiltAngleFinal = motorToGimbalAngles(motorStepAngle, motor1ThetaInit, motor2ThetaInit, motor1StepsCommanded, motor2StepsCommanded)
+    gimbalTipAngleInit , gimbalTiltAngleInit = motorToGimbalAngles(macros.R2D * motor1ThetaInit, macros.R2D * motor2ThetaInit)
 
     # Print interpolation results
     print("\nInitial Gimbal Tip Angle: ")
@@ -165,98 +184,149 @@ def test_twoAxisGimbal(show_plots):
     print("\nInitial Gimbal Tilt Angle: ")
     print(gimbalTiltAngleInit)
 
-    print("\nGimbal Tip Reference Angle: ")
-    print(gimbalTipAngleFinal)
-    print("\nGimbal Tilt Reference Angle: ")
-    print(gimbalTiltAngleFinal)
-    print("********************\n")
+    if motor1StepsCommanded > motor2StepsCommanded:
+        motor1Segment1FinalAngle = motor1ThetaInit + motor2StepsCommanded * motorStepAngle  # [rad]
+        motor2Segment1FinalAngle = motor2ThetaInit + motor2StepsCommanded * motorStepAngle  # [rad]
+        gimbalTipAngleSegment1Final, gimbalTiltAngleSegment1Final = motorToGimbalAngles(macros.R2D * motor1Segment1FinalAngle, macros.R2D * motor2Segment1FinalAngle)
 
-    # Check that the final gimbal angles match the calculated final gimbal angles
-    accuracy = 0.001
-    # np.testing.assert_allclose(gimbalTipAngleFinal,
-    #                            gimbalTipAngle[-1],
+        motor1Segment2FinalAngle = motor1ThetaInit + motor1StepsCommanded * motorStepAngle  # [rad]
+        motor2Segment2FinalAngle = motor2ThetaInit + motor2StepsCommanded * motorStepAngle  # [rad]
+        gimbalTipAngleSegment2Final, gimbalTiltAngleSegment2Final = motorToGimbalAngles(macros.R2D * motor1Segment2FinalAngle, macros.R2D * motor2Segment2FinalAngle)  # [deg]
+
+        gimbalTipAngleCheckList = [gimbalTipAngleSegment1Final, gimbalTipAngleSegment2Final]  # [deg]
+        gimbalTiltAngleCheckList = [gimbalTiltAngleSegment1Final, gimbalTiltAngleSegment2Final]  # [deg]
+
+        segment1StopTimeIdx = int(round(simSegment1Time / testTimeStepSec)) + 1
+        gimbalTipAngleSimList = [macros.R2D * gimbalTipAngle[segment1StopTimeIdx], macros.R2D * gimbalTipAngle[-1]]  # [deg]
+        gimbalTiltAngleSimList = [macros.R2D * gimbalTiltAngle[segment1StopTimeIdx], macros.R2D * gimbalTiltAngle[-1]]  # [deg]
+
+    elif motor1StepsCommanded < motor2StepsCommanded:
+        motor1Segment1FinalAngle = motor1ThetaInit + motor1StepsCommanded * motorStepAngle  # [rad]
+        motor2Segment1FinalAngle = motor2ThetaInit + motor1StepsCommanded * motorStepAngle  # [rad]
+        gimbalTipAngleSegment1Final, gimbalTiltAngleSegment1Final = motorToGimbalAngles(macros.R2D * motor1Segment1FinalAngle, macros.R2D * motor2Segment1FinalAngle)  # [deg]
+
+        motor1Segment2FinalAngle = motor1ThetaInit + motor1StepsCommanded * motorStepAngle  # [rad]
+        motor2Segment2FinalAngle = motor2ThetaInit + motor2StepsCommanded * motorStepAngle  # [rad]
+        gimbalTipAngleSegment2Final, gimbalTiltAngleSegment2Final = motorToGimbalAngles(macros.R2D * motor1Segment2FinalAngle, macros.R2D * motor2Segment2FinalAngle)  # [deg]
+
+        gimbalTipAngleCheckList = [gimbalTipAngleSegment1Final, gimbalTipAngleSegment2Final]  # [deg]
+        gimbalTiltAngleCheckList = [gimbalTiltAngleSegment1Final, gimbalTiltAngleSegment2Final]  # [deg]
+
+        segment1StopTimeIdx = int(round(simSegment1Time / testTimeStepSec)) + 1
+        gimbalTipAngleSimList = [macros.R2D * gimbalTipAngle[segment1StopTimeIdx], macros.R2D * gimbalTipAngle[-1]]  # [deg]
+        gimbalTiltAngleSimList = [macros.R2D * gimbalTiltAngle[segment1StopTimeIdx], macros.R2D * gimbalTiltAngle[-1]]  # [deg]
+
+    else:
+        simSegment1Time = motor1StepsCommanded * motorStepTime  # [s]
+        simSegment2Time = 0  # [s]
+
+        motor1FinalAngle = motor1ThetaInit + motor1StepsCommanded * motorStepAngle  # [rad]
+        motor2FinalAngle = motor2ThetaInit + motor2StepsCommanded * motorStepAngle  # [rad]
+        gimbalTipAngleFinal, gimbalTiltAngleFinal = motorToGimbalAngles(macros.R2D * motor1FinalAngle, macros.R2D * motor2FinalAngle)  # [deg]
+
+        gimbalTipAngleCheckList = [gimbalTipAngleFinal]  # [deg]
+        gimbalTiltAngleCheckList = [gimbalTiltAngleFinal]  # [deg]
+
+        gimbalTipAngleSimList = [macros.R2D * gimbalTipAngle[-1]]  # [deg]
+        gimbalTiltAngleSimList = [macros.R2D * gimbalTiltAngle[-1]]  # [deg]
+
+
+    # Print gimbal angle checks
+    print("GIMBAL TIP ANGLE CHECK TRUTH VALUES: ")
+    print(gimbalTipAngleCheckList)
+    print("GIMBAL TIP ANGLE MODULE VALUES:")
+    print(gimbalTipAngleSimList)
+
+    print("\n\nGIMBAL TILT ANGLE CHECK TRUTH VALUES: ")
+    print(gimbalTiltAngleCheckList)
+    print("GIMBAL TILT ANGLE MODULE VALUES:")
+    print(gimbalTiltAngleSimList)
+
+    # Check that the gimbal angles converge to the desired values for each actuation segment
+    # np.testing.assert_allclose(gimbalTipAngleCheckList,
+    #                            gimbalTipAngleSimList,
     #                            atol=accuracy,
     #                            verbose=True)
     #
-    # np.testing.assert_allclose(gimbalTiltAngleFinal,
-    #                            gimbalTiltAngle[-1],
+    # np.testing.assert_allclose(gimbalTiltAngleCheckList,
+    #                            gimbalTiltAngleSimList,
     #                            atol=accuracy,
     #                            verbose=True)
 
     if show_plots:
         # 1. Plot the gimbal tip and tilt angles
         # 1A. Plot gimbal tip angle
+        gimbalTipAngleInitPlotting = np.ones(len(timespan)) * gimbalTipAngleInit  # [deg]
+        gimbalTipAngleFinalPlotting = np.ones(len(timespan)) * gimbalTipAngleCheckList[-1]  # [deg]
         plt.figure()
         plt.clf()
         plt.plot(timespan, gimbalTipAngle, label=r"$\psi$")
+        plt.plot(timespan, gimbalTipAngleInitPlotting, '--', label=r"$\psi_0$")
+        plt.plot(timespan, gimbalTipAngleFinalPlotting, '--', label=r"$\psi_{\text{ref}}$")
         plt.title(r'Gimbal Tip Angle $\psi$', fontsize=14)
         plt.ylabel('(deg)', fontsize=14)
         plt.xlabel('Time (s)', fontsize=14)
-        plt.legend(loc='upper right', prop={'size': 12})
+        plt.legend(loc='center right', prop={'size': 12})
         plt.grid(True)
 
         # 1B. Plot gimbal tilt angle
+        gimbalTiltAngleInitPlotting = np.ones(len(timespan)) * gimbalTiltAngleInit  # [deg]
+        gimbalTiltAngleFinalPlotting = np.ones(len(timespan)) * gimbalTiltAngleCheckList[-1]  # [deg]
         plt.figure()
         plt.clf()
         plt.plot(timespan, gimbalTiltAngle, label=r"$\phi$")
+        plt.plot(timespan, gimbalTiltAngleInitPlotting, '--', label=r"$\phi_0$")
+        plt.plot(timespan, gimbalTiltAngleFinalPlotting, '--', label=r"$\phi_{\text{ref}}$")
         plt.title(r'Gimbal Tilt Angle $\phi$', fontsize=14)
         plt.ylabel('(deg)', fontsize=14)
         plt.xlabel('Time (s)', fontsize=14)
-        plt.legend(loc='upper right', prop={'size': 12})
+        plt.legend(loc='center right', prop={'size': 12})
         plt.grid(True)
 
-        # 2. Plot the gimbal prescribed rotational states
-        # 2A. Plot PRV angle from sigma_FM
-        phi_FM = []
-        for i in range(len(timespan)):
-            phi_FM.append(macros.R2D * 4 * np.arctan(np.linalg.norm(sigma_FM[i, :])))  # [deg]
-
-        plt.figure()
-        plt.clf()
-        plt.plot(timespan, phi_FM, label=r"$\Phi$")
-        plt.title(r'Profiled PRV Angle $\Phi_{\mathcal{F}/\mathcal{M}}$', fontsize=14)
-        plt.ylabel('(deg)', fontsize=14)
-        plt.xlabel('Time (s)', fontsize=14)
-        plt.legend(loc='center right', prop={'size': 14})
-        plt.grid(True)
-
-        # 2B. Plot gimbal hub-relative angular velocity omega_FM_F
-        plt.figure()
-        plt.clf()
-        plt.plot(timespan, omega_FM_F[:, 0], label=r'$\omega_{1}$')
-        plt.plot(timespan, omega_FM_F[:, 1], label=r'$\omega_{2}$')
-        plt.plot(timespan, omega_FM_F[:, 2], label=r'$\omega_{3}$')
-        plt.title(r'Profiled Angular Velocity ${}^\mathcal{F} \omega_{\mathcal{F}/\mathcal{M}}$', fontsize=14)
-        plt.ylabel('(deg/s)', fontsize=14)
-        plt.xlabel('Time (s)', fontsize=14)
-        plt.legend(loc='upper right', prop={'size': 14})
-        plt.grid(True)
-
-        # 2C. Plot gimbal hub-relative angular acceleration omegaPrime_FM_F
-        plt.figure()
-        plt.clf()
-        plt.plot(timespan, omegaPrime_FM_F[:, 0], label=r'1')
-        plt.plot(timespan, omegaPrime_FM_F[:, 1], label=r'2')
-        plt.plot(timespan, omegaPrime_FM_F[:, 2], label=r'3')
-        plt.title(r'Profiled Angular Acceleration ${}^\mathcal{F} \omega$Prime$_{\mathcal{F}/\mathcal{M}}$',
-                  fontsize=14)
-        plt.ylabel('(deg/s$^2$)', fontsize=14)
-        plt.xlabel('Time (s)', fontsize=14)
-        plt.legend(loc='upper right', prop={'size': 14})
-        plt.grid(True)
+        # # 2. Plot the gimbal prescribed rotational states
+        # # 2A. Plot PRV angle from sigma_FM
+        # phi_FM = []
+        # for i in range(len(timespan)):
+        #     phi_FM.append(macros.R2D * 4 * np.arctan(np.linalg.norm(sigma_FM[i, :])))  # [deg]
+        #
+        # plt.figure()
+        # plt.clf()
+        # plt.plot(timespan, phi_FM, label=r"$\Phi$")
+        # plt.title(r'Profiled PRV Angle $\Phi_{\mathcal{F}/\mathcal{M}}$', fontsize=14)
+        # plt.ylabel('(deg)', fontsize=14)
+        # plt.xlabel('Time (s)', fontsize=14)
+        # plt.legend(loc='center right', prop={'size': 14})
+        # plt.grid(True)
+        #
+        # # 2B. Plot gimbal hub-relative angular velocity omega_FM_F
+        # plt.figure()
+        # plt.clf()
+        # plt.plot(timespan, omega_FM_F[:, 0], label=r'$\omega_{1}$')
+        # plt.plot(timespan, omega_FM_F[:, 1], label=r'$\omega_{2}$')
+        # plt.plot(timespan, omega_FM_F[:, 2], label=r'$\omega_{3}$')
+        # plt.title(r'Profiled Angular Velocity ${}^\mathcal{F} \omega_{\mathcal{F}/\mathcal{M}}$', fontsize=14)
+        # plt.ylabel('(deg/s)', fontsize=14)
+        # plt.xlabel('Time (s)', fontsize=14)
+        # plt.legend(loc='upper right', prop={'size': 14})
+        # plt.grid(True)
+        #
+        # # 2C. Plot gimbal hub-relative angular acceleration omegaPrime_FM_F
+        # plt.figure()
+        # plt.clf()
+        # plt.plot(timespan, omegaPrime_FM_F[:, 0], label=r'1')
+        # plt.plot(timespan, omegaPrime_FM_F[:, 1], label=r'2')
+        # plt.plot(timespan, omegaPrime_FM_F[:, 2], label=r'3')
+        # plt.title(r'Profiled Angular Acceleration ${}^\mathcal{F} \omega$Prime$_{\mathcal{F}/\mathcal{M}}$',
+        #           fontsize=14)
+        # plt.ylabel('(deg/s$^2$)', fontsize=14)
+        # plt.xlabel('Time (s)', fontsize=14)
+        # plt.legend(loc='upper right', prop={'size': 14})
+        # plt.grid(True)
 
         plt.show()
     plt.close("all")
 
-def motorToGimbalAngles(motorStepAngle, motor1InitAngle, motor2InitAngle, motor1StepsCommanded, motor2StepsCommanded):
-    # Determine reference motor angles
-    motor1Angle = motor1InitAngle + motorStepAngle * motor1StepsCommanded  # [deg]
-    motor2Angle = motor2InitAngle + motorStepAngle * motor2StepsCommanded  # [deg]
-
-    print("\n********************\nMotor 1 Reference Angle: ")
-    print(motor1Angle)
-    print("\n********************\nMotor 2 Reference Angle: ")
-    print(motor2Angle)
+def motorToGimbalAngles(motor1Angle, motor2Angle):
 
     # Read in the lookup tables
     path_to_file = "/Users/leahkiner/Desktop/motor_to_gimbal_tip_angle.csv"
@@ -351,4 +421,5 @@ def bilinearInterpolation(x1, x2, y1, y2, z11, z12, z21, z22, x, y):
 if __name__ == "__main__":
     test_twoAxisGimbal(
         True,  # show_plots
+        1e-3  # accuracy
     )
