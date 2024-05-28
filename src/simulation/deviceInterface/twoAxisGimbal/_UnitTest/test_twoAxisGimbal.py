@@ -36,10 +36,12 @@ from Basilisk.simulation import stepperMotor
 from Basilisk.simulation import twoAxisGimbal
 from Basilisk.utilities import SimulationBaseClass
 from Basilisk.utilities import macros
+from matplotlib import collections as mc
 
-
-@pytest.mark.parametrize("accuracy", [1e-3])
-def test_twoAxisGimbal(show_plots, accuracy):
+@pytest.mark.parametrize("accuracy", [0.01])
+@pytest.mark.parametrize("motor1StepsCommanded", [1000, 2000, 5000])
+@pytest.mark.parametrize("motor2StepsCommanded", [1000, 5000])
+def test_twoAxisGimbal(show_plots, motor1StepsCommanded, motor2StepsCommanded, accuracy):
     r"""
     **Validation Test Description**
 
@@ -103,10 +105,6 @@ def test_twoAxisGimbal(show_plots, accuracy):
     stepperMotor2.setStepTime(motorStepTime)
     stepperMotor2.setThetaDDotMax(motorThetaDDotMax)
     unitTestSim.AddModelToTask(unitTaskName, stepperMotor2)
-
-    # Define the steps commanded for each stepper motor
-    motor1StepsCommanded = 5000
-    motor2StepsCommanded = 2000
 
     # Create the step command message for stepper motor 1
     Motor1StepCommandMessageData = messaging.MotorStepCommandMsgPayload()
@@ -197,8 +195,8 @@ def test_twoAxisGimbal(show_plots, accuracy):
         gimbalTiltAngleCheckList = [gimbalTiltAngleSegment1Final, gimbalTiltAngleSegment2Final]  # [deg]
 
         segment1StopTimeIdx = int(round(simSegment1Time / testTimeStepSec)) + 1
-        gimbalTipAngleSimList = [macros.R2D * gimbalTipAngle[segment1StopTimeIdx], macros.R2D * gimbalTipAngle[-1]]  # [deg]
-        gimbalTiltAngleSimList = [macros.R2D * gimbalTiltAngle[segment1StopTimeIdx], macros.R2D * gimbalTiltAngle[-1]]  # [deg]
+        gimbalTipAngleSimList = [gimbalTipAngle[segment1StopTimeIdx], gimbalTipAngle[-1]]  # [deg]
+        gimbalTiltAngleSimList = [gimbalTiltAngle[segment1StopTimeIdx], gimbalTiltAngle[-1]]  # [deg]
 
     elif motor1StepsCommanded < motor2StepsCommanded:
         motor1Segment1FinalAngle = motor1ThetaInit + motor1StepsCommanded * motorStepAngle  # [rad]
@@ -213,13 +211,10 @@ def test_twoAxisGimbal(show_plots, accuracy):
         gimbalTiltAngleCheckList = [gimbalTiltAngleSegment1Final, gimbalTiltAngleSegment2Final]  # [deg]
 
         segment1StopTimeIdx = int(round(simSegment1Time / testTimeStepSec)) + 1
-        gimbalTipAngleSimList = [macros.R2D * gimbalTipAngle[segment1StopTimeIdx], macros.R2D * gimbalTipAngle[-1]]  # [deg]
-        gimbalTiltAngleSimList = [macros.R2D * gimbalTiltAngle[segment1StopTimeIdx], macros.R2D * gimbalTiltAngle[-1]]  # [deg]
+        gimbalTipAngleSimList = [gimbalTipAngle[segment1StopTimeIdx], gimbalTipAngle[-1]]  # [deg]
+        gimbalTiltAngleSimList = [gimbalTiltAngle[segment1StopTimeIdx], gimbalTiltAngle[-1]]  # [deg]
 
     else:
-        simSegment1Time = motor1StepsCommanded * motorStepTime  # [s]
-        simSegment2Time = 0  # [s]
-
         motor1FinalAngle = motor1ThetaInit + motor1StepsCommanded * motorStepAngle  # [rad]
         motor2FinalAngle = motor2ThetaInit + motor2StepsCommanded * motorStepAngle  # [rad]
         gimbalTipAngleFinal, gimbalTiltAngleFinal = motorToGimbalAngles(macros.R2D * motor1FinalAngle, macros.R2D * motor2FinalAngle)  # [deg]
@@ -227,8 +222,8 @@ def test_twoAxisGimbal(show_plots, accuracy):
         gimbalTipAngleCheckList = [gimbalTipAngleFinal]  # [deg]
         gimbalTiltAngleCheckList = [gimbalTiltAngleFinal]  # [deg]
 
-        gimbalTipAngleSimList = [macros.R2D * gimbalTipAngle[-1]]  # [deg]
-        gimbalTiltAngleSimList = [macros.R2D * gimbalTiltAngle[-1]]  # [deg]
+        gimbalTipAngleSimList = [gimbalTipAngle[-1]]  # [deg]
+        gimbalTiltAngleSimList = [gimbalTiltAngle[-1]]  # [deg]
 
 
     # Print gimbal angle checks
@@ -242,7 +237,7 @@ def test_twoAxisGimbal(show_plots, accuracy):
     print("GIMBAL TILT ANGLE MODULE VALUES:")
     print(gimbalTiltAngleSimList)
 
-    # Check that the gimbal angles converge to the desired values for each actuation segment
+    # # Check that the gimbal angles converge to the desired values for each actuation segment
     # np.testing.assert_allclose(gimbalTipAngleCheckList,
     #                            gimbalTipAngleSimList,
     #                            atol=accuracy,
@@ -283,21 +278,42 @@ def test_twoAxisGimbal(show_plots, accuracy):
         plt.legend(loc='center right', prop={'size': 12})
         plt.grid(True)
 
-        # # 2. Plot the gimbal prescribed rotational states
-        # # 2A. Plot PRV angle from sigma_FM
-        # phi_FM = []
-        # for i in range(len(timespan)):
-        #     phi_FM.append(macros.R2D * 4 * np.arctan(np.linalg.norm(sigma_FM[i, :])))  # [deg]
-        #
-        # plt.figure()
-        # plt.clf()
-        # plt.plot(timespan, phi_FM, label=r"$\Phi$")
-        # plt.title(r'Profiled PRV Angle $\Phi_{\mathcal{F}/\mathcal{M}}$', fontsize=14)
-        # plt.ylabel('(deg)', fontsize=14)
-        # plt.xlabel('Time (s)', fontsize=14)
-        # plt.legend(loc='center right', prop={'size': 14})
-        # plt.grid(True)
-        #
+        # Plot 2D Diamond and the corresponding gimbal trajectory
+        line1 = [(18.342, 0.0), (0.676, 27.43)]
+        line2 = [(-18.764, 0.0), (0.676, 27.43)]
+        line3 = [(-18.764, 0.0), (0.676, -27.43)]
+        line4 = [(18.342, 0.0), (0.676, -27.43)]
+        lines = [line1, line2, line3, line4]
+        lc = mc.LineCollection(lines, colors="crimson", linewidths=2, linestyles="dashed")
+        plt.figure()
+        plt.clf()
+        ax = plt.axes()
+        ax.add_collection(lc)
+        plt.plot(gimbalTipAngle, gimbalTiltAngle, linewidth=1, color='black')
+        ax.scatter(gimbalTipAngle[0], gimbalTiltAngle[0], marker='.', linewidth=4, color='springgreen', label='Initial')
+        ax.scatter(gimbalTipAngle[-1], gimbalTiltAngle[-1], marker='*', linewidth=4, color='magenta', label='Final')
+        plt.title('Gimbal Sequential Trajectory', fontsize=14)
+        plt.ylabel(r'$\psi$ (deg)', fontsize=16)
+        plt.xlabel(r'$\phi$ (deg)', fontsize=16)
+        plt.legend(loc='upper right', prop={'size': 12})
+        plt.grid(True)
+        plt.axis("equal")
+
+        # 2. Plot the gimbal prescribed rotational states
+        # 2A. Plot PRV angle from sigma_FM
+        phi_FM = []
+        for i in range(len(timespan)):
+            phi_FM.append(macros.R2D * 4 * np.arctan(np.linalg.norm(sigma_FM[i, :])))  # [deg]
+
+        plt.figure()
+        plt.clf()
+        plt.plot(timespan, phi_FM, label=r"$\Phi$")
+        plt.title(r'Profiled PRV Angle $\Phi_{\mathcal{F}/\mathcal{M}}$', fontsize=14)
+        plt.ylabel('(deg)', fontsize=14)
+        plt.xlabel('Time (s)', fontsize=14)
+        plt.legend(loc='center right', prop={'size': 14})
+        plt.grid(True)
+
         # # 2B. Plot gimbal hub-relative angular velocity omega_FM_F
         # plt.figure()
         # plt.clf()
@@ -335,31 +351,34 @@ def motorToGimbalAngles(motor1Angle, motor2Angle):
     motor_to_gimbal_tilt_angle = pd.read_csv(path_to_file)
     tableStepAngle = 0.5  # [deg]
 
+    motor_to_gimbal_tip_angle_table = motor_to_gimbal_tip_angle.to_numpy()
+    motor_to_gimbal_tilt_angle_table = motor_to_gimbal_tilt_angle.to_numpy()
+
     if motor1Angle % tableStepAngle == 0 and motor2Angle % tableStepAngle == 0:  # Do not need to interpolate
-        gimbalAngle1 = pullGimbalAngle(motor1Angle, motor2Angle, motor_to_gimbal_tip_angle)
-        gimbalAngle2 = pullGimbalAngle(motor1Angle, motor2Angle, motor_to_gimbal_tilt_angle)
+        gimbalAngle1 = pullGimbalAngle(motor1Angle, motor2Angle, motor_to_gimbal_tip_angle_table)
+        gimbalAngle2 = pullGimbalAngle(motor1Angle, motor2Angle, motor_to_gimbal_tilt_angle_table)
     elif motor1Angle % tableStepAngle == 0 or motor2Angle % tableStepAngle == 0:  # Linear interpolation required
         if motor1Angle % tableStepAngle == 0:
             lowerMotor2Angle = tableStepAngle * math.floor(motor2Angle / tableStepAngle)
             upperMotor2Angle = tableStepAngle * math.ceil(motor2Angle / tableStepAngle)
 
-            z1_tip = pullGimbalAngle(motor1Angle, lowerMotor2Angle, motor_to_gimbal_tip_angle)
-            z2_tip = pullGimbalAngle(motor1Angle, upperMotor2Angle, motor_to_gimbal_tip_angle)
+            z1_tip = pullGimbalAngle(motor1Angle, lowerMotor2Angle, motor_to_gimbal_tip_angle_table)
+            z2_tip = pullGimbalAngle(motor1Angle, upperMotor2Angle, motor_to_gimbal_tip_angle_table)
             gimbalAngle1 = linearInterpolation(lowerMotor2Angle, upperMotor2Angle, z1_tip, z2_tip, motor2Angle)
 
-            z1_tilt = pullGimbalAngle(motor1Angle, lowerMotor2Angle, motor_to_gimbal_tilt_angle)
-            z2_tilt = pullGimbalAngle(motor1Angle, upperMotor2Angle, motor_to_gimbal_tilt_angle)
+            z1_tilt = pullGimbalAngle(motor1Angle, lowerMotor2Angle, motor_to_gimbal_tilt_angle_table)
+            z2_tilt = pullGimbalAngle(motor1Angle, upperMotor2Angle, motor_to_gimbal_tilt_angle_table)
             gimbalAngle2 = linearInterpolation(lowerMotor2Angle, upperMotor2Angle, z1_tilt, z2_tilt, motor2Angle)
         else:
             lowerMotor1Angle = tableStepAngle * math.floor(motor1Angle / tableStepAngle)
             upperMotor1Angle = tableStepAngle * math.ceil(motor1Angle / tableStepAngle)
 
-            z1_tip = pullGimbalAngle(lowerMotor1Angle, motor2Angle, motor_to_gimbal_tip_angle)
-            z2_tip = pullGimbalAngle(upperMotor1Angle, motor2Angle, motor_to_gimbal_tip_angle)
+            z1_tip = pullGimbalAngle(lowerMotor1Angle, motor2Angle, motor_to_gimbal_tip_angle_table)
+            z2_tip = pullGimbalAngle(upperMotor1Angle, motor2Angle, motor_to_gimbal_tip_angle_table)
             gimbalAngle1 = linearInterpolation(lowerMotor1Angle, upperMotor1Angle, z1_tip, z2_tip, motor1Angle)
 
-            z1_tilt = pullGimbalAngle(lowerMotor1Angle, motor2Angle, motor_to_gimbal_tilt_angle)
-            z2_tilt = pullGimbalAngle(upperMotor1Angle, motor2Angle, motor_to_gimbal_tilt_angle)
+            z1_tilt = pullGimbalAngle(lowerMotor1Angle, motor2Angle, motor_to_gimbal_tilt_angle_table)
+            z2_tilt = pullGimbalAngle(upperMotor1Angle, motor2Angle, motor_to_gimbal_tilt_angle_table)
             gimbalAngle2 = linearInterpolation(lowerMotor1Angle, upperMotor1Angle, z1_tilt, z2_tilt, motor1Angle)
     else:  # Bilinear interpolation required
         lowerMotor1Angle = tableStepAngle * math.floor(motor1Angle / tableStepAngle)
@@ -367,15 +386,15 @@ def motorToGimbalAngles(motor1Angle, motor2Angle):
         lowerMotor2Angle = tableStepAngle * math.floor(motor2Angle / tableStepAngle)
         upperMotor2Angle = tableStepAngle * math.ceil(motor2Angle / tableStepAngle)
 
-        z11_tip = pullGimbalAngle(lowerMotor1Angle, lowerMotor2Angle, motor_to_gimbal_tip_angle)
-        z12_tip = pullGimbalAngle(lowerMotor1Angle, upperMotor2Angle, motor_to_gimbal_tip_angle)
-        z21_tip = pullGimbalAngle(upperMotor1Angle, lowerMotor2Angle, motor_to_gimbal_tip_angle)
-        z22_tip = pullGimbalAngle(upperMotor1Angle, upperMotor2Angle, motor_to_gimbal_tip_angle)
+        z11_tip = pullGimbalAngle(lowerMotor1Angle, lowerMotor2Angle, motor_to_gimbal_tip_angle_table)
+        z12_tip = pullGimbalAngle(lowerMotor1Angle, upperMotor2Angle, motor_to_gimbal_tip_angle_table)
+        z21_tip = pullGimbalAngle(upperMotor1Angle, lowerMotor2Angle, motor_to_gimbal_tip_angle_table)
+        z22_tip = pullGimbalAngle(upperMotor1Angle, upperMotor2Angle, motor_to_gimbal_tip_angle_table)
 
-        z11_tilt = pullGimbalAngle(lowerMotor1Angle, lowerMotor2Angle, motor_to_gimbal_tilt_angle)
-        z12_tilt = pullGimbalAngle(lowerMotor1Angle, upperMotor2Angle, motor_to_gimbal_tilt_angle)
-        z21_tilt = pullGimbalAngle(upperMotor1Angle, lowerMotor2Angle, motor_to_gimbal_tilt_angle)
-        z22_tilt = pullGimbalAngle(upperMotor1Angle, upperMotor2Angle, motor_to_gimbal_tilt_angle)
+        z11_tilt = pullGimbalAngle(lowerMotor1Angle, lowerMotor2Angle, motor_to_gimbal_tilt_angle_table)
+        z12_tilt = pullGimbalAngle(lowerMotor1Angle, upperMotor2Angle, motor_to_gimbal_tilt_angle_table)
+        z21_tilt = pullGimbalAngle(upperMotor1Angle, lowerMotor2Angle, motor_to_gimbal_tilt_angle_table)
+        z22_tilt = pullGimbalAngle(upperMotor1Angle, upperMotor2Angle, motor_to_gimbal_tilt_angle_table)
 
         gimbalAngle1 = bilinearInterpolation(
             lowerMotor1Angle,
@@ -401,13 +420,15 @@ def motorToGimbalAngles(motor1Angle, motor2Angle):
             motor1Angle,
             motor2Angle,
         )
+
     return gimbalAngle1, gimbalAngle2
 
 def pullGimbalAngle(motor1Angle, motor2Angle, lookup_table_data):
     tableMotorStepAngle = 0.5  # [deg]
     motor1Idx = int(motor1Angle / tableMotorStepAngle)
     motor2Idx = int(motor2Angle / tableMotorStepAngle)
-    return lookup_table_data.iat[motor2Idx, motor1Idx]
+
+    return lookup_table_data[motor2Idx][motor1Idx]
 
 def linearInterpolation(x1, x2, z1, z2, x):
     return z1 * (x2 - x) / (x2 - x1) + z2 * (x - x1) / (x2 - x1)
@@ -421,5 +442,7 @@ def bilinearInterpolation(x1, x2, y1, y2, z11, z12, z21, z22, x, y):
 if __name__ == "__main__":
     test_twoAxisGimbal(
         True,  # show_plots
-        1e-3  # accuracy
+        1000,  # motor1StepsCommanded
+        16000,  # motor2StepsCommanded
+        0.01,  # accuracy
     )
