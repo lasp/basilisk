@@ -16,13 +16,15 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SEPGIMBALLOOKUPTABLE_
-#define _SEPGIMBALLOOKUPTABLE_
+#ifndef SEPGIMBALLOOKUPTABLE_
+#define SEPGIMBALLOOKUPTABLE_
 
 #include <stdint.h>
-#include <stdbool.h>
+#include <Eigen/Core>
 #include "architecture/utilities/bskLogging.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "cMsgCInterface/HingedRigidBodyMsg_C.h"
+
 #define MAX_ROWS 114
 #define MAX_COLUMNS 78
 
@@ -40,32 +42,15 @@ typedef struct {
 
 }LookUpTableRowElements;
 
-typedef struct {
-    double rowNum;
-    double columnNum;
-    double inputTipAngle;                                       //!< [deg] Desired platform tip angle
-    double inputTiltAngle;                                      //!< [deg] Desired platform tilt angle
-    double motor1Angle;                                         //!< [deg] Desired motor angle 1
-    double motor2Angle;                                         //!< [deg] Desired motor angle 2
-    double z11;
-    double z12;
-    double z21;
-    double z22;
-    double x1;
-    double x2;
-    double y1;
-    double y2;
-
-
+class SepGimbalLookUpTable : public SysModel {
+public:
     char* fileName_1;                                           //!< CSV File for motor 1
-
-
-    
     char* fileName_2;                                           //!< CSV File for motor 2
+
     LookUpTableRowElements* rows[MAX_ROWS];                     //!< Array to save csv file rows
-    LookUpTableRowElements* selectedTiltRows[MAX_ROWS];         //!< Array to save rows with desired tilt angle 
+    LookUpTableRowElements* selectedTiltRows[MAX_ROWS];         //!< Array to save rows with desired tilt angle
     LookUpTableRowElements* columns[MAX_COLUMNS];               //!< Array to save csv file rows
-    LookUpTableRowElements* selectedTipColumns[MAX_COLUMNS];    //!< Array to save rows with desired tip angle 
+    LookUpTableRowElements* selectedTipColumns[MAX_COLUMNS];    //!< Array to save rows with desired tip angle
 
     BSKLogger* bskLogger;                                        //!< BSK Logging
 
@@ -74,28 +59,32 @@ typedef struct {
     HingedRigidBodyMsg_C desiredGimbalTiltAngleInMsg;            //!< Intput msg for the tilt angle (theta)
     HingedRigidBodyMsg_C motor1AngleOutMsg;                      //!< Output msg for motor 1 angle (theta)
     HingedRigidBodyMsg_C motor2AngleOutMsg;                      //!< Output msg for motor 2 angle (theta)
-    
-}SepGimbalLookUpTableConfig;
 
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    void SelfInit_sepGimbalLookUpTable(SepGimbalLookUpTableConfig *configData, int64_t moduleID);                     //!< Method for module initialization
-    void Reset_sepGimbalLookUpTable(SepGimbalLookUpTableConfig *configData, uint64_t callTime, int64_t moduleID);     //!< Method for module reset
-    void Update_sepGimbalLookUpTable(SepGimbalLookUpTableConfig *configData, uint64_t callTime, int64_t moduleID);    //!< Method for module time update
+    void SelfInit() override;                     //!< Method for module initialization
+    void Reset(uint64_t callTime) override;     //!< Method for module reset
+    void UpdateState(uint64_t callTime) override;    //!< Method for module time update
 
     // Function to read data from a CSV file
-    int readData1(const char *filename_1, LookUpTableRowElements* rows[], LookUpTableRowElements *columns[]);
-    int readData2(const char *filename_2, LookUpTableRowElements* rows[], LookUpTableRowElements *columns[]);
-    int findMatchingTiltAngle(LookUpTableRowElements *matchingRowsTilt[], int numMatchingRowsTilt, double inputTiltAngle, LookUpTableRowElements **selectedTiltRows);
-    int findMatchingTipAngle(LookUpTableRowElements *matchingColumnsTip[], int numMatchingColumnsTip, double inputTipAngle, LookUpTableRowElements **selectedTipColumns);
-    int BilinearInterpolation(LookUpTableRowElements *rows[], LookUpTableRowElements *columns[], double inputTipAngle, double inputTiltAngle, double z11, double z12, double z21, double z22, double x1, double x2, double y1, double y2);
+    static int readData1(const char *filename_1, LookUpTableRowElements* rows[], LookUpTableRowElements *columns[]);
+    static int readData2(const char *filename_2, LookUpTableRowElements* rows[], LookUpTableRowElements *columns[]);
 
+private:
+    double motor1Angle{};
+    double motor2Angle{};
 
-#ifdef __cplusplus
-}
-#endif
+    LookUpTableRowElements findMatchingTiltAngle(double desiredTiltAngle);
+    LookUpTableRowElements findMatchingTipAngle(double desiredTipAngle);
+    Eigen::Vector2d bilinearInterpolation(
+                              double tipAngle,
+                              double tiltAngle,
+                              double z11,
+                              double z12,
+                              double z21,
+                              double z22,
+                              double x1,
+                              double x2,
+                              double y1,
+                              double y2);
+};
 
-#endif
+#endif /* SEPGIMBALLOOKUPTABLE_ */
