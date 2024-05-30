@@ -60,18 +60,12 @@ public:
     BSKLogger *bskLogger;                                                           //!< BSK Logging
 
 private:
-    double tableStepAngle;
 
-    double motor_to_gimbal_tip_angle[319][319];
-    double motor_to_gimbal_tilt_angle[319][319];
-
-    Eigen::Vector3d gimbalPRV_FIntM;
-
-    std::pair<double, double> motorToGimbalAngles(double motor1Angle, double motor2Angle);
-
-    double pullGimbalTipAngle(double motor1Angle, double motor2Angle);
-    double pullGimbalTiltAngle(double motor1Angle, double motor2Angle);
-    double linearInterpolation(double x1, double x2, double z1, double z2, double x);
+    Eigen::Vector3d motorAnglesToGimbalPRV(double motor1Angle,
+                                           double motor2Angle);                     //!< Function to determine the gimbal PRV attitude given the stepper motor angles
+    std::pair<double, double> motorAnglesToGimbalAngles(double motor1Angle,
+                                                        double motor2Angle);        //!< Function to determine the gimbal tip and tilt angles given the stepper motor angles
+    void computeGimbalActuationParameters();                                        //!< Function used to compute and update the gimbal actuation parameters for each segment of required gimbal motion
     double bilinearInterpolation(double x1,
                                  double x2,
                                  double y1,
@@ -81,9 +75,11 @@ private:
                                  double z21,
                                  double z22,
                                  double x,
-                                 double y);
-
-    void computeGimbalActuationParameters();
+                                 double y);                                         //!< Interpolation function used to determine the gimbal tip and tilt angles
+    double pullGimbalTipAngle(double motor1Angle,
+                              double motor2Angle);                                  //!< Function used to pull a specific gimbal tip angle from the tip interpolation table given specific motor angles
+    double pullGimbalTiltAngle(double motor1Angle,
+                               double motor2Angle);                                 //!< Function used to pull a specific gimbal tilt angle from the tilt interpolation table given specific motor angles
     void actuateGimbal(double t);                                                   //!< High-level method used to simulate the gimbal states in time
     void resetGimbal(double t);                                                     //!< Method used to reset the gimbal states when the current request is complete and a new request is received
     void updateGimbalRotationParameters();                                          //!< Method used to update the gimbal rotation parameters after a step is completed
@@ -91,7 +87,7 @@ private:
     void computeGimbalStepFirstHalf(double t);                                      //!< Method used to compute the gimbal states during the first half of each step
     bool isInGimbalStepSecondHalf(double t);                                        //!< Method used to determine if the gimbal is in the second half of a step
     void computeGimbalStepSecondHalf(double t);                                     //!< Method used to compute the gimbal states during the second half of each step
-    void computeGimbalStepComplete(double t);
+    void computeGimbalStepComplete(double t);                                       //!< Method used to compute the gimbal states when a step is complete
     void writeOutputMessages(uint64_t CurrentSimNanos);                             //!< Method for writing the module output messages and computing the output message data
 
     // Stepper motor state data
@@ -99,30 +95,27 @@ private:
     double motorStepTime;                                                           //!< [s] Time required for a single motor step (constant)
     double motor1ThetaInit;                                                         //!< [rad] Initial stepper motor 1 angle
     double motor2ThetaInit;                                                         //!< [rad] Initial stepper motor 2 angle
-    int motor1StepsCommanded;
-    int motor2StepsCommanded;
-    double motor1ThetaRef;
-    double motor2ThetaRef;
+    int motor1StepsCommanded;                                                       //!< Number of steps commanded for stepper motor 1
+    int motor2StepsCommanded;                                                       //!< Number of steps commanded for stepper motor 2
+    double motor1ThetaRef;                                                          //!< [rad] Motor 1 reference angle
+    double motor2ThetaRef;                                                          //!< [rad] Motor 2 reference angle
 
     // Gimbal state data
-    Eigen::Vector3d gimbalPRV_F0M;
+    Eigen::Vector3d gimbalPRV_F0M;                                                  //!< Initial hub-relative gimbal prv attitude
+    Eigen::Vector3d gimbalPRV_FIntM;                                                //!< Intermediate hub-relative gimbal prv attitude
     Eigen::Vector3d gimbalPRVRotHat;                                                //!< Gimbal prv Eigen axis of rotation
     Eigen::Vector3d gimbalRotHat1_M;                                                //!< Gimbal tip angle axis of rotation 1 expressed in M frame components
     Eigen::Vector3d gimbalRotHat2_F;                                                //!< Gimbal tilt angle axis of rotation 2 expressed in F frame components
-    int gimbalStepCount;
-    int gimbalStepsCommanded;
-    double gimbalStepAngle;
+    int gimbalStepCount;                                                            //!< Current number of gimbal steps taken
+    int gimbalStepsCommanded;                                                       //!< Number of gimbal steps commanded
+    double gimbalStepAngle;                                                         //!< [rad] Angle the gimbal moves through for a single step
     double gimbalPRVThetaDDotMax;                                                   //!< [rad/s^2] Current profiled gimbal prv angular acceleration
-    double gimbalPRVThetaRef;
-    double intermediateGimbalPRVThetaInit;
-    double intermediateGimbalPRVThetaRef;
+    double gimbalPRVThetaRef;                                                       //!< [rad] Reference PRV gimbal angle
+    double intermediateGimbalPRVThetaInit;                                          //!< [rad] Intermediate initial gimbal PRV angle
+    double intermediateGimbalPRVThetaRef;                                           //!< [rad] Intermediate gimbal PRV reference angle
     double gimbalPRVTheta;                                                          //!< [rad] Current profiled gimbal prv angle
     double gimbalPRVThetaDot;                                                       //!< [rad/s] Current profiled gimbal prv angle rate
     double gimbalPRVThetaDDot;                                                      //!< [rad/s^2] Current profiled gimbal prv angular acceleration
-    double gimbalTheta1;                                                            //!< [rad] Current gimbal tip angle
-    double gimbalTheta2;                                                            //!< [rad] Current gimbal tilt angle
-    double gimbalTheta1Ref;                                                         //!< [rad] Reference gimbal tip angle
-    double gimbalTheta2Ref;                                                         //!< [rad] Reference gimbal tilt angle
 
     /* Temporal parameters */
     double previousWrittenTime;                                                     //!< [ns] Time the last input message was written
@@ -131,15 +124,20 @@ private:
     double tf;                                                                      //!< [s] Simulation time when the maneuver is finished
 
     /* Boolean parameters */
-    bool segment1Complete;
-    bool segment2Complete;
-    bool completion;                                                                //!< Boolean designating a fully completed maneuver
-    bool gimbalStepComplete;                                                        //!< Boolean designating a completed step
-    bool newMsg;                                                                    //!< Boolean designating a new message was written
+    bool segment1Complete;                                                          //!< Boolean designating completion of the first actuation segment
+    bool segment2Complete;                                                          //!< Boolean designating completion of the second actuation segment
+    bool completion;                                                                //!< Boolean designating completion of the full gimbal actuation (Both segment 1 and segment 2 are complete)
+    bool gimbalStepComplete;                                                        //!< Boolean designating a completed gimbal step
+    bool newMsg;                                                                    //!< Boolean designating a new gimbal actuation command
 
     /* Constant parameters */
-    double a;                                                                       //!< Parabolic constant for the first half of a step
-    double b;                                                                       //!< Parabolic constant for the second half of a step
+    double a;                                                                       //!< Parabolic constant for the first half of a gimbal step
+    double b;                                                                       //!< Parabolic constant for the second half of a gimbal step
+
+    /* Interpolation table parameters */
+    double tableStepAngle;                                                          //!< [rad] Interpolation table motor discretization angle
+    double motor_to_gimbal_tip_angle[319][319];                                     //!< [rad] Motor-to-gimbal tip angle interpolation table storage array
+    double motor_to_gimbal_tilt_angle[319][319];                                    //!< [rad] Motor-to-gimbal tilt angle interpolation table storage array
 };
 
 #endif
