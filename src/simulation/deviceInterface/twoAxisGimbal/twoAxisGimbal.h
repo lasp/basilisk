@@ -64,7 +64,7 @@ private:
     Eigen::Vector3d motorAnglesToGimbalPRV(double motor1Angle,
                                            double motor2Angle);                     //!< Function to determine the gimbal PRV attitude given the stepper motor angles
     std::pair<double, double> motorAnglesToGimbalAngles(double motor1Angle,
-                                                        double motor2Angle);        //!< Function to determine the gimbal tip and tilt angles given the stepper motor angles
+                                                        double motor2Angle);        //!< Function to determine the sequential gimbal tip and tilt angles given the stepper motor angles
     void computeGimbalActuationParameters();                                        //!< Function used to compute and update the gimbal actuation parameters for each segment of required gimbal motion
     double bilinearInterpolation(double x1,
                                  double x2,
