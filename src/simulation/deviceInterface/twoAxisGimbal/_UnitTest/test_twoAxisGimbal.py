@@ -38,10 +38,17 @@ from Basilisk.utilities import SimulationBaseClass
 from Basilisk.utilities import macros
 from matplotlib import collections as mc
 
+@pytest.mark.parametrize("motor1StepsCommanded_Stage1", [0, 10, 1000, 10000, 12345, 19875])
+@pytest.mark.parametrize("motor2StepsCommanded_Stage1", [0, 25, 5432, 10000, 19875])
+@pytest.mark.parametrize("motor1StepsCommanded_Stage2", [500])
+@pytest.mark.parametrize("motor2StepsCommanded_Stage2", [500])
 @pytest.mark.parametrize("accuracy", [1e-5])
-@pytest.mark.parametrize("motor1StepsCommanded", [10, 1000, 10000, 12345, 19875])
-@pytest.mark.parametrize("motor2StepsCommanded", [25, 5432, 10000, 19875])
-def test_twoAxisGimbal(show_plots, motor1StepsCommanded, motor2StepsCommanded, accuracy):
+def test_twoAxisGimbal(show_plots,
+                       motor1StepsCommanded_Stage1,
+                       motor2StepsCommanded_Stage1,
+                       motor1StepsCommanded_Stage2,
+                       motor2StepsCommanded_Stage2,
+                       accuracy):
     r"""
     **Validation Test Description**
 
@@ -64,7 +71,7 @@ def test_twoAxisGimbal(show_plots, motor1StepsCommanded, motor2StepsCommanded, a
     # Create a sim module as an empty container
     unitTestSim = SimulationBaseClass.SimBaseClass()
 
-    testTimeStepSec = 0.0001  # [s]
+    testTimeStepSec = 0.001  # [s]
     testProcessRate = macros.sec2nano(testTimeStepSec)
     testProc = unitTestSim.CreateNewProcess(unitProcessName)
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
@@ -108,13 +115,13 @@ def test_twoAxisGimbal(show_plots, motor1StepsCommanded, motor2StepsCommanded, a
 
     # Create the step command message for stepper motor 1
     Motor1StepCommandMessageData = messaging.MotorStepCommandMsgPayload()
-    Motor1StepCommandMessageData.stepsCommanded = motor1StepsCommanded
+    Motor1StepCommandMessageData.stepsCommanded = motor1StepsCommanded_Stage1
     Motor1StepCommandMessage = messaging.MotorStepCommandMsg().write(Motor1StepCommandMessageData)
     stepperMotor1.motorStepCommandInMsg.subscribeTo(Motor1StepCommandMessage)
 
     # Create the step command message for stepper motor 2
     Motor2StepCommandMessageData = messaging.MotorStepCommandMsgPayload()
-    Motor2StepCommandMessageData.stepsCommanded = motor2StepsCommanded
+    Motor2StepCommandMessageData.stepsCommanded = motor2StepsCommanded_Stage1
     Motor2StepCommandMessage = messaging.MotorStepCommandMsg().write(Motor2StepCommandMessageData)
     stepperMotor2.motorStepCommandInMsg.subscribeTo(Motor2StepCommandMessage)
 
@@ -144,21 +151,52 @@ def test_twoAxisGimbal(show_plots, motor1StepsCommanded, motor2StepsCommanded, a
     unitTestSim.AddModelToTask(unitTaskName, gimbalTipTiltAngleData)
 
     # Determine the simulation time
-    if motor1StepsCommanded > motor2StepsCommanded:
-        simSegment1Time = motor2StepsCommanded * motorStepTime  # [s]
-        simSegment2Time = (motor1StepsCommanded - motor2StepsCommanded) * motorStepTime  # [s]
-    elif motor1StepsCommanded < motor2StepsCommanded:
-        simSegment1Time = motor1StepsCommanded * motorStepTime  # [s]
-        simSegment2Time = (motor2StepsCommanded - motor1StepsCommanded) * motorStepTime  # [s]
+    if motor1StepsCommanded_Stage1 > motor2StepsCommanded_Stage1:
+        simSegment1Time = motor2StepsCommanded_Stage1 * motorStepTime  # [s]
+        simSegment2Time = (motor1StepsCommanded_Stage1 - motor2StepsCommanded_Stage1) * motorStepTime  # [s]
+    elif motor1StepsCommanded_Stage1 < motor2StepsCommanded_Stage1:
+        simSegment1Time = motor1StepsCommanded_Stage1 * motorStepTime  # [s]
+        simSegment2Time = (motor2StepsCommanded_Stage1 - motor1StepsCommanded_Stage1) * motorStepTime  # [s]
     else:
-        simSegment1Time = motor1StepsCommanded * motorStepTime  # [s]
+        simSegment1Time = motor1StepsCommanded_Stage1 * motorStepTime  # [s]
         simSegment2Time = 0  # [s]
     simExtraTime = 10.0  # [s]
-    simTimeTotal = simSegment1Time + simSegment2Time + simExtraTime  # [s]
+    simTimeTotal_Stage1 = simSegment1Time + simSegment2Time + simExtraTime  # [s]
 
     # Run the simulation
     unitTestSim.InitializeSimulation()
-    unitTestSim.ConfigureStopTime(macros.sec2nano(simTimeTotal))
+    unitTestSim.ConfigureStopTime(macros.sec2nano(simTimeTotal_Stage1))
+    unitTestSim.ExecuteSimulation()
+
+    # Create the step command message for stepper motor 1 (Stage 2)
+    Motor1StepCommandMessageData = messaging.MotorStepCommandMsgPayload()
+    Motor1StepCommandMessageData.stepsCommanded = motor1StepsCommanded_Stage2
+    Motor1StepCommandMessage = messaging.MotorStepCommandMsg().write(Motor1StepCommandMessageData, unitTestSim.TotalSim.CurrentNanos)
+    stepperMotor1.motorStepCommandInMsg.subscribeTo(Motor1StepCommandMessage)
+
+    # Create the step command message for stepper motor 2 (Stage 2)
+    Motor2StepCommandMessageData = messaging.MotorStepCommandMsgPayload()
+    Motor2StepCommandMessageData.stepsCommanded = motor2StepsCommanded_Stage2
+    Motor2StepCommandMessage = messaging.MotorStepCommandMsg().write(Motor2StepCommandMessageData, unitTestSim.TotalSim.CurrentNanos)
+    stepperMotor2.motorStepCommandInMsg.subscribeTo(Motor2StepCommandMessage)
+
+    gimbal.motor1StepCmdInMsg.subscribeTo(Motor1StepCommandMessage)
+    gimbal.motor2StepCmdInMsg.subscribeTo(Motor2StepCommandMessage)
+
+    # Determine the simulation time (Stage 2)
+    if motor1StepsCommanded_Stage2 > motor2StepsCommanded_Stage2:
+        simSegment1Time = motor2StepsCommanded_Stage2 * motorStepTime  # [s]
+        simSegment2Time = (motor1StepsCommanded_Stage2 - motor2StepsCommanded_Stage2) * motorStepTime  # [s]
+    elif motor1StepsCommanded_Stage2 < motor2StepsCommanded_Stage2:
+        simSegment1Time = motor1StepsCommanded_Stage2 * motorStepTime  # [s]
+        simSegment2Time = (motor2StepsCommanded_Stage2 - motor1StepsCommanded_Stage2) * motorStepTime  # [s]
+    else:
+        simSegment1Time = motor1StepsCommanded_Stage2 * motorStepTime  # [s]
+        simSegment2Time = 0  # [s]
+    simExtraTime = 10.0  # [s]
+    simTimeTotal_Stage2 = simSegment1Time + simSegment2Time + simExtraTime  # [s]
+
+    unitTestSim.ConfigureStopTime(macros.sec2nano(simTimeTotal_Stage1 + simTimeTotal_Stage2))
     unitTestSim.ExecuteSimulation()
 
     # Extract the logged data for plotting and data comparison
@@ -182,13 +220,13 @@ def test_twoAxisGimbal(show_plots, motor1StepsCommanded, motor2StepsCommanded, a
     print("\nInitial Gimbal Tilt Angle: ")
     print(gimbalTiltAngleInit)
 
-    if motor1StepsCommanded > motor2StepsCommanded:
-        motor1Segment1FinalAngle = motor1ThetaInit + motor2StepsCommanded * motorStepAngle  # [rad]
-        motor2Segment1FinalAngle = motor2ThetaInit + motor2StepsCommanded * motorStepAngle  # [rad]
+    if motor1StepsCommanded_Stage1 > motor2StepsCommanded_Stage1:
+        motor1Segment1FinalAngle = motor1ThetaInit + motor2StepsCommanded_Stage1 * motorStepAngle  # [rad]
+        motor2Segment1FinalAngle = motor2ThetaInit + motor2StepsCommanded_Stage1 * motorStepAngle  # [rad]
         gimbalTipAngleSegment1Final, gimbalTiltAngleSegment1Final = motorToGimbalAngles(macros.R2D * motor1Segment1FinalAngle, macros.R2D * motor2Segment1FinalAngle)
 
-        motor1Segment2FinalAngle = motor1ThetaInit + motor1StepsCommanded * motorStepAngle  # [rad]
-        motor2Segment2FinalAngle = motor2ThetaInit + motor2StepsCommanded * motorStepAngle  # [rad]
+        motor1Segment2FinalAngle = motor1ThetaInit + motor1StepsCommanded_Stage1 * motorStepAngle  # [rad]
+        motor2Segment2FinalAngle = motor2ThetaInit + motor2StepsCommanded_Stage1 * motorStepAngle  # [rad]
         gimbalTipAngleSegment2Final, gimbalTiltAngleSegment2Final = motorToGimbalAngles(macros.R2D * motor1Segment2FinalAngle, macros.R2D * motor2Segment2FinalAngle)  # [deg]
 
         gimbalTipAngleCheckList = [gimbalTipAngleSegment1Final, gimbalTipAngleSegment2Final]  # [deg]
@@ -198,13 +236,13 @@ def test_twoAxisGimbal(show_plots, motor1StepsCommanded, motor2StepsCommanded, a
         gimbalTipAngleSimList = [gimbalTipAngle[segment1StopTimeIdx], gimbalTipAngle[-1]]  # [deg]
         gimbalTiltAngleSimList = [gimbalTiltAngle[segment1StopTimeIdx], gimbalTiltAngle[-1]]  # [deg]
 
-    elif motor1StepsCommanded < motor2StepsCommanded:
-        motor1Segment1FinalAngle = motor1ThetaInit + motor1StepsCommanded * motorStepAngle  # [rad]
-        motor2Segment1FinalAngle = motor2ThetaInit + motor1StepsCommanded * motorStepAngle  # [rad]
+    elif motor1StepsCommanded_Stage1 < motor2StepsCommanded_Stage1:
+        motor1Segment1FinalAngle = motor1ThetaInit + motor1StepsCommanded_Stage1 * motorStepAngle  # [rad]
+        motor2Segment1FinalAngle = motor2ThetaInit + motor1StepsCommanded_Stage1 * motorStepAngle  # [rad]
         gimbalTipAngleSegment1Final, gimbalTiltAngleSegment1Final = motorToGimbalAngles(macros.R2D * motor1Segment1FinalAngle, macros.R2D * motor2Segment1FinalAngle)  # [deg]
 
-        motor1Segment2FinalAngle = motor1ThetaInit + motor1StepsCommanded * motorStepAngle  # [rad]
-        motor2Segment2FinalAngle = motor2ThetaInit + motor2StepsCommanded * motorStepAngle  # [rad]
+        motor1Segment2FinalAngle = motor1ThetaInit + motor1StepsCommanded_Stage1 * motorStepAngle  # [rad]
+        motor2Segment2FinalAngle = motor2ThetaInit + motor2StepsCommanded_Stage1 * motorStepAngle  # [rad]
         gimbalTipAngleSegment2Final, gimbalTiltAngleSegment2Final = motorToGimbalAngles(macros.R2D * motor1Segment2FinalAngle, macros.R2D * motor2Segment2FinalAngle)  # [deg]
 
         gimbalTipAngleCheckList = [gimbalTipAngleSegment1Final, gimbalTipAngleSegment2Final]  # [deg]
@@ -219,8 +257,8 @@ def test_twoAxisGimbal(show_plots, motor1StepsCommanded, motor2StepsCommanded, a
         gimbalTiltAngleSimList = [gimbalTiltAngle[segment1StopTimeIdx], gimbalTiltAngle[-1]]  # [deg]
 
     else:
-        motor1FinalAngle = motor1ThetaInit + motor1StepsCommanded * motorStepAngle  # [rad]
-        motor2FinalAngle = motor2ThetaInit + motor2StepsCommanded * motorStepAngle  # [rad]
+        motor1FinalAngle = motor1ThetaInit + motor1StepsCommanded_Stage1 * motorStepAngle  # [rad]
+        motor2FinalAngle = motor2ThetaInit + motor2StepsCommanded_Stage1 * motorStepAngle  # [rad]
         gimbalTipAngleFinal, gimbalTiltAngleFinal = motorToGimbalAngles(macros.R2D * motor1FinalAngle, macros.R2D * motor2FinalAngle)  # [deg]
 
         gimbalTipAngleCheckList = [gimbalTipAngleFinal]  # [deg]
@@ -446,7 +484,9 @@ def bilinearInterpolation(x1, x2, y1, y2, z11, z12, z21, z22, x, y):
 if __name__ == "__main__":
     test_twoAxisGimbal(
         True,  # show_plots
-        12345,  # motor1StepsCommanded
-        19875,  # motor2StepsCommanded
+        1500,  # motor1StepsCommanded_Stage1
+        1000,  # motor2StepsCommanded_Stage1
+        2000,  # motor1StepsCommanded_Stage2
+        2500,  # motor2StepsCommanded_Stage2
         1e-5,  # accuracy
     )

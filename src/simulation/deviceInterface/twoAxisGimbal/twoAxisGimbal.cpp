@@ -104,6 +104,7 @@ void TwoAxisGimbal::Reset(uint64_t callTime) {
     this->gimbalPRVThetaDDot = 0.0;
     this->tInit = 0.0;
     this->gimbalStepCount = 0;
+    this->gimbalPRVRotHat = {0.0, 0.0, 1.0};
 
     // Set the previous written time to a negative value to capture a message written at time zero
     this->previousWrittenTime = -1;
@@ -143,13 +144,16 @@ void TwoAxisGimbal::UpdateState(uint64_t callTime) {
         motor1StateIn = this->motor1StateInMsg();
         motor2StateIn = this->motor2StateInMsg();
 
-        if (this->previousWrittenTime < this->motor1InitStateInMsg.timeWritten()) {
+        if (this->previousWrittenTime < this->motor1StepCmdInMsg.timeWritten()) {
             cout << "NEW MESSAGE!" << endl;
-            this->previousWrittenTime = this->motor1InitStateInMsg.timeWritten();
+            this->previousWrittenTime = this->motor1StepCmdInMsg.timeWritten();
 
             // Store the initial motor angles
             this->motor1ThetaInit = motor1InitStateIn.theta;
             this->motor2ThetaInit = motor2InitStateIn.theta;
+
+            // Find the initial gimbal attitude prv_F0M
+            this->gimbalPRV_F0M = this->motorAnglesToGimbalPRV(this->motor1ThetaInit, this->motor2ThetaInit);
 
             // Store the motor steps commanded
             this->motor1StepsCommanded = motor1StepCmdIn.stepsCommanded;
@@ -157,12 +161,11 @@ void TwoAxisGimbal::UpdateState(uint64_t callTime) {
 
             if (this->motor1StepsCommanded != 0 || this->motor2StepsCommanded != 0) {
                 this->completion = false;
+                this->segment1Complete = false;
+                this->segment2Complete = false;
                 if ((this->motor1StepsCommanded == 0 || this->motor2StepsCommanded == 0) || (this->motor1StepsCommanded == this->motor2StepsCommanded)) {
                     this->segment2Complete = true;
                 }
-
-                // Find the initial gimbal attitude prv_F0M
-                this->gimbalPRV_F0M = this->motorAnglesToGimbalPRV(this->motor1ThetaInit, this->motor2ThetaInit);
                 this->computeGimbalActuationParameters();
             } else {
                 this->completion = true;
@@ -384,9 +387,9 @@ void TwoAxisGimbal::computeGimbalActuationParameters() {
             this->gimbalPRVThetaDDotMax = (4 * this->gimbalStepAngle) / (this->motorStepTime * this->motorStepTime);
         }
     } else if  (!this->segment1Complete && !this->segment2Complete) { // Set first of two prvs
-        cout << "Commanded motor 1 steps > Commanded motor 2 steps: ACTUATE BOTH MOTORS FOLLOWED BY ACTUATION OF SINGLE MOTOR" << endl;
-        cout << "STEP 1: ACTUATE BOTH MOTORS" << endl;
         if (this->motor1StepsCommanded > this->motor2StepsCommanded) {
+            cout << "Commanded motor 1 steps > Commanded motor 2 steps: ACTUATE BOTH MOTORS FOLLOWED BY ACTUATION OF SINGLE MOTOR" << endl;
+            cout << "STEP 1: ACTUATE BOTH MOTORS" << endl;
             this->gimbalStepsCommanded = this->motor2StepsCommanded;
             this->motor1ThetaRef = this->motor1ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
             this->motor2ThetaRef = this->motor2ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
@@ -404,6 +407,8 @@ void TwoAxisGimbal::computeGimbalActuationParameters() {
             this->gimbalStepAngle = fabs(this->gimbalPRVThetaRef) / this->gimbalStepsCommanded;
             this->gimbalPRVThetaDDotMax = (4 * this->gimbalStepAngle) / (this->motorStepTime * this->motorStepTime);
         } else {
+            cout << "Commanded motor 2 steps > Commanded motor 1 steps: ACTUATE BOTH MOTORS FOLLOWED BY ACTUATION OF SINGLE MOTOR" << endl;
+            cout << "STEP 1: ACTUATE BOTH MOTORS" << endl;
             this->gimbalStepsCommanded = this->motor1StepsCommanded;
             this->motor1ThetaRef = this->motor1ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
             this->motor2ThetaRef = this->motor2ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
@@ -422,8 +427,8 @@ void TwoAxisGimbal::computeGimbalActuationParameters() {
             this->gimbalPRVThetaDDotMax = (4 * this->gimbalStepAngle) / (this->motorStepTime * this->motorStepTime);
         }
     } else if  (this->segment1Complete && !this->segment2Complete) {  // Set second of two prvs
-        cout << "Commanded motor 2 steps > Commanded motor 1 steps: ACTUATE BOTH MOTORS FOLLOWED BY ACTUATION OF SINGLE MOTOR" << endl;
         if (this->motor1StepsCommanded > this->motor2StepsCommanded) {
+            cout << "Commanded motor 1 steps > Commanded motor 2 steps: ACTUATE BOTH MOTORS FOLLOWED BY ACTUATION OF SINGLE MOTOR" << endl;
             cout << "STEP 2: ACTUATE MOTOR 1" << endl;
             this->gimbalStepsCommanded = (this->motor1StepsCommanded - this->motor2StepsCommanded);
             this->motor1ThetaRef = this->motor1ThetaRef + this->gimbalStepsCommanded * this->motorStepAngle;
@@ -443,6 +448,7 @@ void TwoAxisGimbal::computeGimbalActuationParameters() {
 
             this->gimbalPRV_F0M = this->gimbalPRV_FIntM;
         } else {
+            cout << "Commanded motor 2 steps > Commanded motor 1 steps: ACTUATE BOTH MOTORS FOLLOWED BY ACTUATION OF SINGLE MOTOR" << endl;
             cout << "STEP 2: ACTUATE MOTOR 2" << endl;
             this->gimbalStepsCommanded = (this->motor2StepsCommanded - this->motor1StepsCommanded);
             this->motor2ThetaRef = this->motor2ThetaRef + this->gimbalStepsCommanded * this->motorStepAngle;
