@@ -60,6 +60,8 @@ public:
     BSKLogger *bskLogger;                                                           //!< BSK Logging
 
 private:
+    double tableStepAngle;
+
     double motor_to_gimbal_tip_angle[319][319];
     double motor_to_gimbal_tilt_angle[319][319];
 

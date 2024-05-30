@@ -38,9 +38,9 @@ from Basilisk.utilities import SimulationBaseClass
 from Basilisk.utilities import macros
 from matplotlib import collections as mc
 
-@pytest.mark.parametrize("accuracy", [0.01])
-@pytest.mark.parametrize("motor1StepsCommanded", [1000, 2000, 5000])
-@pytest.mark.parametrize("motor2StepsCommanded", [1000, 5000])
+@pytest.mark.parametrize("accuracy", [1e-5])
+@pytest.mark.parametrize("motor1StepsCommanded", [10, 1000, 10000, 12345, 19875])
+@pytest.mark.parametrize("motor2StepsCommanded", [25, 5432, 10000, 19875])
 def test_twoAxisGimbal(show_plots, motor1StepsCommanded, motor2StepsCommanded, accuracy):
     r"""
     **Validation Test Description**
@@ -64,7 +64,7 @@ def test_twoAxisGimbal(show_plots, motor1StepsCommanded, motor2StepsCommanded, a
     # Create a sim module as an empty container
     unitTestSim = SimulationBaseClass.SimBaseClass()
 
-    testTimeStepSec = 0.001  # [s]
+    testTimeStepSec = 0.0001  # [s]
     testProcessRate = macros.sec2nano(testTimeStepSec)
     testProc = unitTestSim.CreateNewProcess(unitProcessName)
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
@@ -209,8 +209,12 @@ def test_twoAxisGimbal(show_plots, motor1StepsCommanded, motor2StepsCommanded, a
 
         gimbalTipAngleCheckList = [gimbalTipAngleSegment1Final, gimbalTipAngleSegment2Final]  # [deg]
         gimbalTiltAngleCheckList = [gimbalTiltAngleSegment1Final, gimbalTiltAngleSegment2Final]  # [deg]
-
-        segment1StopTimeIdx = int(round(simSegment1Time / testTimeStepSec)) + 1
+        print(simSegment1Time)
+        segment1StopTimeIdx = int(simSegment1Time / testTimeStepSec) + 1
+        print("SEGMENT 1 STOP TIME")
+        print(timespan[segment1StopTimeIdx])
+        print("INDEX: ")
+        print(segment1StopTimeIdx)
         gimbalTipAngleSimList = [gimbalTipAngle[segment1StopTimeIdx], gimbalTipAngle[-1]]  # [deg]
         gimbalTiltAngleSimList = [gimbalTiltAngle[segment1StopTimeIdx], gimbalTiltAngle[-1]]  # [deg]
 
@@ -237,7 +241,7 @@ def test_twoAxisGimbal(show_plots, motor1StepsCommanded, motor2StepsCommanded, a
     print("GIMBAL TILT ANGLE MODULE VALUES:")
     print(gimbalTiltAngleSimList)
 
-    # # Check that the gimbal angles converge to the desired values for each actuation segment
+    # Check that the gimbal angles converge to the desired values for each actuation segment
     # np.testing.assert_allclose(gimbalTipAngleCheckList,
     #                            gimbalTipAngleSimList,
     #                            atol=accuracy,
@@ -293,8 +297,8 @@ def test_twoAxisGimbal(show_plots, motor1StepsCommanded, motor2StepsCommanded, a
         ax.scatter(gimbalTipAngle[0], gimbalTiltAngle[0], marker='.', linewidth=4, color='springgreen', label='Initial')
         ax.scatter(gimbalTipAngle[-1], gimbalTiltAngle[-1], marker='*', linewidth=4, color='magenta', label='Final')
         plt.title('Gimbal Sequential Trajectory', fontsize=14)
-        plt.ylabel(r'$\psi$ (deg)', fontsize=16)
-        plt.xlabel(r'$\phi$ (deg)', fontsize=16)
+        plt.ylabel(r'$\phi$ (deg)', fontsize=16)
+        plt.xlabel(r'$\psi$ (deg)', fontsize=16)
         plt.legend(loc='upper right', prop={'size': 12})
         plt.grid(True)
         plt.axis("equal")
@@ -442,7 +446,7 @@ def bilinearInterpolation(x1, x2, y1, y2, z11, z12, z21, z22, x, y):
 if __name__ == "__main__":
     test_twoAxisGimbal(
         True,  # show_plots
-        1000,  # motor1StepsCommanded
-        16000,  # motor2StepsCommanded
-        0.01,  # accuracy
+        12345,  # motor1StepsCommanded
+        19875,  # motor2StepsCommanded
+        1e-5,  # accuracy
     )
