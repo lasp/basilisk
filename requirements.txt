@@ -1,4 +1,6 @@
 conan>=1.40.1, <2.00.0
+matplotlib
+numpy
 opencv-contrib-python
 opencv-python
 pandas
@@ -7,5 +9,3 @@ Pillow
 pytest
 pytest-html
 pytest-xdist
-matplotlib
-numpy
