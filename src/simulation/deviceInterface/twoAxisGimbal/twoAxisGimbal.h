@@ -62,6 +62,18 @@ private:
                                            double motor2Angle);                     //!< Function to determine the gimbal PRV attitude given the stepper motor angles
     std::pair<double, double> motorAnglesToGimbalAngles(double motor1Angle,
                                                         double motor2Angle);        //!< Function to determine the sequential gimbal tip and tilt angles given the stepper motor angles
+
+    bool noInterpolationRequired(double motor1Angle,
+                                 double motor2Angle);
+    bool bilinearInterpolationRequired(double motor1Angle,
+                                       double motor2Angle);
+    bool linearInterpolationRequired(double motorAngle);
+    std::pair<double, double> bilinearlyInterpolateGimbalAngles(double motor1Angle,
+                                                                double motor2Angle);
+    std::pair<double, double> linearlyInterpolateGimbalAnglesMotor1Fixed(double motor1Angle,
+                                                                         double motor2Angle);
+    std::pair<double, double> linearlyInterpolateGimbalAnglesMotor2Fixed(double motor1Angle,
+                                                                         double motor2Angle);
     void computeGimbalActuationParameters();                                        //!< Function used to compute and update the gimbal actuation parameters for each segment of required gimbal motion
     double pullGimbalTipAngle(double motor1Angle,
                               double motor2Angle);                                  //!< Function used to pull a specific gimbal tip angle from the tip interpolation table given specific motor angles
