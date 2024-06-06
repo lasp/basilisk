@@ -31,9 +31,6 @@ from Basilisk.architecture.swig_common_model import *
 %include "sys_model.i"
 %include "twoAxisGimbal.h"
 
-%include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
-struct HingedRigidBodyMsg_C;
-
 %include "architecture/msgPayloadDefC/MotorStepCommandMsgPayload.h"
 struct MotorStepCommandMsg_C;
 
