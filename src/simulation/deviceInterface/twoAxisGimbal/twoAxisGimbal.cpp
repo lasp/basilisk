@@ -21,8 +21,8 @@
 #include "architecture/utilities/avsEigenSupport.h"
 #include "architecture/utilities/rigidBodyKinematics.hpp"
 #include "architecture/utilities/macroDefinitions.h"
-#include "linearInterpolation.h"
-#include "bilinearInterpolation.h"
+#include "linearInterpolation.hpp"
+#include "bilinearInterpolation.hpp"
 #include <cmath>
 #include <fstream>
 #include <sstream>
@@ -351,16 +351,11 @@ std::pair<double, double> TwoAxisGimbal::linearlyInterpolateGimbalAnglesMotor2Fi
  @return void
 */
 void TwoAxisGimbal::computeGimbalActuationParameters() {
-    Eigen::Vector3d gimbalPRV_FM = {0.0, 0.0, 0.0};
-    Eigen::Vector3d gimbalPRV_FF0 = {0.0, 0.0, 0.0};
-    Eigen::Vector3d gimbalPRV_FIntF0 = {0.0, 0.0, 0.0};
-    Eigen::Vector3d gimbalPRV_FFInt = {0.0, 0.0, 0.0};
-
-    if (!this->segment1Complete && this->segment2Complete) { // Single prv
+    if (!this->segment1Complete && this->segment2Complete) {
         this->computeSingleSegmentParameters();
-    } else if (!this->segment1Complete) { // Set first of two prvs
+    } else if (!this->segment1Complete) {
         this->computeSegment1Parameters();
-    } else {  // Set second of two prvs
+    } else {
         this->computeSegment2Parameters();
     }
 
