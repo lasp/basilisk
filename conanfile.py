@@ -174,7 +174,7 @@ class BasiliskConan(ConanFile):
     def requirements(self):
         if self.options.opNav:
             self.requires.add("pcre/8.45")
-            self.requires.add("opencv/4.1.2")
+            self.requires.add("opencv/4.5.5")
             self.options['opencv'].with_ffmpeg = False  # video frame encoding lib
             self.options['opencv'].with_ade = False  # graph manipulations framework
             self.options['opencv'].with_tiff = False  # encode/decode image in TIFF format
