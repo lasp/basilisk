@@ -173,7 +173,7 @@ class BasiliskConan(ConanFile):
 
     def requirements(self):
         if self.options.opNav:
-            self.requires.add("pcre/8.45")
+            #self.requires.add("pcre/8.45")
             self.requires.add("opencv/4.5.5")
             self.options['opencv'].with_ffmpeg = False  # video frame encoding lib
             self.options['opencv'].with_ade = False  # graph manipulations framework
@@ -181,11 +181,11 @@ class BasiliskConan(ConanFile):
             self.options['opencv'].with_openexr = False  # encode/decode image in EXR format
             self.options['opencv'].with_webp = False  # encode/decode image in WEBP format
             self.options['opencv'].with_quirc = False  # QR code lib
-            self.requires.add("zlib/1.2.13")
-            self.requires.add("xz_utils/5.4.0")
+            #self.requires.add("zlib/1.2.13")
+            #self.requires.add("xz_utils/5.4.0")
 
         if self.options.vizInterface or self.options.opNav:
-            self.requires.add("protobuf/3.17.1#7627fae1426bcc12a67dba7c7207b1bccf05e5fd")
+            self.requires.add("protobuf/3.17.1#ffb2039b66b5a372f7a2a8a0b1ddfd13")
             self.options['zeromq'].encryption = False  # Basilisk does not use data streaming encryption.
             self.requires.add("cppzmq/4.5.0")
 
