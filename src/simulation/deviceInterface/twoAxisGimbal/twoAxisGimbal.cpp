@@ -120,15 +120,12 @@ void TwoAxisGimbal::UpdateState(uint64_t callTime) {
         motor1StateIn = this->motor1StateInMsg();
         motor2StateIn = this->motor2StateInMsg();
 
+        // Store the current motor angles
+        this->motor1Theta = motor1StateIn.theta;
+        this->motor2Theta = motor2StateIn.theta;
+
         if (this->previousWrittenTime < this->motor1StepCmdInMsg.timeWritten()) {
             this->previousWrittenTime = this->motor1StepCmdInMsg.timeWritten();
-
-            // Store the initial motor angles
-            this->motor1ThetaInit = motor1StateIn.theta;
-            this->motor2ThetaInit = motor2StateIn.theta;
-
-            // Find the initial gimbal attitude
-            this->gimbalPRV_F0M = this->motorAnglesToGimbalPRV(this->motor1ThetaInit, this->motor2ThetaInit);
 
             // Store the motor steps commanded
             this->motor1StepsCommanded = motor1StepCmdIn.stepsCommanded;
@@ -142,10 +139,10 @@ void TwoAxisGimbal::UpdateState(uint64_t callTime) {
                 if ((this->motor1StepsCommanded == 0 || this->motor2StepsCommanded == 0) || (this->motor1StepsCommanded == this->motor2StepsCommanded)) {
                     this->segment2Complete = true;
                 }
-                this->computeGimbalActuationParameters();
             } else {
                 this->completion = true;
                 this->gimbalPRVTheta = 0.0;
+                this->gimbalPRV_F0M = this->motorAnglesToGimbalPRV(this->motor1Theta, this->motor2Theta);
             }
             this->newMsg = true;
         }
@@ -158,6 +155,51 @@ void TwoAxisGimbal::UpdateState(uint64_t callTime) {
 
     // Write the module output messages
     this->writeOutputMessages(callTime);
+}
+
+/*! This high-level method is used to simulate the gimbal prv states in time.
+ @return void
+ @param t [s] Time the method is called
+*/
+void TwoAxisGimbal::actuateGimbal(double t) {
+    // Reset the gimbal actuation parameters when the current request is complete and a new request is received
+    if (this->newMsg && this->gimbalStepComplete) {
+        this->resetGimbal(t);
+    }
+
+    // Update the gimbal rotation parameters after each gimbal step is completed
+    if (this->gimbalStepComplete) {
+        this->updateGimbalRotationParameters();
+    }
+
+    // Update the scalar gimbal states during each step
+    if (this->isInGimbalStepFirstHalf(t)) {
+        this->computeGimbalStepFirstHalf(t);
+    } else if (this->isInGimbalStepSecondHalf(t)) {
+        this->computeGimbalStepSecondHalf(t);
+    } else {
+        this->computeGimbalStepComplete(t);
+    }
+}
+
+/*! This method resets the gimbal states when the current request is complete and a new request is received.
+ @return void
+ @param t [s] Time the method is called
+*/
+void TwoAxisGimbal::resetGimbal(double t) {
+    // Reset the gimbal step count to zero
+    this->gimbalStepCount = 0;
+
+    // Update the initial time as the current simulation time
+    this->tInit = t;
+
+    // Find the initial gimbal attitude
+    this->gimbalPRV_F0M = this->motorAnglesToGimbalPRV(this->motor1Theta, this->motor2Theta);
+
+    // Compute the parameters to profile the gimbal actuation for each actuation segment
+    this->computeGimbalActuationParameters();
+
+    this->newMsg = false;
 }
 
 /*! This method determines the gimbal PRV hub-relative attitude given the stepper motor angles.
@@ -369,16 +411,16 @@ void TwoAxisGimbal::computeGimbalActuationParameters() {
 void TwoAxisGimbal::computeSingleSegmentParameters() {
     if (this->motor1StepsCommanded == this->motor2StepsCommanded) { // Actuate both motors
         this->gimbalStepsCommanded = this->motor1StepsCommanded;
-        this->motor1ThetaRef = this->motor1ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
-        this->motor2ThetaRef = this->motor2ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
-    } else if (this->motor2StepsCommanded == 0) {  // Actuate motor 1
+        this->motor1ThetaRef = this->motor1Theta + this->gimbalStepsCommanded * this->motorStepAngle;
+        this->motor2ThetaRef = this->motor2Theta + this->gimbalStepsCommanded * this->motorStepAngle;
+    } else if (this->motor2StepsCommanded == 0) {  // Actuate motor 1 only
         this->gimbalStepsCommanded = this->motor1StepsCommanded;
-        this->motor1ThetaRef = this->motor1ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
-        this->motor2ThetaRef = this->motor2ThetaInit;
-    } else {  // Actuate motor 2
+        this->motor1ThetaRef = this->motor1Theta + this->gimbalStepsCommanded * this->motorStepAngle;
+        this->motor2ThetaRef = this->motor2Theta;
+    } else {  // Actuate motor 2 only
         this->gimbalStepsCommanded = this->motor2StepsCommanded;
-        this->motor1ThetaRef = this->motor1ThetaInit;
-        this->motor2ThetaRef = this->motor2ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
+        this->motor1ThetaRef = this->motor1Theta;
+        this->motor2ThetaRef = this->motor2Theta + this->gimbalStepsCommanded * this->motorStepAngle;
     }
 
     // Interpolate to find the reference gimbal attitude prv_FM
@@ -403,12 +445,12 @@ void TwoAxisGimbal::computeSingleSegmentParameters() {
 void TwoAxisGimbal::computeSegment1Parameters() {
     if (fabs(this->motor1StepsCommanded) > fabs(this->motor2StepsCommanded)) {
         this->gimbalStepsCommanded = this->motor2StepsCommanded;
-        this->motor1ThetaRef = this->motor1ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
-        this->motor2ThetaRef = this->motor2ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
+        this->motor1ThetaRef = this->motor1Theta + this->gimbalStepsCommanded * this->motorStepAngle;
+        this->motor2ThetaRef = this->motor2Theta + this->gimbalStepsCommanded * this->motorStepAngle;
     } else {
         this->gimbalStepsCommanded = this->motor1StepsCommanded;
-        this->motor1ThetaRef = this->motor1ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
-        this->motor2ThetaRef = this->motor2ThetaInit + this->gimbalStepsCommanded * this->motorStepAngle;
+        this->motor1ThetaRef = this->motor1Theta + this->gimbalStepsCommanded * this->motorStepAngle;
+        this->motor2ThetaRef = this->motor2Theta + this->gimbalStepsCommanded * this->motorStepAngle;
     }
 
     // Interpolate to find the intermediate reference gimbal attitude prv_FIntM
@@ -478,58 +520,13 @@ double TwoAxisGimbal::pullGimbalTiltAngle(double motor1Angle, double motor2Angle
     return this->motor_to_gimbal_tilt_angle[motor2Idx][motor1Idx];
 }
 
-/*! This high-level method is used to simulate the gimbal prv states in time.
- @return void
- @param t [s] Time the method is called
-*/
-void TwoAxisGimbal::actuateGimbal(double t) {
-    // Reset the gimbal states when the current request is complete and a new request is received
-    if (this->newMsg && this->gimbalStepComplete) {
-        this->resetGimbal(t);
-    }
-
-    // Define temporal information for the rotation
-    this->tf = this->tInit + this->motorStepTime;
-    this->ts = this->tInit + this->motorStepTime / 2;
-
-    // Update the intermediate initial and reference gimbal angles and the parabolic constants when a step is completed
-    if (this->gimbalStepComplete) {
-        this->updateGimbalRotationParameters();
-    }
-
-    // Update the scalar gimbal states during each step
-    if (this->isInGimbalStepFirstHalf(t)) {
-        this->computeGimbalStepFirstHalf(t);
-    } else if (this->isInGimbalStepSecondHalf(t)) {
-        this->computeGimbalStepSecondHalf(t);
-    } else {
-        this->computeGimbalStepComplete(t);
-    }
-}
-
-/*! This method resets the gimbal states when the current request is complete and a new request is received.
- @return void
- @param t [s] Time the method is called
-*/
-void TwoAxisGimbal::resetGimbal(double t) {
-    // Reset the gimbal step count to zero
-    this->gimbalStepCount = 0;
-
-    // Update the initial time as the current simulation time
-    this->tInit = t;
-
-    // Re-compute the actuation parameters if the first segment is complete and a second actuation segment is required
-    if (this->segment1Complete && !this->segment2Complete) {
-        this->computeGimbalActuationParameters();
-    }
-
-    this->newMsg = false;
-}
-
 /*! This method updates the gimbal rotation parameters after a gimbal step is completed.
  @return void
 */
 void TwoAxisGimbal::updateGimbalRotationParameters() {
+    this->tf = this->tInit + this->motorStepTime;
+    this->ts = this->tInit + this->motorStepTime / 2;
+
     this->intermediateGimbalPRVThetaInit = this->gimbalStepCount * this->gimbalStepAngle;
     if (this->gimbalStepsCommanded > 0) {
         this->intermediateGimbalPRVThetaRef = (this->gimbalStepCount + 1) * this->gimbalStepAngle;

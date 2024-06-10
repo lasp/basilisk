@@ -57,7 +57,8 @@ public:
     BSKLogger *bskLogger;                                                                        //!< BSK Logging
 
 private:
-
+    void actuateGimbal(double t);                                                                //!< High-level method used to simulate the gimbal states in time
+    void resetGimbal(double t);                                                                  //!< Method used to reset the gimbal states when the current request is complete and a new request is received
     Eigen::Vector3d motorAnglesToGimbalPRV(double motor1Angle,
                                            double motor2Angle);                                  //!< Method to determine the gimbal PRV attitude given the stepper motor angles
     std::pair<double, double> motorAnglesToGimbalAngles(double motor1Angle,
@@ -81,8 +82,6 @@ private:
                               double motor2Angle);                                               //!< Method used to pull a specific gimbal tip angle from the tip interpolation table given specific motor angles
     double pullGimbalTiltAngle(double motor1Angle,
                                double motor2Angle);                                              //!< Method used to pull a specific gimbal tilt angle from the tilt interpolation table given specific motor angles
-    void actuateGimbal(double t);                                                                //!< High-level method used to simulate the gimbal states in time
-    void resetGimbal(double t);                                                                  //!< Method used to reset the gimbal states when the current request is complete and a new request is received
     void updateGimbalRotationParameters();                                                       //!< Method used to update the gimbal rotation parameters after a step is completed
     bool isInGimbalStepFirstHalf(double t);                                                      //!< Method used to determine if the gimbal is in the first half of a step
     void computeGimbalStepFirstHalf(double t);                                                   //!< Method used to compute the gimbal states during the first half of each step
@@ -94,8 +93,8 @@ private:
     // Stepper motor state data
     double motorStepAngle{1.0 * DEG2RAD};                                                        //!< [rad] Angle the stepper motor moves through for a single step
     double motorStepTime{0.1};                                                                   //!< [s] Time required for a single motor step (constant)
-    double motor1ThetaInit{};                                                                    //!< [rad] Initial stepper motor 1 angle
-    double motor2ThetaInit{};                                                                    //!< [rad] Initial stepper motor 2 angle
+    double motor1Theta{};                                                                        //!< [rad] Current stepper motor 1 angle
+    double motor2Theta{};                                                                        //!< [rad] current stepper motor 2 angle
     int motor1StepsCommanded{};                                                                  //!< Number of steps commanded for stepper motor 1
     int motor2StepsCommanded{};                                                                  //!< Number of steps commanded for stepper motor 2
     double motor1ThetaRef{};                                                                     //!< [rad] Motor 1 reference angle
