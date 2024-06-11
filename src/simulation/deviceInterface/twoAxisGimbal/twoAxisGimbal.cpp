@@ -35,13 +35,15 @@ TwoAxisGimbal::TwoAxisGimbal(std::string pathToTipTable, std::string pathToTiltT
         _bskLog(this->bskLogger, BSK_ERROR, "Motor-to-gimbal tip angle interpolation table was not found.");
     }
     std::string line;
-    int row = 0;
-    while (getline(file, line) && row < 319) {
+    int row = -1;
+    while (getline(file, line) && row < 320) {
         std::stringstream ss(line);
         std::string cell;
         int col = 0;
         while (getline(ss, cell, ',') && col < 319) {
-            this->motor_to_gimbal_tip_angle[row][col] = DEG2RAD * stod(cell);
+            if (row >= 0) {
+                this->motor_to_gimbal_tip_angle[row][col] = DEG2RAD * stod(cell);
+            }
             col++;
         }
         row++;
@@ -53,13 +55,15 @@ TwoAxisGimbal::TwoAxisGimbal(std::string pathToTipTable, std::string pathToTiltT
     if (!file2.is_open()) {
         _bskLog(this->bskLogger, BSK_ERROR, "Motor-to-gimbal tilt angle interpolation table was not found.");
     }
-    row = 0;
-    while (getline(file2, line) && row < 319) {
+    row = -1;
+    while (getline(file2, line) && row < 320) {
         std::stringstream ss(line);
         std::string cell;
         int col = 0;
         while (getline(ss, cell, ',') && col < 319) {
-            this->motor_to_gimbal_tilt_angle[row][col] = DEG2RAD * stod(cell);
+            if (row >= 0) {
+                this->motor_to_gimbal_tilt_angle[row][col] = DEG2RAD * stod(cell);
+            }
             col++;
         }
         row++;

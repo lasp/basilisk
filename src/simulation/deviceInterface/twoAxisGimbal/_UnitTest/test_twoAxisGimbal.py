@@ -234,10 +234,8 @@ def test_twoAxisGimbal(show_plots,
     #
 
     # Read in the lookup tables
-    path_to_file = "/Users/leahkiner/Desktop/motor_to_gimbal_tip_angle.csv"
-    motor_to_gimbal_tip_angle = pd.read_csv(path_to_file)
-    path_to_file = "/Users/leahkiner/Desktop/motor_to_gimbal_tilt_angle.csv"
-    motor_to_gimbal_tilt_angle = pd.read_csv(path_to_file)
+    motor_to_gimbal_tip_angle = pd.read_csv(motorToGimbalTipAnglePath)
+    motor_to_gimbal_tilt_angle = pd.read_csv(motorToGimbalTiltAnglePath)
     motor_to_gimbal_tip_angle_table = motor_to_gimbal_tip_angle.to_numpy()
     motor_to_gimbal_tilt_angle_table = motor_to_gimbal_tilt_angle.to_numpy()
 
