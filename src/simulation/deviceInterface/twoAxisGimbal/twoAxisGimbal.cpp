@@ -21,8 +21,8 @@
 #include "architecture/utilities/avsEigenSupport.h"
 #include "architecture/utilities/rigidBodyKinematics.hpp"
 #include "architecture/utilities/macroDefinitions.h"
-#include "linearInterpolation.hpp"
-#include "bilinearInterpolation.hpp"
+#include "architecture/utilities/linearInterpolation.hpp"
+#include "architecture/utilities/bilinearInterpolation.hpp"
 #include <cmath>
 #include <fstream>
 #include <sstream>
