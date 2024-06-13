@@ -13,7 +13,6 @@ from Basilisk.utilities import SimulationBaseClass
 from Basilisk.utilities import macros
 from Basilisk.utilities import unitTestSupport
 
-
 filename = inspect.getframeinfo(inspect.currentframe()).filename
 path = os.path.dirname(os.path.abspath(filename))
 bskName = 'Basilisk'
@@ -24,7 +23,7 @@ splitPath = path.split(bskName)
 
 # @pytest.mark.parametrize("desiredAngle", [0, 2*np.pi/3])
 @pytest.mark.parametrize("accuracy", [1e-12])
-def test_sepGimbalLookUpTableTestFunction(show_plots, inputTipAngle, inputTiltAngle, accuracy):
+def test_sepGimbalLookUpTableTestFunction(inputTipAngle, inputTiltAngle, accuracy):
     r"""
     **Validation Test Description**
 
@@ -44,14 +43,14 @@ def test_sepGimbalLookUpTableTestFunction(show_plots, inputTipAngle, inputTiltAn
     and angular velocity magnitude ``thetaDot_Final`` are compared with the reference values ``theta_Ref`` and
     ``thetaDot_Ref``, respectively.
     """
-    [testResults, testMessage] = sepGimbalLookUpTableTestFunction(show_plots, inputTipAngle, inputTiltAngle, accuracy)
+    [testResults, testMessage] = sepGimbalLookUpTableTestFunction(inputTipAngle, inputTiltAngle, accuracy)
 
 #assertion statement checks whether a given condition is True.
     # If the condition is False, an AssertionError is raised, and an optional error message (testMessage) can be
     # provided to explain the reason for the assertion failure.
     assert testResults < 1, testMessage
 
-def sepGimbalLookUpTableTestFunction(show_plots, desiredTipAngle1, desiredTiltAngle1, accuracy):
+def sepGimbalLookUpTableTestFunction(tipAngle, tiltAngle, accuracy):
     testFailCount = 0                                        # Zero the unit test result counter
     testMessages = []                                        # Create an empty array to store the test log messages
     unitTaskName = "unitTask"
@@ -67,32 +66,31 @@ def sepGimbalLookUpTableTestFunction(show_plots, desiredTipAngle1, desiredTiltAn
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Create an instance of the sepGimbalLookUpTable module to be tested
-    SepGimbalLookUpTableConfig = sepGimbalLookUpTable.SepGimbalLookUpTableConfig()
-    SepGimbalLookUpTableWrap = unitTestSim.setModelDataWrap(SepGimbalLookUpTableConfig)
-    SepGimbalLookUpTableWrap.ModelTag = "sepGimbalLookUpTable"
+    SepGimbalLookUpTable = sepGimbalLookUpTable.SepGimbalLookUpTable()
+    SepGimbalLookUpTable.ModelTag = "sepGimbalLookUpTable"
 
     # Add the sepGimbal test module to runtime call list
-    unitTestSim.AddModelToTask(unitTaskName, SepGimbalLookUpTableWrap, SepGimbalLookUpTableConfig)
+    unitTestSim.AddModelToTask(unitTaskName, SepGimbalLookUpTable, SepGimbalLookUpTable)
 
     # Create variable for the tip and tilt angles 
     HingedRigidBodyTipAngleData = messaging.HingedRigidBodyMsgPayload()
-    HingedRigidBodyTipAngleData.theta = desiredTipAngle1
+    HingedRigidBodyTipAngleData.theta = tipAngle
 
     HingedRigidBodyTiltAngleData = messaging.HingedRigidBodyMsgPayload()
-    HingedRigidBodyTiltAngleData.theta = desiredTiltAngle1
+    HingedRigidBodyTiltAngleData.theta = tiltAngle
 
     # Create the sepGimbalLookUpTable tip and tilt angles input message
     HingedRigidBodyTipAngleMessage = messaging.HingedRigidBodyMsg().write(HingedRigidBodyTipAngleData)
-    SepGimbalLookUpTableConfig.desiredGimbalTipAngleInMsg.subscribeTo(HingedRigidBodyTipAngleMessage)
+    SepGimbalLookUpTable.desiredGimbalTipAngleInMsg.subscribeTo(HingedRigidBodyTipAngleMessage)
 
     HingedRigidBodyTiltAngleMessage = messaging.HingedRigidBodyMsg().write(HingedRigidBodyTiltAngleData)
-    SepGimbalLookUpTableConfig.desiredGimbalTiltAngleInMsg.subscribeTo(HingedRigidBodyTiltAngleMessage)
+    SepGimbalLookUpTable.desiredGimbalTiltAngleInMsg.subscribeTo(HingedRigidBodyTiltAngleMessage)
 
-    SepGimbalLookUpTableConfig.fileName = "C:\\Users\\ShamsaS\\Documents\\software-projects\\basilisk-lasp\\src\\fswAlgorithms\\effectorInterfaces\\sepGimbalLookUpTable\\platformAngle_motorAngle.csv"
+    #SepGimbalLookUpTable.fileName = "C:\\Users\\ShamsaS\\Documents\\software-projects\\basilisk-lasp\\src\\fswAlgorithms\\effectorInterfaces\sepGimbalLookUpTable\platformToMotor1.h"
 
     # Log the test module output message for data comparison
-    motor1AngleMsgLog = SepGimbalLookUpTableConfig.motor1AngleOutMsg.recorder()
-    motor2AngleMsgLog = SepGimbalLookUpTableConfig.motor2AngleOutMsg.recorder()
+    motor1AngleMsgLog = SepGimbalLookUpTable.motor1AngleOutMsg.recorder()
+    motor2AngleMsgLog = SepGimbalLookUpTable.motor2AngleOutMsg.recorder()
     unitTestSim.AddModelToTask(unitTaskName, motor1AngleMsgLog)
     unitTestSim.AddModelToTask(unitTaskName, motor2AngleMsgLog)
 
@@ -100,22 +98,21 @@ def sepGimbalLookUpTableTestFunction(show_plots, desiredTipAngle1, desiredTiltAn
     unitTestSim.InitializeSimulation()
 
     # Set the simulation time
-    unitTestSim.ConfigureStopTime(macros.sec2nano(30))
+    #unitTestSim.ConfigureStopTime(macros.sec2nano(30))
 
     # Begin the simulation
     unitTestSim.ExecuteSimulation()
     
-    print("")
-    print(type(motor1AngleMsgLog))
-    print(type(motor2AngleMsgLog))
+    #print("")
+    #print(type(motor1AngleMsgLog))
+    #print(type(motor2AngleMsgLog))
 
 
 # This statement below ensures that the unitTestScript can be run as a
 # stand-along python script
 if __name__ == "__main__":
     sepGimbalLookUpTableTestFunction(
-                 True,
-                 17,    # desiredTipAngle1
-                 0.4,     # desiredTiltAngle1
-                 1e-12   # accuracy
+                 -11,    # tipAngle1
+                 -10.1,   # tiltAngle1
+                 1e-12  # accuracy
     )

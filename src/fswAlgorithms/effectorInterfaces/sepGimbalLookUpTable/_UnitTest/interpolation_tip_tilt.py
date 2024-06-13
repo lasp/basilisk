@@ -220,4 +220,3 @@ plt.ylim()
 # Print the calculated predicted motor angles
 print("Predicted Motor 1 Angle:", predictedMotor1)
 print("Predicted Motor 2 Angle:", predictedMotor2)
-

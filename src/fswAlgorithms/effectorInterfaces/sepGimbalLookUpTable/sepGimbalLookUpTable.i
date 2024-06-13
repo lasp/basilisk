@@ -21,16 +21,24 @@
    #include "sepGimbalLookUpTable.h"
 %}
 
+// %include "swig_conly_data.i"
+// %constant void SelfInit_sepGimbalLookUpTable(void*, uint64_t);
+// %ignore SelfInit_sepGimbalLookUpTable;
+// %constant void Reset_sepGimbalLookUpTable(void*, uint64_t, uint64_t);
+// %ignore Reset_sepGimbalLookUpTable;
+// %constant void Update_sepGimbalLookUpTable(void*, uint64_t, uint64_t);
+// %ignore Update_sepGimbalLookUpTable;
+
+%pythoncode %{
+from Basilisk.architecture.swig_common_model import *
+%}
+
+
+%include "std_string.i"
+%include "swig_eigen.i"
 %include "swig_conly_data.i"
-%constant void SelfInit_sepGimbalLookUpTable(void*, uint64_t);
-%ignore SelfInit_sepGimbalLookUpTable;
-%constant void Reset_sepGimbalLookUpTable(void*, uint64_t, uint64_t);
-%ignore Reset_sepGimbalLookUpTable;
-%constant void Update_sepGimbalLookUpTable(void*, uint64_t, uint64_t);
-%ignore Update_sepGimbalLookUpTable;
-
+%include "sys_model.i"
 %include "sepGimbalLookUpTable.h"
-
 %include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
 struct HingedRigidBodyMsg_C;
 
