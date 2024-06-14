@@ -57,6 +57,7 @@ private:
                            double gimbalTiltAngle);                                              //!< Method used to pull a specific motor 1 angle from the motor 1 interpolation table given specific gimbal angles
     double pullMotor2Angle(double gimbalTipAngle,
                            double gimbalTiltAngle);                                              //!< Method used to pull a specific motor 2 angle from the motor 2 interpolation table given specific gimbal angles
+    double trilinearInterpolation(double z1, double z2, double z3);
 
     /* Gimbal parameters */
     double gimbalTipAngleRef{};                                                                  //!< [rad] Gimbal tip reference angle
