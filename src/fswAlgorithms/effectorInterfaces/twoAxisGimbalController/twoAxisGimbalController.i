@@ -19,7 +19,7 @@
 
 %module twoAxisGimbalController
 %{
-#include "twoAxisGimbalController.h"
+    #include "twoAxisGimbalController.h"
 %}
 
 %pythoncode %{

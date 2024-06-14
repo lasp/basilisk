@@ -19,12 +19,11 @@
 #ifndef _TWOAXISGIMBALCONTROLLER_
 #define _TWOAXISGIMBALCONTROLLER_
 
-#include <stdint.h>
-#include <Eigen/Core>
-#include "architecture/utilities/bskLogging.h"
 #include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
 #include "cMsgCInterface/TwoAxisGimbalMsg_C.h"
 #include "cMsgCInterface/HingedRigidBodyMsg_C.h"
+#include "architecture/utilities/bskLogging.h"
 
 const double DEG2RAD = M_PI / 180.0;
 
@@ -39,11 +38,11 @@ public:
     void loadGimbalToMotor1AngleLookupTable(std::string pathToMotor1Table);                      //!< Method to load the gimbal-to-motor 1 angle lookup table
     void loadGimbalToMotor2AngleLookupTable(std::string pathToMotor2Table);                      //!< Method to load the gimbal-to-motor 2 angle lookup table
 
-    BSKLogger* bskLogger;                                                                        //!< BSK Logging
-
     ReadFunctor<TwoAxisGimbalMsgPayload> twoAxisGimbalInMsg;                                     //!< Input msg for the gimbal tip and tilt angles
     Message<HingedRigidBodyMsgPayload> motor1AngleOutMsg;                                        //!< Output message for the motor 1 angle
     Message<HingedRigidBodyMsgPayload> motor2AngleOutMsg;                                        //!< Output message for the motor 1 angle
+
+    BSKLogger* bskLogger;                                                                        //!< BSK Logging
 
 private:
 

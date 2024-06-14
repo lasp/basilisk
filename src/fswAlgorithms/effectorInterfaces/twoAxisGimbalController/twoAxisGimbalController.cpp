@@ -97,10 +97,11 @@ The desired gimbal angles are then written to the output message to find the cor
 void TwoAxisGimbalController::UpdateState(uint64_t callTime) {
 
     // Read the input messages
-    TwoAxisGimbalMsgPayload twoAxisGimbalMsgIn = TwoAxisGimbalMsgPayload();
+    TwoAxisGimbalMsgPayload twoAxisGimbalIn = TwoAxisGimbalMsgPayload();
     if (this->twoAxisGimbalInMsg.isWritten()) {
-        this->gimbalTipAngleRef = twoAxisGimbalInMsg.theta1;
-        this->gimbalTiltAngleRef = twoAxisGimbalInMsg.theta2;
+        twoAxisGimbalIn = this->twoAxisGimbalInMsg();
+        this->gimbalTipAngleRef = twoAxisGimbalIn.theta1;
+        this->gimbalTiltAngleRef = twoAxisGimbalIn.theta2;
     }
 
     // Use the provided gimbal angles to determine the motor angles
@@ -239,8 +240,8 @@ void TwoAxisGimbalController::linearlyInterpolateMotorAnglesTiltAngleFixed() {
     this->motor1Angle = linearInterpolation(lowerGimbalAngle, upperGimbalAngle, y1_m1, y2_m1, this->gimbalTipAngleRef);
 
     // Linearly interpolate the motor 2 angle
-    double y1_m2 = this->pullMotor2Angle(lowerGimbalAngle);
-    double y2_m2 = this->pullMotor2Angle(upperGimbalAngle);
+    double y1_m2 = this->pullMotor2Angle(lowerGimbalAngle, this->gimbalTiltAngleRef);
+    double y2_m2 = this->pullMotor2Angle(upperGimbalAngle, this->gimbalTiltAngleRef);
     this->motor2Angle = linearInterpolation(lowerGimbalAngle, upperGimbalAngle, y1_m2, y2_m2, this->gimbalTipAngleRef);
 }
 
