@@ -69,8 +69,8 @@ private:
 
     /* Interpolation table parameters */
     double tableStepAngle{0.5 * DEG2RAD};                                                        //!< [rad] Interpolation table gimbal discretization angle
-    double gimbal_to_motor_1_angle[109][74];                                                     //!< [rad] Gimbal-to-motor 1 angle interpolation table storage array
-    double gimbal_to_motor_2_angle[109][74];                                                     //!< [rad] Gimbal-to-motor 2 angle interpolation table storage array
+    double gimbal_to_motor_1_angle[110][80];                                                     //!< [rad] Gimbal-to-motor 1 angle interpolation table storage array
+    double gimbal_to_motor_2_angle[110][80];                                                     //!< [rad] Gimbal-to-motor 2 angle interpolation table storage array
 
 };
 

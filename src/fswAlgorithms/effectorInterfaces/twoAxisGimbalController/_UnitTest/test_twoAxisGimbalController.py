@@ -230,8 +230,8 @@ def gimbalToMotorAngles(gimbalTipAngle, gimbalTiltAngle, gimbal_to_motor_1_angle
 # This function uses the given interpolation table and gimbal angles to pull the correct motor angle
 def pullMotorAngle(gimbalTipAngle, gimbalTiltAngle, lookup_table_data):
     tableMotorStepAngle = 0.5  # [deg]
-    gimbalTipAngleIdx = 37 + int(gimbalTipAngle / tableMotorStepAngle)
-    gimbalTiltAngleIdx = 54 + int(gimbalTiltAngle / tableMotorStepAngle)
+    gimbalTipAngleIdx = 40 + int(gimbalTipAngle / tableMotorStepAngle)
+    gimbalTiltAngleIdx = 56 + int(gimbalTiltAngle / tableMotorStepAngle)
 
     return lookup_table_data[gimbalTiltAngleIdx][gimbalTipAngleIdx]
 
