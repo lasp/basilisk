@@ -40,8 +40,16 @@ filename = inspect.getframeinfo(inspect.currentframe()).filename
 path = os.path.dirname(os.path.abspath(filename))
 
 
-@pytest.mark.parametrize("gimbalTipAngleRef", [0.0 * macros.D2R, 5.0 * macros.D2R, 10.0 * macros.D2R, -5.0 * macros.D2R])
-@pytest.mark.parametrize("gimbalTiltAngleRef", [0.0 * macros.D2R, 5.0 * macros.D2R, 10.0 * macros.D2R, -5.0 * macros.D2R])
+@pytest.mark.parametrize("gimbalTipAngleRef", [-0.4 * macros.D2R,
+                                               0.1 * macros.D2R,
+                                               0.0 * macros.D2R,
+                                               1.0 * macros.D2R,
+                                               1.3 * macros.D2R])
+@pytest.mark.parametrize("gimbalTiltAngleRef", [-26.7 * macros.D2R,
+                                                -26.5 * macros.D2R,
+                                                -26.2 * macros.D2R,
+                                                -26.0 * macros.D2R,
+                                                -25.7 * macros.D2R])
 @pytest.mark.parametrize("accuracy", [1e-4])
 def test_twoAxisGimbalController(show_plots, gimbalTipAngleRef, gimbalTiltAngleRef, accuracy):
     r"""
@@ -49,7 +57,10 @@ def test_twoAxisGimbalController(show_plots, gimbalTipAngleRef, gimbalTiltAngleR
 
     This unit test ensures that the two-axis gimbal flight software module correctly determines the motor 1 and motor 2
     angles corresponding to any given gimbal tip and tilt angles. Using the provided gimbal-to-motor angle lookup
-    tables, the module determines the corresponding motor angles.
+    tables, the module determines the corresponding motor angles. The edge cases where the requested gimbal angles
+    lie on the boundary of the gimbal attitude space are checked in this test. Assert statements are used in the module
+    to ensure that a valid gimbal attitude is requested. Therefore, the case where the requested gimbal attitude is not
+    valid is not checked in this test script.
 
     **Test Parameters**
 
@@ -83,7 +94,7 @@ def test_twoAxisGimbalController(show_plots, gimbalTipAngleRef, gimbalTiltAngleR
     twoAxisGimbalMessageData.theta2 = gimbalTiltAngleRef
     twoAxisGimbalMessage = messaging.TwoAxisGimbalMsg().write(twoAxisGimbalMessageData)
 
-    # Create the two-axis gimbal (Module tested in this script)
+    # Create the two-axis gimbal controller (Module tested in this script)
     gimbalToMotor1AnglePath = path + "/../gimbal_to_motor1_angle.csv"
     gimbalToMotor2AnglePath = path + "/../gimbal_to_motor2_angle.csv"
     gimbalController = twoAxisGimbalController.TwoAxisGimbalController(gimbalToMotor1AnglePath, gimbalToMotor2AnglePath)
@@ -117,26 +128,27 @@ def test_twoAxisGimbalController(show_plots, gimbalTipAngleRef, gimbalTiltAngleR
     gimbal_to_motor_1_angle_table = gimbal_to_motor_1_angle.to_numpy()
     gimbal_to_motor_2_angle_table = gimbal_to_motor_2_angle.to_numpy()
 
+    # Determine the true motor angles from the given gimbal reference tip and tilt angles
     motor1AngleTruth, motor2AngleTruth = gimbalToMotorAngles(macros.R2D * gimbalTipAngleRef,
                                                              macros.R2D * gimbalTiltAngleRef,
                                                              gimbal_to_motor_1_angle_table,
                                                              gimbal_to_motor_2_angle_table)
 
-    # Print unit test checks
-    print("DESIRED GIMBAL TIP ANGLE: ")
-    print(macros.R2D * gimbalTipAngleRef)
-    print("DESIRED GIMBAL TILT ANGLE: ")
-    print(macros.R2D * gimbalTipAngleRef)
-
-    print("TRUE MOTOR 1 ANGLE: ")
-    print(motor1AngleTruth)
-    print("MODULE-DETERMINED MOTOR 1 ANGLE: ")
-    print(motor1AngleSim[-1])
-
-    print("TRUE MOTOR 2 ANGLE: ")
-    print(motor2AngleTruth)
-    print("MODULE-DETERMINED MOTOR 2 ANGLE: ")
-    print(motor2AngleSim[-1])
+    # # Print unit test checks
+    # print("DESIRED GIMBAL TIP ANGLE: ")
+    # print(macros.R2D * gimbalTipAngleRef)
+    # print("DESIRED GIMBAL TILT ANGLE: ")
+    # print(macros.R2D * gimbalTiltAngleRef)
+    #
+    # print("TRUE MOTOR 1 ANGLE: ")
+    # print(motor1AngleTruth)
+    # print("MODULE-DETERMINED MOTOR 1 ANGLE: ")
+    # print(motor1AngleSim[-1])
+    #
+    # print("TRUE MOTOR 2 ANGLE: ")
+    # print(motor2AngleTruth)
+    # print("MODULE-DETERMINED MOTOR 2 ANGLE: ")
+    # print(motor2AngleSim[-1])
 
     # Check that the module-obtained motor angles match the determined truth values
     np.testing.assert_allclose(motor1AngleTruth, motor1AngleSim[-1], atol=accuracy, verbose=True)
@@ -145,87 +157,133 @@ def test_twoAxisGimbalController(show_plots, gimbalTipAngleRef, gimbalTiltAngleR
 # This function is used to convert the given gimbal tip and tilt angles to motor angles
 def gimbalToMotorAngles(gimbalTipAngle, gimbalTiltAngle, gimbal_to_motor_1_angle_table, gimbal_to_motor_2_angle_table):
     tableStepAngle = 0.5  # [deg]
+    motor1Angle = 0.0  # [deg]
+    motor2Angle = 0.0  # [deg]
 
     if gimbalTipAngle % tableStepAngle == 0 and gimbalTiltAngle % tableStepAngle == 0:  # Do not need to interpolate
-        gimbalAngle1 = pullMotorAngle(gimbalTipAngle, gimbalTiltAngle, gimbal_to_motor_1_angle_table)
-        gimbalAngle2 = pullMotorAngle(gimbalTipAngle, gimbalTiltAngle, gimbal_to_motor_2_angle_table)
-
+        motor1Angle = pullMotorAngle(gimbalTipAngle, gimbalTiltAngle, gimbal_to_motor_1_angle_table)
+        motor2Angle = pullMotorAngle(gimbalTipAngle, gimbalTiltAngle, gimbal_to_motor_2_angle_table)
     elif gimbalTipAngle % tableStepAngle == 0 or gimbalTiltAngle % tableStepAngle == 0:  # Linear interpolation required
         if gimbalTipAngle % tableStepAngle == 0:
-            # Find the upper and lower interpolation table angle bounds for motor 2
-            lowerMotor2Angle = tableStepAngle * math.floor(gimbalTiltAngle / tableStepAngle)
-            upperMotor2Angle = tableStepAngle * math.ceil(gimbalTiltAngle / tableStepAngle)
+            # Find the upper and lower interpolation table angle bounds for the gimbal tilt angle
+            lowerGimbalAngle = tableStepAngle * math.floor(gimbalTiltAngle / tableStepAngle)
+            upperGimbalAngle = tableStepAngle * math.ceil(gimbalTiltAngle / tableStepAngle)
 
-            # Linearly interpolate the gimbal tip angle
-            y1_tip = pullMotorAngle(gimbalTipAngle, lowerMotor2Angle, gimbal_to_motor_1_angle_table)
-            y2_tip = pullMotorAngle(gimbalTipAngle, upperMotor2Angle, gimbal_to_motor_1_angle_table)
-            gimbalAngle1 = linearInterpolation(lowerMotor2Angle, upperMotor2Angle, y1_tip, y2_tip, gimbalTiltAngle)
+            # Determine the bounding motor 1 angles
+            y1_m1 = pullMotorAngle(gimbalTipAngle, lowerGimbalAngle, gimbal_to_motor_1_angle_table)
+            y2_m1 = pullMotorAngle(gimbalTipAngle, upperGimbalAngle, gimbal_to_motor_1_angle_table)
 
-            # Linearly interpolate the gimbal tilt angle
-            y1_tilt = pullMotorAngle(gimbalTipAngle, lowerMotor2Angle, gimbal_to_motor_2_angle_table)
-            y2_tilt = pullMotorAngle(gimbalTipAngle, upperMotor2Angle, gimbal_to_motor_2_angle_table)
-            gimbalAngle2 = linearInterpolation(lowerMotor2Angle, upperMotor2Angle, y1_tilt, y2_tilt, gimbalTiltAngle)
+            # Determine the bounding motor 2 angles
+            y1_m2 = pullMotorAngle(gimbalTipAngle, lowerGimbalAngle, gimbal_to_motor_2_angle_table)
+            y2_m2 = pullMotorAngle(gimbalTipAngle, upperGimbalAngle, gimbal_to_motor_2_angle_table)
 
+            if (y1_m1 > 0.0 and y2_m1 > 0.0):  # 2/2 motor angles are valid
+                motor1Angle = linearInterpolation(lowerGimbalAngle, upperGimbalAngle, y1_m1, y2_m1, gimbalTiltAngle)
+                motor2Angle = linearInterpolation(lowerGimbalAngle, upperGimbalAngle, y1_m2, y2_m2, gimbalTiltAngle)
+            else:  # 1/2 motor angles are valid
+                if (y1_m1 < 0.0):
+                    motor1Angle = y2_m1
+                    motor2Angle = y2_m2
+                else:
+                    motor1Angle = y1_m1
+                    motor2Angle = y1_m2
         else:
-            # Find the upper and lower interpolation table angle bounds for motor 1
-            lowerMotor1Angle = tableStepAngle * math.floor(gimbalTipAngle / tableStepAngle)
-            upperMotor1Angle = tableStepAngle * math.ceil(gimbalTipAngle / tableStepAngle)
+            # Find the upper and lower interpolation table angle bounds for the gimbal tip angle
+            lowerGimbalAngle = tableStepAngle * math.floor(gimbalTipAngle / tableStepAngle)
+            upperGimbalAngle = tableStepAngle * math.ceil(gimbalTipAngle / tableStepAngle)
 
-            # Linearly interpolate the gimbal tip angle
-            y1_tip = pullMotorAngle(lowerMotor1Angle, gimbalTiltAngle, gimbal_to_motor_1_angle_table)
-            y2_tip = pullMotorAngle(upperMotor1Angle, gimbalTiltAngle, gimbal_to_motor_1_angle_table)
-            gimbalAngle1 = linearInterpolation(lowerMotor1Angle, upperMotor1Angle, y1_tip, y2_tip, gimbalTipAngle)
+            # Determine the bounding motor 1 angles
+            y1_m1 = pullMotorAngle(lowerGimbalAngle, gimbalTiltAngle, gimbal_to_motor_1_angle_table)
+            y2_m1 = pullMotorAngle(upperGimbalAngle, gimbalTiltAngle, gimbal_to_motor_1_angle_table)
 
-            # Linearly interpolate the gimbal tilt angle
-            y1_tilt = pullMotorAngle(lowerMotor1Angle, gimbalTiltAngle, gimbal_to_motor_2_angle_table)
-            y2_tilt = pullMotorAngle(upperMotor1Angle, gimbalTiltAngle, gimbal_to_motor_2_angle_table)
-            gimbalAngle2 = linearInterpolation(lowerMotor1Angle, upperMotor1Angle, y1_tilt, y2_tilt, gimbalTipAngle)
+            # Determine the bounding motor 2 angles
+            y1_m2 = pullMotorAngle(lowerGimbalAngle, gimbalTiltAngle, gimbal_to_motor_2_angle_table)
+            y2_m2 = pullMotorAngle(upperGimbalAngle, gimbalTiltAngle, gimbal_to_motor_2_angle_table)
 
+            if (y1_m1> 0.0 and y2_m1 > 0.0):  # 2/2 motor angles are valid
+                motor1Angle = linearInterpolation(lowerGimbalAngle, upperGimbalAngle, y1_m1, y2_m1, gimbalTipAngle)
+                motor2Angle = linearInterpolation(lowerGimbalAngle, upperGimbalAngle, y1_m2, y2_m2, gimbalTipAngle)
+            else:  # 1/2 motor angles are valid
+                if (y1_m1 < 0.0):
+                    motor1Angle = y2_m1
+                    motor2Angle = y2_m2
+                else:
+                    motor1Angle = y1_m1
+                    motor2Angle = y1_m2
     else:  # Bilinear interpolation required
-        # Find the upper and lower interpolation table angle bounds for motor1 and motor 2
-        lowerMotor1Angle = tableStepAngle * math.floor(gimbalTipAngle / tableStepAngle)
-        upperMotor1Angle = tableStepAngle * math.ceil(gimbalTipAngle / tableStepAngle)
-        lowerMotor2Angle = tableStepAngle * math.floor(gimbalTiltAngle / tableStepAngle)
-        upperMotor2Angle = tableStepAngle * math.ceil(gimbalTiltAngle / tableStepAngle)
+        # Find the upper and lower interpolation table angle bounds for the gimbal angles
+        lowerTipAngle = tableStepAngle * math.floor(gimbalTipAngle / tableStepAngle)
+        upperTipAngle = tableStepAngle * math.ceil(gimbalTipAngle / tableStepAngle)
+        lowerTiltAngle = tableStepAngle * math.floor(gimbalTiltAngle / tableStepAngle)
+        upperTiltAngle = tableStepAngle * math.ceil(gimbalTiltAngle / tableStepAngle)
 
-        # Bilinearly interpolate the gimbal tip angle
-        z11_tip = pullMotorAngle(lowerMotor1Angle, lowerMotor2Angle, gimbal_to_motor_1_angle_table)
-        z12_tip = pullMotorAngle(lowerMotor1Angle, upperMotor2Angle, gimbal_to_motor_1_angle_table)
-        z21_tip = pullMotorAngle(upperMotor1Angle, lowerMotor2Angle, gimbal_to_motor_1_angle_table)
-        z22_tip = pullMotorAngle(upperMotor1Angle, upperMotor2Angle, gimbal_to_motor_1_angle_table)
-        gimbalAngle1 = bilinearInterpolation(
-            lowerMotor1Angle,
-            upperMotor1Angle,
-            lowerMotor2Angle,
-            upperMotor2Angle,
-            z11_tip,
-            z12_tip,
-            z21_tip,
-            z22_tip,
-            gimbalTipAngle,
-            gimbalTiltAngle,
-        )
+        # Determine the bounding motor 1 angles
+        z11_m1 = pullMotorAngle(lowerTipAngle, lowerTiltAngle, gimbal_to_motor_1_angle_table)
+        z12_m1 = pullMotorAngle(upperTipAngle, lowerTiltAngle, gimbal_to_motor_1_angle_table)
+        z21_m1 = pullMotorAngle(lowerTipAngle, upperTiltAngle, gimbal_to_motor_1_angle_table)
+        z22_m1 = pullMotorAngle(upperTipAngle, upperTiltAngle, gimbal_to_motor_1_angle_table)
 
-        # Bilinearly interpolate the gimbal tilt angle
-        z11_tilt = pullMotorAngle(lowerMotor1Angle, lowerMotor2Angle, gimbal_to_motor_2_angle_table)
-        z12_tilt = pullMotorAngle(lowerMotor1Angle, upperMotor2Angle, gimbal_to_motor_2_angle_table)
-        z21_tilt = pullMotorAngle(upperMotor1Angle, lowerMotor2Angle, gimbal_to_motor_2_angle_table)
-        z22_tilt = pullMotorAngle(upperMotor1Angle, upperMotor2Angle, gimbal_to_motor_2_angle_table)
-        gimbalAngle2 = bilinearInterpolation(
-            lowerMotor1Angle,
-            upperMotor1Angle,
-            lowerMotor2Angle,
-            upperMotor2Angle,
-            z11_tilt,
-            z12_tilt,
-            z21_tilt,
-            z22_tilt,
-            gimbalTipAngle,
-            gimbalTiltAngle,
-        )
+        # Determine the bounding motor 2 angles
+        z11_m2 = pullMotorAngle(lowerTipAngle, lowerTiltAngle, gimbal_to_motor_2_angle_table)
+        z12_m2 = pullMotorAngle(upperTipAngle, lowerTiltAngle, gimbal_to_motor_2_angle_table)
+        z21_m2 = pullMotorAngle(lowerTipAngle, upperTiltAngle, gimbal_to_motor_2_angle_table)
+        z22_m2 = pullMotorAngle(upperTipAngle, upperTiltAngle, gimbal_to_motor_2_angle_table)
 
-    return gimbalAngle1, gimbalAngle2
+        if (z11_m1 > 0.0 and z12_m1 > 0.0 and z21_m1 > 0.0 and z22_m1 > 0.0):  # 4/4 motor angles are valid
+            motor1Angle = bilinearInterpolation(lowerTipAngle,
+                                                upperTipAngle,
+                                                lowerTiltAngle,
+                                                upperTiltAngle,
+                                                z11_m1,
+                                                z12_m1,
+                                                z21_m1,
+                                                z22_m1,
+                                                gimbalTipAngle,
+                                                gimbalTiltAngle)
+            motor2Angle = bilinearInterpolation(lowerTipAngle,
+                                                upperTipAngle,
+                                                lowerTiltAngle,
+                                                upperTiltAngle,
+                                                z11_m2,
+                                                z12_m2,
+                                                z21_m2,
+                                                z22_m2,
+                                                gimbalTipAngle,
+                                                gimbalTiltAngle)
+        elif (z11_m1 < 0.0 and z21_m1 < 0.0):
+            if (z12_m1 > 0.0 and z22_m1 > 0.0):  # 2/4 motor angles are valid
+                motor1Angle = linearInterpolation(lowerTiltAngle, upperTiltAngle, z12_m1, z22_m1, gimbalTiltAngle)
+                motor2Angle = linearInterpolation(lowerTiltAngle, upperTiltAngle, z12_m2, z22_m2, gimbalTiltAngle)
+            elif (z12_m1 < 0.0):  # 1/4 motor angles are valid
+                motor1Angle = pullMotorAngle(upperTipAngle, upperTiltAngle, gimbal_to_motor_1_angle_table)
+                motor2Angle = pullMotorAngle(upperTipAngle, upperTiltAngle, gimbal_to_motor_2_angle_table)
+            else:  # 1/4 motor angles are valid
+                motor1Angle = pullMotorAngle(upperTipAngle, lowerTiltAngle, gimbal_to_motor_1_angle_table)
+                motor2Angle = pullMotorAngle(upperTipAngle, lowerTiltAngle, gimbal_to_motor_2_angle_table)
+        elif (z12_m1 < 0.0 and z22_m1 < 0.0):  # 2/4 motor angles are valid
+            if (z11_m1 > 0.0 and z21_m1 > 0.0):
+                motor1Angle = linearInterpolation(lowerTiltAngle, upperTiltAngle, z11_m1, z21_m1, gimbalTiltAngle)
+                motor2Angle = linearInterpolation(lowerTiltAngle, upperTiltAngle, z11_m2, z21_m2, gimbalTiltAngle)
+            elif (z11_m1 < 0.0):  # 1/4 motor angles are valid
+                motor1Angle = pullMotorAngle(lowerTipAngle, upperTiltAngle, gimbal_to_motor_1_angle_table)
+                motor2Angle = pullMotorAngle(lowerTipAngle, upperTiltAngle, gimbal_to_motor_2_angle_table)
+            else:  # 1/4 motor angles are valid
+                motor1Angle = pullMotorAngle(lowerTipAngle, lowerTiltAngle, gimbal_to_motor_1_angle_table)
+                motor2Angle = pullMotorAngle(lowerTipAngle, lowerTiltAngle, gimbal_to_motor_2_angle_table)
+        elif (z11_m1 < 0.0):  # 3/4 motor angles are valid
+            motor1Angle = (z12_m1 + z21_m1 + z22_m1) / 3.0
+            motor2Angle = (z12_m2 + z21_m2 + z22_m2) / 3.0
+        elif (z12_m1 < 0.0):  # 3/4 motor angles are valid
+            motor1Angle = (z11_m1 + z21_m1 + z22_m1) / 3.0
+            motor2Angle = (z11_m2 + z21_m2 + z22_m2) / 3.0
+        elif (z21_m1 < 0.0):  # 3/4 motor angles are valid
+            motor1Angle = (z11_m1 + z12_m1 + z22_m1) / 3.0
+            motor2Angle = (z11_m2 + z12_m2 + z22_m2) / 3.0
+        elif (z22_m1 < 0.0):  # 3/4 motor angles are valid
+            motor1Angle = (z11_m1 + z12_m1 + z21_m1) / 3.0
+            motor2Angle = (z11_m2 + z12_m2 + z21_m2) / 3.0
 
+    return motor1Angle, motor2Angle
 
 # This function uses the given interpolation table and gimbal angles to pull the correct motor angle
 def pullMotorAngle(gimbalTipAngle, gimbalTiltAngle, lookup_table_data):
@@ -233,12 +291,15 @@ def pullMotorAngle(gimbalTipAngle, gimbalTiltAngle, lookup_table_data):
     gimbalTipAngleIdx = 40 + int(gimbalTipAngle / tableMotorStepAngle)
     gimbalTiltAngleIdx = 56 + int(gimbalTiltAngle / tableMotorStepAngle)
 
-    return lookup_table_data[gimbalTiltAngleIdx][gimbalTipAngleIdx]
+    motorAngle = lookup_table_data[gimbalTiltAngleIdx][gimbalTipAngleIdx]
 
+    if np.isnan(motorAngle):
+        return -1
+    else:
+        return motorAngle
 
 #  This function uses linear interpolation to solve for the value of an unknown function of a single variables f(x)
 #  at the point x.
-#  return: double
 #  param x1: Data point x1
 #  param x2: Data point x2
 #  param y1: Function value at point x1
@@ -250,7 +311,6 @@ def linearInterpolation(x1, x2, y1, y2, x):
 
 #  This function uses bilinear interpolation to solve for the value of an unknown function of two variables f(x,y)
 #  at the point (x,y).
-#  return: double
 #  param x1: Data point x1
 #  param x2: Data point x2
 #  param y1: Data point y1
@@ -273,11 +333,10 @@ def bilinearInterpolation(x1, x2, y1, y2, z11, z12, z21, z22, x, y):
             )
     )
 
-
 if __name__ == "__main__":
     test_twoAxisGimbalController(
         True,  # show_plots
-        0.5 * macros.D2R,  # [rad] gimbalTipAngleRef
-        0.5 * macros.D2R,  # [rad] gimbalTiltAngleRef
+        14.6 * macros.D2R,  # [rad] gimbalTipAngleRef
+        -5.4 * macros.D2R,  # [rad] gimbalTiltAngleRef
         1e-4,  # accuracy
     )

@@ -18,99 +18,47 @@
  */
 
 #include "twoAxisGimbalController.h"
-#include "architecture/utilities/avsEigenSupport.h"
 #include "architecture/utilities/linearInterpolation.hpp"
 #include "architecture/utilities/bilinearInterpolation.hpp"
 #include "architecture/utilities/rigidBodyKinematics.hpp"
-#include "architecture/utilities/macroDefinitions.h"
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <iostream>
+#include <utility>
 
-/*! This method initializes the output messages for this module.
+/*! Module constructor. The path to the interpolation table data files must be specified.
  @return void
- @param this The configuration data associated with this module
- @param moduleID The module identifier
- */
+ @param pathToMotor1Table String for the gimbal-to-motor 1 angle file absolute path
+ @param pathToMotor2Table String for the gimbal-to-motor 1 angle file absolute path
+*/
 TwoAxisGimbalController::TwoAxisGimbalController(std::string pathToMotor1Table, std::string pathToMotor2Table) {
-    // Read the gimbal-to-motor 1 angle data file
-    std::ifstream file(pathToMotor1Table);
-    if (!file.is_open()) {
-        _bskLog(this->bskLogger, BSK_ERROR, "Gimbal-to-motor 1 angle interpolation table was not found.");
-    }
-    std::string line;
-    int row = -1;
-    while (getline(file, line) && row < 111) {
-        std::stringstream ss(line);
-        std::string cell;
-        int col = 0;
-        while (getline(ss, cell, ',') && col < 80) {
-            if (row >= 0) {
-                if (cell == "" || cell == " ") {
-                    cell = "-1";
-                    std::cout<< cell << std::endl;
-                    this->gimbal_to_motor_1_angle[row][col] = -1;
-                }
-                else {
-                    std::cout<< cell << std::endl;
-                    this->gimbal_to_motor_1_angle[row][col] = DEG2RAD * stod(cell);
-                }
-
-            }
-            col++;
-        }
-        row++;
-    }
-    file.close();
-
-    // Read the gimbal-to-motor 2 angle data file
-    std::ifstream file2(pathToMotor2Table);
-    if (!file2.is_open()) {
-        _bskLog(this->bskLogger, BSK_ERROR, "Gimbal-to-motor 2 angle interpolation table was not found.");
-    }
-    row = -1;
-    while (getline(file2, line) && row < 111) {
-        std::stringstream ss(line);
-        std::string cell;
-        int col = 0;
-        while (getline(ss, cell, ',') && col < 80) {
-            if (row >= 0) {
-                if (cell == "") {
-                    cell = "-1";
-                }
-                this->gimbal_to_motor_2_angle[row][col] = DEG2RAD * stod(cell);
-            }
-            col++;
-        }
-        row++;
-    }
-    file2.close();
+    // Read the gimbal-to-motor angle lookup tables
+    this->loadGimbalToMotor1AngleLookupTable(std::move(pathToMotor1Table));
+    this->loadGimbalToMotor2AngleLookupTable(std::move(pathToMotor2Table));
 }
 
-
-/*! This method performs a complete reset of the module. The input messages are checked to ensure they are linked.
+/*! This method checks the input messages to ensure they are linked. This method also resets module parameters to their
+default values.
  @return void
- @param this The configuration data associated with the module
  @param callTime [ns] Time the method is called
- @param moduleID The module identifier
 */
-
 void TwoAxisGimbalController::Reset(uint64_t callTime) {
     if (!this->twoAxisGimbalInMsg.isLinked()) {
         _bskLog(this->bskLogger, BSK_ERROR, "twoAxisGimbalController.twoAxisGimbalInMsg wasn't connected.");
     }
+
+    this->motor1Angle = 0.0;
+    this->motor2Angle = 0.0;
 }
 
-/*! This method recieves the desired tip and tilt angles and outputs the motor angles.
-The desired gimbal angles are then written to the output message to find the corresponding motor angles from the lookup table.
+/*! This method determines the stepper motor angles corresponding to the given gimbal tip and tilt angles. The motor
+angles are then written to the module output message.
  @return void
  @param callTime [ns] The current time of simulation
 */
 void TwoAxisGimbalController::UpdateState(uint64_t callTime) {
-
     // Read the input messages
-    TwoAxisGimbalMsgPayload twoAxisGimbalIn = TwoAxisGimbalMsgPayload();
+    auto twoAxisGimbalIn = TwoAxisGimbalMsgPayload();
     if (this->twoAxisGimbalInMsg.isWritten()) {
         twoAxisGimbalIn = this->twoAxisGimbalInMsg();
         this->gimbalTipAngleRef = twoAxisGimbalIn.theta1;
@@ -121,8 +69,8 @@ void TwoAxisGimbalController::UpdateState(uint64_t callTime) {
     this->gimbalAnglesToMotorAngles();
 
     // Write the module output messages
-    HingedRigidBodyMsgPayload motor1AngleOut = HingedRigidBodyMsgPayload();
-    HingedRigidBodyMsgPayload motor2AngleOut = HingedRigidBodyMsgPayload();
+    auto motor1AngleOut = HingedRigidBodyMsgPayload();
+    auto motor2AngleOut = HingedRigidBodyMsgPayload();
     motor1AngleOut.theta = this->motor1Angle;
     motor2AngleOut.theta = this->motor2Angle;
     this->motor1AngleOutMsg.write(&motor1AngleOut, moduleID, callTime);
@@ -136,8 +84,14 @@ void TwoAxisGimbalController::gimbalAnglesToMotorAngles() {
     if (this->bilinearInterpolationRequired()) {
         this->bilinearlyInterpolateMotorAngles();
     } else if (this->noInterpolationRequired()) {
-        this->motor1Angle = this->pullMotor1Angle(this->gimbalTipAngleRef, this->gimbalTiltAngleRef);
-        this->motor2Angle = this->pullMotor2Angle(this->gimbalTipAngleRef, this->gimbalTiltAngleRef);
+        this->motor1Angle = this->pullMotor1Angle(this->gimbalTipAngleRef,
+                                                  this->gimbalTiltAngleRef);
+        this->motor2Angle = this->pullMotor2Angle(this->gimbalTipAngleRef,
+                                                  this->gimbalTiltAngleRef);
+
+        // Check that a valid gimbal attitude was requested
+        assert(!(this->motor1Angle < 0.0 && this->motor2Angle < 0.0));
+
     } else if (this->linearInterpolationRequired(this->gimbalTipAngleRef)) {
         this->linearlyInterpolateMotorAnglesTipAngleFixed();
     } else {
@@ -145,16 +99,16 @@ void TwoAxisGimbalController::gimbalAnglesToMotorAngles() {
     }
 }
 
-/*! This method determines if bilinear interpolation is required to obtain the gimbal angles.
+/*! This method determines if bilinear interpolation is required to obtain the motor angles.
  @return bool
 */
 bool TwoAxisGimbalController::bilinearInterpolationRequired() {
-    int compare1a = this->gimbalTipAngleRef / this->tableStepAngle;
-    double compare2a = this->gimbalTipAngleRef / this->tableStepAngle;
+    int compare1a = abs(this->gimbalTipAngleRef / this->tableStepAngle);
+    double compare2a = abs(this->gimbalTipAngleRef / this->tableStepAngle);
     double compare3a = compare2a - compare1a;
 
-    int compare1b = this->gimbalTiltAngleRef / this->tableStepAngle;
-    double compare2b = this->gimbalTiltAngleRef / this->tableStepAngle;
+    int compare1b = abs(this->gimbalTiltAngleRef / this->tableStepAngle);
+    double compare2b = abs(this->gimbalTiltAngleRef / this->tableStepAngle);
     double compare3b = compare2b - compare1b;
 
     return (!(compare3a < 1e-10) && !(compare3b < 1e-10));
@@ -162,10 +116,11 @@ bool TwoAxisGimbalController::bilinearInterpolationRequired() {
 
 /*! This method determines if linear interpolation is required to obtain the motor angles.
  @return bool
+ @param gimbalAngle [rad] gimbal angle
 */
 bool TwoAxisGimbalController::linearInterpolationRequired(double gimbalAngle) {
-    int compare1 = gimbalAngle / this->tableStepAngle;
-    double compare2 = gimbalAngle / this->tableStepAngle;
+    int compare1 = abs(gimbalAngle / this->tableStepAngle);
+    double compare2 = abs(gimbalAngle / this->tableStepAngle);
     double compare3 = compare2 - compare1;
 
     return (compare3 < 1e-10);
@@ -175,17 +130,22 @@ bool TwoAxisGimbalController::linearInterpolationRequired(double gimbalAngle) {
  @return bool
 */
 bool TwoAxisGimbalController::noInterpolationRequired() {
-    int compare1a = this->gimbalTipAngleRef / this->tableStepAngle;
-    double compare2a = this->gimbalTipAngleRef / this->tableStepAngle;
+    int compare1a = abs(this->gimbalTipAngleRef / this->tableStepAngle);
+    double compare2a = abs(this->gimbalTipAngleRef / this->tableStepAngle);
     double compare3a = compare2a - compare1a;
 
-    int compare1b = this->gimbalTiltAngleRef / this->tableStepAngle;
-    double compare2b = this->gimbalTiltAngleRef / this->tableStepAngle;
+    int compare1b = abs(this->gimbalTiltAngleRef / this->tableStepAngle);
+    double compare2b = abs(this->gimbalTiltAngleRef / this->tableStepAngle);
     double compare3b = compare2b - compare1b;
 
     return (compare3a < 1e-10 && compare3b < 1e-10);
 }
 
+/*! This method calls the bilinear interpolation function to interpolate the motor angles from the gimbal angles.
+The case where the gimbal angles are at the edge of the interpolation table is checked and the helper method
+computeTableEdgeCase() is called to determine the appropriate motor angles.
+ @return void
+*/
 void TwoAxisGimbalController::bilinearlyInterpolateMotorAngles() {
     // Find the upper and lower interpolation table angle bounds for the gimbal angles
     double lowerTipAngle = this->tableStepAngle * floor(this->gimbalTipAngleRef / this->tableStepAngle);
@@ -193,11 +153,20 @@ void TwoAxisGimbalController::bilinearlyInterpolateMotorAngles() {
     double lowerTiltAngle = this->tableStepAngle * floor(this->gimbalTiltAngleRef / this->tableStepAngle);
     double upperTiltAngle = this->tableStepAngle * ceil(this->gimbalTiltAngleRef / this->tableStepAngle);
 
-    // Bilinearly interpolate the motor 1 angle
+    // Determine the bounding motor 1 angles
     double z11_m1 = this->pullMotor1Angle(lowerTipAngle, lowerTiltAngle);
-    double z12_m1 = this->pullMotor1Angle(lowerTipAngle, upperTiltAngle);
-    double z21_m1 = this->pullMotor1Angle(upperTipAngle, lowerTiltAngle);
+    double z12_m1 = this->pullMotor1Angle(upperTipAngle, lowerTiltAngle);
+    double z21_m1 = this->pullMotor1Angle(lowerTipAngle, upperTiltAngle);
     double z22_m1 = this->pullMotor1Angle(upperTipAngle, upperTiltAngle);
+
+    // Determine the bounding motor 2 angles
+    double z11_m2 = this->pullMotor2Angle(lowerTipAngle, lowerTiltAngle);
+    double z12_m2 = this->pullMotor2Angle(upperTipAngle, lowerTiltAngle);
+    double z21_m2 = this->pullMotor2Angle(lowerTipAngle, upperTiltAngle);
+    double z22_m2 = this->pullMotor2Angle(upperTipAngle, upperTiltAngle);
+
+    // Check that a valid gimbal attitude was requested
+    assert (!(z11_m1 < 0.0 && z12_m1 < 0.0 && z21_m1 < 0.0 && z22_m1 < 0.0));
 
     if (z11_m1 > 0.0 && z12_m1 > 0.0 && z21_m1 > 0.0 && z22_m1 > 0.0) {
         this->motor1Angle = bilinearInterpolation(lowerTipAngle,
@@ -210,39 +179,7 @@ void TwoAxisGimbalController::bilinearlyInterpolateMotorAngles() {
                                                   z22_m1,
                                                   this->gimbalTipAngleRef,
                                                   this->gimbalTiltAngleRef);
-    } else if (z11_m1 < 0.0 && z21_m1 < 0.0) {
-        if (z12_m1 > 0.0 && z22_m1 > 0.0) {
-            this->motor1Angle = linearInterpolation(lowerTiltAngle, upperTiltAngle, z12_m1, z22_m1, this->gimbalTiltAngleRef);
-        } else if (z12_m1 < 0.0) {
-            this->motor1Angle = this->pullMotor1Angle(upperTipAngle, upperTiltAngle);
-        } else {
-            this->motor1Angle = this->pullMotor1Angle(lowerTipAngle, upperTiltAngle);
-        }
-    } else if (z12_m1 < 0.0 && z22_m1 < 0.0) {
-        if (z11_m1 > 0.0 && z21_m1 > 0.0) {
-            this->motor1Angle = linearInterpolation(lowerTiltAngle, upperTiltAngle, z11_m1, z21_m1, this->gimbalTiltAngleRef);
-        } else if (z11_m1 < 0.0) {
-            this->motor1Angle = this->pullMotor1Angle(upperTipAngle, lowerTiltAngle);
-        } else {
-            this->motor1Angle = this->pullMotor1Angle(lowerTipAngle, lowerTiltAngle);
-        }
-    } else if (z11_m1 < 0.0) {
-        this->motor1Angle = this->trilinearInterpolation(z12_m1, z21_m1, z22_m1);
-    } else if (z12_m1 < 0.0) {
-        this->motor1Angle = this->trilinearInterpolation(z11_m1, z21_m1, z22_m1);
-    } else if (z21_m1 < 0.0) {
-        this->motor1Angle = this->trilinearInterpolation(z11_m1, z12_m1, z22_m1);
-    } else if (z22_m1 < 0.0) {
-        this->motor1Angle = this->trilinearInterpolation(z11_m1, z12_m1, z21_m1);
-    }
 
-    // Bilinearly interpolate the motor 2 angle
-    double z11_m2 = this->pullMotor2Angle(lowerTipAngle, lowerTiltAngle);
-    double z12_m2 = this->pullMotor2Angle(lowerTipAngle, upperTiltAngle);
-    double z21_m2 = this->pullMotor2Angle(upperTipAngle, lowerTiltAngle);
-    double z22_m2 = this->pullMotor2Angle(upperTipAngle, upperTiltAngle);
-
-    if (z11_m2 > 0.0 && z12_m2 > 0.0 && z21_m2 > 0.0 && z22_m2 > 0.0) {
         this->motor2Angle = bilinearInterpolation(lowerTipAngle,
                                                   upperTipAngle,
                                                   lowerTiltAngle,
@@ -253,67 +190,189 @@ void TwoAxisGimbalController::bilinearlyInterpolateMotorAngles() {
                                                   z22_m2,
                                                   this->gimbalTipAngleRef,
                                                   this->gimbalTiltAngleRef);
-    } else if (z11_m2 < 0.0 && z21_m2 < 0.0) {
-        if (z12_m2 > 0.0 && z22_m2 > 0.0) {
-            this->motor2Angle = linearInterpolation(lowerTiltAngle, upperTiltAngle, z12_m2, z22_m2, this->gimbalTiltAngleRef);
-        } else if (z12_m2 < 0.0) {
-            this->pullMotor2Angle(upperTipAngle, upperTiltAngle);
-        } else {
-            this->pullMotor2Angle(lowerTipAngle, upperTiltAngle);
-        }
-    } else if (z12_m2 < 0.0 && z22_m2 < 0.0) {
-        if (z11_m2 > 0.0 && z21_m2 > 0.0) {
-            this->motor2Angle = linearInterpolation(lowerTiltAngle, upperTiltAngle, z11_m2, z21_m2, this->gimbalTiltAngleRef);
-        } else if (z11_m2 < 0.0) {
-            this->pullMotor2Angle(upperTipAngle, lowerTiltAngle);
-        } else {
-            this->pullMotor2Angle(lowerTipAngle, lowerTiltAngle);
-        }
-    } else if (z11_m2 < 0.0) {
-        this->motor2Angle = this->trilinearInterpolation(z12_m2, z21_m2, z22_m2);
-    } else if (z12_m2 < 0.0) {
-        this->motor2Angle = this->trilinearInterpolation(z11_m2, z21_m2, z22_m2);
-    } else if (z21_m2 < 0.0) {
-        this->motor2Angle = this->trilinearInterpolation(z11_m2, z12_m2, z22_m2);
-    } else if (z22_m2 < 0.0) {
-        this->motor2Angle = this->trilinearInterpolation(z11_m2, z12_m2, z21_m2);
+    } else {
+        this->computeTableEdgeCase(lowerTipAngle,
+                                   upperTipAngle,
+                                   lowerTiltAngle,
+                                   upperTiltAngle,
+                                   z11_m1,
+                                   z12_m1,
+                                   z21_m1,
+                                   z22_m1,
+                                   z11_m2,
+                                   z12_m2,
+                                   z21_m2,
+                                   z22_m2);
     }
 }
 
-double TwoAxisGimbalController::trilinearInterpolation(double z1, double z2, double z3) {
-    return (z1 + z2 + z3) / 3;
+/*! Method used to determine the motor angles at the bounding outside edges of the interpolation table.
+If 3/4 motor angles are valid, a 3D triangle centroid method is used to determine the motor angle
+If 2/4 motor angles are valid, linear interpolation is used to determine the motor angle
+If 1/4 motor angles are valid, the motor angle is directly pulled as the valid value
+ @return void
+ @param lowerTipAngle [rad] Lower bounding gimbal tip angle
+ @param upperTipAngle [rad] Upper bounding gimbal tip angle
+ @param lowerTiltAngle [rad] Lower bounding gimbal tilt angle
+ @param upperTiltAngle [rad] Upper bounding gimbal tilt angle
+ @param z11_m1 [rad] Bounding motor 1 angle corresponding to (lowerTipAngle, lowerTiltAngle)
+ @param z12_m1 [rad] Bounding motor 1 angle corresponding to (lowerTipAngle, upperTiltAngle)
+ @param z21_m1 [rad] Bounding motor 1 angle corresponding to (upperTipAngle, lowerTiltAngle)
+ @param z22_m1 [rad] Bounding motor 1 angle corresponding to (upperTipAngle, upperTiltAngle)
+ @param z11_m2 [rad] Bounding motor 2 angle corresponding to (lowerTipAngle, lowerTiltAngle)
+ @param z12_m2 [rad] Bounding motor 2 angle corresponding to (lowerTipAngle, upperTiltAngle)
+ @param z21_m2 [rad] Bounding motor 2 angle corresponding to (upperTipAngle, lowerTiltAngle)
+ @param z22_m2 [rad] Bounding motor 2 angle corresponding to (upperTipAngle, upperTiltAngle)
+*/
+void TwoAxisGimbalController::computeTableEdgeCase(double lowerTipAngle,
+                                                   double upperTipAngle,
+                                                   double lowerTiltAngle,
+                                                   double upperTiltAngle,
+                                                   double z11_m1,
+                                                   double z12_m1,
+                                                   double z21_m1,
+                                                   double z22_m1,
+                                                   double z11_m2,
+                                                   double z12_m2,
+                                                   double z21_m2,
+                                                   double z22_m2) {
+   if (z11_m1 < 0.0 && z21_m1 < 0.0) {  // 2/4 motor angles are valid
+        if (z12_m1 > 0.0 && z22_m1 > 0.0) {
+            this->motor1Angle = linearInterpolation(lowerTiltAngle,
+                                                    upperTiltAngle,
+                                                    z12_m1,
+                                                    z22_m1,
+                                                    this->gimbalTiltAngleRef);
+            this->motor2Angle = linearInterpolation(lowerTiltAngle,
+                                                    upperTiltAngle,
+                                                    z12_m2,
+                                                    z22_m2,
+                                                    this->gimbalTiltAngleRef);
+        } else if (z12_m1 < 0.0) {  // 1/4 motor angels are valid
+            this->motor1Angle = this->pullMotor1Angle(upperTipAngle, upperTiltAngle);
+            this->motor2Angle = this->pullMotor2Angle(upperTipAngle, upperTiltAngle);
+        } else {  // 1/4 motor angels are valid
+            this->motor1Angle = this->pullMotor1Angle(upperTipAngle, lowerTiltAngle);
+            this->motor2Angle = this->pullMotor2Angle(upperTipAngle, lowerTiltAngle);
+        }
+    } else if (z12_m1 < 0.0 && z22_m1 < 0.0) {  // 2/4 motor angles are valid
+        if (z11_m1 > 0.0 && z21_m1 > 0.0) {
+            this->motor1Angle = linearInterpolation(lowerTiltAngle,
+                                                    upperTiltAngle,
+                                                    z11_m1, z21_m1,
+                                                    this->gimbalTiltAngleRef);
+            this->motor2Angle = linearInterpolation(lowerTiltAngle,
+                                                    upperTiltAngle,
+                                                    z11_m2, z21_m2,
+                                                    this->gimbalTiltAngleRef);
+        } else if (z11_m1 < 0.0) {  // 1/4 motor angels are valid
+            this->motor1Angle = this->pullMotor1Angle(lowerTipAngle, upperTiltAngle);
+            this->motor2Angle = this->pullMotor2Angle(lowerTipAngle, upperTiltAngle);
+        } else {  // 1/4 motor angels are valid
+            this->motor1Angle = this->pullMotor1Angle(lowerTipAngle, lowerTiltAngle);
+            this->motor2Angle = this->pullMotor2Angle(lowerTipAngle, lowerTiltAngle);
+        }
+    } else if (z11_m1 < 0.0) {  // 3/4 motor angles are valid: use 3d triangle centroid method
+        this->motor1Angle = (z12_m1 + z21_m1 + z22_m1) / 3.0;
+        this->motor2Angle = (z12_m2 + z21_m2 + z22_m2) / 3.0;
+    } else if (z12_m1 < 0.0) {
+        this->motor1Angle = (z11_m1 + z21_m1 + z22_m1) / 3.0;
+        this->motor2Angle = (z11_m2 + z21_m2 + z22_m2) / 3.0;
+    } else if (z21_m1 < 0.0) {
+        this->motor1Angle = (z11_m1 + z12_m1 + z22_m1) / 3.0;
+        this->motor2Angle = (z11_m2 + z12_m2 + z22_m2) / 3.0;
+    } else if (z22_m1 < 0.0) {
+        this->motor1Angle = (z11_m1 + z12_m1 + z21_m1) / 3.0;
+        this->motor2Angle = (z11_m2 + z12_m2 + z21_m2) / 3.0;
+    }
+
 }
 
+/*! This method calls the linear interpolation function to interpolate the gimbal angles to motor angles using a fixed gimbal tip angle and bounded gimbal tilt angle.
+The case where the gimbal angles are at the edge of the interpolation table is checked in this method and the appropriate motor angles are returned for this case.
+If 2/2 motor angles are valid, linear interpolation is used to determine the motor angle
+If 1/2 motor angles are valid, the motor angle is directly pulled as the valid value
+ @return void
+*/
 void TwoAxisGimbalController::linearlyInterpolateMotorAnglesTipAngleFixed() {
     // Find the upper and lower interpolation table angle bounds for the bounded gimbal angle
     double lowerGimbalAngle = this->tableStepAngle * floor(this->gimbalTiltAngleRef / this->tableStepAngle);
     double upperGimbalAngle = this->tableStepAngle * ceil(this->gimbalTiltAngleRef / this->tableStepAngle);
 
-    // Linearly interpolate the motor 1 angle
+    // Determine the bounding motor 1 angles
     double y1_m1 = this->pullMotor1Angle(this->gimbalTipAngleRef, lowerGimbalAngle);
     double y2_m1 = this->pullMotor1Angle(this->gimbalTipAngleRef, upperGimbalAngle);
-    this->motor1Angle = linearInterpolation(lowerGimbalAngle, upperGimbalAngle, y1_m1, y2_m1, this->gimbalTiltAngleRef);
 
-    // Linearly interpolate the motor 2
+    // Determine the bounding motor 2 angles
     double y1_m2 = this->pullMotor2Angle(this->gimbalTipAngleRef, lowerGimbalAngle);
     double y2_m2 = this->pullMotor2Angle(this->gimbalTipAngleRef, upperGimbalAngle);
-    this->motor2Angle = linearInterpolation(lowerGimbalAngle, upperGimbalAngle, y1_m2, y2_m2, this->gimbalTiltAngleRef);
+
+    // Check that a valid gimbal attitude was requested
+    assert (!(y1_m1 < 0.0 && y2_m1 < 0.0));
+
+    // Linearly interpolate the motor angles if not on the edge of the interpolation table
+    if (y1_m1 > 0.0 && y2_m1 > 0.0) {
+        this->motor1Angle = linearInterpolation(lowerGimbalAngle,
+                                                upperGimbalAngle,
+                                                y1_m1,
+                                                y2_m1,
+                                                this->gimbalTiltAngleRef);
+        this->motor2Angle = linearInterpolation(lowerGimbalAngle,
+                                                upperGimbalAngle,
+                                                y1_m2,
+                                                y2_m2,
+                                                this->gimbalTiltAngleRef);
+    } else {
+        if (y1_m1 < 0.0) {
+            this->motor1Angle = y2_m1;
+            this->motor2Angle = y2_m2;
+        } else {
+            this->motor1Angle = y1_m1;
+            this->motor2Angle = y1_m2;
+        }
+    }
 }
 
+/*! This method calls the linear interpolation function to interpolate the gimbal angles to motor angles using a fixed gimbal tilt angle and bounded gimbal tip angle.
+The case where the gimbal angles are at the edge of the interpolation table is checked in this method and the appropriate motor angles are returned for this case.
+If 2/2 motor angles are valid, linear interpolation is used to determine the motor angle
+If 1/2 motor angles are valid, the motor angle is directly pulled as the valid value
+ @return void
+*/
 void TwoAxisGimbalController::linearlyInterpolateMotorAnglesTiltAngleFixed() {
     // Find the upper and lower interpolation table angle bounds for the bounded gimbal angle
     double lowerGimbalAngle = this->tableStepAngle * floor(this->gimbalTipAngleRef / this->tableStepAngle);
     double upperGimbalAngle = this->tableStepAngle * ceil(this->gimbalTipAngleRef / this->tableStepAngle);
 
-    // Linearly interpolate the motor 1 angle
+    // Determine the bounding motor 1 angles
     double y1_m1 = this->pullMotor1Angle(lowerGimbalAngle, this->gimbalTiltAngleRef);
     double y2_m1 = this->pullMotor1Angle(upperGimbalAngle, this->gimbalTiltAngleRef);
-    this->motor1Angle = linearInterpolation(lowerGimbalAngle, upperGimbalAngle, y1_m1, y2_m1, this->gimbalTipAngleRef);
 
-    // Linearly interpolate the motor 2 angle
+    // Determine the bounding motor 2 angles
     double y1_m2 = this->pullMotor2Angle(lowerGimbalAngle, this->gimbalTiltAngleRef);
     double y2_m2 = this->pullMotor2Angle(upperGimbalAngle, this->gimbalTiltAngleRef);
-    this->motor2Angle = linearInterpolation(lowerGimbalAngle, upperGimbalAngle, y1_m2, y2_m2, this->gimbalTipAngleRef);
+
+    // Linearly interpolate the motor angles if not on the edge of the interpolation table
+    if (y1_m1 > 0.0 && y2_m1 > 0.0) {
+        this->motor1Angle = linearInterpolation(lowerGimbalAngle,
+                                                upperGimbalAngle,
+                                                y1_m1,
+                                                y2_m1,
+                                                this->gimbalTipAngleRef);
+        this->motor2Angle = linearInterpolation(lowerGimbalAngle,
+                                                upperGimbalAngle,
+                                                y1_m2,
+                                                y2_m2,
+                                                this->gimbalTipAngleRef);
+    } else {
+        if (y1_m1 < 0.0) {
+            this->motor1Angle = y2_m1;
+            this->motor2Angle = y2_m2;
+        } else {
+            this->motor1Angle = y1_m1;
+            this->motor2Angle = y1_m2;
+        }
+    }
 }
 
 /*! This method pulls a specific motor 1 angle from the motor 1 interpolation table given specific gimbal angles.
@@ -321,9 +380,10 @@ void TwoAxisGimbalController::linearlyInterpolateMotorAnglesTiltAngleFixed() {
  @param gimbalTipAngle [rad] Gimbal tip angle
  @param gimbalTiltAngle [rad] Gimbal tilt angle
 */
-double TwoAxisGimbalController::pullMotor1Angle(double gimbalTipAngle, double gimbalTiltAngle) {
+double TwoAxisGimbalController::pullMotor1Angle(double gimbalTipAngle, double gimbalTiltAngle) const {
     int gimbalTipIdx = 40 + gimbalTipAngle / this->tableStepAngle;
     int gimbalTiltIdx = 56 + gimbalTiltAngle / this->tableStepAngle;
+
     return this->gimbal_to_motor_1_angle[gimbalTiltIdx][gimbalTipIdx];
 }
 
@@ -332,9 +392,10 @@ double TwoAxisGimbalController::pullMotor1Angle(double gimbalTipAngle, double gi
  @param gimbalTipAngle [rad] Gimbal tip angle
  @param gimbalTiltAngle [rad] Gimbal tilt angle
 */
-double TwoAxisGimbalController::pullMotor2Angle(double gimbalTipAngle, double gimbalTiltAngle) {
+double TwoAxisGimbalController::pullMotor2Angle(double gimbalTipAngle, double gimbalTiltAngle) const {
     int gimbalTipIdx = 40 + gimbalTipAngle / this->tableStepAngle;
     int gimbalTiltIdx = 56 + gimbalTiltAngle / this->tableStepAngle;
+
     return this->gimbal_to_motor_2_angle[gimbalTiltIdx][gimbalTipIdx];
 }
 
@@ -349,13 +410,13 @@ void TwoAxisGimbalController::loadGimbalToMotor1AngleLookupTable(std::string pat
     }
     std::string line;
     int row = -1;
-    while (getline(file, line) && row < 111) {
+    while (getline(file, line) && row < 110) {
         std::stringstream ss(line);
         std::string cell;
         int col = 0;
         while (getline(ss, cell, ',') && col < 80) {
             if (row >= 0) {
-                if (cell == "") {
+                if (cell.empty()) {
                     cell = "-1";
                 }
                 this->gimbal_to_motor_1_angle[row][col] = DEG2RAD * stod(cell);
@@ -378,13 +439,13 @@ void TwoAxisGimbalController::loadGimbalToMotor2AngleLookupTable(std::string pat
     }
     std::string line;
     int row = -1;
-    while (getline(file, line) && row < 111) {
+    while (getline(file, line) && row < 110) {
         std::stringstream ss(line);
         std::string cell;
         int col = 0;
         while (getline(ss, cell, ',') && col < 80) {
             if (row >= 0) {
-                if (cell == "") {
+                if (cell.empty()) {
                     cell = "-1";
                 }
                 this->gimbal_to_motor_2_angle[row][col] = DEG2RAD * stod(cell);

@@ -46,18 +46,29 @@ public:
 
 private:
 
-    void gimbalAnglesToMotorAngles();
-    bool bilinearInterpolationRequired();
-    void bilinearlyInterpolateMotorAngles();
-    bool noInterpolationRequired();
-    bool linearInterpolationRequired(double gimbalAngle);
-    void linearlyInterpolateMotorAnglesTipAngleFixed();
-    void linearlyInterpolateMotorAnglesTiltAngleFixed();
+    void gimbalAnglesToMotorAngles();                                                            //!< Method to determine the stepper motor angles given the gimbal sequential tip and tilt angles
+    bool bilinearInterpolationRequired();                                                        //!< Method to determine if bilinear interpolation is required to obtain the motor angles
+    bool linearInterpolationRequired(double gimbalAngle);                                        //!< Method to determine if linear interpolation is required to obtain the motor angles
+    bool noInterpolationRequired();                                                              //!< Method to determine if no interpolation is required to obtain the motor angles
+    void bilinearlyInterpolateMotorAngles();                                                     //!< Method to call the bilinear interpolation function to interpolate the motor angles from the gimbal angles
+    void computeTableEdgeCase(double lowerTipAngle,
+                              double upperTipAngle,
+                              double lowerTiltAngle,
+                              double upperTiltAngle,
+                              double z11_m1,
+                              double z12_m1,
+                              double z21_m1,
+                              double z22_m1,
+                              double z11_m2,
+                              double z12_m2,
+                              double z21_m2,
+                              double z22_m2);                                                   //!< Method to determine the motor angles at the bounding outside edges of the interpolation table
+    void linearlyInterpolateMotorAnglesTipAngleFixed();                                         //!< Method to call the linear interpolation function using a fixed gimbal tip angle and bounded gimbal tilt angle
+    void linearlyInterpolateMotorAnglesTiltAngleFixed();                                        //!< Method to call the linear interpolation function using a fixed gimbal tilt angle and bounded gimbal tip angle
     double pullMotor1Angle(double gimbalTipAngle,
-                           double gimbalTiltAngle);                                              //!< Method used to pull a specific motor 1 angle from the motor 1 interpolation table given specific gimbal angles
+                           double gimbalTiltAngle) const;                                        //!< Method used to pull a specific motor 1 angle from the motor 1 interpolation table given specific gimbal angles
     double pullMotor2Angle(double gimbalTipAngle,
-                           double gimbalTiltAngle);                                              //!< Method used to pull a specific motor 2 angle from the motor 2 interpolation table given specific gimbal angles
-    double trilinearInterpolation(double z1, double z2, double z3);
+                           double gimbalTiltAngle) const;                                        //!< Method used to pull a specific motor 2 angle from the motor 2 interpolation table given specific gimbal angles
 
     /* Gimbal parameters */
     double gimbalTipAngleRef{};                                                                  //!< [rad] Gimbal tip reference angle
