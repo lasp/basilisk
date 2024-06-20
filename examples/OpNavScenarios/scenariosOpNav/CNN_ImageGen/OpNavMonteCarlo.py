@@ -127,54 +127,50 @@ def run(show_plots):
             except FileNotFoundError:
                 print("File not found, ",  i)
                 continue
-        csvfile = open(dirName + "/run" + str(i) + "/data.csv", 'w')
-        writer = csv.writer(csvfile)
-        writer.writerow(['Filename', 'Valid', 'X_p', 'Y_p', 'rho_p', 'r_BN_N_1', 'r_BN_N_2', 'r_BN_N_3'])
+            csvfile = open(dirName + "/run" + str(i) + "/data.csv", 'w')
+            writer = csv.writer(csvfile)
+            writer.writerow(['Filename', 'Valid', 'X_p', 'Y_p', 'rho_p', 'r_BN_N_1', 'r_BN_N_2', 'r_BN_N_3'])
 
-        timeAxis = monteCarloData["messages"][retainedMessageName1 + ".times"]
-        position_N = unitTestSupport.addTimeColumn(timeAxis,
-                                                   monteCarloData["messages"][retainedMessageName1 + "." + var1])
-        sigma_BN = unitTestSupport.addTimeColumn(timeAxis,
-                                                 monteCarloData["messages"][retainedMessageName1 + "." + var2])
-        validCircle = unitTestSupport.addTimeColumn(timeAxis,
-                                                    monteCarloData["messages"][retainedMessageName2 + "." + var3])
+            position_N =monteCarloData["messages"][retainedMessageName1 + "." + var1]
+            sigma_BN =monteCarloData["messages"][retainedMessageName1 + "." + var2]
+            validCircle =monteCarloData["messages"][retainedMessageName2 + "." + var3]
 
-        renderRate = 60*1E9
-        sigma_CB = [0., 0., 0.]  # Arbitrary camera orientation
-        sizeOfCam = [512, 512]
-        sizeMM = [10. * 1E-3, 10. * 1E-3]  # in m
-        fieldOfView = np.deg2rad(55)  # in degrees
-        focal = sizeMM[0] / 2. / np.tan(fieldOfView / 2.)  # in m
+            renderRate = 60*1E9
+            sigma_CB = [0., 0., 0.]  # Arbitrary camera orientation
+            sizeOfCam = [512, 512]
+            sizeMM = [10. * 1E-3, 10. * 1E-3]  # in m
+            fieldOfView = np.deg2rad(55)  # in degrees
+            focal = sizeMM[0] / 2. / np.tan(fieldOfView / 2.)  # in m
 
-        pixelSize = []
-        pixelSize.append(sizeMM[0] / sizeOfCam[0])
-        pixelSize.append(sizeMM[1] / sizeOfCam[1])
+            pixelSize = []
+            pixelSize.append(sizeMM[0] / sizeOfCam[0])
+            pixelSize.append(sizeMM[1] / sizeOfCam[1])
 
-        dcm_CB = rbk.MRP2C(sigma_CB)
-        # Plot results
+            dcm_CB = rbk.MRP2C(sigma_CB)
+            # Plot results
 
-        trueRhat_C = np.full([len(validCircle[:, 0]), 4], np.nan)
-        trueCircles = np.full([len(validCircle[:, 0]), 4], np.nan)
-        trueCircles[:, 0] = validCircle[:, 0]
-        trueRhat_C[:, 0] = validCircle[:, 0]
+            trueRhat_C = np.full([len(validCircle[:, 0]), 4], np.nan)
+            trueCircles = np.full([len(validCircle[:, 0]), 4], np.nan)
+            trueCircles[:, 0] = validCircle[:, 0]
+            trueRhat_C[:, 0] = validCircle[:, 0]
 
-        ModeIdx = 0
-        Rmars = 3396.19 * 1E3
-        for j in range(len(position_N[:, 0])):
-            if position_N[j, 0] in validCircle[:, 0]:
-                ModeIdx = j
-                break
-        for i in range(len(validCircle[:, 0])):
-            if validCircle[i, 1] > 1E-5 or (validCircle[i, 0]%renderRate ==0 and validCircle[i, 0] > 1):
-                trueRhat_C[i, 1:] = np.dot(np.dot(dcm_CB, rbk.MRP2C(sigma_BN[ModeIdx + i, 1:4])),
-                                           position_N[ModeIdx + i, 1:4]) / np.linalg.norm(position_N[ModeIdx + i, 1:4])
-                trueCircles[i, 3] = focal * np.tan(np.arcsin(Rmars / np.linalg.norm(position_N[ModeIdx + i, 1:4]))) / pixelSize[0]
-                trueRhat_C[i, 1:] *= focal / trueRhat_C[i, 3]
-                trueCircles[i, 1] = trueRhat_C[i, 1] / pixelSize[0] + sizeOfCam[0] / 2 - 0.5
-                trueCircles[i, 2] = trueRhat_C[i, 2] / pixelSize[1] + sizeOfCam[1] / 2 - 0.5
+            ModeIdx = 0
+            Rmars = 3396.19 * 1E3
+            for j in range(len(position_N[:, 0])):
+                if position_N[j, 0] in validCircle[:, 0]:
+                    ModeIdx = j
+                    break
+            for i in range(len(validCircle[:, 0])):
+                if validCircle[i, 1] > 1E-5 or (validCircle[i, 0]%renderRate ==0 and validCircle[i, 0] > 1):
+                    trueRhat_C[i, 1:] = np.dot(np.dot(dcm_CB, rbk.MRP2C(sigma_BN[ModeIdx + i, 1:4])),
+                                            position_N[ModeIdx + i, 1:4]) / np.linalg.norm(position_N[ModeIdx + i, 1:4])
+                    trueCircles[i, 3] = focal * np.tan(np.arcsin(Rmars / np.linalg.norm(position_N[ModeIdx + i, 1:4]))) / pixelSize[0]
+                    trueRhat_C[i, 1:] *= focal / trueRhat_C[i, 3]
+                    trueCircles[i, 1] = trueRhat_C[i, 1] / pixelSize[0] + sizeOfCam[0] / 2 - 0.5
+                    trueCircles[i, 2] = trueRhat_C[i, 2] / pixelSize[1] + sizeOfCam[1] / 2 - 0.5
 
-                writer.writerow([str("{0:.6f}".format(position_N[i,0]*1E-9))+".jpg", validCircle[i, 1], trueCircles[i, 1], trueCircles[i, 2], trueCircles[i, 3], position_N[i,1], position_N[i,2], position_N[i,3]])
-        csvfile.close()
+                    writer.writerow([str("{0:.6f}".format(position_N[i,0]*1E-9))+".jpg", validCircle[i, 1], trueCircles[i, 1], trueCircles[i, 2], trueCircles[i, 3], position_N[i,1], position_N[i,2], position_N[i,3]])
+            csvfile.close()
 
     if show_plots:
         monteCarlo.executeCallbacks()

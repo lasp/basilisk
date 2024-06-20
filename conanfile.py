@@ -214,7 +214,7 @@ class BasiliskConan(ConanFile):
             if self.settings.os == "Macos":
                 self.generator = "Xcode"
             elif self.settings.os == "Windows":
-                self.generator = "Visual Studio 16 2019"
+                self.generator = "Visual Studio 17 2022"
                 self.options["*"].shared = True
             else:
                 print("Creating a make file for project. ")

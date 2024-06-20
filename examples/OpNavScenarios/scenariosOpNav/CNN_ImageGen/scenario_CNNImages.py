@@ -75,7 +75,9 @@ class scenario_OpNav(BSKSim):
         oe.Omega = 25. * macros.D2R
         oe.omega = 190. * macros.D2R
         oe.f = 100. * macros.D2R #90 good
-        mu = self.get_DynModel().gravFactory.gravBodies['mars barycenter'].mu
+        mu = self.get_DynModel().gravFactory.gravBodies['Itokawa'].mu
+
+        # Itokawa
 
         rN, vN = orbitalMotion.elem2rv(mu, oe)
         orbitalMotion.rv2elem(mu, rN, vN)
@@ -184,7 +186,7 @@ def run(TheScenario, runLog):
 
     TheScenario.vizard.kill()
 
-    spice = TheScenario.get_DynModel().spiceObject
+    spice = TheScenario.get_DynModel().gravFactory.spiceObject
     spice.unloadSpiceKernel(spice.SPICEDataPath, 'de430.bsp')
     spice.unloadSpiceKernel(spice.SPICEDataPath, 'naif0012.tls')
     spice.unloadSpiceKernel(spice.SPICEDataPath, 'de-403-masses.tpc')
