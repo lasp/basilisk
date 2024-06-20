@@ -61,7 +61,7 @@ class BSKDynamicModels():
         self.earth = None
         self.mars = None
         self.jupiter = None
-        self.Itokawa = None
+        self.itokawa = None
 
         # Define process name, task name and task time-step
         self.processName = SimBase.DynamicsProcessName
@@ -206,17 +206,16 @@ class BSKDynamicModels():
         """
 
         timeInitString = "2019 DECEMBER 12 18:00:00.0"
-        gravBodies = self.gravFactory.createBodies(['sun', 'earth', 'mars barycenter', 'jupiter barycenter','Itokawa'])
+        gravBodies = self.gravFactory.createBodies(['sun', 'earth', 'mars barycenter', 'jupiter barycenter'])
+        self.itokawa_object = self.gravFactory.createCustomGravObject(
+            "Itokawa", 1e6, radEquator=22000 / 2, modelDictionaryKey="Itokawa"
+        )
         gravBodies['Itokawa'].isCentralBody = True
         self.sun = 0
         self.earth = 1
         self.mars = 2
         self.jupiter = 3
         self.Itokawa = 4
-
-
-        gravBodies[' Itokawa'].useSphericalHarmonicsGravityModel(
-            bskPath + '/supportData/LocalGravData/GGM2BData.txt', 2)
 
         self.gravFactory.addBodiesTo(self.scObject)
         self.gravFactory.createSpiceInterface(bskPath + '/supportData/EphemerisData/',
@@ -226,6 +225,7 @@ class BSKDynamicModels():
         self.gravFactory.spiceObject.referenceBase = "J2000"
         self.gravFactory.spiceObject.zeroBase = 'Itokawa'
 
+        self.gravFactory.spiceObject.loadSpiceKernel('Itokawa_2025143.bsp', self.gravFactory.spiceObject.SPICEDataPath)
         pyswice.furnsh_c(self.gravFactory.spiceObject.SPICEDataPath + 'de430.bsp')  # solar system bodies
         pyswice.furnsh_c(self.gravFactory.spiceObject.SPICEDataPath + 'naif0012.tls')  # leap second file
         pyswice.furnsh_c(self.gravFactory.spiceObject.SPICEDataPath + 'de-403-masses.tpc')  # solar system masses

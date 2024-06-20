@@ -69,7 +69,7 @@ class scenario_OpNav(BSKSim):
     def configure_initial_conditions(self):
         # Configure Dynamics initial conditions
         oe = orbitalMotion.ClassicElements()
-        oe.a = 18000*1E3 # meters
+        oe.a = 50*1E3 # meters
         oe.e = 0.
         oe.i = 20 * macros.D2R
         oe.Omega = 25. * macros.D2R

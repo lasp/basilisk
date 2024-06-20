@@ -86,8 +86,8 @@ def run(show_plots):
 
         # Add some dispersions
         dispDict = {}
-        dispDict["mu"] = 4.2828371901284001E+13
-        dispDict["a"] = ["normal", 14000*1E3, 2500*1E3] # 12000
+        dispDict["mu"] = 1.9
+        dispDict["a"] = ["normal", 140*1E3, 250*1E3] # 12000
         dispDict["e"] = ["uniform", 0.2, 0.5]           # 0.4, 0.7
         dispDict["i"] = ["uniform", np.deg2rad(40), np.deg2rad(90)]
         dispDict["Omega"] = None
