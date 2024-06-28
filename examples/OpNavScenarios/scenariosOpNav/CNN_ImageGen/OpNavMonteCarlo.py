@@ -155,7 +155,7 @@ def run(show_plots):
             dcm_CB = rbk.MRP2C(sigma_CB)
             # Plot results
             for i in range(len(validCircle[:, 0])):
-                if validCircle[i, 1] > 1E-5 or (validCircle[i, 0]%renderRate == 0 and validCircle[i, 0] > 1):
+                if validCircle[i, 1] > 0:
                     r_image_plane_N = position_N[i,1:]
                     dcm_BN = rbk.MRP2C(sigma_BN[i,1:])
                     r_image_plane_C = np.dot(dcm_CB, np.dot(dcm_BN, r_image_plane_N))
