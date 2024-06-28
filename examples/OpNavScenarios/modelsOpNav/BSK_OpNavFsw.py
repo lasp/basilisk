@@ -44,7 +44,7 @@ from Basilisk.utilities import deprecated
 bskPath = __path__[0]
 
 try:
-    from Basilisk.fswAlgorithms import limbFinding, houghCircles  # FSW for OpNav
+    from Basilisk.fswAlgorithms import limbFinding, houghCircles, centerOfBrightness  # FSW for OpNav
 except ImportError:
     print("OpNav Modules Missing, check build options")
 
@@ -65,6 +65,7 @@ class BSKFswModels():
         self.fswRwConfigMsg = None
         self.attGuidMsg = None
         self.opnavMsg = None
+        self.opnav_cob_out_msg = None
         self.opnavPrimaryMsg = None
         self.opnavSecondaryMsg = None
         self.opnavCirclesMsg = None
@@ -91,6 +92,9 @@ class BSKFswModels():
 
         self.imageProcessing = houghCircles.HoughCircles()
         self.imageProcessing.ModelTag = "houghCircles"
+
+        self.cob = centerOfBrightness.CenterOfBrightness()
+        self.cob.ModelTag = "centerOfBrightness"
 
         if centerRadiusCNNIncluded:
             self.opNavCNN = centerRadiusCNN.CenterRadiusCNN()
@@ -172,7 +176,8 @@ class BSKFswModels():
         SimBase.AddModelToTask("opNavODTaskB", self.imageProcessing, 15)
         SimBase.AddModelToTask("opNavODTaskB", self.pixelLineFilter, 13)
 
-        SimBase.AddModelToTask("imageProcTask", self.imageProcessing, 15)
+        # SimBase.AddModelToTask("imageProcTask", self.imageProcessing, 15)
+        SimBase.AddModelToTask("imageProcTask", self.cob, 12)
 
         SimBase.AddModelToTask("opNavAttODTask", self.imageProcessing, 15)
         SimBase.AddModelToTask("opNavAttODTask", self.pixelLine, 14)
@@ -425,6 +430,14 @@ class BSKFswModels():
         self.opNavCNN.pixelNoise = [5,5,5]
         self.opNavCNN.pathToNetwork = bskPath + "/../../src/fswAlgorithms/imageProcessing/centerRadiusCNN/CAD.onnx"
 
+    def set_center_of_brighteness(self, SimBase):
+        self.cob.imageInMsg.subscribeTo(SimBase.DynModels.cameraMod.imageOutMsg)
+        self.cob.opnavCOBOutMsg = self.opnav_cob_out_msg
+
+        self.cob.threshold = 0
+        self.cob.blurSize = 5
+        self.cob.numberOfPointsBrightnessAverage = 5
+
     def SetImageProcessing(self, SimBase):
         self.imageProcessing.imageInMsg.subscribeTo(SimBase.DynModels.cameraMod.imageOutMsg)
         self.imageProcessing.opnavCirclesOutMsg = self.opnavCirclesMsg
@@ -554,6 +567,7 @@ class BSKFswModels():
         self.SetRWMotorTorque(SimBase)
         self.SetAttTrackingErrorCam(SimBase)
         self.SetImageProcessing(SimBase)
+        self.set_center_of_brighteness(SimBase)
         self.SetPixelLineConversion(SimBase)
 
         if centerRadiusCNNIncluded:
@@ -580,6 +594,7 @@ class BSKFswModels():
 
         # C++ wrapped gateway messages
         self.opnavCirclesMsg = messaging.OpNavCirclesMsg()
+        self.opnav_cob_out_msg = messaging.OpNavCOBMsg()
 
         self.zeroGateWayMsgs()
 
@@ -591,6 +606,7 @@ class BSKFswModels():
         self.opnavSecondaryMsg.write(messaging.OpNavMsgPayload())
 
         self.opnavCirclesMsg.write(messaging.OpNavCirclesMsgPayload())
+        self.opnav_cob_out_msg.write(messaging.OpNavCOBMsgPayload())
 
     @property
     def hillPointData(self):

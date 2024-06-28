@@ -62,6 +62,7 @@ class scenario_OpNav(BSKSim):
         self.msgRecList = {}
         self.retainedMessageName1 = "scMsg"
         self.retainedMessageName2 = "circlesMsg"
+        self.retainedMessageName3 = "cob_msg"
         self.var1 = "r_BN_N"
         self.var2 = "sigma_BN"
         self.var3 = "valid"
@@ -107,6 +108,9 @@ class scenario_OpNav(BSKSim):
         self.msgRecList[self.retainedMessageName2] = FswModel.opnavCirclesMsg.recorder(samplingTime)
         self.AddModelToTask(DynModel.taskName, self.msgRecList[self.retainedMessageName2])
 
+        self.msgRecList[self.retainedMessageName3] = FswModel.opnav_cob_out_msg.recorder(samplingTime)
+        self.AddModelToTask(DynModel.taskName, self.msgRecList[self.retainedMessageName3])
+
         return
 
     def pull_outputs(self, showPlots):
@@ -118,6 +122,9 @@ class scenario_OpNav(BSKSim):
         ## Image processing
         circleStates = self.scRecmsgRecList[self.retainedMessageName2]
         validCircle = unitTestSupport.addTimeColumn(circleStates.times(), circleStates.valid)
+
+        cob = self.scRecmsgRecList[self.retainedMessageName3]
+        validCob = unitTestSupport.addTimeColumn(cob.times(), cob.centerOfBrightness)
 
         sigma_CB = self.get_DynModel().cameraMRP_CB
         sizeMM = self.get_DynModel().cameraSize
@@ -148,8 +155,8 @@ class scenario_OpNav(BSKSim):
                 trueRhat_C[i,1:] = np.dot(np.dot(dcm_CB, rbk.MRP2C(sigma_BN[ModeIdx+i , 1:4])) ,position_N[ModeIdx+i, 1:4])/np.linalg.norm(position_N[ModeIdx+i, 1:4])
                 trueCircles[i,3] = focal*np.tan(np.arcsin(Rmars/np.linalg.norm(position_N[ModeIdx+i,1:4])))/pixelSize[0]
                 trueRhat_C[i,1:] *= focal/trueRhat_C[i,3]
-                trueCircles[i, 1] = trueRhat_C[i, 1] / pixelSize[0] + sizeOfCam[0]/2 - 0.5
-                trueCircles[i, 2] = trueRhat_C[i, 2] / pixelSize[1] + sizeOfCam[1]/2 - 0.5
+                trueCircles[i, 1] = trueRhat_C[i, 1] / pixelSize[0] + sizeOfCam[0]/2
+                trueCircles[i, 2] = trueRhat_C[i, 2] / pixelSize[1] + sizeOfCam[1]/2
 
         return
 
