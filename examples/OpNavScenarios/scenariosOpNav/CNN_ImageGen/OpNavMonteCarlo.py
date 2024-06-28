@@ -56,15 +56,17 @@ import numpy as np
 
 retainedMessageName1 = "scMsg"
 retainedMessageName2 = "circlesMsg"
+retainedMessageName3 = "cob_msg"
 retainedRate = macros.sec2nano(10)
 var1 = "r_BN_N"
 var2 = "sigma_BN"
 var3 = "valid"
+var4 = "centerOfBrightness"
 
 def run(show_plots):
     """Main Simulation Method"""
 
-    NUMBER_OF_RUNS = 10
+    NUMBER_OF_RUNS = 1
     VERBOSE = True
     PROCESSES = 1
     RUN = True
@@ -97,23 +99,15 @@ def run(show_plots):
         disp1Name = 'get_DynModel().scObject.hub.r_CN_NInit'
         disp2Name = 'get_DynModel().scObject.hub.v_CN_NInit'
         disp3Name = 'get_FswModel().trackingErrorCam.sigma_R0R'
-        dispGauss = 'get_DynModel().cameraMod.gaussian'
-        dispDC = 'get_DynModel().cameraMod.darkCurrent'
-        dispSP = 'get_DynModel().cameraMod.saltPepper'
-        dispCR = 'get_DynModel().cameraMod.cosmicRays'
-        dispBlur = 'get_DynModel().cameraMod.blurParam'
 
         monteCarlo.addDispersion(OrbitalElementDispersion(disp1Name,disp2Name, dispDict))
         monteCarlo.addDispersion(MRPDispersionPerAxis(disp3Name, bounds=[[1./3-0.051, 1./3+0.051], [1./3-0.051, 1./3+0.051], [-1./3-0.051, -1./3+0.051]]))
-        monteCarlo.addDispersion(UniformDispersion(dispGauss, [0,5]))
-        monteCarlo.addDispersion(UniformDispersion(dispSP, [0,2.5]))
-        monteCarlo.addDispersion(UniformDispersion(dispCR, [0.5,4]))
-        monteCarlo.addDispersion(UniformDispersion(dispBlur, [1,6]))
 
         # Add retention policy
         retentionPolicy = RetentionPolicy()
         retentionPolicy.addMessageLog(retainedMessageName1, [var1, var2])
         retentionPolicy.addMessageLog(retainedMessageName2, [var3])
+        retentionPolicy.addMessageLog(retainedMessageName3, [var3, var4])
         monteCarlo.addRetentionPolicy(retentionPolicy)
 
         failures = monteCarlo.executeSimulations()
@@ -129,11 +123,12 @@ def run(show_plots):
                 continue
             csvfile = open(dirName + "/run" + str(i) + "/data.csv", 'w')
             writer = csv.writer(csvfile)
-            writer.writerow(['Filename', 'Valid', 'X_p', 'Y_p', 'rho_p', 'r_BN_N_1', 'r_BN_N_2', 'r_BN_N_3'])
+            writer.writerow(['Filename', 'Valid', 'X_com', 'Y_com', 'X_cob', 'Y_cob'])
 
             position_N =monteCarloData["messages"][retainedMessageName1 + "." + var1]
             sigma_BN =monteCarloData["messages"][retainedMessageName1 + "." + var2]
-            validCircle =monteCarloData["messages"][retainedMessageName2 + "." + var3]
+            validCircle =monteCarloData["messages"][retainedMessageName3 + "." + var3]
+            cob =monteCarloData["messages"][retainedMessageName3 + "." + var4]
 
             renderRate = 60*1E9
             sigma_CB = [0., 0., 0.]  # Arbitrary camera orientation
@@ -146,30 +141,27 @@ def run(show_plots):
             pixelSize.append(sizeMM[0] / sizeOfCam[0])
             pixelSize.append(sizeMM[1] / sizeOfCam[1])
 
+            # camera parameters
+            alpha = 0.
+            pX = 2.*np.tan(fieldOfView*sizeOfCam[0]/sizeOfCam[1]/2.0)
+            pY = 2.*np.tan(fieldOfView/2.0)
+            dX = focal/pixelSize[0]
+            dY = focal/pixelSize[1]
+            up = sizeOfCam[0]/2.
+            vp = sizeOfCam[1]/2.
+            # build camera calibration matrix (not the inverse of it)
+            K = np.array([[dX, alpha, up], [0., dY, vp], [0., 0., 1.]])
+
             dcm_CB = rbk.MRP2C(sigma_CB)
             # Plot results
-
-            trueRhat_C = np.full([len(validCircle[:, 0]), 4], np.nan)
-            trueCircles = np.full([len(validCircle[:, 0]), 4], np.nan)
-            trueCircles[:, 0] = validCircle[:, 0]
-            trueRhat_C[:, 0] = validCircle[:, 0]
-
-            ModeIdx = 0
-            Rmars = 3396.19 * 1E3
-            for j in range(len(position_N[:, 0])):
-                if position_N[j, 0] in validCircle[:, 0]:
-                    ModeIdx = j
-                    break
             for i in range(len(validCircle[:, 0])):
-                if validCircle[i, 1] > 1E-5 or (validCircle[i, 0]%renderRate ==0 and validCircle[i, 0] > 1):
-                    trueRhat_C[i, 1:] = np.dot(np.dot(dcm_CB, rbk.MRP2C(sigma_BN[ModeIdx + i, 1:4])),
-                                            position_N[ModeIdx + i, 1:4]) / np.linalg.norm(position_N[ModeIdx + i, 1:4])
-                    trueCircles[i, 3] = focal * np.tan(np.arcsin(Rmars / np.linalg.norm(position_N[ModeIdx + i, 1:4]))) / pixelSize[0]
-                    trueRhat_C[i, 1:] *= focal / trueRhat_C[i, 3]
-                    trueCircles[i, 1] = trueRhat_C[i, 1] / pixelSize[0] + sizeOfCam[0] / 2 - 0.5
-                    trueCircles[i, 2] = trueRhat_C[i, 2] / pixelSize[1] + sizeOfCam[1] / 2 - 0.5
+                if validCircle[i, 1] > 1E-5 or (validCircle[i, 0]%renderRate == 0 and validCircle[i, 0] > 1):
+                    r_image_plane_N = position_N[i,1:]
+                    dcm_BN = rbk.MRP2C(sigma_BN[i,1:])
+                    r_image_plane_C = np.dot(dcm_CB, np.dot(dcm_BN, r_image_plane_N))
+                    com = np.dot(K, r_image_plane_C/r_image_plane_C[2])
 
-                    writer.writerow([str("{0:.6f}".format(position_N[i,0]*1E-9))+".jpg", validCircle[i, 1], trueCircles[i, 1], trueCircles[i, 2], trueCircles[i, 3], position_N[i,1], position_N[i,2], position_N[i,3]])
+                    writer.writerow([str("{0:.6f}".format(position_N[i,0]*1E-9))+".jpg", validCircle[i, 1], com[0], com[1], cob[i, 1], cob[i,2]])
             csvfile.close()
 
     if show_plots:
