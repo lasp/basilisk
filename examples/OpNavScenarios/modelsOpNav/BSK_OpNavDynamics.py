@@ -101,7 +101,7 @@ class BSKDynamicModels():
         SimBase.AddModelToTask(self.taskName, self.gravFactory.spiceObject, 200)
         SimBase.AddModelToTask(self.taskName, self.ephemObject, 199)
         SimBase.AddModelToTask(self.taskName, self.CSSConstellationObject, 299)
-        SimBase.AddModelToTask(self.taskName, self.eclipseObject, 204)
+        # SimBase.AddModelToTask(self.taskName, self.eclipseObject, 204)
         SimBase.AddModelToTask(self.taskName, self.rwStateEffector, 301)
         SimBase.AddModelToTask(self.taskName, self.extForceTorqueObject, 300)
         SimBase.AddModelToTask(self.taskName, self.vizInterface, 100)
@@ -336,7 +336,7 @@ class BSKDynamicModels():
             cssDevice.scaleFactor = 2.0
             cssDevice.sunInMsg.subscribeTo(self.gravFactory.spiceObject.planetStateOutMsgs[self.sun])
             cssDevice.stateInMsg.subscribeTo(self.scObject.scStateOutMsg)
-            cssDevice.sunEclipseInMsg.subscribeTo(self.eclipseObject.eclipseOutMsgs[0])
+            # cssDevice.sunEclipseInMsg.subscribeTo(self.eclipseObject.eclipseOutMsgs[0])
             cssDevice.this.disown()
 
         # setup CSS sensor normal vectors in body frame components
@@ -382,7 +382,7 @@ class BSKDynamicModels():
         self.SetSpacecraftHub()
         self.SetGravityEffector()
         # self.SetSimpleGrav()
-        self.SetEclipseObject()
+        # self.SetEclipseObject()
         self.SetExternalForceTorqueObject()
         self.SetSimpleNavObject()
         self.SetReactionWheelDynEffector()
