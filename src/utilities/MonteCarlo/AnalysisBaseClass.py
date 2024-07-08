@@ -5,18 +5,26 @@ import time
 import numpy as np
 import pandas as pd
 from Basilisk.utilities import macros
+from bokeh.layouts import column
+from bokeh.plotting import figure, show
+import panel as pn
+import numpy as np
+from tornado.ioloop import IOLoop
 
 try:
     import holoviews as hv
+    import datashader as ds
     from Basilisk.utilities.datashader_utilities import DS_Plot, curve_per_df_component
+    from holoviews.operation.datashader import datashade, dynspread, spread
 except:
     pass
 
+
 class mcAnalysisBaseClass:
-    def __init__(self):
+    def __init__(self, data_dir=""):
         self.variableName = ""
         self.variableDim = 0
-        self.dataDir = ""
+        self.dataDir = data_dir
         self.numExtrema = 0
         self.extremaRuns = []
         self.timeWindow = []
@@ -66,17 +74,15 @@ class mcAnalysisBaseClass:
         times = self.data.index.tolist()
 
         # Find the closest indices to the time window requested
-        indStart = min(range(len(times)), key=lambda i: abs(times[i] - window[0]))
-        indEnd = min(range(len(times)), key=lambda i: abs(times[i] - window[1]))
-        self.timeWindow = [indStart, indEnd]
+        ind_start = min(range(len(times)), key=lambda i: abs(times[i] - window[0]))
+        ind_end = min(range(len(times)), key=lambda i: abs(times[i] - window[1]))
+        self.timeWindow = [times[ind_start], times[ind_end]]
 
         # Find outliers based on largest deviation off of the mean
-        self.mean = self.data.mean(axis=1, level=1)
-        self.diff = self.data.subtract(self.mean)
-        self.diff = self.diff.abs()
-        self.diff = self.diff.iloc[indStart:indEnd].max(axis=0)
-        self.extremaRuns = self.diff.nlargest(numExtrema).index._codes[0]
-        print("Extreme runs are ", list(dict.fromkeys(self.extremaRuns.tolist())))
+        mean = self.data.mean(axis=1)
+        diff = self.data.abs().sub(mean, axis=0)
+        self.extremaRuns = diff.transpose().nlargest(numExtrema, self.timeWindow).index
+        print("Extrema runs are ", list(dict.fromkeys(self.extremaRuns.tolist())))
         return self.extremaRuns
 
     def generateStatCurves(self):
@@ -121,27 +127,27 @@ class mcAnalysisBaseClass:
         varIdxList = range(self.variableDim)
         varIdxListStr = str(varIdxList)
 
-        meanRun.columns = pd.MultiIndex.from_product([['mean'], [0,1,2]], names=["stats", "varIdx"])
-        medianRun.columns = pd.MultiIndex.from_product([['median'], [0,1,2]], names=["stats", "varIdx"])
-        stdRun.columns = pd.MultiIndex.from_product([['std'], [0,1,2]], names=["stats", "varIdx"])
+        meanRun.columns = pd.MultiIndex.from_product([['mean'], [0, 1, 2]], names=["stats", "varIdx"])
+        medianRun.columns = pd.MultiIndex.from_product([['median'], [0, 1, 2]], names=["stats", "varIdx"])
+        stdRun.columns = pd.MultiIndex.from_product([['std'], [0, 1, 2]], names=["stats", "varIdx"])
 
         meanRun_plot = DS_Plot(meanRun, title="Mean Plot: " + self.variableName,
-                                            xAxisLabel='time[s]', yAxisLabel= self.variableName.split('.')[-1],
-                                            macro_x=macros.NANO2SEC,
-                                            labels=['1', '2', '3'],
-                                            plotFcn=curve_per_df_component)
+                               xAxisLabel='time[s]', yAxisLabel=self.variableName.split('.')[-1],
+                               macro_x=macros.NANO2SEC,
+                               labels=['1', '2', '3'],
+                               plotFcn=curve_per_df_component)
 
         medRun_plot = DS_Plot(medianRun, title="Median Plot: " + self.variableName,
-                                            xAxisLabel='time[s]', yAxisLabel= self.variableName.split('.')[-1],
-                                            macro_x=macros.NANO2SEC,
-                                            labels=['1', '2', '3'],
-                                            plotFcn=curve_per_df_component)
+                              xAxisLabel='time[s]', yAxisLabel=self.variableName.split('.')[-1],
+                              macro_x=macros.NANO2SEC,
+                              labels=['1', '2', '3'],
+                              plotFcn=curve_per_df_component)
 
         stdRun_plot = DS_Plot(stdRun, title="Standard Dev Plot: " + self.variableName,
-                                            xAxisLabel='time[s]', yAxisLabel= self.variableName.split('.')[-1],
-                                            macro_x=macros.NANO2SEC,
-                                            labels=['1', '2', '3'],
-                                            plotFcn=curve_per_df_component)
+                              xAxisLabel='time[s]', yAxisLabel=self.variableName.split('.')[-1],
+                              macro_x=macros.NANO2SEC,
+                              labels=['1', '2', '3'],
+                              plotFcn=curve_per_df_component)
 
         statRun_plots = []
         statRun_plots.append(meanRun_plot)
@@ -160,7 +166,11 @@ class mcAnalysisBaseClass:
         """
         idx = pd.IndexSlice
         baseDir = self.dataDir
+        new_list = []
+        for run in runIdx:
+            new_list.append(run[0])
 
+        runIdx = new_list;
         # check if a subset directory exists, and if it already contains all runIdx requested
         if not os.path.exists(baseDir + "/subset/"):
             os.mkdir(baseDir + "/subset/")
@@ -196,7 +206,7 @@ class mcAnalysisBaseClass:
             pd.to_pickle(dfSubSet, baseDir + "/subset/" + varName[-1])
         print("Finished Populating Subset Directory")
 
-    def renderPlots(self, plotList):
+    def renderPlots(self, plotList, cols=2):
         """
         Render all plots in plotList and print information about time taken, percent complete, which plot, etc.
 
@@ -204,28 +214,28 @@ class mcAnalysisBaseClass:
         :return: nothing.
         """
         hv.extension('bokeh')
-        renderer = hv.renderer('bokeh').instance(mode='server')
+        #renderer = hv.renderer('bokeh')
+        #renderer = hv.renderer.instance(mode='server')
 
         if self.save_as_static:
-            print("Note: You requested to save static plots. This means no interactive python session will be generated.")
+            print(
+                "Note: You requested to save static plots. This means no interactive python session will be generated.")
         print("Beginning the plotting")
 
         if not os.path.exists(self.dataDir + self.staticDir):
             os.mkdir(self.dataDir + self.staticDir)
 
+        figures = []
         for i in range(len(plotList)):
             startTime = time.time()
-            image, title = plotList[i].generateImage()
-            try:
-                if self.save_as_static:
-                    # Save .html files of each of the plots into the static directory
-                    hv.save(image, self.dataDir + self.staticDir + "/" + title + ".html")
-                else:
-                    renderer.server_doc(image)
-                # Print information about the rendering process
-                print("LOADED: " + title +"\t\t\t" +
-                      "Percent Complete: " + str(round((i + 1) / len(plotList) * 100, 2)) + "% \t\t\t"
-                      "Time Elapsed: " + str( round(time.time() - startTime)) + " [s]")
-            except Exception as e:
-                print("Couldn't Plot " + title)
-                print(e)
+            fig, title = plotList[i].generateOverlay()
+            figures.append(fig)
+            print("LOADED: " + title + "\t\t\t" +
+                  "Percent Complete: " + str(round((i + 1) / len(plotList) * 100, 2)) + "% \t\t\t"
+                                                                                        "Time Elapsed: " + str(
+                round(time.time() - startTime)) + " [s]")
+
+        layout = hv.Layout(figures).cols(cols)
+
+
+        return pn.panel(layout).servable()

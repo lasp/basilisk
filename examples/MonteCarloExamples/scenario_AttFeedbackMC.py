@@ -65,11 +65,11 @@ def run(show_plots):
     monteCarlo = Controller()
     monteCarlo.setSimulationFunction(scenario_AttFeedback.scenario_AttFeedback)  # Required: function that configures the base scenario
     monteCarlo.setExecutionFunction(scenario_AttFeedback.runScenario)  # Required: function that runs the scenario
-    monteCarlo.setExecutionCount(4)  # Required: Number of MCs to run
+    monteCarlo.setExecutionCount(1000)  # Required: Number of MCs to run
 
     monteCarlo.setArchiveDir(path + "/scenario_AttFeedbackMC")  # Optional: If/where to save retained data.
     monteCarlo.setShouldDisperseSeeds(True)  # Optional: Randomize the seed for each module
-    monteCarlo.setThreadCount(2)  # Optional: Number of processes to spawn MCs on
+    monteCarlo.setThreadCount(15)  # Optional: Number of processes to spawn MCs on
     monteCarlo.setVerbose(True)  # Optional: Produce supplemental text output in console describing status
     monteCarlo.setVarCast('float')  # Optional: Downcast the retained numbers to float32 to save on storage space
     monteCarlo.setDispMagnitudeFile(True)  # Optional: Produce a .txt file that shows dispersion in std dev units

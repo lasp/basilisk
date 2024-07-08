@@ -20,7 +20,7 @@
 r"""
 Motivation
 ----------
-This script is a basic demonstration of a script that can be used to plot Monte Carlo data with 
+This script is a basic demonstration of a script that can be used to plot Monte Carlo data with
 bokeh and datashaders.   These tools are very efficient to plot large amounts of simulation data
 that is likely to occur with Monte Carlo sensitivity analysis studies.  For example, running this script will
 create an HTML interactive view of the simulation data.   Instead of seeing a fixed resolution, the user can
@@ -80,7 +80,7 @@ How to Run the Script
 
     Read all three steps before advancing.
 
-The next steps outline how to run this script. 
+The next steps outline how to run this script.
 
 1.  This script can only be run once there exists data produced by the ``scenario_AttFeedbackMC.py`` script.
 
@@ -102,18 +102,24 @@ bokeh server will keep running until stopped.
 
 import inspect
 import os
-FOUND_DATESHADER = True
+import holoviews as hv
+
+
+FOUND_DATASHADER = True
 try:
-    from Basilisk.utilities.datashader_utilities import DS_Plot, curve_per_df_component, pull_and_format_df
+    from Basilisk.utilities.datashader_utilities import DS_Plot, curve_per_df_column, pull_and_format_df
     from Basilisk.utilities.MonteCarlo.AnalysisBaseClass import mcAnalysisBaseClass
     from bokeh.palettes import Blues9, Reds9, Greens9, \
         Blues3, Reds3, Greens3, Oranges3, RdYlBu9
+    from bokeh.server.server import Server
+    from bokeh.application import Application
+    from bokeh.application.handlers.function import FunctionHandler
+
 except:
     print("Wasn't able to include the datashader_utilities.")
-    FOUND_DATESHADER = False
+    FOUND_DATASHADER = False
 
 import Basilisk.utilities.macros as macros
-
 
 filename = inspect.getframeinfo(inspect.currentframe()).filename
 fileNameString = os.path.basename(os.path.splitext(__file__)[0])
@@ -121,6 +127,7 @@ path = os.path.dirname(os.path.abspath(filename))
 from Basilisk import __path__
 
 bskPath = __path__[0]
+
 
 def plotSuite(dataDir):
     """
@@ -139,18 +146,21 @@ def plotSuite(dataDir):
     sigmaPlot = DS_Plot(sigma_BR, title="Attitude Error",
                         xAxisLabel='time [s]', yAxisLabel='Sigma_BR',
                         macro_x=macros.NANO2SEC,
-                        labels = ['b1', 'b2', 'b3'], cmap=RdYlBu9,
-                        plotFcn=curve_per_df_component)
+                        labels=['b1', 'b2', 'b3'], cmap=RdYlBu9,
+                        plotObjType=hv.Points,
+                        plotFcn=curve_per_df_column)
     plotList.append(sigmaPlot)
 
-    sigma_BR = pull_and_format_df(dataDir + "attGuidMsg.omega_BR_B.data", 3)
-    sigmaPlot = DS_Plot(sigma_BR, title="Attitude Rate Error",
-                        xAxisLabel='time [s]', yAxisLabel='omega_BR_B',
-                        macro_x=macros.NANO2SEC, macro_y=macros.R2D,
-                        labels = ['b1', 'b2', 'b3'], cmap=RdYlBu9,
-                        plotFcn=curve_per_df_component)
-    plotList.append(sigmaPlot)
+    # sigma_BR = pull_and_format_df(dataDir + "attGuidMsg.omega_BR_B.data", 3)
+    # sigmaPlot = DS_Plot(sigma_BR, title="Attitude Rate Error",
+    #                     xAxisLabel='time [s]', yAxisLabel='omega_BR_B',
+    #                     macro_x=macros.NANO2SEC, macro_y=macros.R2D,
+    #                     labels=['b1', 'b2', 'b3'], cmap=RdYlBu9,
+    #                     plotObjType=hv.Points,
+    #                     plotFcn=curve_per_df_column)
+    # plotList.append(sigmaPlot)
     return plotList
+
 
 
 def run(show_plots):
@@ -161,7 +171,7 @@ def run(show_plots):
     First, set ``show_all_data = True`` to get a broad view of the data and find a time window to investigate closer.
 
     Once the data is characterized, the user can set ``show_extreme_data = True`` to look at specific run cases
-    within the window.
+    within the window.title=title, xAxisLabel=x_axi
 
     Finally, the user can set ``show_optional_data = True`` to look at any extra data to determine why the extrema
     cases exist.
@@ -171,7 +181,7 @@ def run(show_plots):
     :param optional_plots: plots additional user-defined plots
     """
 
-    if not FOUND_DATESHADER:
+    if not FOUND_DATASHADER:
         return
 
     show_all_data = True
@@ -179,8 +189,7 @@ def run(show_plots):
     optional_plots = False
 
     plotList = []
-    analysis = mcAnalysisBaseClass()
-    analysis.dataDir = path + "/scenario_AttFeedbackMC/"
+    analysis = mcAnalysisBaseClass(path + "/scenario_AttFeedbackMC/rerun/")
 
     # save_as_static: save off static .html files of the plots generated into the staticDir directory.
     # The staticDir will be created inside the dataDir folder.
@@ -192,13 +201,13 @@ def run(show_plots):
         plotList.extend(plotSuite(analysis.dataDir))
 
     if show_extreme_data:
-        analysis.variableName = "attGuidMsg.omega_BR_B"
+        analysis.variableName = "attGuidMsg.sigma_BR"
         analysis.variableDim = 1
 
-        extremaRunNumbers = analysis.getExtremaRunIndices(numExtrema=1, window=[500 * 1E9, 550 * 1E9])
+        extrema_run_numbers = analysis.getExtremaRunIndices(numExtrema=10, window=[1e9, 2e9])
 
-        analysis.extractSubsetOfRuns(runIdx=extremaRunNumbers)
-        plotList.extend(plotSuite(analysis.dataDir + "/subset"))
+        analysis.extractSubsetOfRuns(runIdx=extrema_run_numbers)
+        plotList.extend(plotSuite(analysis.dataDir + "subset/"))
 
     if optional_plots:
         # nominalRuns = analysis.getNominalRunIndices(50)
@@ -207,22 +216,25 @@ def run(show_plots):
         shadowFactor = pull_and_format_df(analysis.dataDir + "/eclipse_data_0.shadowFactor.data", 1)
         shadowFactor = shadowFactor.dropna(axis=1)
         shadowFactorPlot = DS_Plot(shadowFactor, title="Optional Plots: Eclipse",
-                                               xAxisLabel='time[s]', yAxisLabel='Eclipse Factor',
-                                               macro_x=macros.NANO2SEC, macro_y=macros.R2D,
-                                               cmap=RdYlBu9,
-                                               plotFcn=curve_per_df_component)
+                                   xAxisLabel='time[s]', yAxisLabel='Eclipse Factor',
+                                   macro_x=macros.NANO2SEC, macro_y=macros.R2D,
+                                   cmap=RdYlBu9,
+                                   plotFcn=curve_per_df_column)
 
         # plotList.extend([statPlots])
         plotList.extend([shadowFactorPlot])
+
+
+
 
     analysis.renderPlots(plotList)
 
 # The following must be commented out before this script can run.  It is provided here
 # to ensure that the sphinx documentation generation process does not run this script
 # automatically.
-if __name__ == "__main__":
-    run(False)
+#if __name__ == "__main__":
+#    run(False)
 
 
 # uncomment the following line to run this script.
-# run(False)
+run(False)
