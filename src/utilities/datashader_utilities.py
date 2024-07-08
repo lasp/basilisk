@@ -1,25 +1,32 @@
 import warnings
-
+import time
+import holoviews.operation.datashader
 import numpy as np
+from colorcet import glasbey
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", category=DeprecationWarning)
     import pandas as pd
     import datashader as ds
     import holoviews as hv
-    from holoviews.operation.datashader import datashade, dynspread
+    from holoviews.operation.datashader import datashade, dynspread, spread
     from holoviews.streams import RangeXY
     from datashader.colors import Sets1to3
+    from bokeh.models import HoverTool
+    from bokeh.plotting import figure
 from Basilisk.utilities import macros
 
 
 def pull_and_format_df(path, varIdxLen):
+    startTime = time.time()
     df = pd.read_pickle(path)
     if len(np.unique(df.columns.codes[1])) is not varIdxLen:
         print("Warning: " + path + " not formatted correctly!")
         newMultIndex = pd.MultiIndex.from_product([df.columns.codes[0], list(range(varIdxLen))], names=['runNum', 'varIdx'])
-        indices = pd.Index([0,1]) # Need multiple rows for curves
+        indices = pd.Index([0, 1])  # Need multiple rows for curves
         df = df.reindex(columns=newMultIndex, index=indices)
+
+    print("Time Elapsed for pull_and_format_df: " + str( round(time.time() - startTime)) + " [s]")
     return df
 
 
@@ -31,7 +38,7 @@ def curve_per_df_component(df):
     :return:
     """
     idx = pd.IndexSlice
-    df = df.interpolate(method = "linear")
+    df = df.interpolate(method="linear")
     df_list = []
     for i in np.unique(df.columns.codes[1]):
         # Select all of the component
@@ -50,6 +57,33 @@ def curve_per_df_component(df):
 
     return df_list
 
+def curve_per_run(df):
+
+    startTime = time.time()
+    idx = pd.IndexSlice
+    print("idx:", idx)
+    df = df.interpolate(method="linear")
+    df_list = []
+    print("columns:\n", df.columns)
+    for i in np.unique(df.columns.codes[1]):
+        print("i:", i)
+
+        # Select all of the component
+        varIdx_df = df.loc[idx[:], idx[:, i]]
+
+        # Inject NaNs at the end of the run so the curves don't wrap from t_f to t_0
+        varIdx_df = pd.concat([varIdx_df, pd.DataFrame([np.nan] * varIdx_df.shape[1], index=varIdx_df.columns).T])
+
+        # Flatten values by column order
+        times = np.tile(varIdx_df.index, len(varIdx_df.columns.codes[0]))  # Repeat time by number of runs
+        varIdx_flat = varIdx_df.values.flatten('F')
+
+        # Generate a curve for each component
+        curve_df = pd.DataFrame(np.transpose([times, varIdx_flat]).tolist(), columns=['x', 'y'])
+        df_list.append(curve_df)
+
+    print("Time Elapsed for curve_per_run: " + str( round(time.time() - startTime)) + " [s]")
+    return df_list
 
 def curve_per_df_column(df):
     """
@@ -58,31 +92,34 @@ def curve_per_df_column(df):
     """
     idx = pd.IndexSlice
     df_list = []
-    for index in range(len(df.columns)):
+
+    for index in df.columns.tolist():
         try:
-            i = df.columns.codes[0][index] # Multi-Index level=0 index
-            j = df.columns.codes[1][index] # Multi-Index level=1 index
+            i = df.columns.codes[0][index]  # Multi-Index level=0 index
+            j = df.columns.codes[1][index]  # Multi-Index level=1 index
 
             # Grab the desired x and y data
-            xData = df.index.values # time [ns]
-            yData = df.loc[idx[:], idx[i, j]].values # variable data
-            runNum = np.repeat(i, len(xData))
+            x_data = df.index.values  # time [ns]
+            y_data = df.loc[idx[:], idx[i, j]].values  # variable data
+            print("try", len(x_data))
+            run_num = np.repeat(i, len(x_data))
         except:
             # Grab the desired x and y data
-            xData = df.index.values  # time [ns]
-            yData = df.loc[idx[:], idx[index]].values  # variable data
-            runNum = np.repeat(index, len(xData))
+            x_data = df.index.values  # time [ns]
+            y_data = df.loc[idx[:], idx[index]].values  # variable data
+            run_num = np.repeat(index[0], len(x_data))
 
         # Convert to two columns
-        plotData = pd.DataFrame(np.transpose([xData, yData]).tolist(), columns=['x', 'y'])#, runNum]).tolist()
-        df_list.append(plotData)
+        plot_data = (pd.DataFrame(np.transpose([x_data, y_data, run_num]).tolist(), columns=['x', 'y', 'run'])
+                     .values.tolist())
+        df_list.append(plot_data)
     return df_list
 
 
 def transform_dataframe(df_in, transforming_function):
     """
     Transforms the data in 'df_in' using the function specified in 'transforming_function'.
-    E.g. if the data in 'df_in' are position vectors rvec and the 'transforming_function' is np.linalg.norm(rvec)
+    E.322323g. if the data in 'df_in' are position vectors rvec and the 'transforming_function' is np.linalg.norm(rvec)
     then a dataframe with the norm of each position vector is returned.
     """
     num_runs = df_in.columns.levshape[0]
@@ -149,12 +186,12 @@ class DS_Plot():
     '''
 
     def __init__(self, data, title='',
-              yAxisLabel='', xAxisLabel='time [ns]',
-              macro_y=1.0, macro_x=macros.NANO2SEC,
-              cmap=Sets1to3,
-              plotObjType=hv.Curve,
-              labels=[],
-              plotFcn=curve_per_df_component):
+                 yAxisLabel='', xAxisLabel='time [ns]',
+                 macro_y=1.0, macro_x=macros.NANO2SEC,
+                 cmap=Sets1to3,
+                 plotObjType=hv.Curve,
+                 labels=[],
+                 plotFcn=curve_per_df_column):
         if type(data) is not list:
             self.data = [data]
         else:
@@ -170,7 +207,6 @@ class DS_Plot():
         self.labels = labels
         self.plotFcn = plotFcn
 
-
     def generateCurves(self):
         '''
         Generate hv.Curve or hv.Points from the provided dataframe(s)
@@ -178,6 +214,8 @@ class DS_Plot():
         Populates a dictionary with a unique identifier for each curve for curve coloring purposes
         :return: dict of hv.Curve or hv.Point objects
         '''
+
+        startTime = time.time()
         count = 0
         curves = []
         missingData = []
@@ -185,8 +223,8 @@ class DS_Plot():
         self.max = self.data[0].values.max()
 
         for i in range(len(self.data)):
-            if self.min > self.data[0].values.min() : self.min = self.data[0].values.min()
-            if self.max < self.data[0].values.max() : self.max = self.data[0].values.max()
+            if self.min > self.data[0].values.min(): self.min = self.data[0].values.min()
+            if self.max < self.data[0].values.max(): self.max = self.data[0].values.max()
             self.data[i] = self.data[i] * self.macro_y
             self.data[i].index = self.data[i].index * self.macro_x
 
@@ -195,7 +233,7 @@ class DS_Plot():
 
             # Customize the individual component curves, points, other
             for curve_df in curveList:
-                curve = self.plotObjType(curve_df)#.opts(framewise=True)
+                curve = self.plotObjType(curve_df, label=f'Curve {count}').opts(tools=["hover"])  #.opts(framewise=True)
                 curves.append(curve)
                 count += 1
 
@@ -203,8 +241,8 @@ class DS_Plot():
                 missingData.append(True)
         # Label each curve with a unique identifier
         curves = {i: curves[i] for i in range(len(curves))}
+        print("Time Elapsed for generate curves: " + str( round(time.time() - startTime)) + " [s]")
         return curves, missingData
-
 
     def generateImage(self):
         '''
@@ -217,31 +255,50 @@ class DS_Plot():
         hv.extension('bokeh')
         # Overlay these curves
         curves, missingData = self.generateCurves()
-        overlay = hv.NdOverlay(curves, kdims='k')#.opts(framewise=True)
+        overlay = hv.NdOverlay(curves, kdims='k')  #.opts(framewise=True)
 
         # Rasterize the plot using datashade()
         if np.sum(missingData) == len(self.data):
             image = hv.Text(0.5, 0.5, "All Data Missing")
         else:
+            color_key = glasbey[:1000]
             if self.min == self.max and self.min != np.nan:
-                y_range = (self.min-0.1, self.max+0.1)
-                image = dynspread(datashade(overlay, dynamic=True, streams=[RangeXY],
-                                            aggregator=ds.count_cat('k'), color_key=self.cmap,
+                y_range = (self.min - 0.1, self.max + 0.1)
+                image = dynspread(datashade(overlay, dynamic=True, streams=[RangeXY], color_key=color_key,
+                                            aggregator=ds.count_cat('k'),
                                             y_range=y_range)).opts(framewise=True)
             else:
-                image = dynspread(datashade(overlay, dynamic=True, streams=[RangeXY],
-                                            aggregator=ds.count_cat('k'), color_key=self.cmap
+                image = dynspread(datashade(overlay, dynamic=True, streams=[RangeXY], color_key=color_key,
+                                            aggregator=ds.count_cat('k'),
                                            )).opts(framewise=True)
 
         image.opts(width=960, height=540)
-        image.opts(tools=['hover'])
         image.opts(padding=0.05)
         image.opts(title=self.title, xlabel=self.xAxisLabel, ylabel=self.yAxisLabel)
 
         if not self.labels == []:
             color_key = [(name, color) for name, color in zip(self.labels, self.cmap)]
             legend = hv.NdOverlay({n: hv.Points([np.nan, np.nan], label=str(n)).opts(color=c) for n, c in color_key})
-            image = image*legend
+            image = image * legend
 
-        return image, self.title
+        hover = holoviews.operation.datashader.inspect(image)
 
+        return hover, self.title
+
+    def generateOverlay(self):
+
+        hv.extension('bokeh')
+        # Overlay these curves
+        curves, missing_data = self.generateCurves()
+        startTime = time.time()
+        overlay = hv.NdOverlay(curves, kdims=['run'])  #.opts(framewise=True)
+        raster = hv.operation.datashader.rasterize(overlay).opts(width=800)
+        highlight = hv.operation.datashader.inspect(raster)
+        hover = HoverTool(tooltips=[("run", "@run")], point_policy="follow_mouse")
+        #overlay.opts(tools=[hover])
+        layers = raster * highlight.opts(tools=[hover])
+
+        layers.opts(title=self.title, xlabel=self.xAxisLabel, ylabel=self.yAxisLabel)
+        print("Time Elapsed for generate overlay: " + str( round(time.time() - startTime)) + " [s]")
+
+        return layers, self.title

@@ -60,8 +60,8 @@ def run(time=None):
     scenarioName = "scenario_AttFeedback"
 
     monteCarlo = Controller()
-    monteCarlo.numProcess = 3 # Specify number of processes to spawn
-    runsList = [1]  # Specify the run numbers to be rerun
+    monteCarlo.numProcess = 10  # Specify number of processes to spawn
+    runsList = [678]  # Specify the run numbers to be rerun
 
     #
     # # Generic initialization
@@ -88,7 +88,7 @@ def run(time=None):
     # Step 4: Add any additional retention policies desired
     retentionPolicy = RetentionPolicy()
     retentionPolicy.logRate = int(2E9)
-    retentionPolicy.addMessageLog("attGuidMsg", ["sigma_BR"]) 
+    retentionPolicy.addMessageLog("attGuidMsg", ["sigma_BR"])
     monteCarlo.addRetentionPolicy(retentionPolicy)
 
 
@@ -97,6 +97,6 @@ def run(time=None):
 
 
 
+
 if __name__ == "__main__":
     run()
-
