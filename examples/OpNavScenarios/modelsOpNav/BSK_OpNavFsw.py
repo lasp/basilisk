@@ -434,7 +434,7 @@ class BSKFswModels():
         self.cob.imageInMsg.subscribeTo(SimBase.DynModels.cameraMod.imageOutMsg)
         self.cob.opnavCOBOutMsg = self.opnav_cob_out_msg
 
-        self.cob.threshold = 0
+        self.cob.threshold = 20
         self.cob.blurSize = 5
         self.cob.numberOfPointsBrightnessAverage = 5
 

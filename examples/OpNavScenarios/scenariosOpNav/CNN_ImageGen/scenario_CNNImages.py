@@ -182,13 +182,18 @@ def run(TheScenario, runLog):
     print("Vizard spawned with PID = " + str(TheScenario.vizard.pid))
 
     # Configure FSW mode
-    TheScenario.modeRequest = 'imageGen'
     # Initialize simulation
     TheScenario.InitializeSimulation()
-    # Configure run time and execute simulation
-    simulationTime = macros.min2nano(100.)
-    TheScenario.ConfigureStopTime(simulationTime)
     print('Starting Execution')
+    # Configure run time and execute simulation
+    TheScenario.modeRequest = 'standby'
+    TheScenario.get_DynModel().cameraMod.cameraIsOn = 0
+    TheScenario.ConfigureStopTime(macros.min2nano(10.))
+    TheScenario.ExecuteSimulation()
+
+    TheScenario.modeRequest = 'imageGen'
+    TheScenario.get_DynModel().cameraMod.cameraIsOn = 1
+    TheScenario.ConfigureStopTime(macros.min2nano(210.))
     TheScenario.ExecuteSimulation()
 
     TheScenario.vizard.kill()

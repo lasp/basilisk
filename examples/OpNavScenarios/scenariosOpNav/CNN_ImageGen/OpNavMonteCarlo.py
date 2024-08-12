@@ -66,8 +66,7 @@ var4 = "centerOfBrightness"
 def run(show_plots):
     """Main Simulation Method"""
 
-    NUMBER_OF_RUNS = 1
-    VERBOSE = True
+    NUMBER_OF_RUNS = 500
     PROCESSES = 1
     RUN = True
     POST = True
@@ -89,7 +88,7 @@ def run(show_plots):
         # Add some dispersions
         dispDict = {}
         dispDict["mu"] = 1.9
-        dispDict["a"] = ["normal", 140*1E3, 250*1E3] # 12000
+        dispDict["a"] = ["normal", 60*1E3, 10*1E3] # 12000
         dispDict["e"] = ["uniform", 0.2, 0.5]           # 0.4, 0.7
         dispDict["i"] = ["uniform", np.deg2rad(40), np.deg2rad(90)]
         dispDict["Omega"] = None
