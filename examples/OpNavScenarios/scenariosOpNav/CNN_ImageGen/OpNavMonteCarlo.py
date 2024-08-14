@@ -66,9 +66,9 @@ var4 = "centerOfBrightness"
 def run(show_plots):
     """Main Simulation Method"""
 
-    NUMBER_OF_RUNS = 500
+    NUMBER_OF_RUNS = 122
     PROCESSES = 1
-    RUN = True
+    RUN = False
     POST = True
 
     dirName = os.path.abspath(os.path.dirname(__file__)) + "/cnn_MC_data"
@@ -82,13 +82,13 @@ def run(show_plots):
         monteCarlo.setSimulationFunction(myCreationFunction)
         monteCarlo.setExecutionCount(NUMBER_OF_RUNS)
         monteCarlo.setThreadCount(PROCESSES)
-        monteCarlo.setVerbose(True)
+        monteCarlo.setVerbose(False)
         monteCarlo.setArchiveDir(dirName)
 
         # Add some dispersions
         dispDict = {}
         dispDict["mu"] = 1.9
-        dispDict["a"] = ["normal", 60*1E3, 10*1E3] # 12000
+        dispDict["a"] = ["uniform", 50*1E3, 100*1E3] # 12000
         dispDict["e"] = ["uniform", 0.2, 0.5]           # 0.4, 0.7
         dispDict["i"] = ["uniform", np.deg2rad(40), np.deg2rad(90)]
         dispDict["Omega"] = None
