@@ -66,9 +66,9 @@ var4 = "centerOfBrightness"
 def run(show_plots):
     """Main Simulation Method"""
 
-    NUMBER_OF_RUNS = 122
+    NUMBER_OF_RUNS = 100
     PROCESSES = 1
-    RUN = False
+    RUN = True
     POST = True
 
     dirName = os.path.abspath(os.path.dirname(__file__)) + "/cnn_MC_data"
@@ -88,9 +88,9 @@ def run(show_plots):
         # Add some dispersions
         dispDict = {}
         dispDict["mu"] = 1.9
-        dispDict["a"] = ["uniform", 50*1E3, 100*1E3] # 12000
-        dispDict["e"] = ["uniform", 0.2, 0.5]           # 0.4, 0.7
-        dispDict["i"] = ["uniform", np.deg2rad(40), np.deg2rad(90)]
+        dispDict["a"] = ["uniform", 70*1E3, 90*1E3] # 12000
+        dispDict["e"] = ["uniform", 0.01, 0.2]           # 0.4, 0.7
+        dispDict["i"] = ["uniform", np.deg2rad(30), np.deg2rad(90)]
         dispDict["Omega"] = None
         dispDict["omega"] = None
         dispDict["f"] = ["uniform", np.deg2rad(0), np.deg2rad(359)]

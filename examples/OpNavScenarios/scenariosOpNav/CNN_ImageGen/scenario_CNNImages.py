@@ -193,7 +193,7 @@ def run(TheScenario, runLog):
 
     TheScenario.modeRequest = 'imageGen'
     TheScenario.get_DynModel().cameraMod.cameraIsOn = 1
-    TheScenario.ConfigureStopTime(macros.min2nano(210.))
+    TheScenario.ConfigureStopTime(macros.min2nano(310.))
     TheScenario.ExecuteSimulation()
 
     TheScenario.vizard.kill()
