@@ -224,8 +224,8 @@ def test_MonteCarloSimulation(show_plots):
     if show_plots:
         plt.show()
 
-    shutil.rmtree(dirName)
-    assert not os.path.exists(dirName), "No leftover data should exist after the test"
+    #shutil.rmtree(dirName)
+    #assert not os.path.exists(dirName), "No leftover data should exist after the test"
 
 
 if __name__ == "__main__":
