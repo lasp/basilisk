@@ -1,7 +1,8 @@
 /*
  ISC License
 
- Copyright (c) 2024, University of Colorado at Boulder
+ Copyright (c) 2024, Laboratory for Atmospheric and Space Physics,
+ University of Colorado at Boulder
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -19,13 +20,11 @@
 
 #include "dynamicModels.h"
 
-DynamicsModel::DynamicsModel() = default;
-
-DynamicsModel::~DynamicsModel() = default;
-
 /*! Call the propagation function for the dynamics
-   @param StateVector inputState
-   @param StateVector propagatedState
+   @param std::array<double, 2> interval : time interval
+   @param StateVector state : initial state
+   @param double dt: time step
+   @return StateVector propagatedState
 */
 StateVector DynamicsModel::propagate(const std::array<double, 2> interval, const StateVector& state, const double dt) const {
     double t_0 = interval[0];
@@ -37,7 +36,7 @@ StateVector DynamicsModel::propagate(const std::array<double, 2> interval, const
     double N = ceil((t_f-t_0)/dt);
     for (int c=0; c < N; c++) {
         double step = std::min(dt,t_f-t);
-        X = this->rk4(this->propagator, X, t, step);
+        X = DynamicsModel::rk4(this->propagator, X, t, step);
         t = t + step;
     }
 
@@ -47,8 +46,7 @@ StateVector DynamicsModel::propagate(const std::array<double, 2> interval, const
 /*! Set the propagation function for the dynamics
    @param std::function<const StateVector(const StateVector&)>& dynamicsPropagator
 */
-void DynamicsModel::setPropagator(const std::function<const StateVector(const double, const StateVector&)>&
-        dynamicsPropagator){
+void DynamicsModel::setDynamics(const std::function<const StateVector(const double, const StateVector&)>& dynamicsPropagator){
     this->propagator = dynamicsPropagator;
 }
 
@@ -74,10 +72,10 @@ void DynamicsModel::setDynamicsMatrix(const std::function<const Eigen::MatrixXd(
     @param dt time step
     @return Eigen::VectorXd
 */
-    StateVector DynamicsModel::rk4(const std::function<const StateVector(const double, const StateVector&)>& ODEfunction,
+    StateVector DynamicsModel::rk4(std::function<const StateVector(const double, const StateVector&)> ODEfunction,
             const StateVector& X0,
             double t0,
-            double dt) const{
+            double dt) {
     double h = dt;
 
     StateVector k1 = ODEfunction(t0, X0);
@@ -85,5 +83,5 @@ void DynamicsModel::setDynamicsMatrix(const std::function<const Eigen::MatrixXd(
     StateVector k3 = ODEfunction(t0 + h/2., X0.add(k2.scale(h/2.)));
     StateVector k4 = ODEfunction(t0 + h, X0.add(k3.scale(h)));
 
-    return k1.scale(h/6.).add(k2.scale(h/3.)).add(k3.scale(h/3.)).add(k4.scale(h/6.));
+    return X0.add(k1.scale(h/6.).add(k2.scale(h/3.)).add(k3.scale(h/3.)).add(k4.scale(h/6.)));
 }
