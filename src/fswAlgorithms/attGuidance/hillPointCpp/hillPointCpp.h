@@ -22,9 +22,10 @@
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/bskLogging.h"
-#include "cMsgCInterface/EphemerisMsg_C.h"
-#include "cMsgCInterface/NavTransMsg_C.h"
-#include "cMsgCInterface/AttRefMsg_C.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
+#include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
+#include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
 #include <Eigen/Core>
 
 /*! @brief Hill Point attitude guidance class. */
@@ -37,9 +38,9 @@ public:
     void Reset(uint64_t currentSimNanos) override;              //!< Reset function
     void UpdateState(uint64_t currentSimNanos) override;        //!< Update function
 
-    NavTransMsg_C transNavInMsg;            //!< The name of the incoming attitude command
-    EphemerisMsg_C celBodyInMsg;            //!< The name of the celestial body message
-    AttRefMsg_C attRefOutMsg;               //!< The name of the output message
+    ReadFunctor<NavTransMsgPayload> transNavInMsg;                     //!< The name of the incoming attitude command
+    ReadFunctor<EphemerisMsgPayload> celBodyInMsg;            //!< The name of the celestial body message
+    Message<AttRefMsgPayload> attRefOutMsg;               //!< The name of the output message
 
     BSKLogger *bskLogger;                   //!< BSK Logging
 
