@@ -23,12 +23,11 @@
 
 /*! This method performs the module reset capability. */
 void HillPointCpp::Reset(uint64_t currentSimNanos){
-    if (!NavTransMsg_C_isLinked(&this->transNavInMsg)) {
+    // Check if the required input messages are linked
+    if (!this->transNavInMsg.isLinked()) {
         this->bskLogger->bskLog(BSK_ERROR, "hillPoint.transNavInMsg wasn't connected.");
     }
-    this->planetMsgIsLinked = EphemerisMsg_C_isLinked(&this->celBodyInMsg);
-
-    AttRefMsg_C_init(&this->attRefOutMsg);
+    this->planetMsgIsLinked = this->celBodyInMsg.isLinked();
 }
 
 /*! This method creates a orbit hill frame reference message.  The desired orientation is
@@ -37,23 +36,23 @@ void HillPointCpp::Reset(uint64_t currentSimNanos){
 void HillPointCpp::UpdateState(uint64_t currentSimNanos){
 
     /*! - zero the output message */
-    AttRefMsgPayload attRefOut = AttRefMsg_C_zeroMsgPayload();
+    AttRefMsgPayload AttRefOutBuffer = AttRefMsgPayload();
 
     /* zero the local planet ephemeris message */
-    EphemerisMsgPayload primPlanet = EphemerisMsg_C_zeroMsgPayload();  /* zero'd as default, even if not connected */
+    EphemerisMsgPayload primPlanet = EphemerisMsgPayload();  /* zero'd as default, even if not connected */
     if (this->planetMsgIsLinked) {
-        primPlanet = EphemerisMsg_C_read(&this->celBodyInMsg);
+        primPlanet = this->celBodyInMsg();
     }
-    NavTransMsgPayload navData = NavTransMsg_C_read(&this->transNavInMsg);
+    NavTransMsgPayload navData = this->transNavInMsg();
 
     /*! - Compute and store output message */
     computeHillPointingReference((Eigen::Vector3d)navData.r_BN_N,
                                  (Eigen::Vector3d)navData.v_BN_N,
                                  (Eigen::Vector3d)primPlanet.r_BdyZero_N,
                                  (Eigen::Vector3d)primPlanet.v_BdyZero_N,
-                                 &attRefOut);
+                                 &AttRefOutBuffer);
 
-    AttRefMsg_C_write(&attRefOut, &this->attRefOutMsg, this->moduleID, currentSimNanos);
+    this->attRefOutMsg.write(&AttRefOutBuffer, moduleID, currentSimNanos);
 }
 
 
