@@ -185,6 +185,3 @@ void KeplerianOrbit::change_f(){
 void KeplerianOrbit::set_mu(const double mu){
     this->mu = mu;
 }
-
-
-

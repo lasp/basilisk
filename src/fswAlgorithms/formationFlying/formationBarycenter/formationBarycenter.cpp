@@ -128,7 +128,7 @@ void FormationBarycenter::computeBaricenter() {
             orbitElements.a += this->scPayloadBuffer.at(c).massSC * tempElements.a;
             orbitElements.e += this->scPayloadBuffer.at(c).massSC * tempElements.e;
             orbitElements.i += this->scPayloadBuffer.at(c).massSC * tempElements.i;
-            
+
             OmegaSineSum += this->scPayloadBuffer.at(c).massSC * sin(tempElements.Omega);
             OmegaCosineSum += this->scPayloadBuffer.at(c).massSC * cos(tempElements.Omega);
             omegaSineSum += this->scPayloadBuffer.at(c).massSC * sin(tempElements.omega);
@@ -177,4 +177,3 @@ void FormationBarycenter::UpdateState(uint64_t CurrentSimNanos)
     this->computeBaricenter();
     this->WriteOutputMessage(CurrentSimNanos);
 }
-

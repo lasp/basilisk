@@ -67,7 +67,7 @@ public:
     void set_omega(double omega);
     void set_RAAN(double RAAN);
     void set_f(double f);
-    
+
 private:
     double mu = MU_EARTH;
     double semi_major_axis = 1E5;
@@ -96,4 +96,3 @@ private:
     void change_orbit();
     void change_f();
 };
-

@@ -37,12 +37,12 @@ class PlanetEphemeris: public SysModel {
 public:
     PlanetEphemeris();
     ~PlanetEphemeris();
-    
+
     void Reset(uint64_t CurrentSimNanos);
     void UpdateState(uint64_t CurrentSimNanos);
 
     void setPlanetNames(std::vector<std::string> planetNames);
-    
+
 public:
     std::vector<Message<SpicePlanetStateMsgPayload>*> planetOutMsgs; //!< -- vector of planet state output messages
 
