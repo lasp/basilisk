@@ -1,7 +1,8 @@
 /*
  ISC License
 
- Copyright (c) 2024, University of Colorado at Boulder
+ Copyright (c) 2024, Laboratory for Atmospheric and Space Physics,
+ University of Colorado at Boulder
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -56,15 +57,14 @@ enum class AttitudeFilterMethod {StarOnly, GyroWhenDazzled, AllMeasurements};
 class InertialAttitudeUkf: public SRukfInterface {
 public:
     InertialAttitudeUkf(AttitudeFilterMethod method);
-    ~InertialAttitudeUkf() override;
+    ~InertialAttitudeUkf() = default;
 
 private:
-    void customReset() override;
-    void readFilterMeasurements() override;
-    void writeOutputMessages(uint64_t CurrentSimNanos) override;
-    Eigen::VectorXd propagate(std::array<double, 2> interval, const Eigen::VectorXd& X0, double dt) override;
-    void customInitializeUpdate() override;
-    void customFinalizeUpdate() override;
+    void customReset() final;
+    void readFilterMeasurements() final;
+    void writeOutputMessages(uint64_t CurrentSimNanos) final;
+    void customInitializeUpdate() final;
+    void customFinalizeUpdate() final;
 
     /*! Specific read messages */
     void readRWSpeedData();

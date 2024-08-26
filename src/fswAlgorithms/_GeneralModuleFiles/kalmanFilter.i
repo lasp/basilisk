@@ -17,29 +17,35 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
-%module sunlineSRuKF
+%module kalmanFilter
 %{
-   #include "sunlineSRuKF.h"
+   #include "kalmanFilter.h"
 %}
 
 %pythoncode %{
 from Basilisk.architecture.swig_common_model import *
 %}
 
-%include "fswAlgorithms/_GeneralModuleFiles/srukfInterface.i"
+%include "swig_conly_data.i"
+%include "std_vector.i"
+%include "std_string.i"
+%include "swig_eigen.i"
+%include "sys_model.i"
 
-%include "sunlineSRuKF.h"
+%typemap(out) std::optional<Eigen::VectorXd> %{
+    if ($1.has_value()) {
+        std::optional<Eigen::VectorXd> &tmp_ov = $1;
+        {
+            Eigen::VectorXd result = tmp_ov.value();
+            $typemap(out, Eigen::VectorXd)
+        }
+    } else {
+        $result = Py_None;
+        Py_INCREF($result);
+    }
+%}
 
-%include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-struct NavAttMsg_C;
-%include "architecture/msgPayloadDefC/CSSConfigMsgPayload.h"
-struct CSSConfigMsg_C;
-%include "architecture/msgPayloadDefC/CSSUnitConfigMsgPayload.h"
-struct CSSUnitConfigMsg_C;
-%include "architecture/msgPayloadDefC/CSSArraySensorMsgPayload.h"
-struct CSSArraySensorMsg_C;
-%include "architecture/msgPayloadDefCpp/FilterMsgPayload.h"
-%include "architecture/msgPayloadDefCpp/FilterResidualsMsgPayload.h"
+%include "kalmanFilter.h"
 
 %pythoncode %{
 import sys

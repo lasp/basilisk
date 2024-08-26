@@ -1,7 +1,8 @@
 #
 #  ISC License
 #
-# Copyright (c) 2024, University of Colorado at Boulder
+#  Copyright (c) 2024, Laboratory for Atmospheric and Space Physics,
+#  University of Colorado at Boulder
 #
 #  Permission to use, copy, modify, and/or distribute this software for any
 #  purpose with or without fee is hereby granted, provided that the above
@@ -16,10 +17,7 @@
 #  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 import inspect
-import math
 import os
-import sys
-
 import numpy as np
 
 filename = inspect.getframeinfo(inspect.currentframe()).filename

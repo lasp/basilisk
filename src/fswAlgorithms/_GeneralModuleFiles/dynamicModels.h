@@ -1,7 +1,8 @@
 /*
  ISC License
 
- Copyright (c) 2024, University of Colorado at Boulder
+ Copyright (c) 2024, Laboratory for Atmospheric and Space Physics,
+ University of Colorado at Boulder
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -29,20 +30,21 @@ private:
     std::function<const StateVector(const double, const StateVector&)> propagator; //!< [-] state propagator using dynamics
     std::function<const Eigen::MatrixXd(const double, const StateVector&)> dynamicsMatrix; //!< [-] partial of dynamics wrt state
 
-    StateVector rk4(const std::function<const StateVector(const double, const StateVector&)>& ODEfunction,
+    static StateVector rk4(std::function<const StateVector(const double, const StateVector&)> ODEfunction,
             const StateVector& X0,
             double t0,
-            double dt) const;
+            double dt) ;
 
 public:
-    DynamicsModel();
-    ~DynamicsModel();
+    DynamicsModel() = default;
+    ~DynamicsModel() = default;
 
-    StateVector propagate(const std::array<double, 2>, const StateVector& state, const double dt) const;
-    void setPropagator(const std::function<const StateVector(const double, const StateVector&)>& dynamicsPropagator);
+    StateVector propagate(std::array<double, 2>, const StateVector& state, double dt) const;
+    void setDynamics(const std::function<const StateVector(const double, const StateVector&)>& dynamicsPropagator);
 
-    Eigen::MatrixXd computeDynamicsMatrix(const double time, const StateVector& state) const;
-    void setDynamicsMatrix(const std::function<const Eigen::MatrixXd(const double, const StateVector&)>& dynamicsMatrixCalculator);
+    Eigen::MatrixXd computeDynamicsMatrix(double time, const StateVector& state) const;
+    void setDynamicsMatrix(const std::function<const Eigen::MatrixXd(const double, const StateVector&)>&
+            dynamicsMatrixCalculator);
 };
 
 #endif

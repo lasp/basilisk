@@ -17,29 +17,18 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
-%module sunlineSRuKF
+%module ekfInterface
 %{
-   #include "sunlineSRuKF.h"
+   #include "ekfInterface.h"
 %}
 
 %pythoncode %{
 from Basilisk.architecture.swig_common_model import *
 %}
 
-%include "fswAlgorithms/_GeneralModuleFiles/srukfInterface.i"
+%include "kalmanFilter.i"
 
-%include "sunlineSRuKF.h"
-
-%include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-struct NavAttMsg_C;
-%include "architecture/msgPayloadDefC/CSSConfigMsgPayload.h"
-struct CSSConfigMsg_C;
-%include "architecture/msgPayloadDefC/CSSUnitConfigMsgPayload.h"
-struct CSSUnitConfigMsg_C;
-%include "architecture/msgPayloadDefC/CSSArraySensorMsgPayload.h"
-struct CSSArraySensorMsg_C;
-%include "architecture/msgPayloadDefCpp/FilterMsgPayload.h"
-%include "architecture/msgPayloadDefCpp/FilterResidualsMsgPayload.h"
+%include "ekfInterface.h"
 
 %pythoncode %{
 import sys

@@ -1,7 +1,8 @@
 #
 #  ISC License
 #
-# Copyright (c) 2024, University of Colorado at Boulder
+#  Copyright (c) 2024, Laboratory for Atmospheric and Space Physics,
+#  University of Colorado at Boulder
 #
 #  Permission to use, copy, modify, and/or distribute this software for any
 #  purpose with or without fee is hereby granted, provided that the above
@@ -16,20 +17,14 @@
 #  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 import inspect
-import math
 import os
-import sys
-
 import numpy as np
 
 filename = inspect.getframeinfo(inspect.currentframe()).filename
 path = os.path.dirname(os.path.abspath(filename))
 splitPath = path.split('fswAlgorithms')
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.patches import Ellipse
 
 color_x = 'dodgerblue'
 color_y = 'salmon'
