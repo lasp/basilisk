@@ -35,7 +35,4 @@ typedef struct {
     double rApoap;    //!< Radius if apoapsis (extra)
 } ClassicElementsMsgPayload;
 
-typedef ClassicElementsMsgPayload classicElements;
-
-
 #endif
