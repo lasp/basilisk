@@ -72,7 +72,7 @@ class BSKFswModels():
         # Define process name and default time-step for all FSW tasks defined later on
         self.processName = SimBase.FSWProcessName
         self.processTasksTimeStep = macros.sec2nano(fswRate)
-        
+
         # Create module data and module wraps
         self.hillPoint = hillPoint.hillPoint()
         self.hillPoint.ModelTag = "hillPoint"
@@ -85,7 +85,7 @@ class BSKFswModels():
 
         self.mrpFeedbackRWs = mrpFeedback.mrpFeedback()
         self.mrpFeedbackRWs.ModelTag = "mrpFeedbackRWs"
-        
+
         self.rwMotorTorque = rwMotorTorque.rwMotorTorque()
         self.rwMotorTorque.ModelTag = "rwMotorTorque"
 
@@ -122,7 +122,7 @@ class BSKFswModels():
 
         # Initialize all modules
         self.InitAllFSWObjects(SimBase)
-        
+
         # Create tasks
         SimBase.fswProc.addTask(SimBase.CreateNewTask("opNavPointTask", self.processTasksTimeStep), 20)
         SimBase.fswProc.addTask(SimBase.CreateNewTask("headingPointTask", self.processTasksTimeStep), 20)
@@ -398,14 +398,14 @@ class BSKFswModels():
         rwElAngle = np.array([40.0, 40.0, 40.0, 40.0]) * macros.D2R
         rwAzimuthAngle = np.array([45.0, 135.0, 225.0, 315.0]) * macros.D2R
         wheelJs = 50.0 / (6000.0 * math.pi * 2.0 / 60)
-        
+
         fswSetupRW.clearSetup()
         for elAngle, azAngle in zip(rwElAngle, rwAzimuthAngle):
             gsHat = (rbk.Mi(-azAngle, 3).dot(rbk.Mi(elAngle, 2))).dot(np.array([1, 0, 0]))
             fswSetupRW.create(gsHat,  # spin axis
                               wheelJs,  # kg*m^2
                               0.2)  # Nm        uMax
-        
+
         self.fswRwConfigMsg = fswSetupRW.writeConfigMessage()
 
     def SetRWMotorTorque(self, SimBase):
