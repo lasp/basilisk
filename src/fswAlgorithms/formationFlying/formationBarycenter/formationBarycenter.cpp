@@ -20,7 +20,6 @@
 
 #include "fswAlgorithms/formationFlying/formationBarycenter/formationBarycenter.h"
 #include "architecture/utilities/orbitalMotion.h"
-#include "architecture/msgPayloadDefC/ClassicElementsMsgPayload.h"
 #include <math.h>
 
 
