@@ -40,7 +40,7 @@ void EkfInterface::Reset(uint64_t currentSimNanos)
     else {
         this->processNoise.resize(this->state.getPositionStates().size(), this->state.getPositionStates().size());
     }
-
+    this->minCovarNorm = this->minCovarNorm*this->unitConversion*this->unitConversion;
     this->customReset();
 }
 
@@ -217,5 +217,5 @@ double EkfInterface::getMinimumCovarianceNormForEkf() const {
     assert(this->filterType == FilterType::Extended && "EKF minimum norm requested in a Classical implementation: "
                                                         "this is only used in an extended kalman filter to temporarily "
                                                         "use linear updates when the covariance is high");
-    return this->minCovarNorm;
+    return this->minCovarNorm/this->unitConversion/this->unitConversion;
 }
