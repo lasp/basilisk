@@ -1,0 +1,80 @@
+cflags = $
+  -fvisibility=hidden $
+  -fPIC $
+  -Wall $
+  -Wpedantic
+
+ldflags = -fPIC
+
+includes = $
+  -I../../src/
+
+pyincludes = $
+	-I/opt/homebrew/opt/python@3.12/Frameworks/Python.framework/Versions/3.12/include/python3.12 $
+	-I/Users/twisol/the-world/Projects/basilisk/.venv/lib/python3.12/site-packages/pybind11/include
+
+pypath = /opt/homebrew/opt/python@3.12/Frameworks/Python.framework/Versions/3.12/Python
+
+
+rule cc
+  command = gcc -c $
+    --std=c17 $
+    -MD -MF $out.d $
+    $cflags $
+    $includes $
+    -o $out $
+    $in
+  depfile = $out.d
+  description = Compiling C file $in
+
+rule cpp
+  command = g++ -c $
+    --std=c++20 $
+    -MD -MF $out.d $
+    $cflags $
+    $includes $
+    -o $out $
+    $in
+  depfile = $out.d
+  description = Compiling C++ file $in
+
+rule ld
+  command = g++ -bundle $
+    $ldflags $
+    -o $out $
+    $in
+  description = Linking $out
+
+rule strip
+  command = strip -x -o $out - $in
+  description = Stripping $out
+
+
+# compile object files
+build build/obj/linearAlgebra.o : cc src/linearAlgebra.c
+  cflags = $cflags -Wno-gnu-zero-variadic-macro-arguments
+
+build build/obj/rigidBodyKinematics.o : cc src/rigidBodyKinematics.c
+  cflags = $cflags -Wno-gnu-zero-variadic-macro-arguments
+
+build build/obj/module.o : cc src/module.c
+
+build build/obj/bsk_module.o : cpp src/bsk_module.cpp
+  includes = $includes $
+    $pyincludes
+  cflags = $cflags $
+    -Wno-gnu-zero-variadic-macro-arguments
+
+
+# link shared library
+build build/bin/mrp_steering.so : ld $
+    build/obj/module.o $
+    build/obj/linearAlgebra.o $
+    build/obj/rigidBodyKinematics.o $
+    build/obj/bsk_module.o
+  ldflags = $ldflags $
+    -bundle_loader $pypath
+
+
+# prepare distributable tree
+build build/dist/mrp_steering.so : strip build/bin/mrp_steering.so
