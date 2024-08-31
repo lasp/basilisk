@@ -34,10 +34,10 @@ void TimeClosestApproach::readMessages()
     FilterMsgPayload filterState = this->filterInMsg();
     auto navFilterMsg = this->navFilterMsg();
 
-    this->r_BN_N = cArray2EigenVector3d(&filterState.state[0]);
-    this->v_BN_N = cArray2EigenVector3d(&filterState.state[3]);
-    this->FilterCovariance = cArray2EigenMatrixXd(filterState.covar,6,6);
     this->numberOfStates = filterState.numberOfStates;
+    this->r_BN_N = cArray2EigenVector3d(navFilterMsg.r_BN_N);
+    this->v_BN_N = cArray2EigenVector3d(navFilterMsg.v_BN_N);
+    this->FilterCovariance = cArray2EigenMatrixXd(filterState.covar, this->numberOfStates, this->numberOfStates);
 }
 
 /*! Write output messages.
@@ -95,10 +95,13 @@ double TimeClosestApproach::computeTcaStandardDeviation() const
     Eigen::Vector3d v_BN_N_hat = this->v_BN_N.normalized();
 
     // Calculate covariance_map_to_tca
-    Eigen::VectorXd covariance_map_to_tca(6);
-    covariance_map_to_tca.head(3) = v_BN_N_hat /r_BN_N.norm();
-    covariance_map_to_tca.tail(3) = 1.0 / v_BN_N.norm() * (r_BN_N_hat - std::sin(this->FlightPathAngle) * v_BN_N_hat);
+    Eigen::VectorXd covariance_map_to_tca(this->numberOfStates);
 
+    covariance_map_to_tca.head(3) = v_BN_N_hat / r_BN_N.norm();
+    if (this->numberOfStates == 6) {
+        covariance_map_to_tca.tail(3) =
+                1.0 / v_BN_N.norm() * (r_BN_N_hat - std::sin(this->FlightPathAngle) * v_BN_N_hat);
+    }
     const double mappedCovariance = covariance_map_to_tca.transpose() * this->FilterCovariance * covariance_map_to_tca;
     const double tCA_covariance = (1.0 / std::pow(this->Ratio, 2)) * mappedCovariance;
 

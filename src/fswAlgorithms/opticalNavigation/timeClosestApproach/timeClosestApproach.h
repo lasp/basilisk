@@ -50,7 +50,7 @@ private:
 
     Eigen::Vector3d     v_BN_N;  //!< spacecraft velocity estimate in inertial coordinates
     Eigen::Vector3d     r_BN_N;  //!< spacecraft position estimate in inertial coordinates
-    Eigen::Matrix<double, 6, 6> FilterCovariance; //!< filter covariance
+    Eigen::MatrixXd FilterCovariance; //!< filter covariance
     double    FlightPathAngle=-M_PI/2;  //!< flight path angle of the spacecraft at time of read [rad]
     double    Ratio=0;     //!< ratio between relative velocity and position norms at time of read [Hz]
     int numberOfStates = 0; //!< Number of states in the filter estimate
