@@ -205,9 +205,6 @@ void EkfInterface::setFilterDynamicsMatrix(const std::function<const Eigen::Matr
     @return void
     */
 void EkfInterface::setMinimumCovarianceNormForEkf(const double infiniteNorm){
-    assert(this->filterType == FilterType::Extended && "EKF minimum norm set in a Classical implementation: this is "
-                                                        "only used in an extended kalman filter to temporarily use "
-                                                        "linear updates when the covariance is high");
     this->minCovarNorm = infiniteNorm;
 }
 
@@ -215,8 +212,5 @@ void EkfInterface::setMinimumCovarianceNormForEkf(const double infiniteNorm){
     @return double infiniteNorm
     */
 double EkfInterface::getMinimumCovarianceNormForEkf() const {
-    assert(this->filterType == FilterType::Extended && "EKF minimum norm requested in a Classical implementation: "
-                                                        "this is only used in an extended kalman filter to temporarily "
-                                                        "use linear updates when the covariance is high");
     return this->minCovarNorm/this->unitConversion/this->unitConversion;
 }
