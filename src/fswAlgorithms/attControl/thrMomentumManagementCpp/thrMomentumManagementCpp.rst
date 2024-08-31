@@ -95,7 +95,15 @@ Let :math:`h_{s,\text{min}}` be lower bound that the RW momentum dumping strateg
     }{|\boldsymbol h_{s}|}
   \end{equation}
 
-This strategy requires a thruster firing solution which creates this desired :math:`{}^{\mathcal{B}}{\Delta}\boldsymbol H` over the duration of the momentum dumping.  The goal of the RW momentum management module is to simply compute if a :math:`{}^{\mathcal{B}}{\Delta}\boldsymbol H` is required, or set it equal to zero if the RW momentum is too small.  Not that this module will only compute :math:`{}^{\mathcal{B}}{\Delta}\boldsymbol H` once.  Either it is zero or non-zero. To reuse this momentum management module, the reset() function must be called.
+If a specified momentum bias :math:`\boldsymbol{h}_d` is required instead of lowering the magnitude of the reaction wheels momenta, then the required torque is approximately
+
+.. math::
+
+  \begin{equation}
+    {}^{\mathcal{B}}{\Delta}\boldsymbol H = {}^{\mathcal{B}}\boldsymbol{h}_d - {}^{\mathcal{B}}\boldsymbol{h}_s
+  \end{equation}
+
+This strategy requires a thruster firing solution which creates this desired :math:`{}^{\mathcal{B}}{\Delta}\boldsymbol H` over the duration of the momentum dumping.  The goal of the RW momentum management module is to simply compute if a :math:`{}^{\mathcal{B}}{\Delta}\boldsymbol H` is required, or set it equal to zero if the RW momentum is too small.  Note that this module will only compute :math:`{}^{\mathcal{B}}{\Delta}\boldsymbol H` once.  Either it is zero or non-zero. To reuse this momentum management module, the Reset() function must be called.
 
 The Reset Method
 ================
