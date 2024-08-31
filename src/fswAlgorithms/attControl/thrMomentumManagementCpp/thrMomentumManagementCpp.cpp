@@ -20,7 +20,6 @@
 #include "fswAlgorithms/attControl/thrMomentumManagementCpp/thrMomentumManagementCpp.h"
 #include "architecture/utilities/linearAlgebra.h"
 #include "architecture/utilities/avsEigenSupport.h"
-#include <Eigen/Core>
 
 void ThrMomentumManagementCpp::Reset(uint64_t currentSimNanos)
 {

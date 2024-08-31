@@ -28,6 +28,8 @@
 #include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
 #include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
 
+#include "Eigen/Core"
+
 /*! @brief Module configuration message definition. */
 class ThrMomentumManagementCpp: public SysModel {
 public:
@@ -35,6 +37,7 @@ public:
     void UpdateState(uint64_t currentSimNanos) override;        //!< Update function
 
     double hs_min = 0;                                      //!< [Nms]  minimum RW cluster momentum for dumping
+    Eigen::Vector3d hd_B;
     RWArrayConfigMsgPayload rwConfigParams;             //!< [-] struct to store message containing RW config parameters in body B frame
 
     Message<CmdTorqueBodyMsgPayload> deltaHOutMsg = {};                    //!< The name of the output message
