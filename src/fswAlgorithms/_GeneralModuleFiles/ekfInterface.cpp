@@ -110,7 +110,8 @@ void EkfInterface::measurementUpdate(const MeasurementModel &measurement)
 
     /*! - Update the covariance */
     EkfInterface::updateCovariance(measurementMatrix, measurement.getMeasurementNoise(), kalmanGain);
-    if (this->covar.maxCoeff() > this->minCovarNorm || this->filterType == FilterType::Classical){
+    if ((this->covar.maxCoeff() > this->minCovarNorm && this->filterType == FilterType::Extended) ||
+    this->filterType == FilterType::Classical){
         /*! - Compute the update with a CKF if the covariance is high at the time of the update to avoid divergence*/
         EkfInterface::ckfUpdate(kalmanGain, measurementDelta, measurementMatrix);
     }
