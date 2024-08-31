@@ -32,6 +32,7 @@ void TimeClosestApproach::readMessages()
 {
     /*! - Read the input messages */
     FilterMsgPayload filterState = this->filterInMsg();
+    auto navFilterMsg = this->navFilterMsg();
 
     this->r_BN_N = cArray2EigenVector3d(&filterState.state[0]);
     this->v_BN_N = cArray2EigenVector3d(&filterState.state[3]);
