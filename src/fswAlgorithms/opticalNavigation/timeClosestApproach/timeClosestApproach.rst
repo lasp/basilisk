@@ -1,6 +1,8 @@
 Executive Summary
 -----------------
 This module computes the time of closest approach estimation and its covariance during a rectilinear flyby. It was written based on the paper "Attitude Uncertainty Quantification Of Rectilinear Asteroid Flyby For The Emirates Mission Th The Asteroid Belt" that was presented by Thibaud Teil and Riccardo Calaon in 2023.
+Because the filter may not estimate both position and velocity, the TCA module uses the navigation message as well which is populated regardless of the
+filter state vector. It then checks the size of the state to perform the covariance mapping.
 
 Message Connection Descriptions
 -------------------------------
@@ -17,6 +19,9 @@ provides information on what this message is used for.
     * - filterInMsg
       - :ref:`FilterMsgPayload`
       - Input message containing the relative spacecraft state (position and velocity) and it's covariance. "of the spacecraft with respect to the small body, estimated from a filter"
+    * - navFilterMsg
+      - :ref:`NavTransMsgPayload`
+      - Input message containing the spacecraft navigation information. All information is present regardless of what the filter estimates.
     * - tcaOutMsg
       - :ref:`TimeClosestApproachMsgPayload`
       - Output time of closest approach message containing time of closest approach during the flyby and the covariance.
@@ -40,7 +45,8 @@ The following equation solves for time of closest approach uncertainty where :ma
 .. math::
     \sigma_{t_{CA}}^2 = \frac{1}{f_0^2}  \left[ \frac{\mathbf{\hat{v}}^T}{\ \mathbf{r} } \ \frac{{1}}{ \mathbf{v} } \  \left( \mathbf{\hat{r}}^T - \sin \gamma_0 \mathbf{\hat{v}}^ T \right)] [{P}] (t) [\left[ \frac{\mathbf{\hat{v}}^T}{\ \mathbf{r} } \ \frac{{1}}{\ \mathbf{v} } \  \left( \mathbf{\hat{r}}^T - \sin\gamma_0 \mathbf{\hat{v}}^ T \right)]^T
 
-
+The covariance mapping only occurs with the position components if the covariance is a 3x3 matrix, meaning the filter only
+estimated the position
 
 
 Module Assumptions and Limitations
