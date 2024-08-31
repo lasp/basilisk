@@ -37,6 +37,7 @@ void TimeClosestApproach::readMessages()
     this->r_BN_N = cArray2EigenVector3d(&filterState.state[0]);
     this->v_BN_N = cArray2EigenVector3d(&filterState.state[3]);
     this->FilterCovariance = cArray2EigenMatrixXd(filterState.covar,6,6);
+    this->numberOfStates = filterState.numberOfStates;
 }
 
 /*! Write output messages.

@@ -53,6 +53,7 @@ private:
     Eigen::Matrix<double, 6, 6> FilterCovariance; //!< filter covariance
     double    FlightPathAngle=-M_PI/2;  //!< flight path angle of the spacecraft at time of read [rad]
     double    Ratio=0;     //!< ratio between relative velocity and position norms at time of read [Hz]
+    int numberOfStates = 0; //!< Number of states in the filter estimate
 };
 
 #endif
