@@ -48,8 +48,12 @@ void ThrMomentumManagementCpp::UpdateState(uint64_t currentSimNanos)
         }
 
         Eigen::Vector3d Delta_H_B = Eigen::Vector3d::Zero();
-        if (double hs = hs_B.norm(); hs >= this->hs_min) {
-            Delta_H_B = - hs_B * (hs - this->hs_min) / hs;
+        if (this->hd_B.norm() > 0) {
+            Delta_H_B = this->hd_B - hs_B;
+        } else {
+            if (double hs = hs_B.norm(); hs >= this->hs_min) {
+                Delta_H_B = - hs_B * (hs - this->hs_min) / hs;
+            }
         }
 
         CmdTorqueBodyMsgPayload controlOutMsg = this->deltaHOutMsg.zeroMsgPayload;
