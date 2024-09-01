@@ -16,7 +16,7 @@ pyincludes = $
 pypath = /opt/homebrew/opt/python@3.12/Frameworks/Python.framework/Versions/3.12/Python
 
 
-rule cc
+rule build_c_object
   command = gcc -c $
     --std=c17 $
     -MD -MF $out.d $
@@ -27,7 +27,7 @@ rule cc
   depfile = $out.d
   description = Compiling C file $in
 
-rule cpp
+rule build_cpp_object
   command = g++ -c $
     --std=c++20 $
     -MD -MF $out.d $
@@ -38,7 +38,7 @@ rule cpp
   depfile = $out.d
   description = Compiling C++ file $in
 
-rule ld
+rule link_shared_library
   command = g++ -bundle $
     $ldflags $
     -o $out $
@@ -49,32 +49,47 @@ rule strip
   command = strip -x -o $out - $in
   description = Stripping $out
 
+rule copy
+  command = cp $in $out
+  description = Copying $out
 
-# compile object files
-build build/obj/linearAlgebra.o : cc src/linearAlgebra.c
+rule hardlink
+  command = ln -f $in $out
+  description = Hard-linking $out
+
+rule link_static_library
+  command = ar -r -c $out $in
+  description = Archiving $out
+
+
+# math support library
+build build/obj/linearAlgebra.o : build_c_object src/linearAlgebra.c
   cflags = $cflags -Wno-gnu-zero-variadic-macro-arguments
-
-build build/obj/rigidBodyKinematics.o : cc src/rigidBodyKinematics.c
+build build/obj/rigidBodyKinematics.o : build_c_object src/rigidBodyKinematics.c
   cflags = $cflags -Wno-gnu-zero-variadic-macro-arguments
+build build/lib/bskmath.a : link_static_library $
+  build/obj/linearAlgebra.o $
+  build/obj/rigidBodyKinematics.o
 
-build build/obj/module.o : cc src/module.c
+# core steering logic
+build build/obj/module.o : build_c_object src/module.c
+build build/lib/mrp_steering.a : link_static_library $
+  build/obj/module.o
 
-build build/obj/bsk_module.o : cpp src/bsk_module.cpp
+# basilisk module w/ python bindings
+build build/obj/bsk_module.o : build_cpp_object src/bsk_module.cpp
   includes = $includes $
     $pyincludes
   cflags = $cflags $
     -Wno-gnu-zero-variadic-macro-arguments
-
-
-# link shared library
-build build/bin/mrp_steering.so : ld $
-    build/obj/module.o $
-    build/obj/linearAlgebra.o $
-    build/obj/rigidBodyKinematics.o $
+build build/lib/mrp_steering.so : link_shared_library $
+    build/lib/bskmath.a $
+    build/lib/mrp_steering.a $
     build/obj/bsk_module.o
   ldflags = $ldflags $
     -bundle_loader $pypath
 
-
 # prepare distributable tree
-build build/dist/mrp_steering.so : strip build/bin/mrp_steering.so
+build build/dist/bskmath.a : hardlink build/lib/bskmath.a
+build build/dist/mrp_steering.a : hardlink build/lib/mrp_steering.a
+build build/dist/mrp_steering.so : strip build/lib/mrp_steering.so
