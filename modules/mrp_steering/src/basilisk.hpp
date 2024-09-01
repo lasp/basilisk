@@ -148,7 +148,7 @@ namespace bsk {
             return std::string(type_of<carrier>());
         }
 
-        struct __attribute__((visibility("default"))) plug final : public bsk::plug {
+        struct plug final : public bsk::plug {
             message_header const* const header;
             carrier const* const payload;
 
@@ -207,7 +207,7 @@ namespace bsk {
             return schema<T>::repr() + "[" + std::to_string(length) + "]";
         }
 
-        struct __attribute__((visibility("default"))) plug final : public bsk::plug {
+        struct plug final : public bsk::plug {
             message_header const* const header;
             carrier const* const payload;
             std::size_t const length;
@@ -291,7 +291,7 @@ namespace bsk {
             return schema<T>::repr() + "[" + std::to_string(N) + "]";
         }
 
-        struct __attribute__((visibility("default"))) plug final : public bsk::plug {
+        struct plug final : public bsk::plug {
             message_header const* const header;
             carrier const* const payload;
 

@@ -1,5 +1,4 @@
-#include "../src/module.h"
-
+#include "module.h"
 #include "basilisk.hpp"
 
 #include <pybind11/pybind11.h>
@@ -28,7 +27,7 @@ struct bsk::schema<foo> final {
              + " }";
     }
 
-    struct __attribute__((visibility("default"))) plug : public bsk::plug {
+    struct plug : public bsk::plug {
         bsk::message_header const* const header;
         carrier const* const payload;
 
@@ -94,7 +93,7 @@ private:
     bsk::read_functor<foo> fooInMsg;
 
     bsk::message<double> volumeOutMsg = 0.0;
-    bsk::message<foo> fooOutMsg = {0, 0.0f};
+    bsk::message<foo> fooOutMsg = {42, 101.0f};
 
 public:
     bsk::inputs getInputs() override {
@@ -120,7 +119,7 @@ public:
 };
 
 // mrp_steering basilisk adapter
-class __attribute__((visibility("default"))) BskMrpSteering final : public bsk::SysModel {
+class BskMrpSteering final : public bsk::SysModel {
 private:
     //! Current attitude error estimate (MRPs) of B relative to R
     bsk::read_functor<double[3]> sigma_BR;
@@ -157,122 +156,24 @@ public:
 };
 
 
-// common basilisk pybind glue
 namespace py = pybind11;
 
-/*! @brief A trampoline for implementations of SysModel within Python */
-class PySysModel final : public bsk::SysModel {
-public:
-    /* Inherit the constructors */
-    using bsk::SysModel::SysModel;
-
-    void SelfInit() override {
-        PYBIND11_OVERRIDE(void, bsk::SysModel, SelfInit, /*no parameters*/);
-    }
-    void IntegratedInit() override {
-        PYBIND11_OVERRIDE(void, bsk::SysModel, IntegratedInit, /*no parameters*/);
-    }
-    void UpdateState(uint64_t CurrentSimNanos) override {
-        PYBIND11_OVERRIDE(void, bsk::SysModel, UpdateState, CurrentSimNanos);
-    }
-    void Reset(uint64_t CurrentSimNanos) override {
-        PYBIND11_OVERRIDE(void, bsk::SysModel, Reset, CurrentSimNanos);
-    }
-    bsk::inputs getInputs() override {
-        // TODO: actually, how should `getInputs` work for Python modules?
-        // we need some way for a python module to allocate typed primitive
-        // pointers that can reference data from C++ modules
-        PYBIND11_OVERRIDE(bsk::inputs, bsk::SysModel, getInputs, /*no parameters*/);
-    }
-    bsk::outputs getOutputs() const override {
-        // TODO: actually, how should `getOutputs` work for Python modules?
-        // we need some way for a python module to allocate typed primitives
-        // that are referencable from C++ modules
-        PYBIND11_OVERRIDE(bsk::outputs, bsk::SysModel, getOutputs, /*no parameters*/);
-    }
-};
-
-void subscribeToPy(bsk::socket& target, py::object source) {
-    try {
-        // if the source is a regular plug, drop into the core subscription logic.
-        return target.subscribeTo(*source.cast<std::shared_ptr<bsk::plug>>());
-    } catch (py::cast_error const& ex) {
-        // otherwise, it's assumed to be a further structured Python object.
-        // that means we need entry.second to be a bsk::inputs.
-        auto components = dynamic_cast<bsk::inputs*>(&target);
-        if (components == nullptr) throw bsk::mismatched_schemas_error();
-
-        for (auto entry : *components) {
-            subscribeToPy(*entry.second, source[py::cast(entry.first)]);
-        }
-    }
-}
-
 PYBIND11_MODULE(mrp_steering, m) {
-    // Basilisk types (more common basilisk pybind glue)
-    {
-        py::class_<bsk::plug, std::shared_ptr<bsk::plug>>(m, "Plug")
-            .def("__repr__", &bsk::plug::repr)
-            .def("__getitem__", py::overload_cast<std::string>(&bsk::plug::focus, py::const_))
-            .def("__getitem__", py::overload_cast<std::size_t>(&bsk::plug::focus, py::const_))
-            .def("__getitem__", [](bsk::plug const& self, py::slice range) {
-                self.focus(range.attr("start").cast<size_t>(), range.attr("stop").cast<size_t>());
-            })
-            .def_property_readonly("indices", &bsk::plug::focusable_indices)
-            .def_property_readonly("names", &bsk::plug::focusable_names);
+    m.import("basilisk");
 
-        py::class_<bsk::socket, std::shared_ptr<bsk::socket>>(m, "Socket")
-            .def("__repr__", &bsk::socket::repr)
-            .def("__getitem__", py::overload_cast<std::string>(&bsk::socket::focus))
-            .def("__getitem__", py::overload_cast<std::size_t>(&bsk::socket::focus))
-            .def("__getitem__", [](bsk::socket& self, py::slice range) {
-                self.focus(range.attr("start").cast<size_t>(), range.attr("stop").cast<size_t>());
-            })
-            .def_property_readonly("indices", &bsk::socket::focusable_indices)
-            .def_property_readonly("names", &bsk::socket::focusable_names)
-            .def("subscribeTo", &subscribeToPy);
+    py::class_<BskFooModule, bsk::SysModel, std::shared_ptr<BskFooModule>>(m, "FooModule", py::module_local())
+        .def(py::init<>());
 
-        py::class_<bsk::SysModel, std::shared_ptr<bsk::SysModel>, PySysModel>(m, "SysModel")
-            .def(py::init<>())
-            .def("SelfInit", &bsk::SysModel::SelfInit)
-            .def("IntegratedInit", &bsk::SysModel::IntegratedInit)
-            .def("UpdateState", &bsk::SysModel::UpdateState)
-            .def("Reset", &bsk::SysModel::Reset)
-            .def_readwrite("ModelTag", &bsk::SysModel::ModelTag)
-            .def_readwrite("CallCounts", &bsk::SysModel::CallCounts)
-            .def_readwrite("RNGSeed", &bsk::SysModel::RNGSeed)
-            .def_readwrite("moduleID", &bsk::SysModel::moduleID)
-            .def("subscribeTo", [](bsk::SysModel& self, py::object source) {
-                auto inputs = self.getInputs();
-                subscribeToPy(inputs, source);
-            })
-            .def_property_readonly("inputs", [](bsk::SysModel& self) -> std::shared_ptr<bsk::socket> {
-                return std::make_shared<bsk::inputs>(self.getInputs());
-            })
-            .def_property_readonly("outputs", [](bsk::SysModel& self) -> std::shared_ptr<bsk::plug> {
-                return std::make_shared<bsk::outputs>(self.getOutputs());
-            });
-    }
+    auto module = py::class_<BskMrpSteering, std::shared_ptr<BskMrpSteering>, bsk::SysModel>(m, "MrpSteering", py::is_final(), py::module_local())
+        .def(py::init<>())
+        .def_readwrite("parameters", &BskMrpSteering::params);
 
-    // more custom schema demo
-    {
-        py::class_<BskFooModule, bsk::SysModel, std::shared_ptr<BskFooModule>>(m, "FooModule", py::module_local())
-            .def(py::init<>());
-    }
+    py::class_<MrpSteering>(module, "Parameters", py::is_final(), py::module_local())
+        .def(py::init<>())
+        .def_readwrite("K1", &MrpSteering::K1)
+        .def_readwrite("K3", &MrpSteering::K3)
+        .def_readwrite("omega_max", &MrpSteering::omega_max)
+        .def_readwrite("ignoreOuterLoopFeedforward", &MrpSteering::ignoreOuterLoopFeedforward);
 
-    // more mrp_steering basilisk adapter
-    {
-        auto module = py::class_<BskMrpSteering, std::shared_ptr<BskMrpSteering>, bsk::SysModel>(m, "MrpSteering", py::is_final(), py::module_local())
-            .def(py::init<>())
-            .def_readwrite("parameters", &BskMrpSteering::params);
-
-        py::class_<MrpSteering>(module, "Parameters", py::is_final(), py::module_local())
-            .def(py::init<>())
-            .def_readwrite("K1", &MrpSteering::K1)
-            .def_readwrite("K3", &MrpSteering::K3)
-            .def_readwrite("omega_max", &MrpSteering::omega_max)
-            .def_readwrite("ignoreOuterLoopFeedforward", &MrpSteering::ignoreOuterLoopFeedforward);
-
-        m.def("MRPSteeringLaw", &MRPSteeringLaw);
-    }
+    m.def("MRPSteeringLaw", &MRPSteeringLaw);
 }
