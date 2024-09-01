@@ -382,7 +382,7 @@ namespace bsk {
     };
 
     template<typename T>
-    class message final : public to_plug {
+    class message final {
     private:
         T payload;
         message_header header;
@@ -398,11 +398,7 @@ namespace bsk {
             return this->payload;
         }
 
-        std::shared_ptr<bsk::plug> to_shared_plug() const override {
-            return std::make_shared<plug_for<T>>(&this->header, &this->payload);
-        }
-
-        operator std::shared_ptr<plug>() const {
+        std::shared_ptr<bsk::plug> to_shared_plug() const {
             return std::make_shared<plug_for<T>>(&this->header, &this->payload);
         }
     };
@@ -428,38 +424,39 @@ namespace bsk {
                 : std::forward<T const>(alternative);
         }
 
-        operator std::shared_ptr<socket>() {
+        std::shared_ptr<socket> to_shared_socket() {
             return std::make_shared<socket_for<T>>(&this->header, &this->payload);
         }
     };
 }
 
 namespace bsk {
-    class outputs final : public plug, to_plug {
+    class outputs final : public plug {
     private:
         std::unordered_map<std::string, std::shared_ptr<plug>> components;
 
     public:
-        // outputs()
-        //     : outputs({})
-        // {}
+        struct component {
+            std::string key;
+            std::shared_ptr<plug> value;
 
-        // outputs(std::initializer_list<std::pair<std::string const, bsk::to_plug&&>> args) {
-        //     for (auto& arg : args) {
-        //         components[arg.first] = arg.second.to_shared_plug();
-        //     }
-        // }
+            template<typename T>
+            component(char const* key, bsk::message<T> const& value);
 
-        outputs(std::initializer_list<decltype(components)::value_type> components)
-            : components(components)
-        {}
+            component(char const* key, bsk::outputs&& value);
+        };
 
-        std::shared_ptr<bsk::plug> to_shared_plug() const override {
-            return std::make_shared<outputs>(*this);
+
+        outputs(std::initializer_list<component> components)
+            : components(components.size())
+        {
+            for (auto component : components) {
+                this->components[component.key] = component.value;
+            }
         }
 
-        operator std::shared_ptr<plug>() const {
-            return std::make_shared<outputs>(*this);
+        std::shared_ptr<bsk::plug> to_shared_plug() && {
+            return std::make_shared<outputs>(std::move(*this));
         }
 
         void insert(std::string const& key, std::shared_ptr<plug> value) {
@@ -517,21 +514,42 @@ namespace bsk {
         }
     };
 
+    template<typename T>
+    outputs::component::component(char const* key, bsk::message<T> const& value)
+        : key(key), value(value.to_shared_plug())
+    {}
+
+    outputs::component::component(char const* key, bsk::outputs&& value)
+        : key(key), value(std::move(value).to_shared_plug())
+    {}
+
+
     class inputs final : public socket {
     private:
         std::unordered_map<std::string, std::shared_ptr<socket>> components;
 
     public:
-        inputs()
-            : inputs({})
-        {}
+        struct component {
+            std::string key;
+            std::shared_ptr<socket> value;
 
-        inputs(std::initializer_list<decltype(components)::value_type> args)
-            : components(args)
-        {}
+            template<typename T>
+            component(char const* key, bsk::read_functor<T>& value);
 
-        operator std::shared_ptr<socket>() const {
-            return std::make_shared<inputs>(*this);
+            component(char const* key, bsk::inputs&& value);
+        };
+
+
+        inputs(std::initializer_list<component> components)
+            : components(components.size())
+        {
+            for (auto component : components) {
+                this->components[component.key] = component.value;
+            }
+        }
+
+        std::shared_ptr<bsk::socket> to_shared_socket() && {
+            return std::make_shared<inputs>(std::move(*this));
         }
 
         void insert(std::string const& key, std::shared_ptr<socket> value) {
@@ -600,6 +618,15 @@ namespace bsk {
             return std::move(buf).str();
         }
     };
+
+    template<typename T>
+    inputs::component::component(char const* key, bsk::read_functor<T>& value)
+        : key(key), value(value.to_shared_socket())
+    {}
+
+    inputs::component::component(char const* key, bsk::inputs&& value)
+        : key(key), value(std::move(value).to_shared_socket())
+    {}
 }
 
 namespace bsk {

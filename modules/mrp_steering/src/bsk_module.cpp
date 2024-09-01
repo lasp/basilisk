@@ -105,10 +105,10 @@ public:
     }
 
     bsk::outputs getOutputs() const override {
-        return bsk::outputs {
-            std::pair {"foo", this->fooOutMsg},
-            std::pair {"bar", bsk::outputs {
-                std::pair {"baz", this->volumeOutMsg},
+        return {
+            {"foo", this->fooOutMsg},
+            {"bar", {
+                {"baz", this->volumeOutMsg},
             }},
         };
     }
