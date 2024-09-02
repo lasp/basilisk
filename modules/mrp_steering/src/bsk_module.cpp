@@ -12,7 +12,7 @@
 // Python support for binding Basilisk modules into Python.
 namespace bsk::py {
     template<typename T>
-    auto module(pybind11::module& m, char const name[]) {
+    auto module_(pybind11::module_& m, char const name[]) {
         return pybind11::class_<T, bsk::SysModel, std::shared_ptr<T>>(m, name, pybind11::is_final(), pybind11::module_local());
     }
 }
@@ -172,10 +172,10 @@ namespace py = pybind11;
 PYBIND11_MODULE(mrp_steering, m) {
     m.import("basilisk");
 
-    bsk::py::module<bsk::modules::demo>(m, "DemoModule")
+    bsk::py::module_<bsk::modules::demo>(m, "DemoModule")
         .def(py::init<>());
 
-    auto module = bsk::py::module<bsk::modules::mrp_steering>(m, "MrpSteeringModule")
+    auto module = bsk::py::module_<bsk::modules::mrp_steering>(m, "MrpSteeringModule")
         .def(py::init<>())
         .def_readwrite("parameters", &bsk::modules::mrp_steering::params);
 
