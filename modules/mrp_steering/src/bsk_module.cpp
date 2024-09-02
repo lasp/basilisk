@@ -9,18 +9,58 @@
 #include <memory>
 #include <string>
 
+// Python support for binding Basilisk modules into Python.
+namespace bsk::py {
+    template<typename T>
+    auto module(pybind11::module& m, char const name[]) {
+        return pybind11::class_<T, bsk::SysModel, std::shared_ptr<T>>(m, name, pybind11::is_final(), pybind11::module_local());
+    }
+}
+
 // custom schema demo
-struct foo {
-    int x;
-    float y;
-};
+namespace bsk::modules {
+    struct demo final : public bsk::SysModel {
+        struct foo {
+            int x;
+            float y;
+        };
+
+        bsk::inputs getInputs() override {
+            return {
+                {"rate", this->rateInMsg},
+                {"foo", this->fooInMsg},
+            };
+        }
+
+        bsk::outputs getOutputs() const override {
+            return {
+                {"foo", this->fooOutMsg},
+                {"bar", {
+                    {"baz", this->volumeOutMsg},
+                }},
+            };
+        }
+
+        void UpdateState(std::uint64_t CurrentSimNanos) override {
+            *this->volumeOutMsg += this->rateInMsg.getOrElse(4.2) * CurrentSimNanos;
+            *this->fooOutMsg = *this->fooInMsg;
+        }
+
+    private:
+        bsk::read_functor<float> rateInMsg;
+        bsk::read_functor<foo> fooInMsg;
+
+        bsk::message<double> volumeOutMsg = 0.0;
+        bsk::message<foo> fooOutMsg = {42, 101.0f};
+    };
+}
 
 template<>
-struct bsk::schema<foo> final {
-    using carrier = foo;
+struct bsk::schema<bsk::modules::demo::foo> final {
+    using carrier = bsk::modules::demo::foo;
 
     static std::string repr() {
-        return "foo { \"x\": "
+        return "bsk::modules::demo::foo { \"x\": "
              + bsk::schema<int>::repr()
              + ", \"y\": "
              + bsk::schema<float>::repr()
@@ -85,75 +125,46 @@ struct bsk::schema<foo> final {
     };
 };
 
-static_assert(bsk::is_schema<bsk::schema<foo>>);
-
-struct BskFooModule final : public bsk::SysModel {
-private:
-    bsk::read_functor<float> rateInMsg;
-    bsk::read_functor<foo> fooInMsg;
-
-    bsk::message<double> volumeOutMsg = 0.0;
-    bsk::message<foo> fooOutMsg = {42, 101.0f};
-
-public:
-    bsk::inputs getInputs() override {
-        return {
-            {"rate", this->rateInMsg},
-            {"foo", this->fooInMsg},
-        };
-    }
-
-    bsk::outputs getOutputs() const override {
-        return {
-            {"foo", this->fooOutMsg},
-            {"bar", {
-                {"baz", this->volumeOutMsg},
-            }},
-        };
-    }
-
-    void UpdateState(std::uint64_t CurrentSimNanos) override {
-        *this->volumeOutMsg += this->rateInMsg.getOrElse(4.2) * CurrentSimNanos;
-        *this->fooOutMsg = *this->fooInMsg;
-    }
-};
+static_assert(bsk::is_schema<bsk::schema<bsk::modules::demo::foo>>);
 
 // mrp_steering basilisk adapter
-class BskMrpSteering final : public bsk::SysModel {
-private:
-    //! Current attitude error estimate (MRPs) of B relative to R
-    bsk::read_functor<double[3]> sigma_BR;
-    //! [r/s]   Desired body rate relative to R
-    bsk::message<double[3]> omega_BastR_B = {0.0};
-    //! [r/s^2] Body-frame derivative of omega_BastR_B
-    bsk::message<double[3]> omegap_BastR_B = {0.0};
+namespace bsk::modules {
+    class mrp_steering final : public bsk::SysModel {
+    private:
+        //! Current attitude error estimate (MRPs) of B relative to R
+        bsk::read_functor<double[3]> sigma_BR;
+        //! [r/s]   Desired body rate relative to R
+        bsk::message<double[3]> omega_BastR_B = {0.0};
+        //! [r/s^2] Body-frame derivative of omega_BastR_B
+        bsk::message<double[3]> omegap_BastR_B = {0.0};
 
-public:
-    MrpSteering params;
+    public:
+        ::MrpSteering params;
 
-    bsk::inputs getInputs() override {
-        return {
-            {"sigma_BR", this->sigma_BR},
-        };
-    }
+        bsk::inputs getInputs() override {
+            return {
+                {"sigma_BR", this->sigma_BR},
+            };
+        }
 
-    bsk::outputs getOutputs() const override {
-        return {
-            {"omega_BastR_B", this->omega_BastR_B},
-            {"omegap_BastR_B", this->omegap_BastR_B},
-        };
-    }
+        bsk::outputs getOutputs() const override {
+            return {
+                {"omega_BastR_B", this->omega_BastR_B},
+                {"omegap_BastR_B", this->omegap_BastR_B},
+            };
+        }
 
-    void UpdateState(std::uint64_t CurrentSimNanos) override {
-        if (!this->sigma_BR.isLinked()) throw "TODO";
+        void UpdateState(std::uint64_t CurrentSimNanos) override {
+            if (!this->sigma_BR.isLinked()) throw "TODO";
 
-        MRPSteeringLaw(
-            &this->params,
-            *this->sigma_BR,
-            *this->omega_BastR_B,
-            *this->omegap_BastR_B );
-    }
-};
+            MRPSteeringLaw(
+                &this->params,
+                *this->sigma_BR,
+                *this->omega_BastR_B,
+                *this->omegap_BastR_B );
+        }
+    };
+}
 
 
 namespace py = pybind11;
@@ -161,12 +172,12 @@ namespace py = pybind11;
 PYBIND11_MODULE(mrp_steering, m) {
     m.import("basilisk");
 
-    py::class_<BskFooModule, bsk::SysModel, std::shared_ptr<BskFooModule>>(m, "FooModule", py::module_local())
+    bsk::py::module<bsk::modules::demo>(m, "DemoModule")
         .def(py::init<>());
 
-    auto module = py::class_<BskMrpSteering, std::shared_ptr<BskMrpSteering>, bsk::SysModel>(m, "MrpSteering", py::is_final(), py::module_local())
+    auto module = bsk::py::module<bsk::modules::mrp_steering>(m, "MrpSteeringModule")
         .def(py::init<>())
-        .def_readwrite("parameters", &BskMrpSteering::params);
+        .def_readwrite("parameters", &bsk::modules::mrp_steering::params);
 
     py::class_<MrpSteering>(module, "Parameters", py::is_final(), py::module_local())
         .def(py::init<>())

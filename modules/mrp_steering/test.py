@@ -1,7 +1,7 @@
 # run as `env PYTHONPATH=build/dist/ python3 test.py`
 import mrp_steering as mrp
 
-m = mrp.FooModule()
+m = mrp.DemoModule()
 
 print(m)
 print("Inputs:", m.inputs)
