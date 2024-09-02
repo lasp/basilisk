@@ -7,11 +7,11 @@ cflags = $
 ldflags = -fPIC
 
 includes = $
-  -I../../src/
+  -isystem ../../src/
 
 pyincludes = $
-	-I/opt/homebrew/opt/python@3.12/Frameworks/Python.framework/Versions/3.12/include/python3.12 $
-	-I/Users/twisol/the-world/Projects/basilisk/.venv/lib/python3.12/site-packages/pybind11/include
+	-isystem /opt/homebrew/opt/python@3.12/Frameworks/Python.framework/Versions/3.12/include/python3.12 $
+	-isystem /Users/twisol/the-world/Projects/basilisk/.venv/lib/python3.12/site-packages/pybind11/include
 
 pypath = /opt/homebrew/opt/python@3.12/Frameworks/Python.framework/Versions/3.12/Python
 
@@ -64,9 +64,7 @@ rule link_static_library
 
 # math support library
 build build/obj/linearAlgebra.o : build_c_object src/linearAlgebra.c
-  cflags = $cflags -Wno-gnu-zero-variadic-macro-arguments
 build build/obj/rigidBodyKinematics.o : build_c_object src/rigidBodyKinematics.c
-  cflags = $cflags -Wno-gnu-zero-variadic-macro-arguments
 build build/lib/bskmath.a : link_static_library $
   build/obj/linearAlgebra.o $
   build/obj/rigidBodyKinematics.o
@@ -75,8 +73,6 @@ build build/lib/bskmath.a : link_static_library $
 build build/obj/basilisk.o : build_cpp_object src/basilisk.cpp
   includes = $includes $
     $pyincludes
-  cflags = $cflags $
-    -Wno-gnu-zero-variadic-macro-arguments
 build build/lib/basilisk.so : link_shared_library build/obj/basilisk.o
   ldflags = $ldflags $
     -bundle_loader $pypath
@@ -90,8 +86,6 @@ build build/lib/mrp_steering.a : link_static_library $
 build build/obj/bsk_module.o : build_cpp_object src/bsk_module.cpp
   includes = $includes $
     $pyincludes
-  cflags = $cflags $
-    -Wno-gnu-zero-variadic-macro-arguments
 build build/lib/mrp_steering.so : link_shared_library $
     build/lib/bskmath.a $
     build/lib/mrp_steering.a $
