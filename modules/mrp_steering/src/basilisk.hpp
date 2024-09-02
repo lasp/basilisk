@@ -377,10 +377,6 @@ namespace bsk {
         // TODO: add metadata
     };
 
-    struct to_plug {
-        virtual std::shared_ptr<bsk::plug> to_shared_plug() const = 0;
-    };
-
     template<typename T>
     class message final {
     private:
