@@ -441,9 +441,9 @@ namespace bsk {
             std::shared_ptr<plug> value;
 
             template<typename T>
-            component(char const* key, bsk::message<T> const& value);
+            component(std::string&& key, bsk::message<T> const& value);
 
-            component(char const* key, bsk::outputs&& value);
+            component(std::string&& key, bsk::outputs&& value);
         };
 
 
@@ -515,11 +515,11 @@ namespace bsk {
     };
 
     template<typename T>
-    outputs::component::component(char const* key, bsk::message<T> const& value)
+    outputs::component::component(std::string&& key, bsk::message<T> const& value)
         : key(key), value(value.to_shared_plug())
     {}
 
-    outputs::component::component(char const* key, bsk::outputs&& value)
+    outputs::component::component(std::string&& key, bsk::outputs&& value)
         : key(key), value(std::move(value).to_shared_plug())
     {}
 
@@ -534,17 +534,17 @@ namespace bsk {
             std::shared_ptr<socket> value;
 
             template<typename T>
-            component(char const* key, bsk::read_functor<T>& value);
+            component(std::string&& key, bsk::read_functor<T>& value);
 
-            component(char const* key, bsk::inputs&& value);
+            component(std::string&& key, bsk::inputs&& value);
         };
 
 
         inputs(std::initializer_list<component> components)
             : components(components.size())
         {
-            for (auto component : components) {
-                this->components[component.key] = component.value;
+            for (auto&& component : components) {
+                this->components[component.key] = std::move(component.value);
             }
         }
 
@@ -620,11 +620,11 @@ namespace bsk {
     };
 
     template<typename T>
-    inputs::component::component(char const* key, bsk::read_functor<T>& value)
+    inputs::component::component(std::string&& key, bsk::read_functor<T>& value)
         : key(key), value(value.to_shared_socket())
     {}
 
-    inputs::component::component(char const* key, bsk::inputs&& value)
+    inputs::component::component(std::string&& key, bsk::inputs&& value)
         : key(key), value(std::move(value).to_shared_socket())
     {}
 }
