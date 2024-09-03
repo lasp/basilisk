@@ -30,7 +30,7 @@ fileName = os.path.basename(os.path.splitext(__file__)[0])
 
 @pytest.mark.parametrize("position", [[-5e7, 7.5e6, 5e5], [-5e6, 7e6, 4e5]])  # m
 @pytest.mark.parametrize("velocity", [[2e4, 0, 0], [1e4, 1e3, 2e2]])  # m/s
-@pytest.mark.parametrize("filter_covariance", [np.eye(6),  np.ones([6, 6])])
+@pytest.mark.parametrize("filter_covariance", [np.eye(6),  np.ones([6, 6]), np.eye(3), np.ones([3, 3])])
 def test_TimeClosestApproach(show_plots, position, velocity, filter_covariance):
 
     unit_task_name = "unitTask"               # arbitrary name (don't change)
@@ -54,13 +54,16 @@ def test_TimeClosestApproach(show_plots, position, velocity, filter_covariance):
     state_vector[3:] = velocity
 
     # Create the input messages.
-    input_data = messaging.FilterMsgPayload()
-    input_data.state = state_vector.tolist()
-    input_data.covar = filter_covariance.flatten().tolist()
-    filter_in_msg = messaging.FilterMsg().write(input_data)
+    input_filter_data = messaging.FilterMsgPayload()
+    input_nav_data = messaging.NavTransMsgPayload()
+    input_nav_data.r_BN_N = state_vector.tolist()[0:3]
+    input_nav_data.v_BN_N = state_vector.tolist()[3:6]
+    input_filter_data.numberOfStates = len(filter_covariance[:,0])
+    input_filter_data.covar = filter_covariance.flatten().tolist()
+    filter_in_msg = messaging.FilterMsg().write(input_filter_data)
+    nav_in_msg = messaging.NavTransMsg().write(input_nav_data)
     tca_module.filterInMsg.subscribeTo(filter_in_msg)
-
-    tca_module.filterInMsg.subscribeTo(filter_in_msg)
+    tca_module.navFilterMsg.subscribeTo(nav_in_msg)
 
     # Output messages.
     data_log_tca = tca_module.tcaOutMsg.recorder()
@@ -105,18 +108,20 @@ def time_of_closest_approach_calculation(r, v, filter_covariance):
     ratio = norm_v/ norm_r
 
     tca = np.cos(theta) / ratio
+    state_size = len(filter_covariance[:,0])
 
-    covariance_map_to_tca = np.zeros(6)
+    covariance_map_to_tca = np.zeros(state_size)
     covariance_map_to_tca[0:3] = v_hat/norm_r
-    covariance_map_to_tca[3:6] = 1/norm_v * (r_hat - np.sin(flight_path_angle) * v_hat)
+    if state_size == 6:
+        covariance_map_to_tca[3:6] = 1/norm_v * (r_hat - np.sin(flight_path_angle) * v_hat)
     tca_covariance = (1 / ratio**2) * np.dot(covariance_map_to_tca,  np.dot(filter_covariance, covariance_map_to_tca.transpose()))
 
     return tca, np.sqrt(tca_covariance)
 
 
 if __name__ == "__main__":
-    test_TimeClosestApproach(False,
+    test_TimeClosestApproach(True,
                              np.array([-5e7, 7.5e6, 5e5]),
                              np.array([2e4, 0, 0]),
-                             np.eye(6)
+                             np.eye(3)
                              )

@@ -1,7 +1,8 @@
 /*
  ISC License
 
- Copyright (c) 2024, Laboratory for Atmospheric and Space Physics, University of Colorado at Boulder
+ Copyright (c) 2024, Laboratory for Atmospheric and Space Physics,
+ University of Colorado at Boulder
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -16,26 +17,25 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
-%module timeClosestApproach
+
+%module linearODeKF
 %{
-   #include "timeClosestApproach.h"
+   #include "linearODeKF.h"
 %}
 
 %pythoncode %{
 from Basilisk.architecture.swig_common_model import *
 %}
 
-%include "std_string.i"
-%include "sys_model.h"
-%include "swig_eigen.i"
-%include "swig_conly_data.i"
+%include "fswAlgorithms/_GeneralModuleFiles/ekfInterface.i"
 
-%include "timeClosestApproach.h"
+%include "linearODeKF.h"
 
 %include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
 struct NavTransMsg_C;
 %include "architecture/msgPayloadDefCpp/FilterMsgPayload.h"
-%include "architecture/msgPayloadDefCpp/TimeClosestApproachMsgPayload.h"
+%include "architecture/msgPayloadDefCpp/FilterResidualsMsgPayload.h"
+%include "architecture/msgPayloadDefCpp/OpNavUnitVecMsgPayload.h"
 
 %pythoncode %{
 import sys
