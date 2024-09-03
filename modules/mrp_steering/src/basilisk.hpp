@@ -623,6 +623,31 @@ namespace bsk {
     inputs::component::component(std::string&& key, bsk::inputs&& value)
         : key(key), value(std::move(value).to_shared_socket())
     {}
+
+
+    class fanout final : public socket {
+    private:
+        std::vector<std::shared_ptr<socket>> targets;
+
+    public:
+        fanout(std::initializer_list<std::shared_ptr<socket>> targets)
+            : targets(targets)
+        {}
+
+        fanout(std::vector<std::shared_ptr<socket>> targets)
+            : targets(targets)
+        {}
+
+        void subscribeTo(plug const& source) override {
+            for (auto& target : this->targets) {
+                target->subscribeTo(source);
+            }
+        }
+
+        std::string repr() const override {
+            return "fanout";
+        }
+    };
 }
 
 namespace bsk {

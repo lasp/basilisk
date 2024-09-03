@@ -77,6 +77,9 @@ PYBIND11_MODULE(basilisk, m) {
         .def_property_readonly("names", &bsk::socket::focusable_names)
         .def("subscribeTo", &subscribeToPy);
 
+    py::class_<bsk::fanout, bsk::socket, std::shared_ptr<bsk::fanout>>(m, "Fanout")
+        .def(py::init<std::vector<std::shared_ptr<bsk::socket>>>());
+
     py::class_<bsk::SysModel, std::shared_ptr<bsk::SysModel>, PySysModel>(m, "SysModel")
         .def(py::init<>())
         .def("SelfInit", &bsk::SysModel::SelfInit)
