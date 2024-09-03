@@ -39,7 +39,7 @@ public:
     }
 };
 
-void subscribeToPy(bsk::socket& target, py::object source) {
+static void subscribeToPy(bsk::socket& target, py::object source) {
     try {
         // if the source is a regular plug, drop into the core subscription logic.
         return target.subscribeTo(*source.cast<std::shared_ptr<bsk::plug>>());
@@ -52,6 +52,26 @@ void subscribeToPy(bsk::socket& target, py::object source) {
         for (auto entry : *components) {
             subscribeToPy(*entry.second, source[py::cast(entry.first)]);
         }
+    }
+}
+
+static bool can_subscribe_to_py(bsk::socket& target, py::object source) {
+    try {
+        // if the source is a regular plug, drop into the core subscription logic.
+        return target.can_subscribe_to(*source.cast<std::shared_ptr<bsk::plug>>());
+    } catch (py::cast_error const& ex) {
+        // otherwise, it's assumed to be a further structured Python object.
+        // that means we need entry.second to be a bsk::inputs.
+        auto components = dynamic_cast<bsk::inputs*>(&target);
+        if (components == nullptr) return false;
+
+        for (auto entry : *components) {
+            if (!can_subscribe_to_py(*entry.second, source[py::cast(entry.first)])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
 
@@ -75,6 +95,7 @@ PYBIND11_MODULE(basilisk, m) {
         })
         .def_property_readonly("indices", &bsk::socket::focusable_indices)
         .def_property_readonly("names", &bsk::socket::focusable_names)
+        .def("canSubscribeTo", &can_subscribe_to_py)
         .def("subscribeTo", &subscribeToPy);
 
     py::class_<bsk::fanout, bsk::socket, std::shared_ptr<bsk::fanout>>(m, "Fanout")

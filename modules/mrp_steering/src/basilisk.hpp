@@ -70,6 +70,8 @@ namespace bsk {
         // may throw mismatched_schemas_error
         virtual void subscribeTo(plug const& source) = 0;
 
+        virtual bool can_subscribe_to(plug const& source) const = 0;
+
         virtual std::size_t focusable_indices() const {
             return 0; // no/zero focusable indices
         }
@@ -182,6 +184,12 @@ namespace bsk {
                 return this->subscribeTo(*source);
             }
 
+            bool can_subscribe_to(bsk::plug const& other) const override {
+                auto source = dynamic_cast<plug const*>(&other);
+                if (source == nullptr) return false;
+                return true;
+            }
+
             std::string repr() const override {
                 return schema::repr();
             }
@@ -272,6 +280,12 @@ namespace bsk {
                 return this->subscribeTo(*source);
             }
 
+            bool can_subscribe_to(bsk::plug const& other) const override {
+                auto source = dynamic_cast<plug const*>(&other);
+                if (source == nullptr) return false;
+                return true;
+            }
+
             std::string repr() const override {
                 return schema::repr(this->length);
             }
@@ -358,6 +372,16 @@ namespace bsk {
                     return this->subscribeTo(*source);
                 } else {
                     throw mismatched_schemas_error();
+                }
+            }
+
+            bool can_subscribe_to(bsk::plug const& other) const override {
+                if (auto source = dynamic_cast<plug const*>(&other); source != nullptr) {
+                    return true;
+                } else if (auto source = dynamic_cast<slice_plug const*>(&other); source != nullptr) {
+                    return true;
+                } else {
+                    return false;
                 }
             }
 
@@ -572,6 +596,15 @@ namespace bsk {
             }
         }
 
+        bool can_subscribe_to(plug const& source) const override {
+            for (auto const& entry : this->components) {
+                if (!entry.second->can_subscribe_to(*source.focus(entry.first))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         std::vector<std::string> focusable_names() const override {
             // // C++20, clang 14+
             // auto keys = std::views::keys(this->components);
@@ -642,6 +675,13 @@ namespace bsk {
             for (auto& target : this->targets) {
                 target->subscribeTo(source);
             }
+        }
+
+        bool can_subscribe_to(plug const& source) const override {
+            for (auto& target : this->targets) {
+                if (!target->can_subscribe_to(source)) return false;
+            }
+            return true;
         }
 
         std::string repr() const override {

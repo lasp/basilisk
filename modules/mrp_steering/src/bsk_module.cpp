@@ -119,6 +119,12 @@ struct bsk::schema<bsk::modules::demo::foo> final {
             return this->subscribeTo(*source);
         }
 
+        bool can_subscribe_to(bsk::plug const& other) const override {
+            auto source = dynamic_cast<plug const*>(&other);
+            if (source == nullptr) return false;
+            return true;
+        }
+
         std::string repr() const override {
             return schema::repr();
         }
