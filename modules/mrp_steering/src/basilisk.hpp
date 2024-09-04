@@ -704,8 +704,7 @@ namespace bsk {
         virtual outputs getOutputs() const { return {}; }
 
         void subscribe_to(plug const& source) {
-            auto inputs = this->getInputs();
-            return static_cast<socket*>(&inputs)->subscribe_to(source);
+            return this->getInputs().subscribe_to(source);
         }
 
     public:
