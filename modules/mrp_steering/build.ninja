@@ -96,8 +96,11 @@ build build/lib/mrp_steering.so : link_shared_library $
   ldflags = $ldflags $
     -bundle_loader $pypath
 
-# prepare distributable tree
-build build/dist/bskmath.a : hardlink build/lib/bskmath.a
-build build/dist/mrp_steering.a : hardlink build/lib/mrp_steering.a
-build build/dist/mrp_steering.so : strip build/lib/mrp_steering.so
-build build/dist/basilisk.so : strip build/lib/basilisk.so
+# prepare distributables
+build build/dist/core/lib/bskmath.a : hardlink build/lib/bskmath.a
+build build/dist/core/pylib/basilisk/core.so : strip build/lib/basilisk.so
+build build/dist/core/include/basilisk.hpp : hardlink src/basilisk.hpp
+
+build build/dist/modules/mrp_steering/lib/mrp_steering.a : hardlink build/lib/mrp_steering.a
+build build/dist/modules/mrp_steering/pylib/basilisk/modules/mrp_steering.so : strip build/lib/mrp_steering.so
+build build/dist/modules/mrp_steering/include/module.h : hardlink src/module.h

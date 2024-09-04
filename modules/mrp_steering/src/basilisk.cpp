@@ -75,7 +75,7 @@ static bool can_subscribe_to_py(bsk::socket& target, py::object source) {
     }
 }
 
-PYBIND11_MODULE(basilisk, m) {
+PYBIND11_MODULE(core, m) {
     py::class_<bsk::plug, std::shared_ptr<bsk::plug>>(m, "Plug")
         .def("__repr__", &bsk::plug::repr)
         .def("__getitem__", py::overload_cast<std::string>(&bsk::plug::focus, py::const_))

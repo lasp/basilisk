@@ -1,6 +1,6 @@
 # run as `env PYTHONPATH=build/dist/ python3 test.py`
-import basilisk as bsk
-import mrp_steering as mrp
+import basilisk.core as bsk
+import basilisk.modules.mrp_steering as mrp
 
 m = mrp.DemoModule()
 
