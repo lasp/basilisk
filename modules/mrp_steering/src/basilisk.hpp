@@ -68,7 +68,7 @@ namespace bsk {
         virtual std::string repr() const = 0;
 
         // may throw mismatched_schemas_error
-        virtual void subscribeTo(plug const& source) = 0;
+        virtual void subscribe_to(plug const& source) = 0;
 
         virtual bool can_subscribe_to(plug const& source) const = 0;
 
@@ -173,15 +173,15 @@ namespace bsk {
                 , payload(payload)
             {}
 
-            void subscribeTo(plug const& source) {
+            void subscribe_to(plug const& source) {
                 *this->header = source.header;
                 *this->payload = source.payload;
             }
 
-            void subscribeTo(bsk::plug const& other) override {
+            void subscribe_to(bsk::plug const& other) override {
                 auto source = dynamic_cast<plug const*>(&other);
                 if (source == nullptr) throw mismatched_schemas_error();
-                return this->subscribeTo(*source);
+                return this->subscribe_to(*source);
             }
 
             bool can_subscribe_to(bsk::plug const& other) const override {
@@ -267,17 +267,17 @@ namespace bsk {
                 , length(length)
             {}
 
-            void subscribeTo(plug const& source) {
+            void subscribe_to(plug const& source) {
                 if (this->length != source.length) throw mismatched_schemas_error();
 
                 *this->payload = source.payload;
                 *this->header = source.header;
             }
 
-            void subscribeTo(bsk::plug const& other) override {
+            void subscribe_to(bsk::plug const& other) override {
                 auto source = dynamic_cast<plug const*>(&other);
                 if (source == nullptr) throw mismatched_schemas_error();
-                return this->subscribeTo(*source);
+                return this->subscribe_to(*source);
             }
 
             bool can_subscribe_to(bsk::plug const& other) const override {
@@ -353,23 +353,23 @@ namespace bsk {
                 , payload(payload)
             {}
 
-            void subscribeTo(plug const& source) {
+            void subscribe_to(plug const& source) {
                 *this->payload = source.payload;
                 *this->header = source.header;
             }
 
-            void subscribeTo(slice_plug const& source) {
+            void subscribe_to(slice_plug const& source) {
                 if (N != source.length) throw mismatched_schemas_error();
 
                 // TODO: Is there another way to line up a pointer-to-T[N] with a pointer-to-T?
                 *this->payload = reinterpret_cast<carrier const*>(source.payload);
             }
 
-            void subscribeTo(bsk::plug const& other) override {
+            void subscribe_to(bsk::plug const& other) override {
                 if (auto source = dynamic_cast<plug const*>(&other); source != nullptr) {
-                    return this->subscribeTo(*source);
+                    return this->subscribe_to(*source);
                 } else if (auto source = dynamic_cast<slice_plug const*>(&other); source != nullptr) {
-                    return this->subscribeTo(*source);
+                    return this->subscribe_to(*source);
                 } else {
                     throw mismatched_schemas_error();
                 }
@@ -584,10 +584,10 @@ namespace bsk {
             return this->components.cend();
         }
 
-        void subscribeTo(plug const& source) override {
+        void subscribe_to(plug const& source) override {
             try {
                 for (auto const& entry : this->components) {
-                    entry.second->subscribeTo(*source.focus(entry.first));
+                    entry.second->subscribe_to(*source.focus(entry.first));
                 }
             } catch (illegal_focus_error const& ex) {
                 throw mismatched_schemas_error();
@@ -671,9 +671,9 @@ namespace bsk {
             : targets(targets)
         {}
 
-        void subscribeTo(plug const& source) override {
+        void subscribe_to(plug const& source) override {
             for (auto& target : this->targets) {
-                target->subscribeTo(source);
+                target->subscribe_to(source);
             }
         }
 
@@ -703,9 +703,9 @@ namespace bsk {
         virtual inputs getInputs() { return {}; }
         virtual outputs getOutputs() const { return {}; }
 
-        void subscribeTo(plug const& source) {
+        void subscribe_to(plug const& source) {
             auto inputs = this->getInputs();
-            return static_cast<socket*>(&inputs)->subscribeTo(source);
+            return static_cast<socket*>(&inputs)->subscribe_to(source);
         }
 
     public:

@@ -108,15 +108,15 @@ struct bsk::schema<bsk::modules::demo::foo> final {
             , payload(payload)
         {}
 
-        void subscribeTo(plug const& source) {
+        void subscribe_to(plug const& source) {
             *this->payload = source.payload;
             *this->header = source.header;
         }
 
-        void subscribeTo(bsk::plug const& other) override {
+        void subscribe_to(bsk::plug const& other) override {
             auto source = dynamic_cast<plug const*>(&other);
             if (source == nullptr) throw bsk::mismatched_schemas_error();
-            return this->subscribeTo(*source);
+            return this->subscribe_to(*source);
         }
 
         bool can_subscribe_to(bsk::plug const& other) const override {
