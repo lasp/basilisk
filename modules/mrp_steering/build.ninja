@@ -2,7 +2,10 @@ cflags = $
   -fvisibility=hidden $
   -fPIC $
   -Wall $
-  -Wpedantic
+  -Wpedantic $
+  -Wextra $
+  -Wuninitialized $
+  -Wwrite-strings
 
 ldflags = -fPIC
 

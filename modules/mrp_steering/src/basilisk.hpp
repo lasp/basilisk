@@ -47,17 +47,17 @@ namespace bsk {
         }
 
         // struct field focusing
-        virtual std::shared_ptr<plug> focus(std::string const name) const {
+        virtual std::shared_ptr<plug> focus(std::string const name [[maybe_unused]]) const {
             throw unsupported_focus_error();
         }
 
         // array element focusing
-        virtual std::shared_ptr<plug> focus(std::size_t const index) const {
+        virtual std::shared_ptr<plug> focus(std::size_t const index [[maybe_unused]]) const {
             throw unsupported_focus_error();
         }
 
         // array slice focusing
-        virtual std::shared_ptr<plug> focus(std::size_t const start, std::size_t const length) const {
+        virtual std::shared_ptr<plug> focus(std::size_t const start [[maybe_unused]], std::size_t const length [[maybe_unused]]) const {
             throw unsupported_focus_error();
         }
     };
@@ -81,17 +81,17 @@ namespace bsk {
         }
 
         // struct field focusing
-        virtual std::shared_ptr<socket> focus(std::string const name) {
+        virtual std::shared_ptr<socket> focus(std::string const name [[maybe_unused]]) {
             throw unsupported_focus_error();
         }
 
         // array element focusing
-        virtual std::shared_ptr<socket> focus(std::size_t const index) {
+        virtual std::shared_ptr<socket> focus(std::size_t const index [[maybe_unused]]) {
             throw unsupported_focus_error();
         }
 
         // array slice focusing
-        virtual std::shared_ptr<socket> focus(std::size_t const start, std::size_t const length) {
+        virtual std::shared_ptr<socket> focus(std::size_t const start [[maybe_unused]], std::size_t const length [[maybe_unused]]) {
             throw unsupported_focus_error();
         }
     };
@@ -405,7 +405,7 @@ namespace bsk {
     class message final {
     private:
         T payload;
-        message_header header;
+        message_header header = {};
 
     public:
         template<typename ...Args>
@@ -697,8 +697,8 @@ namespace bsk {
         virtual ~SysModel() {}
         virtual void SelfInit() {}
         virtual void IntegratedInit() {}
-        virtual void UpdateState(uint64_t CurrentSimNanos) {}
-        virtual void Reset(uint64_t CurrentSimNanos) {}
+        virtual void UpdateState(uint64_t CurrentSimNanos [[maybe_unused]]) {}
+        virtual void Reset(uint64_t CurrentSimNanos [[maybe_unused]]) {}
 
         virtual inputs getInputs() { return {}; }
         virtual outputs getOutputs() const { return {}; }

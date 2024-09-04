@@ -47,8 +47,8 @@ namespace bsk::modules {
         }
 
     private:
-        bsk::read_functor<float> rateInMsg;
-        bsk::read_functor<foo> fooInMsg;
+        bsk::read_functor<float> rateInMsg = {};
+        bsk::read_functor<foo> fooInMsg = {};
 
         bsk::message<double> volumeOutMsg = 0.0;
         bsk::message<foo> fooOutMsg = {42, 101.0f};
@@ -138,7 +138,7 @@ namespace bsk::modules {
     class mrp_steering final : public bsk::SysModel {
     private:
         //! Current attitude error estimate (MRPs) of B relative to R
-        bsk::read_functor<double[3]> sigma_BR;
+        bsk::read_functor<double[3]> sigma_BR = {};
         //! [r/s]   Desired body rate relative to R
         bsk::message<double[3]> omega_BastR_B = {0.0};
         //! [r/s^2] Body-frame derivative of omega_BastR_B
@@ -160,7 +160,7 @@ namespace bsk::modules {
             };
         }
 
-        void UpdateState(std::uint64_t CurrentSimNanos) override {
+        void UpdateState(std::uint64_t CurrentSimNanos [[maybe_unused]]) override {
             if (!this->sigma_BR.isLinked()) throw "TODO";
 
             MRPSteeringLaw(
