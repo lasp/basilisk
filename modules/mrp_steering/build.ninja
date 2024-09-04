@@ -1,13 +1,13 @@
 cflags = $
   -fvisibility=hidden $
-  -fPIC $
+  -fpic $
   -Wall $
   -Wpedantic $
   -Wextra $
   -Wuninitialized $
   -Wwrite-strings
 
-ldflags = -fPIC
+ldflags = -fpic
 
 includes = $
   -isystem ../../src/
