@@ -16,7 +16,7 @@ pyincludes = $
 	-isystem /opt/homebrew/opt/python@3.12/Frameworks/Python.framework/Versions/3.12/include/python3.12 $
 	-isystem /Users/twisol/the-world/Projects/basilisk/.venv/lib/python3.12/site-packages/pybind11/include
 
-pypath = /opt/homebrew/opt/python@3.12/Frameworks/Python.framework/Versions/3.12/Python
+pyloader = /opt/homebrew/opt/python@3.12/Frameworks/Python.framework/Versions/3.12/Python
 
 
 rule build_c_object
@@ -43,6 +43,7 @@ rule build_cpp_object
 
 rule link_shared_library
   command = g++ -bundle $
+    -bundle_loader $bundle_loader $
     $ldflags $
     -o $out $
     $in
@@ -77,8 +78,7 @@ build build/obj/basilisk.o : build_cpp_object src/basilisk.cpp
   includes = $includes $
     $pyincludes
 build build/lib/basilisk.so : link_shared_library build/obj/basilisk.o
-  ldflags = $ldflags $
-    -bundle_loader $pypath
+  bundle_loader = $pyloader
 
 # core mrp steering logic
 build build/obj/module.o : build_c_object src/module.c
@@ -93,8 +93,7 @@ build build/lib/mrp_steering.so : link_shared_library $
     build/lib/bskmath.a $
     build/lib/mrp_steering.a $
     build/obj/bsk_module.o
-  ldflags = $ldflags $
-    -bundle_loader $pypath
+  bundle_loader = $pyloader
 
 # prepare distributables
 build build/dist/core/lib/bskmath.a : hardlink build/lib/bskmath.a
