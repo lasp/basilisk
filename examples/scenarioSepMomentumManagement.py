@@ -415,7 +415,7 @@ def run(momentumManagement, cmEstimation, showPlots):
     #
     
     # Set up thruster platform state module
-    pltState = thrusterPlatformState.thrusterPlatformState()
+    pltState = thrusterPlatformState.ThrusterPlatformState()
     pltState.ModelTag = "thrusterPlatformState"
     pltState.sigma_MB = np.array([0, 0, 0])
     pltState.r_BM_M = [0, 0, 0]
@@ -435,7 +435,7 @@ def run(momentumManagement, cmEstimation, showPlots):
     # create the FSW vehicle configuration message for CoM
     vehicleConfigData = messaging.VehicleConfigMsgPayload()
     vehicleConfigData.CoM_B = r_CB_B_0    # use the same initial CoM guess as the cmEstimator module
-    vcMsg_CoM = messaging.VehicleConfigMsg_C()
+    vcMsg_CoM = messaging.VehicleConfigMsg()
     vcMsg_CoM.write(vehicleConfigData)
 
     # create the FSW vehicle configuration message for inertias
@@ -444,7 +444,7 @@ def run(momentumManagement, cmEstimation, showPlots):
     vcMsg_I = messaging.VehicleConfigMsg().write(vehicleConfigOut)
     
     # Set up platform reference module
-    pltReference = thrusterPlatformReference.thrusterPlatformReference()
+    pltReference = thrusterPlatformReference.ThrusterPlatformReference()
     pltReference.ModelTag = 'thrusterPlatformReference'
     pltReference.sigma_MB = pltState.sigma_MB
     pltReference.r_BM_M = pltState.r_BM_M
@@ -461,21 +461,21 @@ def run(momentumManagement, cmEstimation, showPlots):
     # Set up the two platform PD controllers
     pltController = []
     for item in range(2):
-        pltController.append(hingedRigidBodyPIDMotor.hingedRigidBodyPIDMotor())
+        pltController.append(hingedRigidBodyPIDMotor.HingedRigidBodyPIDMotor())
         pltController[item].ModelTag = "PltMototorGimbal"+str(item+1)
         pltController[item].K = 0.5
         pltController[item].P = 3
         scSim.AddModelToTask(fswTask, pltController[item], 27)
     
     # Set up the torque scheduler module
-    pltTorqueScheduler = torqueScheduler.torqueScheduler()
+    pltTorqueScheduler = torqueScheduler.TorqueScheduler()
     pltTorqueScheduler.ModelTag = "TorqueScheduler"
     pltTorqueScheduler.tSwitch = 60
     pltTorqueScheduler.lockFlag = 0
     scSim.AddModelToTask(fswTask, pltTorqueScheduler, 26)
 
     # Set up attitude guidance module
-    sepPoint = oneAxisSolarArrayPoint.oneAxisSolarArrayPoint()
+    sepPoint = oneAxisSolarArrayPoint.OneAxisSolarArrayPoint()
     sepPoint.ModelTag = "sepPointGuidance"
     sepPoint.a1Hat_B = [1, 0, 0]          # solar array drive axis
     sepPoint.a2Hat_B = [0, 1, 0]          # antiparallel direction to the sensitive surface
@@ -485,7 +485,7 @@ def run(momentumManagement, cmEstimation, showPlots):
     # Set up the solar array reference modules
     saReference = []
     for item in range(numRSA):
-        saReference.append(solarArrayReference.solarArrayReference())
+        saReference.append(solarArrayReference.SolarArrayReference())
         saReference[item].ModelTag = "SolarArrayReference"+str(item+1)
         saReference[item].a1Hat_B = [(-1)**item, 0, 0]
         saReference[item].a2Hat_B = [0, 1, 0]
@@ -494,7 +494,7 @@ def run(momentumManagement, cmEstimation, showPlots):
     # Set up solar array controller modules
     saController = []
     for item in range(numRSA):
-        saController.append(hingedRigidBodyPIDMotor.hingedRigidBodyPIDMotor())
+        saController.append(hingedRigidBodyPIDMotor.HingedRigidBodyPIDMotor())
         saController[item].ModelTag = "SolarArrayMotor"+str(item+1)
         saController[item].K = 1.25
         saController[item].P = 50
@@ -502,12 +502,12 @@ def run(momentumManagement, cmEstimation, showPlots):
         scSim.AddModelToTask(fswTask, saController[item], 23)
     
     # Set up attitude tracking error
-    attError = attTrackingError.attTrackingError()
+    attError = attTrackingError.AttTrackingError()
     attError.ModelTag = "AttitudeTrackingError"
     scSim.AddModelToTask(fswTask, attError, 22)
     
     # Set up the MRP Feedback control module
-    mrpControl = mrpFeedback.mrpFeedback()
+    mrpControl = mrpFeedback.MrpFeedback()
     mrpControl.ModelTag = "mrpFeedback"
     mrpControl.Ki = 1e-5
     mrpControl.P = 275
@@ -517,7 +517,7 @@ def run(momentumManagement, cmEstimation, showPlots):
     scSim.AddModelToTask(fswTask, mrpControl, 21)
 
     # add module that maps the Lr control torque into the RW motor torques
-    rwMotorTorqueObj = rwMotorTorque.rwMotorTorque()
+    rwMotorTorqueObj = rwMotorTorque.RwMotorTorque()
     rwMotorTorqueObj.ModelTag = "rwMotorTorque"
     rwMotorTorqueObj.controlAxes_B = [1, 0, 0, 0, 1, 0, 0, 0, 1]
     scSim.AddModelToTask(fswTask, rwMotorTorqueObj, 20)
@@ -530,7 +530,7 @@ def run(momentumManagement, cmEstimation, showPlots):
     # Write cmEstimator output msg to the standalone message vcMsg_CoM
     # This is needed because platformReference runs on its own task at a different frequency,
     # but it receives inputs and provides outputs to modules that run on the main flight software task
-    cMsgPy.VehicleConfigMsg_C_addAuthor(cmEstimator.vehConfigOutMsgC, vcMsg_CoM)
+    cmEstimator.vehConfigOutMsg = vcMsg_CoM
 
     # Connect messages
     sNavObject.scStateInMsg.subscribeTo(scObject.scStateOutMsg)

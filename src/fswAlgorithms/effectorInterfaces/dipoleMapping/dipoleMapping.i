@@ -22,18 +22,18 @@
     #include "dipoleMapping.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(dipoleMapping);
-
 %pythoncode %{
     from Basilisk.architecture.swig_common_model import *
 %}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "dipoleMapping.h"
+
 %include "architecture/msgPayloadDefC/DipoleRequestBodyMsgPayload.h"
-struct DipoleRequestBodyMsg_C;
 %include "architecture/msgPayloadDefC/MTBArrayConfigMsgPayload.h"
-struct MTBArrayConfigMsg_C;
 %include "architecture/msgPayloadDefC/MTBCmdMsgPayload.h"
-struct MTBCmdMsg_C;
 
 %pythoncode %{
 import sys

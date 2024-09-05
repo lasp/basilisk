@@ -21,13 +21,17 @@
    #include "rwConfigData.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap_2(rwConfigData, rwConfigData_Config);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "rwConfigData.h"
 
 %include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
-struct RWArrayConfigMsg_C;
 %include "architecture/msgPayloadDefC/RWConstellationMsgPayload.h"
-struct RWConstellationMsg_C;
 
 %pythoncode %{
 import sys

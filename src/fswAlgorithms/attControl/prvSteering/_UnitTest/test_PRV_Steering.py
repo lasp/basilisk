@@ -63,10 +63,10 @@ def subModuleTestFunction(show_plots, simCase):
 
 
     #   Construct algorithm and associated C++ container
-    module = prvSteering.prvSteering()
+    module = prvSteering.PrvSteering()
     module.ModelTag = "prvSteering"
 
-    servo = rateServoFullNonlinear.rateServoFullNonlinear()
+    servo = rateServoFullNonlinear.RateServoFullNonlinear()
     servo.ModelTag = "rate_servo"
 
     #   Add test module to runtime call list

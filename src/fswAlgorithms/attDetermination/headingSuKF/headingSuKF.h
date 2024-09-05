@@ -20,22 +20,28 @@
 #ifndef _HEADING_UKF_H_
 #define _HEADING_UKF_H_
 
-#include "cMsgCInterface/NavAttMsg_C.h"
-#include "cMsgCInterface/VehicleConfigMsg_C.h"
-#include "cMsgCInterface/HeadingFilterMsg_C.h"
-#include "cMsgCInterface/OpNavMsg_C.h"
-#include "cMsgCInterface/CameraConfigMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
+#include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/HeadingFilterMsgPayload.h"
+#include "architecture/msgPayloadDefC/OpNavMsgPayload.h"
+#include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
 
 #include <stdint.h>
 #include "architecture/utilities/bskLogging.h"
 
 
 /*! @brief Top level structure for the SuKF heading module data */
-typedef struct {
-    OpNavMsg_C opnavDataOutMsg;             /*!< output message */
-    HeadingFilterMsg_C filtDataOutMsg;      /*!< output message */
-    OpNavMsg_C opnavDataInMsg;              /*!< input message */
-    CameraConfigMsg_C cameraConfigInMsg;    /*!< (optional) input message */
+class HeadingSuKF : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+
+    Message<OpNavMsgPayload> opnavDataOutMsg;             /*!< output message */
+    Message<HeadingFilterMsgPayload> filtDataOutMsg;      /*!< output message */
+    ReadFunctor<OpNavMsgPayload> opnavDataInMsg;              /*!< input message */
+    ReadFunctor<CameraConfigMsgPayload> cameraConfigInMsg;    /*!< (optional) input message */
     
     int putInCameraFrame;         /*!< [-] If camera message is found output the result to the camera frame as well as the body and inertial frame*/
 	int numStates;                /*!< [-] Number of states for this filter*/
@@ -82,29 +88,15 @@ typedef struct {
 	NavAttMsgPayload outputHeading;   /*!< -- Output heading estimate data */
     OpNavMsgPayload opnavInBuffer;  /*!< -- message buffer */
     
-    BSKLogger *bskLogger;                             //!< BSK Logging
+    BSKLogger bskLogger={};                             //!< BSK Logging
 
-}HeadingSuKFConfig;
+};
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_headingSuKF(HeadingSuKFConfig *configData, int64_t moduleID);
-    void Update_headingSuKF(HeadingSuKFConfig *configData, uint64_t callTime,
-        int64_t moduleID);
-	void Reset_headingSuKF(HeadingSuKFConfig *configData, uint64_t callTime,
-		int64_t moduleID);
-	void headingSuKFTimeUpdate(HeadingSuKFConfig *configData, double updateTime);
-    void headingSuKFMeasUpdate(HeadingSuKFConfig *configData, double updateTime);
-	void headingStateProp(double *stateInOut,  double *b_vec, double dt);
-    void headingSuKFMeasModel(HeadingSuKFConfig *configData);
-    void headingSuKFComputeDCM_BS(double heading[HEAD_N_STATES], double bVec[HEAD_N_STATES], double *dcm);
-    void headingSuKFSwitch(double *bVec_B, double *states, double *covar);
-
-#ifdef __cplusplus
-}
-#endif
-
+void headingSuKFTimeUpdate(HeadingSuKF *configData, double updateTime);
+void headingSuKFMeasUpdate(HeadingSuKF *configData, double updateTime);
+void headingStateProp(double *stateInOut,  double *b_vec, double dt);
+void headingSuKFMeasModel(HeadingSuKF *configData);
+void headingSuKFComputeDCM_BS(double heading[HEAD_N_STATES], double bVec[HEAD_N_STATES], double *dcm);
+void headingSuKFSwitch(double *bVec_B, double *states, double *covar);
 
 #endif

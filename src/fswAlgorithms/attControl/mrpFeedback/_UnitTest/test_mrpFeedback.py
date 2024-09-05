@@ -104,7 +104,7 @@ def run(show_plots, intGain, rwNum, integralLimit, ctrlLaw, useRwAvailability):
 
 
     #   Construct algorithm and associated C++ container
-    module = mrpFeedback.mrpFeedback()
+    module = mrpFeedback.MrpFeedback()
     module.ModelTag = "mrpFeedback"
 
     #   Add test module to runtime call list

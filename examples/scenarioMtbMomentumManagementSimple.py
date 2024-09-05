@@ -365,18 +365,18 @@ def run(show_plots):
     #
 
     # setup inertial3D guidance module
-    inertial3DObj = inertial3D.inertial3D()
+    inertial3DObj = inertial3D.Inertial3D()
     inertial3DObj.ModelTag = "inertial3D"
     scSim.AddModelToTask(simTaskName, inertial3DObj)
     inertial3DObj.sigma_R0N = [0., 0., 0.]  # set the desired inertial orientation
 
     # setup the attitude tracking error evaluation module
-    attError = attTrackingError.attTrackingError()
+    attError = attTrackingError.AttTrackingError()
     attError.ModelTag = "attErrorInertial3D"
     scSim.AddModelToTask(simTaskName, attError)
 
     # setup the MRP Feedback control module
-    mrpControl = mrpFeedback.mrpFeedback()
+    mrpControl = mrpFeedback.MrpFeedback()
     mrpControl.ModelTag = "mrpFeedback"
     scSim.AddModelToTask(simTaskName, mrpControl)
     
@@ -395,19 +395,19 @@ def run(show_plots):
     scSim.AddModelToTask(simTaskName, TAM)
     
     # setup tamComm module
-    tamCommObj = tamComm.tamComm()
+    tamCommObj = tamComm.TamComm()
     tamCommObj.dcm_BS = [1., 0., 0., 0., 1., 0., 0., 0., 1.]
     tamCommObj.ModelTag = "tamComm"
     scSim.AddModelToTask(simTaskName, tamCommObj)
     
     # setup mtbMomentumManagement module
-    mtbMomentumManagementSimpleObj = mtbMomentumManagementSimple.mtbMomentumManagementSimple()
+    mtbMomentumManagementSimpleObj = mtbMomentumManagementSimple.MtbMomentumManagementSimple()
     mtbMomentumManagementSimpleObj.Kp = 0.003
     mtbMomentumManagementSimpleObj.ModelTag = "mtbMomentumManagementSimple"          
     scSim.AddModelToTask(simTaskName, mtbMomentumManagementSimpleObj)
     
     # setup torque2Dipole module
-    torque2DipoleObj = torque2Dipole.torque2Dipole()
+    torque2DipoleObj = torque2Dipole.Torque2Dipole()
     torque2DipoleObj.ModelTag = "torque2Dipole"
     scSim.AddModelToTask(simTaskName, torque2DipoleObj)
     
@@ -425,7 +425,7 @@ def run(show_plots):
     mtbParamsInMsg = messaging.MTBArrayConfigMsg().write(mtbConfigParams)
     
     # setup dipoleMapping module
-    dipoleMappingObj = dipoleMapping.dipoleMapping()
+    dipoleMappingObj = dipoleMapping.DipoleMapping()
     
     # row major toque bar alignment inverse
     dipoleMappingObj.steeringMatrix = [0.75, -0.25, 0.,
@@ -436,12 +436,12 @@ def run(show_plots):
     scSim.AddModelToTask(simTaskName, dipoleMappingObj)
     
     # setup mtbFeedforward module
-    mtbFeedforwardObj = mtbFeedforward.mtbFeedforward()
+    mtbFeedforwardObj = mtbFeedforward.MtbFeedforward()
     mtbFeedforwardObj.ModelTag = "mtbFeedforward"
     scSim.AddModelToTask(simTaskName, mtbFeedforwardObj)
     
     # add module that maps the Lr control torque into the RW motor torques
-    rwMotorTorqueObj = rwMotorTorque.rwMotorTorque()
+    rwMotorTorqueObj = rwMotorTorque.RwMotorTorque()
     rwMotorTorqueObj.ModelTag = "rwMotorTorque"
     scSim.AddModelToTask(simTaskName, rwMotorTorqueObj)
 
@@ -452,7 +452,7 @@ def run(show_plots):
     rwMotorTorqueObj.controlAxes_B = controlAxes_B
     
     # setup rwNullSpace module
-    rwNullSpaceObj = rwNullSpace.rwNullSpace()
+    rwNullSpaceObj = rwNullSpace.RwNullSpace()
     rwNullSpaceObj.OmegaGain = 0.0000003
     rwNullSpaceObj.ModelTag = "rwNullSpace"
     scSim.AddModelToTask(simTaskName, rwNullSpaceObj)

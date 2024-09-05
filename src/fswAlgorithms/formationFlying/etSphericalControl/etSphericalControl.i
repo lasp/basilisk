@@ -21,19 +21,20 @@
    #include "etSphericalControl.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(etSphericalControl);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "etSphericalControl.h"
 
 %include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-struct NavTransMsg_C;
 %include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-struct NavAttMsg_C;
 %include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-struct VehicleConfigMsg_C;
 %include "architecture/msgPayloadDefC/CmdForceInertialMsgPayload.h"
-struct CmdForceInertialMsg_C;
 %include "architecture/msgPayloadDefC/CmdForceBodyMsgPayload.h"
-struct CmdForceBodyMsg_C;
 
 %pythoncode %{
 import sys

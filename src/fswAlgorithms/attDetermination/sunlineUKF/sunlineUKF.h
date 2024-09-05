@@ -22,10 +22,12 @@
 
 #include <stdint.h>
 
-#include "cMsgCInterface/NavAttMsg_C.h"
-#include "cMsgCInterface/CSSArraySensorMsg_C.h"
-#include "cMsgCInterface/SunlineFilterMsg_C.h"
-#include "cMsgCInterface/CSSConfigMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
+#include "architecture/msgPayloadDefC/CSSArraySensorMsgPayload.h"
+#include "architecture/msgPayloadDefC/SunlineFilterMsgPayload.h"
+#include "architecture/msgPayloadDefC/CSSConfigMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 
@@ -34,11 +36,15 @@
 
 /*! @brief Top level structure for the CSS-based unscented Kalman Filter.
  Used to estimate the sun state in the vehicle body frame. */
-typedef struct {
-    NavAttMsg_C navStateOutMsg;                     /*!< The name of the output message*/
-    SunlineFilterMsg_C filtDataOutMsg;              /*!< The name of the output filter data message*/
-    CSSArraySensorMsg_C cssDataInMsg;               /*!< The name of the Input message*/
-    CSSConfigMsg_C cssConfigInMsg;                  /*!< [-] The name of the CSS configuration message*/
+class SunlineUKF : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+
+    Message<NavAttMsgPayload> navStateOutMsg;                     /*!< The name of the output message*/
+    Message<SunlineFilterMsgPayload> filtDataOutMsg;              /*!< The name of the output filter data message*/
+    ReadFunctor<CSSArraySensorMsgPayload> cssDataInMsg;               /*!< The name of the Input message*/
+    ReadFunctor<CSSConfigMsgPayload> cssConfigInMsg;                  /*!< [-] The name of the CSS configuration message*/
 
 	int numStates;                /*!< [-] Number of states for this filter*/
 	int countHalfSPs;             /*!< [-] Number of sigma points over 2 */
@@ -81,26 +87,7 @@ typedef struct {
 	NavAttMsgPayload outputSunline;   /*!< -- Output sunline estimate data */
     CSSArraySensorMsgPayload cssSensorInBuffer; /*!< [-] CSS sensor data read in from message bus*/
 
-    BSKLogger *bskLogger;   //!< BSK Logging
-}SunlineUKFConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_sunlineUKF(SunlineUKFConfig *configData, int64_t moduleID);
-    void Update_sunlineUKF(SunlineUKFConfig *configData, uint64_t callTime,
-        int64_t moduleID);
-	void Reset_sunlineUKF(SunlineUKFConfig *configData, uint64_t callTime,
-		int64_t moduleID);
-	void sunlineUKFTimeUpdate(SunlineUKFConfig *configData, double updateTime);
-    void sunlineUKFMeasUpdate(SunlineUKFConfig *configData, double updateTime);
-	void sunlineStateProp(double *stateInOut, double dt);
-    void sunlineUKFMeasModel(SunlineUKFConfig *configData);
-    
-#ifdef __cplusplus
-}
-#endif
-
+    BSKLogger bskLogger={};   //!< BSK Logging
+};
 
 #endif

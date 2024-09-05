@@ -105,7 +105,7 @@ def navAggregateTestFunction(show_plots, numAttNav, numTransNav):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct an instance of the module being tested
-    module = navAggregate.navAggregate()
+    module = navAggregate.NavAggregate()
     module.ModelTag = "navAggregate"
 
     # Add test module to runtime call list

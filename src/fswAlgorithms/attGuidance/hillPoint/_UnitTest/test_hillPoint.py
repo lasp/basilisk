@@ -63,7 +63,7 @@ def hillPointTestFunction(show_plots, celMsgSet):
 
 
     # Construct algorithm and associated C++ container
-    module = hillPoint.hillPoint()
+    module = hillPoint.HillPoint()
     module.ModelTag = "hillPoint"
 
     # Add test module to runtime call list

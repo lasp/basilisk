@@ -22,11 +22,16 @@
 
 #include <stdint.h>
 #include "architecture/utilities/bskLogging.h"
-#include "cMsgCInterface/HingedRigidBodyMsg_C.h"
-#include "cMsgCInterface/ArrayMotorTorqueMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
+#include "architecture/msgPayloadDefC/ArrayMotorTorqueMsgPayload.h"
 
 /*! @brief Top level structure for the sub-module routines. */
-typedef struct {
+class HingedRigidBodyPIDMotor : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
 
     /*! declare these user-defined input parameters */
     double K;                 //!< proportional gain
@@ -39,25 +44,12 @@ typedef struct {
     double   intError;        //!< integral error
 
     /* declare module IO interfaces */
-    HingedRigidBodyMsg_C   hingedRigidBodyInMsg;      //!< input spinning body message
-    HingedRigidBodyMsg_C   hingedRigidBodyRefInMsg;   //!< output msg containing spinning body target angle and angle rate
-    ArrayMotorTorqueMsg_C  motorTorqueOutMsg;         //!< output msg containing the motor torque to the array drive
+    ReadFunctor<HingedRigidBodyMsgPayload>   hingedRigidBodyInMsg;      //!< input spinning body message
+    ReadFunctor<HingedRigidBodyMsgPayload>   hingedRigidBodyRefInMsg;   //!< output msg containing spinning body target angle and angle rate
+    Message<ArrayMotorTorqueMsgPayload>  motorTorqueOutMsg;         //!< output msg containing the motor torque to the array drive
 
-    BSKLogger *bskLogger;                             //!< BSK Logging
+    BSKLogger bskLogger={};                             //!< BSK Logging
 
-}hingedRigidBodyPIDMotorConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-    void SelfInit_hingedRigidBodyPIDMotor(hingedRigidBodyPIDMotorConfig *configData, int64_t moduleID);
-    void Reset_hingedRigidBodyPIDMotor(hingedRigidBodyPIDMotorConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Update_hingedRigidBodyPIDMotor(hingedRigidBodyPIDMotorConfig *configData, uint64_t callTime, int64_t moduleID);
-
-#ifdef __cplusplus
-}
-#endif
-
+};
 
 #endif

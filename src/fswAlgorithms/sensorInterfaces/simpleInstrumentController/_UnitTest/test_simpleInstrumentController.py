@@ -100,7 +100,7 @@ def simpleInstrumentControllerTestFunction(show_plots, use_rate_limit=1, rate_li
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = simpleInstrumentController.simpleInstrumentController()
+    module = simpleInstrumentController.SimpleInstrumentController()
     module.ModelTag = "simpleInstrumentController"           # update python name of test module
 
     # Add test module to runtime call list

@@ -399,12 +399,12 @@ def run(show_plots):
     planetNavMeas.walkBounds = walk_bounds_p
 
     # Inertial pointing
-    inertialPoint = inertial3D.inertial3D()
+    inertialPoint = inertial3D.Inertial3D()
     inertialPoint.ModelTag = "inertialPoint"
     inertialPoint.sigma_R0N = [0.1, 0.0, 0.0]
 
     # Attitude error configuration
-    trackingError = attTrackingError.attTrackingError()
+    trackingError = attTrackingError.AttTrackingError()
     trackingError.ModelTag = "trackingError"
     trackingError.attRefInMsg.subscribeTo(inertialPoint.attRefOutMsg)
 
@@ -415,7 +415,7 @@ def run(show_plots):
     vcConfigMsg = messaging.VehicleConfigMsg().write(vehicleConfigOut)
 
     # Attitude controller configuration
-    mrpFeedbackControl = mrpFeedback.mrpFeedback()
+    mrpFeedbackControl = mrpFeedback.MrpFeedback()
     mrpFeedbackControl.ModelTag = "mrpFeedbackControl"
     mrpFeedbackControl.guidInMsg.subscribeTo(trackingError.attGuidOutMsg)
     mrpFeedbackControl.vehConfigInMsg.subscribeTo(vcConfigMsg)
@@ -425,7 +425,7 @@ def run(show_plots):
     mrpFeedbackControl.integralLimit = 2. / mrpFeedbackControl.Ki * 0.1
 
     # add module that maps the Lr control torque into the RW motor torques
-    rwMotorTorqueObj = rwMotorTorque.rwMotorTorque()
+    rwMotorTorqueObj = rwMotorTorque.RwMotorTorque()
     rwMotorTorqueObj.ModelTag = "rwMotorTorque"
     rwStateEffector.rwMotorCmdInMsg.subscribeTo(rwMotorTorqueObj.rwMotorTorqueOutMsg)
     rwMotorTorqueObj.rwParamsInMsg.subscribeTo(rwConfigMsg)

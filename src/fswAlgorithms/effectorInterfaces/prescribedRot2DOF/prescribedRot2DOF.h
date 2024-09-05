@@ -23,12 +23,16 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "architecture/utilities/bskLogging.h"
-#include "cMsgCInterface/HingedRigidBodyMsg_C.h"
-#include "cMsgCInterface/PrescribedRotationMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
+#include "architecture/msgPayloadDefC/PrescribedRotationMsgPayload.h"
 
 /*! @brief Top level structure for the sub-module routines. */
-typedef struct
-{
+class PrescribedRot2DOF : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
     /* User configurable variables */
     double phiDDotMax;                                         //!< [rad/s^2] Maximum angular acceleration of the spinning body
     double rotAxis1_M[3];                                      //!< M frame rotation axis for the first rotation
@@ -53,22 +57,12 @@ typedef struct
     double dcm_F0M[3][3];                                      //!< DCM from the M frame to the spinning body body frame at the beginning of the maneuver
 
     /* Declare the module input-output messages */
-    HingedRigidBodyMsg_C spinningBodyRef1InMsg;                //!< Input msg for the first reference angle and angle rate
-    HingedRigidBodyMsg_C spinningBodyRef2InMsg;                //!< Input msg for the second reference angles and angle rate
-    PrescribedRotationMsg_C prescribedRotationOutMsg;          //!< Output msg for the profiled prescribed rotational states
+    ReadFunctor<HingedRigidBodyMsgPayload> spinningBodyRef1InMsg;                //!< Input msg for the first reference angle and angle rate
+    ReadFunctor<HingedRigidBodyMsgPayload> spinningBodyRef2InMsg;                //!< Input msg for the second reference angles and angle rate
+    Message<PrescribedRotationMsgPayload> prescribedRotationOutMsg;          //!< Output msg for the profiled prescribed rotational states
 
-    BSKLogger *bskLogger;                                      //!< BSK Logging
+    BSKLogger bskLogger={};                                      //!< BSK Logging
 
-}PrescribedRot2DOFConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    void SelfInit_prescribedRot2DOF(PrescribedRot2DOFConfig *configData, int64_t moduleID);                         //<! Method for initializing the module
-    void Reset_prescribedRot2DOF(PrescribedRot2DOFConfig *configData, uint64_t callTime, int64_t moduleID);         //<! Method for resetting the module
-    void Update_prescribedRot2DOF(PrescribedRot2DOFConfig *configData, uint64_t callTime, int64_t moduleID);        //<! Method for the updating the module
-#ifdef __cplusplus
-}
-#endif
+};
 
 #endif

@@ -22,16 +22,24 @@
 
 #include <stdint.h>
 
-#include "cMsgCInterface/CmdForceInertialMsg_C.h"
-#include "cMsgCInterface/NavTransMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/CmdForceInertialMsgPayload.h"
+#include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 
 /*! @brief Top level structure for the sub-module routines. */
-typedef struct {
-    NavTransMsg_C chiefTransInMsg;      //!< chief orbit input message
-    NavTransMsg_C deputyTransInMsg;     //!< deputy orbit input message
-    CmdForceInertialMsg_C forceOutMsg;  //!< deputy control force output message
+class MeanOEFeedback : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+    void calcLyapunovFeedback(NavTransMsgPayload chiefTransMsg,
+                              NavTransMsgPayload deputyTransMsg,
+                              CmdForceInertialMsgPayload *forceMsg);
+    ReadFunctor<NavTransMsgPayload> chiefTransInMsg;      //!< chief orbit input message
+    ReadFunctor<NavTransMsgPayload> deputyTransInMsg;     //!< deputy orbit input message
+    Message<CmdForceInertialMsgPayload> forceOutMsg;  //!< deputy control force output message
 
     double K[36];               //!< Lyapunov Gain (6*6)
     double targetDiffOeMean[6];   //!< target mean orbital element difference
@@ -39,17 +47,7 @@ typedef struct {
     double mu;                  //!< [m^3/s^2] gravitational constant
     double req;                 //!< [m] equatorial planet radius
     double J2;                  //!< [] J2 planet oblateness parameter
-    BSKLogger *bskLogger;       //!< BSK Logging
-} meanOEFeedbackConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-void SelfInit_meanOEFeedback(meanOEFeedbackConfig *configData, int64_t moduleID);
-void Update_meanOEFeedback(meanOEFeedbackConfig *configData, uint64_t callTime, int64_t moduleID);
-void Reset_meanOEFeedback(meanOEFeedbackConfig *configData, uint64_t callTime, int64_t moduleID);
-#ifdef __cplusplus
-}
-#endif
+    BSKLogger bskLogger={};       //!< BSK Logging
+};
 
 #endif

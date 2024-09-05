@@ -87,7 +87,7 @@ def mrp_PD_tracking(show_plots, setExtTorque):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = mrpPD.mrpPD()
+    module = mrpPD.MrpPD()
     module.ModelTag = "mrpPD"
 
     # Add test module to runtime call list

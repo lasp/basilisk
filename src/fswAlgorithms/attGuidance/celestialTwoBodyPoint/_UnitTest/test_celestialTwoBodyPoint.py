@@ -121,7 +121,7 @@ def celestialTwoBodyPointTestFunction(show_plots):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = celestialTwoBodyPoint.celestialTwoBodyPoint()
+    module = celestialTwoBodyPoint.CelestialTwoBodyPoint()
     module.ModelTag = "celestialTwoBodyPoint"
 
     # Add test module to runtime call list
@@ -282,7 +282,7 @@ def secBodyCelestialTwoBodyPointTestFunction(show_plots):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = celestialTwoBodyPoint.celestialTwoBodyPoint()
+    module = celestialTwoBodyPoint.CelestialTwoBodyPoint()
     module.ModelTag = "secBodyCelestialTwoBodyPoint"
 
     # Add test module to runtime call list

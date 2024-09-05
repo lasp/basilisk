@@ -23,9 +23,11 @@
 #include <stdint.h>
 #include "fswAlgorithms/fswUtilities/fswDefinitions.h"
 
-#include "cMsgCInterface/THRArrayConfigMsg_C.h"
-#include "cMsgCInterface/THRArrayCmdForceMsg_C.h"
-#include "cMsgCInterface/THRArrayOnTimeCmdMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/THRArrayConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/THRArrayCmdForceMsgPayload.h"
+#include "architecture/msgPayloadDefC/THRArrayOnTimeCmdMsgPayload.h"
 
 #include "architecture/utilities/macroDefinitions.h"
 #include "architecture/utilities/bskLogging.h"
@@ -33,7 +35,10 @@
 
 
 /*! @brief Top level structure for the sub-module routines. */
-typedef struct {
+class ThrFiringRemainder : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
 	double              pulseRemainder[MAX_EFF_CNT];            //!< [-] Unimplemented thrust pulses (number of minimum pulses)
 	double              thrMinFireTime;              			//!< [s] Minimum fire time
 	int      			numThrusters;							//!< [-] The number of thrusters available on vehicle
@@ -45,25 +50,11 @@ typedef struct {
 	
 
 	/* declare module IO interfaces */
-    THRArrayCmdForceMsg_C thrForceInMsg;        	            //!< The name of the Input message
-    THRArrayOnTimeCmdMsg_C onTimeOutMsg;       	                //!< The name of the output message, onTimeOutMsg
-    THRArrayConfigMsg_C thrConfInMsg;			                //!< The name of the thruster cluster Input message
+    ReadFunctor<THRArrayCmdForceMsgPayload> thrForceInMsg;        	            //!< The name of the Input message
+    Message<THRArrayOnTimeCmdMsgPayload> onTimeOutMsg;       	                //!< The name of the output message, onTimeOutMsg
+    ReadFunctor<THRArrayConfigMsgPayload> thrConfInMsg;			                //!< The name of the thruster cluster Input message
+	BSKLogger bskLogger={};                             //!< BSK Logging
 
-	BSKLogger *bskLogger;                             //!< BSK Logging
-
-}thrFiringRemainderConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_thrFiringRemainder(thrFiringRemainderConfig *configData, int64_t moduleID);
-    void Update_thrFiringRemainder(thrFiringRemainderConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Reset_thrFiringRemainder(thrFiringRemainderConfig *configData, uint64_t callTime, int64_t moduleID);
-    
-#ifdef __cplusplus
-}
-#endif
-
+};
 
 #endif

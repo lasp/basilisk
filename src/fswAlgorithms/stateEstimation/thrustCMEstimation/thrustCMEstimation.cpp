@@ -24,11 +24,6 @@ ThrustCMEstimation::ThrustCMEstimation() = default;
 
 ThrustCMEstimation::~ThrustCMEstimation() = default;
 
-/*! Initialize C-wrapped output messages */
-void ThrustCMEstimation::SelfInit(){
-    VehicleConfigMsg_C_init(&this->vehConfigOutMsgC);
-}
-
 /*! Reset the flyby OD filter to an initial state and
  initializes the internal estimation matrices.
  @return void
@@ -157,5 +152,4 @@ void ThrustCMEstimation::UpdateState(uint64_t CurrentSimNanos)
     eigenVector3d2CArray(this->r_CB_est, vehConfigOutBuffer.CoM_B);
     /*! write output msg */
     this->vehConfigOutMsg.write(&vehConfigOutBuffer, this->moduleID, CurrentSimNanos);
-    VehicleConfigMsg_C_write(&vehConfigOutBuffer, &this->vehConfigOutMsgC, this->moduleID, CurrentSimNanos);
 }

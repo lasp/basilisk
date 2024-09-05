@@ -21,13 +21,17 @@
    #include "stComm.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap_3(stComm, STConfigData, stProcessTelem);
+%pythoncode %{
+from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "stComm.h"
 
 %include "architecture/msgPayloadDefC/STSensorMsgPayload.h"
-struct STSensorMsg_C;
 %include "architecture/msgPayloadDefC/STAttMsgPayload.h"
-struct STAttMsg_C;
 
 %pythoncode %{
 import sys

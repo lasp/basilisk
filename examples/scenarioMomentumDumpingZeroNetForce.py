@@ -281,18 +281,18 @@ def run(show_plots):
     #
 
     # set up inertial3D guidance module
-    inertial3DObj = inertial3D.inertial3D()
+    inertial3DObj = inertial3D.Inertial3D()
     inertial3DObj.ModelTag = "inertial3D"
     scSim.AddModelToTask(fswTask, inertial3DObj)
     inertial3DObj.sigma_R0N = [0., 0., 0.]  # set the desired inertial orientation
 
     # set up the attitude tracking error evaluation module
-    attError = attTrackingError.attTrackingError()
+    attError = attTrackingError.AttTrackingError()
     attError.ModelTag = "attErrorInertial3D"
     scSim.AddModelToTask(fswTask, attError)
 
     # set up the MRP Feedback control module
-    mrpControl = mrpFeedback.mrpFeedback()
+    mrpControl = mrpFeedback.MrpFeedback()
     mrpControl.ModelTag = "mrpFeedback"
     scSim.AddModelToTask(fswTask, mrpControl)
     decayTime = 10.0
@@ -305,25 +305,25 @@ def run(show_plots):
     controlAxes_B = [1, 0, 0, 0, 1, 0, 0, 0, 1]
 
     # add module that maps the Lr control torque into the RW motor torques
-    rwMotorTorqueObj = rwMotorTorque.rwMotorTorque()
+    rwMotorTorqueObj = rwMotorTorque.RwMotorTorque()
     rwMotorTorqueObj.ModelTag = "rwMotorTorque"
     scSim.AddModelToTask(fswTask, rwMotorTorqueObj)
     # Make the RW control all three body axes
     rwMotorTorqueObj.controlAxes_B = controlAxes_B
 
     # Momentum dumping configuration
-    thrDesatControl = thrMomentumManagement.thrMomentumManagement()
+    thrDesatControl = thrMomentumManagement.ThrMomentumManagement()
     thrDesatControl.ModelTag = "thrMomentumManagement"
     scSim.AddModelToTask(fswTask, thrDesatControl)
     thrDesatControl.hs_min = 80   # Nms  :  maximum wheel momentum
 
     # set up the thruster force mapping module
-    forceTorqueThrForceMappingObj = forceTorqueThrForceMapping.forceTorqueThrForceMapping()
+    forceTorqueThrForceMappingObj = forceTorqueThrForceMapping.ForceTorqueThrForceMapping()
     forceTorqueThrForceMappingObj.ModelTag = "forceTorqueThrForceMapping"
     scSim.AddModelToTask(fswTask, forceTorqueThrForceMappingObj)
 
     # set up the thruster momentum dumping module
-    thrDump = thrMomentumDumping.thrMomentumDumping()
+    thrDump = thrMomentumDumping.ThrMomentumDumping()
     thrDump.ModelTag = "thrDump"
     scSim.AddModelToTask(fswTask, thrDump)
     thrDump.maxCounterValue = 100  # number of control periods (simulationTimeStepFsw) between two subsequent on-times

@@ -80,7 +80,7 @@ def run(show_plots, useLargeVoltage, useAvailability, useTorqueLoop, testName):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = rwMotorVoltage.rwMotorVoltage()
+    module = rwMotorVoltage.RwMotorVoltage()
     module.ModelTag = "rwMotorVoltage"
 
     # Add test module to runtime call list

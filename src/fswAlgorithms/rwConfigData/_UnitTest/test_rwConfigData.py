@@ -37,7 +37,7 @@ def rwConfigDataTestFunction():
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate)) # Add a new task to the process
 
     # Construct the cssComm module
-    module = rwConfigData.rwConfigData()
+    module = rwConfigData.RwConfig()
 
     # Create the messages
     rwConstellationFswMsg = messaging.RWConstellationMsgPayload()

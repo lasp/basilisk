@@ -86,7 +86,7 @@ def thrFiringSchmittTestFunction(show_plots, resetCheck, dvOn):
 
 
     # Construct algorithm and associated C++ container
-    module = thrFiringSchmitt.thrFiringSchmitt()
+    module = thrFiringSchmitt.ThrFiringSchmitt()
     module.ModelTag = "thrFiringSchmitt"
 
     # Add test module to runtime call list

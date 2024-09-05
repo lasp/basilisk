@@ -61,7 +61,7 @@ def attRefCorrectionTestFunction(show_plots, accuracy):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # setup module to be tested
-    module = attRefCorrection.attRefCorrection()
+    module = attRefCorrection.AttRefCorrection()
     module.ModelTag = "attRefCorrectionTag"
     unitTestSim.AddModelToTask(unitTaskName, module)
     module.sigma_BcB = [math.tan(math.pi/4), 0.0, 0.0]

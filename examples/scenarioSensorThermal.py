@@ -195,7 +195,7 @@ def run(show_plots):
     scSim.AddModelToTask(simTaskName, ephemConverter)
 
     # Set up sun pointing guidance module
-    locPoint = locationPointing.locationPointing()
+    locPoint = locationPointing.LocationPointing()
     locPoint.ModelTag = "locPoint"
     scSim.AddModelToTask(simTaskName, locPoint, 99)
     locPoint.pHat_B = [0, 0, 1]
@@ -204,7 +204,7 @@ def run(show_plots):
     locPoint.celBodyInMsg.subscribeTo(ephemConverter.ephemOutMsgs[0])
 
     # Set up the MRP Feedback control module
-    mrpControl = mrpFeedback.mrpFeedback()
+    mrpControl = mrpFeedback.MrpFeedback()
     mrpControl.ModelTag = "mrpFeedback"
     scSim.AddModelToTask(simTaskName, mrpControl, 98)
     mrpControl.guidInMsg.subscribeTo(locPoint.attGuidOutMsg)

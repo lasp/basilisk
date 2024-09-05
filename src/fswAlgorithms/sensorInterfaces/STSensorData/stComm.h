@@ -20,34 +20,25 @@
 #ifndef _ST_COMM_H_
 #define _ST_COMM_H_
 
-#include "cMsgCInterface/STSensorMsg_C.h"
-#include "cMsgCInterface/STAttMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/STSensorMsgPayload.h"
+#include "architecture/msgPayloadDefC/STAttMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 
 
 /*! @brief Module configuration message.  */
-typedef struct {
+class StComm : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+
     double dcm_BP[9];                /*!< Row major platform 2 body DCM*/
-    STSensorMsg_C stSensorInMsg;  /*!< star tracker sensor input message*/
-    STAttMsg_C stAttOutMsg; /*!< star tracker attitude output message */
+    ReadFunctor<STSensorMsgPayload> stSensorInMsg;  /*!< star tracker sensor input message*/
+    Message<STAttMsgPayload> stAttOutMsg; /*!< star tracker attitude output message */
 
-    STAttMsgPayload attOutBuffer; /*!< Output data structure*/
-    BSKLogger *bskLogger;   //!< BSK Logging
-}STConfigData;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_stProcessTelem(STConfigData *configData, int64_t moduleID);
-    void Reset_stProcessTelem(STConfigData *configData, uint64_t callTime, int64_t moduleID);
-    void Update_stProcessTelem(STConfigData *configData, uint64_t callTime,
-        int64_t moduleID);
-    
-#ifdef __cplusplus
-}
-#endif
-
+    BSKLogger bskLogger{};   //!< BSK Logging
+};
 
 #endif

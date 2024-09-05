@@ -22,10 +22,12 @@
 
 #include <stdint.h>
 
-#include "cMsgCInterface/NavAttMsg_C.h"
-#include "cMsgCInterface/CSSArraySensorMsg_C.h"
-#include "cMsgCInterface/SunlineFilterMsg_C.h"
-#include "cMsgCInterface/CSSConfigMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
+#include "architecture/msgPayloadDefC/CSSArraySensorMsgPayload.h"
+#include "architecture/msgPayloadDefC/SunlineFilterMsgPayload.h"
+#include "architecture/msgPayloadDefC/CSSConfigMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 #include <string.h>
@@ -35,11 +37,17 @@
 /*!@brief Data structure for CSS Extended kalman filter estimator without gyros measurements.
  */
 
-typedef struct {
-    NavAttMsg_C navStateOutMsg;                     /*!< The name of the output message*/
-    SunlineFilterMsg_C filtDataOutMsg;              /*!< The name of the output filter data message*/
-    CSSArraySensorMsg_C cssDataInMsg;               /*!< The name of the Input message*/
-    CSSConfigMsg_C cssConfigInMsg;                  /*!< [-] The name of the CSS configuration message*/
+class OkeefeEKF : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+    void sunlineTimeUpdate(double updateTime);
+    void sunlineMeasUpdate(double updateTime);
+
+    Message<NavAttMsgPayload> navStateOutMsg;                     /*!< The name of the output message*/
+    Message<SunlineFilterMsgPayload> filtDataOutMsg;              /*!< The name of the output filter data message*/
+    ReadFunctor<CSSArraySensorMsgPayload> cssDataInMsg;               /*!< The name of the Input message*/
+    ReadFunctor<CSSConfigMsgPayload> cssConfigInMsg;                  /*!< [-] The name of the CSS configuration message*/
     
     double qObsVal;               /*!< [-] CSS instrument noise parameter*/
     double qProcVal;               /*!< [-] Process noise parameter*/
@@ -79,37 +87,23 @@ typedef struct {
 	NavAttMsgPayload outputSunline;   /*!< -- Output sunline estimate data */
     CSSArraySensorMsgPayload cssSensorInBuffer; /*!< [-] CSS sensor data read in from message bus*/
 
-    BSKLogger *bskLogger;                             //!< BSK Logging
-}okeefeEKFConfig;
+    BSKLogger bskLogger={};                             //!< BSK Logging
+};
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_okeefeEKF(okeefeEKFConfig *configData, int64_t moduleID);
-	void Reset_okeefeEKF(okeefeEKFConfig *configData, uint64_t callTime,
-		int64_t moduleID);
-    void Update_okeefeEKF(okeefeEKFConfig *configData, uint64_t callTime,
-                           int64_t moduleID);
-	void sunlineTimeUpdate(okeefeEKFConfig *configData, double updateTime);
-    void sunlineMeasUpdate(okeefeEKFConfig *configData, double updateTime);
-    void sunlineStateSTMProp(double dynMat[SKF_N_STATES_HALF*SKF_N_STATES_HALF], double dt, double omega[SKF_N_STATES_HALF], double *stateInOut, double *prevstates, double *stateTransition);
 
-    void sunlineHMatrixYMeas(double states[SKF_N_STATES_HALF], size_t numCSS, double cssSensorCos[MAX_N_CSS_MEAS], double sensorUseThresh, double cssNHat_B[MAX_NUM_CSS_SENSORS*3], double CBias[MAX_NUM_CSS_SENSORS], double *obs, double *yMeas, int *numObs, double *measMat);
+void sunlineStateSTMProp(double dynMat[SKF_N_STATES_HALF*SKF_N_STATES_HALF], double dt, double omega[SKF_N_STATES_HALF], double *stateInOut, double *prevstates, double *stateTransition);
 
-    void sunlineKalmanGainOkeefe(double covarBar[SKF_N_STATES_HALF*SKF_N_STATES_HALF], double hObs[MAX_N_CSS_MEAS*SKF_N_STATES_HALF], double qObsVal, int numObsInt, double *kalmanGain);
+void sunlineHMatrixYMeas(double states[SKF_N_STATES_HALF], size_t numCSS, double cssSensorCos[MAX_N_CSS_MEAS], double sensorUseThresh, double cssNHat_B[MAX_NUM_CSS_SENSORS*3], double CBias[MAX_NUM_CSS_SENSORS], double *obs, double *yMeas, int *numObs, double *measMat);
 
-    void sunlineRateCompute(double states[SKF_N_STATES_HALF], double dt, double prev_states[SKF_N_STATES_HALF], double *omega);
-    
-    void sunlineDynMatrixOkeefe(double omega[SKF_N_STATES_HALF], double dt, double *dynMat);
-    
-    void sunlineCKFUpdateOkeefe(double xBar[SKF_N_STATES_HALF], double kalmanGain[SKF_N_STATES_HALF*MAX_N_CSS_MEAS], double covarBar[SKF_N_STATES_HALF*SKF_N_STATES_HALF], double qObsVal, int numObsInt, double yObs[MAX_N_CSS_MEAS], double hObs[MAX_N_CSS_MEAS*SKF_N_STATES_HALF], double *x, double *covar);
-    
-    void okeefeEKFUpdate(double kalmanGain[SKF_N_STATES_HALF*MAX_N_CSS_MEAS], double covarBar[SKF_N_STATES_HALF*SKF_N_STATES_HALF], double qObsVal, int numObsInt, double yObs[MAX_N_CSS_MEAS], double hObs[MAX_N_CSS_MEAS*SKF_N_STATES_HALF], double *states, double *x, double *covar);
+void sunlineKalmanGainOkeefe(double covarBar[SKF_N_STATES_HALF*SKF_N_STATES_HALF], double hObs[MAX_N_CSS_MEAS*SKF_N_STATES_HALF], double qObsVal, int numObsInt, double *kalmanGain);
 
-#ifdef __cplusplus
-}
-#endif
+void sunlineRateCompute(double states[SKF_N_STATES_HALF], double dt, double prev_states[SKF_N_STATES_HALF], double *omega);
+
+void sunlineDynMatrixOkeefe(double omega[SKF_N_STATES_HALF], double dt, double *dynMat);
+
+void sunlineCKFUpdateOkeefe(double xBar[SKF_N_STATES_HALF], double kalmanGain[SKF_N_STATES_HALF*MAX_N_CSS_MEAS], double covarBar[SKF_N_STATES_HALF*SKF_N_STATES_HALF], double qObsVal, int numObsInt, double yObs[MAX_N_CSS_MEAS], double hObs[MAX_N_CSS_MEAS*SKF_N_STATES_HALF], double *x, double *covar);
+
+void okeefeEKFUpdate(double kalmanGain[SKF_N_STATES_HALF*MAX_N_CSS_MEAS], double covarBar[SKF_N_STATES_HALF*SKF_N_STATES_HALF], double qObsVal, int numObsInt, double yObs[MAX_N_CSS_MEAS], double hObs[MAX_N_CSS_MEAS*SKF_N_STATES_HALF], double *states, double *x, double *covar);
 
 
 #endif

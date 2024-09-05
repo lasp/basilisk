@@ -358,18 +358,18 @@ def run(show_plots):
     #
 
     # setup inertial3D guidance module
-    inertial3DObj = inertial3D.inertial3D()
+    inertial3DObj = inertial3D.Inertial3D()
     inertial3DObj.ModelTag = "inertial3D"
     scSim.AddModelToTask(simTaskName, inertial3DObj)
     inertial3DObj.sigma_R0N = [0., 0., 0.]  # set the desired inertial orientation
 
     # setup the attitude tracking error evaluation module
-    attError = attTrackingError.attTrackingError()
+    attError = attTrackingError.AttTrackingError()
     attError.ModelTag = "attErrorInertial3D"
     scSim.AddModelToTask(simTaskName, attError)
 
     # setup the MRP Feedback control module
-    mrpControl = mrpFeedback.mrpFeedback()
+    mrpControl = mrpFeedback.MrpFeedback()
     mrpControl.ModelTag = "mrpFeedback"
     scSim.AddModelToTask(simTaskName, mrpControl)
     
@@ -379,7 +379,7 @@ def run(show_plots):
     mrpControl.integralLimit = 2. / mrpControl.Ki * 0.1
 
     # add module that maps the Lr control torque into the RW motor torques
-    rwMotorTorqueObj = rwMotorTorque.rwMotorTorque()
+    rwMotorTorqueObj = rwMotorTorque.RwMotorTorque()
     rwMotorTorqueObj.ModelTag = "rwMotorTorque"
     scSim.AddModelToTask(simTaskName, rwMotorTorqueObj)
 
@@ -398,13 +398,13 @@ def run(show_plots):
     scSim.AddModelToTask(simTaskName, TAM)
     
     # setup tamComm module
-    tamCommObj = tamComm.tamComm()
+    tamCommObj = tamComm.TamComm()
     tamCommObj.dcm_BS = [1., 0., 0., 0., 1., 0., 0., 0., 1.]
     tamCommObj.ModelTag = "tamComm"
     scSim.AddModelToTask(simTaskName, tamCommObj)
     
     # setup mtbMomentumManagement module
-    mtbMomentumManagementObj = mtbMomentumManagement.mtbMomentumManagement()
+    mtbMomentumManagementObj = mtbMomentumManagement.MtbMomentumManagement()
     # setting the optional RW biases
     mtbMomentumManagementObj.wheelSpeedBiases = [800. * macros.rpm2radsec, 600. * macros.rpm2radsec,
                                                     400. * macros.rpm2radsec, 200. * macros.rpm2radsec]

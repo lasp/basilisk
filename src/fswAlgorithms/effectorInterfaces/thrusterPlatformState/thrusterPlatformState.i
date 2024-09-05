@@ -21,13 +21,17 @@
    #include "thrusterPlatformState.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(thrusterPlatformState);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "thrusterPlatformState.h"
 
 %include "architecture/msgPayloadDefC/THRConfigMsgPayload.h"
-struct THRConfigMsg_C;
 %include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
-struct HingedRigidBodyMsg_C;
 
 %pythoncode %{
 import sys

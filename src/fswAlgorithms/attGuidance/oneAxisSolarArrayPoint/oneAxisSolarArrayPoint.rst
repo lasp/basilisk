@@ -57,7 +57,7 @@ User Guide
 ----------
 The required module configuration is::
 
-    attReference = oneAxisSolarArrayPoint.oneAxisSolarArrayPoint()
+    attReference = oneAxisSolarArrayPoint.OneAxisSolarArrayPoint()
     attReference.ModelTag = "threeAxesPoint"
     attReference.a1Hat_B = a1_B
     attReference.alignmentPriority = 0

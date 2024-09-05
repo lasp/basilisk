@@ -50,7 +50,7 @@ def cssCommTestFunction(numSensors, sensorData):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate)) # Add a new task to the process
 
     # Construct the cssComm module
-    module = cssComm.cssComm()
+    module = cssComm.CSSComm()
     # Populate the config
     module.numSensors = numSensors
     module.maxSensorValue = 500e-6

@@ -80,7 +80,7 @@ def rwMotorTorqueTest(show_plots, numControlAxes, numWheels, numInputCmdTorques,
 
 
     # Construct algorithm and associated C++ container
-    module = rwMotorTorque.rwMotorTorque()
+    module = rwMotorTorque.RwMotorTorque()
     module.ModelTag = "rwMotorTorque"
 
 

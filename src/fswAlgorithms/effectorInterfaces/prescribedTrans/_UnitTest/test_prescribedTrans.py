@@ -94,7 +94,7 @@ def prescribedTransTestFunction(show_plots, scalarPosInit, scalarPosRef, scalarA
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    PrescribedTrans = prescribedTrans.prescribedTrans()
+    PrescribedTrans = prescribedTrans.PrescribedTrans()
     PrescribedTrans.ModelTag = "prescribedTrans"
 
     # Add test module to runtime call list

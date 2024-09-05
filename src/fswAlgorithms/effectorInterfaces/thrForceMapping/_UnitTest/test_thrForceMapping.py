@@ -88,7 +88,7 @@ def thrusterForceTest(show_plots, useDVThruster, useCOMOffset, dropThruster, asy
 
 
     # Construct algorithm and associated C++ container
-    module = thrForceMapping.thrForceMapping()
+    module = thrForceMapping.ThrForceMapping()
     module.ModelTag = "thrForceMapping"
 
 

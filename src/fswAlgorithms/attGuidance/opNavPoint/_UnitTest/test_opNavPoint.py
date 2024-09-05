@@ -80,7 +80,7 @@ def opNavPointTestFunction(show_plots, case):
 
 
     # Construct algorithm and associated C++ container
-    module = opNavPoint.opNavPoint()
+    module = opNavPoint.OpNavPoint()
     module.ModelTag = "opNavPoint"
 
     # Add test module to runtime call list

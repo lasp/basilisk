@@ -20,35 +20,25 @@
 #ifndef _IMU_COMM_H_
 #define _IMU_COMM_H_
 
-#include "cMsgCInterface/IMUSensorBodyMsg_C.h"
-#include "cMsgCInterface/IMUSensorMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/IMUSensorBodyMsgPayload.h"
+#include "architecture/msgPayloadDefC/IMUSensorMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 
 
 
 /*! @brief module configuration message */
-typedef struct {
+class ImuComm : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+
     double dcm_BP[9];    /*!< Row major platform 2 bdy DCM*/
-    IMUSensorMsg_C imuComInMsg;             /*!< imu input message*/
-    IMUSensorBodyMsg_C imuSensorOutMsg;     /*!< imu output message*/
-
-    IMUSensorBodyMsgPayload outMsgBuffer; /*!< Output data structure*/
-    BSKLogger *bskLogger;   //!< BSK Logging
-}IMUConfigData;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_imuProcessTelem(IMUConfigData *configData, int64_t moduleID);
-    void Reset_imuProcessTelem(IMUConfigData *configData, uint64_t callTime, int64_t moduleId);
-    void Update_imuProcessTelem(IMUConfigData *configData, uint64_t callTime,
-        int64_t moduleID);
-    
-#ifdef __cplusplus
-}
-#endif
-
+    ReadFunctor<IMUSensorMsgPayload> imuComInMsg;             /*!< imu input message*/
+    Message<IMUSensorBodyMsgPayload> imuSensorOutMsg;     /*!< imu output message*/
+    BSKLogger bskLogger={};   //!< BSK Logging
+};
 
 #endif

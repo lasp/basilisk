@@ -27,32 +27,25 @@
 #include "architecture/utilities/bskLogging.h"
 
 //  Message type imports
-#include "cMsgCInterface/NavTransMsg_C.h"
-#include "cMsgCInterface/HillRelStateMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
+#include "architecture/msgPayloadDefC/HillRelStateMsgPayload.h"
 
 
 
 /*! @brief Top level structure for the sub-module routines. */
-typedef struct {
+class HillStateConverter : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+
     /* declare module IO interfaces */
-    HillRelStateMsg_C hillStateOutMsg; //!< Output message containing relative state of deputy to chief in chief hill coordinates
-    NavTransMsg_C chiefStateInMsg; //!< Input message containing chief inertial translational state estimate
-    NavTransMsg_C depStateInMsg; //!< Input message containing deputy inertial translational state estimate
+    Message<HillRelStateMsgPayload> hillStateOutMsg; //!< Output message containing relative state of deputy to chief in chief hill coordinates
+    ReadFunctor<NavTransMsgPayload> chiefStateInMsg; //!< Input message containing chief inertial translational state estimate
+    ReadFunctor<NavTransMsgPayload> depStateInMsg; //!< Input message containing deputy inertial translational state estimate
 
-    BSKLogger *bskLogger;                           //!< BSK Logging
-}HillStateConverterConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-    void SelfInit_hillStateConverter(HillStateConverterConfig *configData, int64_t moduleID);
-    void Update_hillStateConverter(HillStateConverterConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Reset_hillStateConverter(HillStateConverterConfig *configData, uint64_t callTime, int64_t moduleID);
-
-#ifdef __cplusplus
-}
-#endif
-
+    BSKLogger bskLogger={};                           //!< BSK Logging
+};
 
 #endif

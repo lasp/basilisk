@@ -22,19 +22,22 @@
    #include "architecture/utilities/ukfUtilities.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap_2(headingSuKF, HeadingSuKFConfig);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "headingSuKF.h"
+
 
 %include "architecture/utilities/ukfUtilities.h"
 
 %include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-struct VehicleConfigMsg_C;
 %include "architecture/msgPayloadDefC/HeadingFilterMsgPayload.h"
-struct HeadingFilterMsg_C;
 %include "architecture/msgPayloadDefC/OpNavMsgPayload.h"
-struct OpNavMsg_C;
 %include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
-struct CameraConfigMsg_C;
 
 %pythoncode %{
 import sys

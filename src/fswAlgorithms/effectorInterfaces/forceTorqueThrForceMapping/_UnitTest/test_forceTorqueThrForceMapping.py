@@ -214,7 +214,7 @@ def forceTorqueThrForceMappingTestFunction(rcsLocation, rcsDirection, requested_
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # setup module to be tested
-    module = forceTorqueThrForceMapping.forceTorqueThrForceMapping()
+    module = forceTorqueThrForceMapping.ForceTorqueThrForceMapping()
     module.ModelTag = "forceTorqueThrForceMappingTag"
     unitTestSim.AddModelToTask(unitTaskName, module)
 

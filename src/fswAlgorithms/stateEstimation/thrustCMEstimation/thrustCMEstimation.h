@@ -46,7 +46,6 @@ class ThrustCMEstimation: public SysModel {
 public:
     ThrustCMEstimation();
     ~ThrustCMEstimation() override;
-    void SelfInit() override;
     void Reset(uint64_t CurrentSimNanos) override;
     void UpdateState(uint64_t CurrentSimNanos) override;
 
@@ -59,7 +58,6 @@ public:
     ReadFunctor<VehicleConfigMsgPayload>    vehConfigInMsg;           //!< (optional) vehicle configuration input msg
     Message<CMEstDataMsgPayload>            cmEstDataOutMsg;          //!< estimated CM output msg
     Message<VehicleConfigMsgPayload>        vehConfigOutMsg;          //!< output C++ vehicle configuration msg
-    VehicleConfigMsg_C                      vehConfigOutMsgC = {};    //!< output C vehicle configuration msg
 
     Eigen::Vector3d r_CB_B;                 //!< initial CM estimate
     Eigen::Vector3d P0;                     //!< initial CM state covariance
@@ -73,7 +71,7 @@ private:
 
     bool cmKnowledge;                       //!< boolean to assess if vehConfigInMsg is connected
 
-    BSKLogger bskLogger; //!< -- BSK Logging
+    BSKLogger bskLogger{}; //!< -- BSK Logging
 };
 
 #endif

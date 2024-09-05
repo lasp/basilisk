@@ -77,7 +77,7 @@ def spacecraftPointingTestFunction(show_plots, case):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = spacecraftPointing.spacecraftPointing()
+    module = spacecraftPointing.SpacecraftPointing()
     module.ModelTag = "spacecraftPointing"
 
     # Add test module to runtime call list

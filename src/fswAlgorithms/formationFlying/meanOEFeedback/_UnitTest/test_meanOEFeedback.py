@@ -62,7 +62,7 @@ def meanOEFeedbackTestFunction(show_plots, useClassicElem, accuracy):
     testProc = unitTestSim.CreateNewProcess(unitProcessName)  # create new process
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))  # create new task
     # Construct algorithm and associated C++ container
-    module = meanOEFeedback.meanOEFeedback()
+    module = meanOEFeedback.MeanOEFeedback()
     module.ModelTag = "meanOEFeedback"  # update python name of test meanOEFeedback
     module.targetDiffOeMean = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     module.mu = orbitalMotion.MU_EARTH * 1e9  # [m^3/s^2]

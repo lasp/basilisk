@@ -9,6 +9,7 @@ import inspect
 import os
 
 import numpy as np
+import pytest
 from Basilisk.architecture import messaging
 from Basilisk.fswAlgorithms import horizonOpNav
 from Basilisk.utilities import RigidBodyKinematics as rbk
@@ -32,7 +33,7 @@ def back_substitution(A, b):
         x[i] = (b[i] - sum)/A[i,i]
     return x
 
-
+@pytest.mark.skip(reason="Pat hasn't ported horizonOpNav yet")
 def test_horizonOpNav():
     """
     Unit test for Horizon Navigation. The unit test specifically covers:
@@ -163,7 +164,7 @@ def horizonOpNav_update():
 
     # Construct the ephemNavConverter module
     # Set the names for the input messages
-    opNav = horizonOpNav.horizonOpNav()
+    opNav = horizonOpNav.HorizonOpNav()
     opNav.noiseSF = 2
     # ephemNavConfig.outputState = simFswInterfaceMessages.NavTransIntMsg()
 

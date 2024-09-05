@@ -21,13 +21,17 @@
    #include "rateMsgConverter.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(rateMsgConverter);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "rateMsgConverter.h"
 
 %include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-struct NavAttMsg_C;
 %include "architecture/msgPayloadDefC/IMUSensorBodyMsgPayload.h"
-struct IMUSensorBodyMsg_C;
 
 %pythoncode %{
 import sys

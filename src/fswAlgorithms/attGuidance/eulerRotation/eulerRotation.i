@@ -21,13 +21,17 @@
    #include "eulerRotation.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(eulerRotation);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "eulerRotation.h"
 
 %include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
-struct AttRefMsg_C;
 %include "architecture/msgPayloadDefC/AttStateMsgPayload.h"
-struct AttStateMsg_C;
 
 %pythoncode %{
 import sys

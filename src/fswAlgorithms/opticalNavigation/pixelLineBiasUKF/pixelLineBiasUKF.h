@@ -22,11 +22,13 @@
 
 #include <stdint.h>
 
-#include "cMsgCInterface/NavTransMsg_C.h"
-#include "cMsgCInterface/CameraConfigMsg_C.h"
-#include "cMsgCInterface/NavAttMsg_C.h"
-#include "cMsgCInterface/OpNavCirclesMsg_C.h"
-#include "cMsgCInterface/PixelLineFilterMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
+#include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
+#include "architecture/msgPayloadDefC/OpNavCirclesMsgPayload.h"
+#include "architecture/msgPayloadDefC/PixelLineFilterMsgPayload.h"
 
 #include "architecture/utilities/macroDefinitions.h"
 #include "architecture/utilities/linearAlgebra.h"
@@ -40,12 +42,22 @@
 /*! @brief Top level structure for the relative OD unscented kalman filter.
  Used to estimate the spacecraft's inertial position relative to a body.
  */
-typedef struct {
-    NavTransMsg_C navStateOutMsg; //!< navigation translation output message
-    PixelLineFilterMsg_C filtDataOutMsg; //!< output filter data message
-    OpNavCirclesMsg_C circlesInMsg;  //!< [-] input messages with circles information
-    CameraConfigMsg_C cameraConfigInMsg; //!< camera config input message
-    NavAttMsg_C attInMsg; //!< attitude input message
+class PixelLineBiasUKF : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+
+    int pixelLineBiasUKFTimeUpdate(double updateTime);
+    int pixelLineBiasUKFMeasUpdate();
+    void pixelLineBiasUKFCleanUpdate();
+    void relODStateProp(double *stateInOut, double dt);
+    void pixelLineBiasUKFMeasModel();
+
+    Message<NavTransMsgPayload> navStateOutMsg; //!< navigation translation output message
+    Message<PixelLineFilterMsgPayload> filtDataOutMsg; //!< output filter data message
+    ReadFunctor<OpNavCirclesMsgPayload> circlesInMsg;  //!< [-] input messages with circles information
+    ReadFunctor<CameraConfigMsgPayload> cameraConfigInMsg; //!< camera config input message
+    ReadFunctor<NavAttMsgPayload> attInMsg; //!< attitude input message
     
     int moduleId; //!< module ID
     
@@ -97,30 +109,8 @@ typedef struct {
     CameraConfigMsgPayload cameraSpecs;  //!< [-] Camera specs for nav
     NavAttMsgPayload attInfo;         //!< [-] Att info for frame transformation
 
-    BSKLogger *bskLogger;  //!< BSK Logging
+    BSKLogger bskLogger={};  //!< BSK Logging
 
-}PixelLineBiasUKFConfig;
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_pixelLineBiasUKF(PixelLineBiasUKFConfig *configData, int64_t moduleId);
-    void Update_pixelLineBiasUKF(PixelLineBiasUKFConfig *configData, uint64_t callTime,
-                            int64_t moduleId);
-    void Reset_pixelLineBiasUKF(PixelLineBiasUKFConfig *configData, uint64_t callTime,
-                           int64_t moduleId);
-    void pixelLineBiasUKFTwoBodyDyn(double state[PIXLINE_N_STATES], double mu, double *stateDeriv);
-    int pixelLineBiasUKFTimeUpdate(PixelLineBiasUKFConfig *configData, double updateTime);
-    int pixelLineBiasUKFMeasUpdate(PixelLineBiasUKFConfig *configData);
-    void pixelLineBiasUKFCleanUpdate(PixelLineBiasUKFConfig *configData);
-    void relODStateProp(PixelLineBiasUKFConfig *configData, double *stateInOut, double dt);
-    void pixelLineBiasUKFMeasModel(PixelLineBiasUKFConfig *configData);
-    
-#ifdef __cplusplus
-}
-#endif
-
+};
 
 #endif

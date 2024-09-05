@@ -22,9 +22,11 @@
 
 #include <stdint.h>
 #include "architecture/utilities/bskLogging.h"
-#include "cMsgCInterface/NavAttMsg_C.h"
-#include "cMsgCInterface/AttRefMsg_C.h"
-#include "cMsgCInterface/HingedRigidBodyMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
+#include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
+#include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
 
 
 enum attitudeFrame{
@@ -33,7 +35,10 @@ enum attitudeFrame{
 };
 
 /*! @brief Top level structure for the sub-module routines. */
-typedef struct {
+class SolarArrayReference : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
 
     /* declare these user-defined quantities */
     double a1Hat_B[3];              //!< solar array drive axis in body frame coordinates
@@ -46,26 +51,13 @@ typedef struct {
     double              priorThetaR;              //!< prior output msg for finite differences
 
     /* declare module IO interfaces */
-    NavAttMsg_C            attNavInMsg;                  //!< input msg measured attitude
-    AttRefMsg_C            attRefInMsg;                  //!< input attitude reference message
-    HingedRigidBodyMsg_C   hingedRigidBodyInMsg;         //!< input hinged rigid body message
-    HingedRigidBodyMsg_C   hingedRigidBodyRefOutMsg;     //!< output msg containing hinged rigid body target angle and angle rate
+    ReadFunctor<NavAttMsgPayload>            attNavInMsg;                  //!< input msg measured attitude
+    ReadFunctor<AttRefMsgPayload>            attRefInMsg;                  //!< input attitude reference message
+    ReadFunctor<HingedRigidBodyMsgPayload>   hingedRigidBodyInMsg;         //!< input hinged rigid body message
+    Message<HingedRigidBodyMsgPayload>   hingedRigidBodyRefOutMsg;     //!< output msg containing hinged rigid body target angle and angle rate
 
-    BSKLogger *bskLogger;                         //!< BSK Logging
+    BSKLogger bskLogger={};                         //!< BSK Logging
 
-}solarArrayReferenceConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-    void SelfInit_solarArrayReference(solarArrayReferenceConfig *configData, int64_t moduleID);
-    void Reset_solarArrayReference(solarArrayReferenceConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Update_solarArrayReference(solarArrayReferenceConfig *configData, uint64_t callTime, int64_t moduleID);
-
-#ifdef __cplusplus
-}
-#endif
-
+};
 
 #endif

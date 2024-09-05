@@ -21,20 +21,20 @@
    #include "horizonOpNav.h"
 %}
 
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
 %include "swig_conly_data.i"
 STRUCTASLIST(HorizonOpNavData)
 
-%include "swig_c_wrap.i"
-%c_wrap_2(horizonOpNav, HorizonOpNavData);
+%include "horizonOpNav.h"
 
 %include "architecture/msgPayloadDefC/OpNavLimbMsgPayload.h"
-struct OpNavLimbMsg_C;
 %include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
-struct CameraConfigMsg_C;
 %include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-struct NavAttMsg_C;
 %include "architecture/msgPayloadDefC/OpNavMsgPayload.h"
-struct OpNavMsg_C;
 
 %pythoncode %{
 import sys

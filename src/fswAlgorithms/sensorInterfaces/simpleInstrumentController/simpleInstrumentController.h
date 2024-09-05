@@ -23,14 +23,19 @@
 
 #include "architecture/utilities/bskLogging.h"
 #include <stdint.h>
-
-#include "cMsgCInterface/AccessMsg_C.h"
-#include "cMsgCInterface/AttGuidMsg_C.h"
-#include "cMsgCInterface/DeviceCmdMsg_C.h"
-#include "cMsgCInterface/DeviceStatusMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/AccessMsgPayload.h"
+#include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
+#include "architecture/msgPayloadDefC/DeviceCmdMsgPayload.h"
+#include "architecture/msgPayloadDefC/DeviceStatusMsgPayload.h"
 
 /*! @brief Data configuration structure for the MRP feedback attitude control routine. */
-typedef struct {
+class SimpleInstrumentController : public SysModel{
+public:
+    void UpdateState(uint64_t callTime) override;
+    void Reset(uint64_t callTime) override;
+
     /* User configurable variables */
     double attErrTolerance; //!< Normalized MRP attitude error tolerance
     unsigned int useRateTolerance; //!< Flag to enable rate error tolerance
@@ -39,24 +44,12 @@ typedef struct {
     unsigned int controllerStatus;  //!< dictates whether or not the controller should be running
 
     /* declare module IO interfaces */
-    AccessMsg_C locationAccessInMsg;                   //!< Ground location access input message
-    AttGuidMsg_C attGuidInMsg;                         //!< attitude guidance input message
-    DeviceStatusMsg_C deviceStatusInMsg;                     //!< (optional) device status input message
-    DeviceCmdMsg_C deviceCmdOutMsg;              //!< device status output message
+    ReadFunctor<AccessMsgPayload> locationAccessInMsg;                   //!< Ground location access input message
+    ReadFunctor<AttGuidMsgPayload> attGuidInMsg;                         //!< attitude guidance input message
+    ReadFunctor<DeviceStatusMsgPayload> deviceStatusInMsg;                     //!< (optional) device status input message
+    Message<DeviceCmdMsgPayload> deviceCmdOutMsg;              //!< device status output message
 
-    BSKLogger *bskLogger;                              //!< BSK Logging
-}simpleInstrumentControllerConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void SelfInit_simpleInstrumentController(simpleInstrumentControllerConfig *configData, int64_t moduleID);
-void Update_simpleInstrumentController(simpleInstrumentControllerConfig *configData, uint64_t callTime, int64_t moduleID);
-void Reset_simpleInstrumentController(simpleInstrumentControllerConfig *configData, uint64_t callTime, int64_t moduleID);
-
-#ifdef __cplusplus
-}
-#endif
+    BSKLogger bskLogger={};                              //!< BSK Logging
+};
 
 #endif //_SIMPLE_INSTRUMENT_CONTROLLER_H_

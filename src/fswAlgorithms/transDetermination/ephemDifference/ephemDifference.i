@@ -21,15 +21,16 @@
    #include "ephemDifference.h"
 %}
 
+%pythoncode %{
+from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
 %include "swig_conly_data.i"
 STRUCTASLIST(EphemChangeConfig)
-
-%include "swig_c_wrap.i"
-%c_wrap_2(ephemDifference, EphemDifferenceData);
-struct EphemChangeConfig;
+%include "ephemDifference.h"
 
 %include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-struct EphemerisMsg_C;
 
 %pythoncode %{
 import sys

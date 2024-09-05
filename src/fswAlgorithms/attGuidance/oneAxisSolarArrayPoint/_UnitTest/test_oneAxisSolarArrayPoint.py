@@ -160,7 +160,7 @@ def oneAxisSolarArrayPointTestFunction(show_plots, alpha, delta, bodyAxisInput, 
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    attReferenceCongfig = oneAxisSolarArrayPoint.oneAxisSolarArrayPoint()
+    attReferenceCongfig = oneAxisSolarArrayPoint.OneAxisSolarArrayPoint()
     attReferenceCongfig.ModelTag = "oneAxisSolarArrayPoint"
 
     # Add test module to runtime call list

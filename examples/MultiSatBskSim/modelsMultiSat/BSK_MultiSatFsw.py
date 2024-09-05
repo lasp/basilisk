@@ -64,25 +64,25 @@ class BSKFswModels:
                                                                        self.processTasksTimeStep), 5)
 
         # Create module data and module wraps
-        self.inertial3DPoint = inertial3D.inertial3D()
+        self.inertial3DPoint = inertial3D.Inertial3D()
         self.inertial3DPoint.ModelTag = "inertial3D"
 
-        self.sunPoint = locationPointing.locationPointing()
+        self.sunPoint = locationPointing.LocationPointing()
         self.sunPoint.ModelTag = "sunPoint"
 
-        self.locPoint = locationPointing.locationPointing()
+        self.locPoint = locationPointing.LocationPointing()
         self.locPoint.ModelTag = "locPoint"
 
-        self.spacecraftReconfig = spacecraftReconfig.spacecraftReconfig()
+        self.spacecraftReconfig = spacecraftReconfig.SpacecraftReconfig()
         self.spacecraftReconfig.ModelTag = "spacecraftReconfig"
 
-        self.trackingError = attTrackingError.attTrackingError()
+        self.trackingError = attTrackingError.AttTrackingError()
         self.trackingError.ModelTag = "trackingError"
 
-        self.mrpFeedbackRWs = mrpFeedback.mrpFeedback()
+        self.mrpFeedbackRWs = mrpFeedback.MrpFeedback()
         self.mrpFeedbackRWs.ModelTag = "mrpFeedbackRWs"
 
-        self.rwMotorTorque = rwMotorTorque.rwMotorTorque()
+        self.rwMotorTorque = rwMotorTorque.RwMotorTorque()
         self.rwMotorTorque.ModelTag = "rwMotorTorque"
 
         # create the FSW module gateway messages
@@ -163,7 +163,7 @@ class BSKFswModels:
         Defines the inertial pointing guidance module.
         """
         self.inertial3DPoint.sigma_R0N = [0.1, 0.2, -0.3]
-        messaging.AttRefMsg_C_addAuthor(self.inertial3DPoint.attRefOutMsg, self.attRefMsg)
+        self.inertial3DPoint.attRefOutMsg = self.attRefMsg
 
     def SetSunPointGuidance(self, SimBase):
         """
@@ -173,7 +173,7 @@ class BSKFswModels:
         self.sunPoint.scAttInMsg.subscribeTo(SimBase.DynModels[self.spacecraftIndex].simpleNavObject.attOutMsg)
         self.sunPoint.scTransInMsg.subscribeTo(SimBase.DynModels[self.spacecraftIndex].simpleNavObject.transOutMsg)
         self.sunPoint.celBodyInMsg.subscribeTo(SimBase.EnvModel.ephemObject.ephemOutMsgs[SimBase.EnvModel.sun])
-        messaging.AttRefMsg_C_addAuthor(self.sunPoint.attRefOutMsg, self.attRefMsg)
+        self.sunPoint.attRefOutMsg = self.attRefMsg
 
     def SetLocationPointGuidance(self, SimBase):
         """
@@ -183,7 +183,7 @@ class BSKFswModels:
         self.locPoint.scAttInMsg.subscribeTo(SimBase.DynModels[self.spacecraftIndex].simpleNavObject.attOutMsg)
         self.locPoint.scTransInMsg.subscribeTo(SimBase.DynModels[self.spacecraftIndex].simpleNavObject.transOutMsg)
         self.locPoint.locationInMsg.subscribeTo(SimBase.EnvModel.groundStation.currentGroundStateOutMsg)
-        messaging.AttRefMsg_C_addAuthor(self.locPoint.attRefOutMsg, self.attRefMsg)
+        self.locPoint.attRefOutMsg = self.attRefMsg
 
     def SetSpacecraftOrbitReconfig(self, SimBase):
         """
@@ -196,7 +196,7 @@ class BSKFswModels:
         self.spacecraftReconfig.vehicleConfigInMsg.subscribeTo(SimBase.DynModels[self.spacecraftIndex].simpleMassPropsObject.vehicleConfigOutMsg)
         self.spacecraftReconfig.mu = SimBase.EnvModel.mu  # [m^3/s^2]
         self.spacecraftReconfig.attControlTime = 400  # [s]
-        messaging.AttRefMsg_C_addAuthor(self.spacecraftReconfig.attRefOutMsg, self.attRefMsg)
+        self.spacecraftReconfig.attRefOutMsg = self.attRefMsg
 
         # connect a blank chief message
         chiefData = messaging.NavTransMsgPayload()
@@ -210,7 +210,7 @@ class BSKFswModels:
         self.trackingError.attNavInMsg.subscribeTo(
             SimBase.DynModels[self.spacecraftIndex].simpleNavObject.attOutMsg)
         self.trackingError.attRefInMsg.subscribeTo(self.attRefMsg)
-        messaging.AttGuidMsg_C_addAuthor(self.trackingError.attGuidOutMsg, self.attGuidMsg)
+        self.trackingError.attGuidOutMsg = self.attGuidMsg
 
     def SetMRPFeedbackRWA(self, SimBase):
         """
@@ -280,8 +280,8 @@ class BSKFswModels:
     def setupGatewayMsgs(self, SimBase):
         """create C-wrapped gateway messages such that different modules can write to this message
         and provide a common input msg for down-stream modules"""
-        self.attRefMsg = messaging.AttRefMsg_C()
-        self.attGuidMsg = messaging.AttGuidMsg_C()
+        self.attRefMsg = messaging.AttRefMsg()
+        self.attGuidMsg = messaging.AttGuidMsg()
 
         self.zeroGateWayMsgs()
 

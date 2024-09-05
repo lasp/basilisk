@@ -52,7 +52,7 @@ def runner(show_plots, use_limits, msg_type):
     
 
     #   Set up the hillStateConverter
-    depAttRef = hillToAttRef.hillToAttRef()
+    depAttRef = hillToAttRef.HillToAttRef()
     depAttRef.ModelTag = "dep_hillControl"
     depAttRef.gainMatrix = hillToAttRef.MultiArray(lqr_gain_set)
     depAttRef.hillStateInMsg.subscribeTo(hillStateMsg)

@@ -65,7 +65,7 @@ A simple example of this module's initialization alongside a recorder to store t
     [0,0,0],       ]).T #   Note that the gain matrix is 3x6, not 6x3
 
     #   Set up the hillStateConverter
-    depAttRefData = hillToAttRef.hillToAttRef()
+    depAttRefData = hillToAttRef.HillToAttRef()
     depAttRefData.ModelTag = "dep_hillControl"
     depAttRefData.gainMatrix = hillToAttRef.MultiArray(lqr_gain_set)
     depAttRefData.hillStateInMsg.subscribeTo(hillStateMsg)

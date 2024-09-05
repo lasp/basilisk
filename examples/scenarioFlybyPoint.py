@@ -201,27 +201,24 @@ def run(show_plots, zeroEarthGravity, dtFilterData):
                     np.cross(crossProductAxis_B, cameraAxis_B)])
 
     # set up the attitude tracking error evaluation module
-    attErrorConfig = attTrackingError.attTrackingErrorConfig()
-    attErrorWrap = scSim.setModelDataWrap(attErrorConfig)
-    attErrorWrap.ModelTag = "attErrorInertial3D"
+    attErrorConfig = attTrackingError.AttTrackingError()
     attErrorConfig.sigma_R0R = rbk.C2MRP(R0R)
-    scSim.AddModelToTask(simTaskName, attErrorWrap, attErrorConfig)
+    attErrorConfig.ModelTag = "attErrorInertial3D"
+    scSim.AddModelToTask(simTaskName, attErrorConfig)
 
     # setup the MRP Feedback control module
-    mrpControlConfig = mrpFeedback.mrpFeedbackConfig()
-    mrpControlWrap = scSim.setModelDataWrap(mrpControlConfig)
-    mrpControlWrap.ModelTag = "mrpFeedback"
-    scSim.AddModelToTask(simTaskName, mrpControlWrap, mrpControlConfig)
+    mrpControlConfig = mrpFeedback.MrpFeedback()
+    mrpControlConfig.ModelTag = "mrpFeedback"
+    scSim.AddModelToTask(simTaskName, mrpControlConfig)
     mrpControlConfig.K = 3.5
     mrpControlConfig.Ki = -1  # make value negative to turn off integral feedback
     mrpControlConfig.P = 30.0
     mrpControlConfig.integralLimit = 2. / mrpControlConfig.Ki * 0.1
 
     # add module that maps the Lr control torque into the RW motor torques
-    rwMotorTorqueConfig = rwMotorTorque.rwMotorTorqueConfig()
-    rwMotorTorqueWrap = scSim.setModelDataWrap(rwMotorTorqueConfig)
-    rwMotorTorqueWrap.ModelTag = "rwMotorTorque"
-    scSim.AddModelToTask(simTaskName, rwMotorTorqueWrap, rwMotorTorqueConfig)
+    rwMotorTorqueConfig = rwMotorTorque.RwMotorTorque()
+    rwMotorTorqueConfig.ModelTag = "rwMotorTorque"
+    scSim.AddModelToTask(simTaskName, rwMotorTorqueConfig)
 
     # Make the RW control all three body axes
     controlAxes_B = [

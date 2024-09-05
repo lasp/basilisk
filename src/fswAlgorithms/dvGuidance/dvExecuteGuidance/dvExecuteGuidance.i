@@ -21,17 +21,19 @@
    #include "dvExecuteGuidance.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(dvExecuteGuidance);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "dvExecuteGuidance.h"
 
 %include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-struct NavTransMsg_C;
 %include "architecture/msgPayloadDefC/THRArrayOnTimeCmdMsgPayload.h"
-struct THRArrayOnTimeCmdMsg_C;
 %include "architecture/msgPayloadDefC/DvBurnCmdMsgPayload.h"
-struct DvBurnCmdMsg_C;
 %include "architecture/msgPayloadDefC/DvExecutionDataMsgPayload.h"
-struct DvExecutionDataMsg_C;
 
 %pythoncode %{
 import sys

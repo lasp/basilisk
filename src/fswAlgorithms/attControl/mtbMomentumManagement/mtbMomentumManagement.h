@@ -20,43 +20,48 @@
 #ifndef MTB_MOMENTUM_MANAGEMENT_H
 #define MTB_MOMENTUM_MANAGEMENT_H
 
-#include "cMsgCInterface/MTBCmdMsg_C.h"
-#include "cMsgCInterface/TAMSensorBodyMsg_C.h"
-#include "cMsgCInterface/RWSpeedMsg_C.h"
-#include "cMsgCInterface/RWArrayConfigMsg_C.h"
-#include "cMsgCInterface/MTBArrayConfigMsg_C.h"
-#include "cMsgCInterface/ArrayMotorTorqueMsg_C.h"
-#include "architecture/utilities/bskLogging.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/MTBCmdMsgPayload.h"
+#include "architecture/msgPayloadDefC/TAMSensorBodyMsgPayload.h"
+#include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
+#include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/MTBArrayConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/ArrayMotorTorqueMsgPayload.h"
 #include <stdio.h>
 #include "architecture/utilities/macroDefinitions.h"
 
 /*! @brief Top level structure for the sub-module routines. */
-typedef struct {
+class MtbMomentumManagement : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+
     /*
      * Configs.
      */
     double wheelSpeedBiases[MAX_EFF_CNT];           //!< [rad/s] reaction wheel speed biases
     double cGain;                                   //!<[1/s]  reaction wheel momentum feedback gain
-    
+
     /*
      * Inputs.
      */
-    RWArrayConfigMsg_C rwParamsInMsg;               //!< input message for RW parameters
-    MTBArrayConfigMsg_C mtbParamsInMsg;             //!< input message for MTB layout
-    TAMSensorBodyMsg_C tamSensorBodyInMsg;          //!< input message for magnetic field sensor data in the Body frame
-    RWSpeedMsg_C rwSpeedsInMsg;                     //!< input message for RW speeds
-    ArrayMotorTorqueMsg_C rwMotorTorqueInMsg;       //!< input message for RW motor torques
-    
+    ReadFunctor<RWArrayConfigMsgPayload> rwParamsInMsg;               //!< input message for RW parameters
+    ReadFunctor<MTBArrayConfigMsgPayload> mtbParamsInMsg;             //!< input message for MTB layout
+    ReadFunctor<TAMSensorBodyMsgPayload> tamSensorBodyInMsg;          //!< input message for magnetic field sensor data in the Body frame
+    ReadFunctor<RWSpeedMsgPayload> rwSpeedsInMsg;                     //!< input message for RW speeds
+    ReadFunctor<ArrayMotorTorqueMsgPayload> rwMotorTorqueInMsg;       //!< input message for RW motor torques
+
     /*
      * Outputs.
      */
-    MTBCmdMsg_C mtbCmdOutMsg;                       //!< output message for MTB dipole commands
-    ArrayMotorTorqueMsg_C rwMotorTorqueOutMsg;      //!< output message for RW motor torques
-    
+    Message<MTBCmdMsgPayload> mtbCmdOutMsg;                       //!< output message for MTB dipole commands
+    Message<ArrayMotorTorqueMsgPayload> rwMotorTorqueOutMsg;      //!< output message for RW motor torques
+
     /*
      * Other.
      */
-    BSKLogger *bskLogger;                           //!< BSK Logging
+    BSKLogger bskLogger = {};                       //!< BSK Logging
     double tauDesiredMTB_B[3];                      //!< [N-m] desired torque produced by the magnetic torque bars in the Body frame
     double tauDesiredRW_B[3];                       //!< [N-m]  desired torque produced by the reaction wheels in the Body frame
     double hDeltaWheels_W[MAX_EFF_CNT];             //!<  [N-m-s] momentum of each wheel
@@ -67,21 +72,9 @@ typedef struct {
     double wheelSpeedError_W[MAX_EFF_CNT];          //!<  [N-m-s] difference between current wheel speeds and desired wheel speeds
     RWArrayConfigMsgPayload rwConfigParams;         //!< configuration for RW's
     MTBArrayConfigMsgPayload mtbConfigParams;       //!< configuration for MTB layout
-    
-}mtbMomentumManagementConfig;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+};
 
-    void SelfInit_mtbMomentumManagement(mtbMomentumManagementConfig *configData, int64_t moduleID);
-    void Update_mtbMomentumManagement(mtbMomentumManagementConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Reset_mtbMomentumManagement(mtbMomentumManagementConfig *configData, uint64_t callTime, int64_t moduleID);
-    void v3TildeM(double v[3], void *result);
-
-#ifdef __cplusplus
-}
-#endif
-
+void v3TildeM(double v[3], double *result);
 
 #endif

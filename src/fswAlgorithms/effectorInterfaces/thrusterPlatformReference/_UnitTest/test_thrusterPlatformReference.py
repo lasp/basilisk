@@ -113,7 +113,7 @@ def platformRotationTestFunction(show_plots, delta_CM, K, thetaMax, seed, accura
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    platform = thrusterPlatformReference.thrusterPlatformReference()
+    platform = thrusterPlatformReference.ThrusterPlatformReference()
     platform.ModelTag = "platformReference"
 
     # Add test module to runtime call list

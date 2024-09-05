@@ -22,12 +22,17 @@
 
 #include <stdint.h>
 #include "architecture/utilities/bskLogging.h"
-#include "cMsgCInterface/ArrayMotorTorqueMsg_C.h"
-#include "cMsgCInterface/ArrayEffectorLockMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/ArrayMotorTorqueMsgPayload.h"
+#include "architecture/msgPayloadDefC/ArrayEffectorLockMsgPayload.h"
 
 
 /*! @brief Top level structure for the sub-module routines. */
-typedef struct {
+class TorqueScheduler : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
 
     /* declare these user-defined inputs */
     int    lockFlag;                               //!< flag to control the scheduler logic
@@ -37,26 +42,13 @@ typedef struct {
     uint64_t t0;                                   //!< [ns] epoch time where module is reset
 
     /* declare module IO interfaces */
-    ArrayMotorTorqueMsg_C  motorTorque1InMsg;      //!< input motor torque message #1
-    ArrayMotorTorqueMsg_C  motorTorque2InMsg;      //!< input motor torque message #1
-    ArrayMotorTorqueMsg_C  motorTorqueOutMsg;      //!< output msg containing the motor torque to the array drive
-    ArrayEffectorLockMsg_C effectorLockOutMsg;     //!< output msg containing the flag to actuate or lock the motor
+    ReadFunctor<ArrayMotorTorqueMsgPayload>  motorTorque1InMsg;      //!< input motor torque message #1
+    ReadFunctor<ArrayMotorTorqueMsgPayload>  motorTorque2InMsg;      //!< input motor torque message #1
+    Message<ArrayMotorTorqueMsgPayload>  motorTorqueOutMsg;      //!< output msg containing the motor torque to the array drive
+    Message<ArrayEffectorLockMsgPayload> effectorLockOutMsg;     //!< output msg containing the flag to actuate or lock the motor
 
-    BSKLogger *bskLogger;                          //!< BSK Logging
+    BSKLogger bskLogger={};                          //!< BSK Logging
 
-}torqueSchedulerConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-    void SelfInit_torqueScheduler(torqueSchedulerConfig *configData, int64_t moduleID);
-    void Reset_torqueScheduler(torqueSchedulerConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Update_torqueScheduler(torqueSchedulerConfig *configData, uint64_t callTime, int64_t moduleID);
-
-#ifdef __cplusplus
-}
-#endif
-
+};
 
 #endif

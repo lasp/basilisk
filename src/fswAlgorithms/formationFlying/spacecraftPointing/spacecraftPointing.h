@@ -20,18 +20,23 @@
 #ifndef _SPACECRAFTPOINTING_H_
 #define _SPACECRAFTPOINTING_H_
 
-#include "cMsgCInterface/NavTransMsg_C.h"
-#include "cMsgCInterface/AttRefMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
+#include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 #include <stdint.h>
 
 
 /*! @brief Top level structure for the spacecraft pointing module.*/
-typedef struct {
-    AttRefMsg_C attReferenceOutMsg;                     /*!< The name of the output message */
-    NavTransMsg_C chiefPositionInMsg;                   /*!< The name of the Input message of the chief */
-    NavTransMsg_C deputyPositionInMsg;                  /*!< The name of the Input message of the deputy */
+class SpacecraftPointing : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+    Message<AttRefMsgPayload> attReferenceOutMsg;                     /*!< The name of the output message */
+    ReadFunctor<NavTransMsgPayload> chiefPositionInMsg;                   /*!< The name of the Input message of the chief */
+    ReadFunctor<NavTransMsgPayload> deputyPositionInMsg;                  /*!< The name of the Input message of the deputy */
 
     double alignmentVector_B[3];                        /*!< Vector within the B-frame that points to antenna */
     double sigma_BA[3];                                 /*!< -- MRP of B-frame with respect to A-frame */
@@ -39,23 +44,8 @@ typedef struct {
     double old_omega_RN_N[3];                           /*!< -- Omega of previous timestep */
     int i;                                              /*!< -- Flag used to set incorrect numerical answers to zero */
     uint64_t priorTime;                                 /*!< [ns] Last time the attitude control is called */
-    AttRefMsgPayload attReferenceOutBuffer;                 //!< output msg copy
-    
-    BSKLogger *bskLogger;                             //!< BSK Logging
-}spacecraftPointingConfig;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_spacecraftPointing(spacecraftPointingConfig *configData, int64_t moduleID);
-    void Update_spacecraftPointing(spacecraftPointingConfig *configData, uint64_t callTime,
-        int64_t moduleID);
-    void Reset_spacecraftPointing(spacecraftPointingConfig *configData, uint64_t callTime, int64_t moduleID);
-
-#ifdef __cplusplus
-}
-#endif
-
+    BSKLogger bskLogger={};                             //!< BSK Logging
+};
 
 #endif

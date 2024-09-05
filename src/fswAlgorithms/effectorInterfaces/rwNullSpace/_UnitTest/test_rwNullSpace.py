@@ -58,7 +58,7 @@ def rwNullSpaceTestFunction(numWheels, defaultDesired):
 
     # Construct the rwNullSpace module
     # Set the names for the input messages
-    module = rwNullSpace.rwNullSpace()
+    module = rwNullSpace.RwNullSpace()
 
     # Set the necessary data in the module. NOTE: This information is more or less random
     module.OmegaGain = .5 # The feedback gain value applied for the RW despin control law

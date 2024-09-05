@@ -23,10 +23,12 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "cMsgCInterface/NavAttMsg_C.h"
-#include "cMsgCInterface/CSSArraySensorMsg_C.h"
-#include "cMsgCInterface/SunlineFilterMsg_C.h"
-#include "cMsgCInterface/CSSConfigMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
+#include "architecture/msgPayloadDefC/CSSArraySensorMsgPayload.h"
+#include "architecture/msgPayloadDefC/SunlineFilterMsgPayload.h"
+#include "architecture/msgPayloadDefC/CSSConfigMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 
@@ -42,11 +44,15 @@ typedef struct {
 
 /*!@brief Data structure for CSS Switch unscented kalman filter estimator.
  */
-typedef struct {
-    NavAttMsg_C navStateOutMsg;                     /*!< The name of the output message*/
-    SunlineFilterMsg_C filtDataOutMsg;              /*!< The name of the output filter data message*/
-    CSSArraySensorMsg_C cssDataInMsg;               /*!< The name of the Input message*/
-    CSSConfigMsg_C cssConfigInMsg;                  /*!< [-] The name of the CSS configuration message*/
+class SunlineSuKF : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+
+    Message<NavAttMsgPayload> navStateOutMsg;                     /*!< The name of the output message*/
+    Message<SunlineFilterMsgPayload> filtDataOutMsg;              /*!< The name of the output filter data message*/
+    ReadFunctor<CSSArraySensorMsgPayload> cssDataInMsg;               /*!< The name of the Input message*/
+    ReadFunctor<CSSConfigMsgPayload> cssConfigInMsg;                  /*!< [-] The name of the CSS configuration message*/
 
 	size_t numStates;                           //!< [-] Number of states for this filter
 	size_t countHalfSPs;                        //!< [-] Number of sigma points over 2
@@ -100,29 +106,15 @@ typedef struct {
     CSSArraySensorMsgPayload cssSensorInBuffer;     //!< [-] CSS sensor data read in from message bus
     uint32_t filterInitialized;                 //!< [-] Flag indicating if filter has been init or not
 
-    BSKLogger *bskLogger;                         //!< BSK Logging
-}SunlineSuKFConfig;
+    BSKLogger bskLogger={};                         //!< BSK Logging
+};
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_sunlineSuKF(SunlineSuKFConfig *configData, int64_t moduleID);
-    void Update_sunlineSuKF(SunlineSuKFConfig *configData, uint64_t callTime,
-        int64_t moduleID);
-	void Reset_sunlineSuKF(SunlineSuKFConfig *configData, uint64_t callTime,
-		int64_t moduleID);
-	int sunlineSuKFTimeUpdate(SunlineSuKFConfig *configData, double updateTime);
-    int sunlineSuKFMeasUpdate(SunlineSuKFConfig *configData, double updateTime);
-	void sunlineStateProp(double *stateInOut,  double *b_vec, double dt);
-    void sunlineSuKFMeasModel(SunlineSuKFConfig *configData);
-    void sunlineSuKFComputeDCM_BS(double sunheading[SKF_N_STATES_HALF], double bVec[SKF_N_STATES_HALF], double *dcm);
-    void sunlineSuKFSwitch(double *bVec_B, double *states, double *covar);
-    void sunlineSuKFCleanUpdate(SunlineSuKFConfig *configData);
-
-#ifdef __cplusplus
-}
-#endif
-
+int sunlineSuKFTimeUpdate(SunlineSuKF *data, double updateTime);
+int sunlineSuKFMeasUpdate(SunlineSuKF *data, double updateTime);
+void sunlineStateProp(double *stateInOut,  double *b_vec, double dt);
+void sunlineSuKFMeasModel(SunlineSuKF *data);
+void sunlineSuKFCleanUpdate(SunlineSuKF *data);
+void sunlineSuKFComputeDCM_BS(double sunheading[SKF_N_STATES_HALF], double bVec[SKF_N_STATES_HALF], double *dcm);
+void sunlineSuKFSwitch(double *bVec_B, double *states, double *covar);
 
 #endif

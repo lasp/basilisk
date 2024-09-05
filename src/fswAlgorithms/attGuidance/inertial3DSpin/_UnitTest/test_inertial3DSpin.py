@@ -64,7 +64,7 @@ def subModuleTestFunction(show_plots):
 
 
     # Construct algorithm and associated C++ container
-    module = inertial3DSpin.inertial3DSpin()
+    module = inertial3DSpin.Inertial3DSpin()
     module.ModelTag = "inertial3DSpin"
 
     # Add test module to runtime call list
@@ -192,7 +192,7 @@ def subModuleTestFunction2(show_plots):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = inertial3DSpin.inertial3DSpin()
+    module = inertial3DSpin.Inertial3DSpin()
     module.ModelTag = "inertial3DSpin"
 
     # Add test module to runtime call list

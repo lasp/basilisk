@@ -501,10 +501,10 @@ class SimBaseClass:
         progressBar.markComplete()
         progressBar.close()
 
-    @deprecated.deprecated("2024/09/06",
-        "Deprecated way to access logged variables."
-        " See 'http://hanspeterschaub.info/basilisk/Learn/bskPrinciples/bskPrinciples-6.html'"
-    )
+    # @deprecated.deprecated("2024/09/06",
+    #     "Deprecated way to access logged variables."
+    #     " See 'http://hanspeterschaub.info/basilisk/Learn/bskPrinciples/bskPrinciples-6.html'"
+    # )
     def GetLogVariableData(self, LogName):
         """
         Pull the recorded module recorded variable.  The first column is the variable recording time in

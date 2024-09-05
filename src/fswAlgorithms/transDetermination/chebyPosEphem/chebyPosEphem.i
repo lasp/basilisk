@@ -21,16 +21,18 @@
    #include "chebyPosEphem.h"
 %}
 
-%include "swig_conly_data.i"
-STRUCTASLIST(ChebyEphemRecord)
+%pythoncode %{
+from Basilisk.architecture.swig_common_model import *
+%}
 
-%include "swig_c_wrap.i"
-%c_wrap_2(chebyPosEphem, ChebyPosEphemData);
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+STRUCTASLIST(ChebyEphemRecord)
+%include "chebyPosEphem.h"
 
 %include "architecture/msgPayloadDefC/TDBVehicleClockCorrelationMsgPayload.h"
-struct TDBVehicleClockCorrelationMsg_C;
 %include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-struct EphemerisMsg_C;
 
 %pythoncode %{
 import sys

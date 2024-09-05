@@ -61,7 +61,7 @@ def rwMotorTorqueTest(show_plots):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = rwMotorTorque.rwMotorTorque()
+    module = rwMotorTorque.RwMotorTorque()
     module.ModelTag = "rwMotorTorque"
 
     # Initialize module variables

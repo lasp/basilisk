@@ -21,13 +21,17 @@
    #include "hingedRigidBodyPIDMotor.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(hingedRigidBodyPIDMotor);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "hingedRigidBodyPIDMotor.h"
 
 %include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
-struct HingedRigidBodyMsg_C;
 %include "architecture/msgPayloadDefC/ArrayMotorTorqueMsgPayload.h"
-struct ArrayMotorTorqueMsg_C;
 
 %pythoncode %{
 import sys

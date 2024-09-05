@@ -381,7 +381,7 @@ def run(show_plots):
     #   Set up the FSW algorithm tasks
     #
     # Set up solar panel Sun-pointing guidance module
-    sunPointGuidance = locationPointing.locationPointing()
+    sunPointGuidance = locationPointing.LocationPointing()
     sunPointGuidance.ModelTag = "panelSunPoint"
     sunPointGuidance.celBodyInMsg.subscribeTo(ephemObject.ephemOutMsgs[sunIdx])
     sunPointGuidance.scTransInMsg.subscribeTo(sNavObject.transOutMsg)
@@ -391,7 +391,7 @@ def run(show_plots):
     scSim.AddModelToTask(simTaskName, sunPointGuidance)
 
     # Set up asteroid-relative velocityPoint guidance module
-    velAsteroidGuidance = velocityPoint.velocityPoint()
+    velAsteroidGuidance = velocityPoint.VelocityPoint()
     velAsteroidGuidance.ModelTag = "velocityPointAsteroid"
     velAsteroidGuidance.transNavInMsg.subscribeTo(sNavObject.transOutMsg)
     velAsteroidGuidance.celBodyInMsg.subscribeTo(ephemObject.ephemOutMsgs[asteroidIdx])
@@ -400,7 +400,7 @@ def run(show_plots):
 
     # Set up sensor science-pointing guidance module
     cameraLocation = [0.0, 1.5, 0.0]
-    sciencePointGuidance = locationPointing.locationPointing()
+    sciencePointGuidance = locationPointing.LocationPointing()
     sciencePointGuidance.ModelTag = "sciencePointAsteroid"
     sciencePointGuidance.celBodyInMsg.subscribeTo(ephemObject.ephemOutMsgs[asteroidIdx])
     sciencePointGuidance.scTransInMsg.subscribeTo(sNavObject.transOutMsg)
@@ -410,7 +410,7 @@ def run(show_plots):
     scSim.AddModelToTask(simTaskName, sciencePointGuidance)
 
     # Set up an antenna pointing to Earth guidance module
-    earthPointGuidance = locationPointing.locationPointing()
+    earthPointGuidance = locationPointing.LocationPointing()
     earthPointGuidance.ModelTag = "antennaEarthPoint"
     earthPointGuidance.celBodyInMsg.subscribeTo(ephemObject.ephemOutMsgs[earthIdx])
     earthPointGuidance.scTransInMsg.subscribeTo(sNavObject.transOutMsg)
@@ -420,7 +420,7 @@ def run(show_plots):
     scSim.AddModelToTask(simTaskName, earthPointGuidance)
 
     # Set up the attitude tracking error evaluation module
-    attError = attTrackingError.attTrackingError()
+    attError = attTrackingError.AttTrackingError()
     attError.ModelTag = "attErrorInertial3D"
     scSim.AddModelToTask(simTaskName, attError)
     attError.attRefInMsg.subscribeTo(sunPointGuidance.attRefOutMsg)  # initial flight mode
@@ -432,7 +432,7 @@ def run(show_plots):
     vcMsg = messaging.VehicleConfigMsg().write(vehicleConfigOut)
 
     # Set up the MRP Feedback control module
-    mrpControl = mrpFeedback.mrpFeedback()
+    mrpControl = mrpFeedback.MrpFeedback()
     mrpControl.ModelTag = "mrpFeedback"
     scSim.AddModelToTask(simTaskName, mrpControl)
     mrpControl.guidInMsg.subscribeTo(attError.attGuidOutMsg)

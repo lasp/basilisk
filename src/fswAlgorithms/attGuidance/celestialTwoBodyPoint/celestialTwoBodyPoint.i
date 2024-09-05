@@ -21,15 +21,18 @@
    #include "celestialTwoBodyPoint.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(celestialTwoBodyPoint);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "celestialTwoBodyPoint.h"
 
 %include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-struct EphemerisMsg_C;
 %include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-struct NavTransMsg_C;
 %include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
-struct AttRefMsg_C;
 
 %pythoncode %{
 import sys

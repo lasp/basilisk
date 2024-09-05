@@ -210,7 +210,7 @@ def run(show_plots, a, i, T, P, F):
         navList[i].scStateInMsg.subscribeTo(scList[i].scStateOutMsg)
 
         # setup nadir pointing guidance module
-        guideList.append(locationPointing.locationPointing())
+        guideList.append(locationPointing.LocationPointing())
         guideList[i].ModelTag = "nadirPoint"+str(i)
         guideList[i].pHat_B = [1, 0, 0]
         guideList[i].scTransInMsg.subscribeTo(navList[i].transOutMsg)

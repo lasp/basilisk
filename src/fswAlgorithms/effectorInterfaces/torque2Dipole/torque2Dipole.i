@@ -22,18 +22,18 @@
     #include "torque2Dipole.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(torque2Dipole);
-
 %pythoncode %{
     from Basilisk.architecture.swig_common_model import *
 %}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "torque2Dipole.h"
+
 %include "architecture/msgPayloadDefC/TAMSensorBodyMsgPayload.h"
-struct TAMSensorBodyMsg_C;
 %include "architecture/msgPayloadDefC/DipoleRequestBodyMsgPayload.h"
-struct DipoleRequestBodyMsg_C;
 %include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
-struct CmdTorqueBodyMsg_C;
 
 %pythoncode %{
 import sys

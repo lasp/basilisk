@@ -20,9 +20,11 @@
 #ifndef _ATT_TRACKING_ERROR_
 #define _ATT_TRACKING_ERROR_
 
-#include "cMsgCInterface/AttGuidMsg_C.h"
-#include "cMsgCInterface/NavAttMsg_C.h"
-#include "cMsgCInterface/AttRefMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
+#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
+#include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
 
 #include <stdint.h>
 #include "architecture/utilities/bskLogging.h"
@@ -31,27 +33,16 @@
 
 /*!@brief Data structure for module to compute the attitude tracking error between the spacecraft attitude and the reference.
  */
-typedef struct {
-    /* declare module private variables */
+class AttTrackingError : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+
     double sigma_R0R[3];                        //!< MRP from corrected reference frame to original reference frame R0. This is the same as [BcB] going from primary body frame B to the corrected body frame Bc
-    AttGuidMsg_C attGuidOutMsg;              //!< output msg of attitude guidance
-    NavAttMsg_C attNavInMsg;                 //!< input msg measured attitude
-    AttRefMsg_C attRefInMsg;                 //!< input msg of reference attitude
-    BSKLogger *bskLogger;                       //!< BSK Logging
-}attTrackingErrorConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-    void SelfInit_attTrackingError(attTrackingErrorConfig *configData, int64_t moduleID);
-    void Update_attTrackingError(attTrackingErrorConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Reset_attTrackingError(attTrackingErrorConfig *configData, uint64_t callTime, int64_t moduleID);
-    void computeAttitudeError(double sigma_R0R[3], NavAttMsgPayload nav, AttRefMsgPayload ref, AttGuidMsgPayload *attGuidOut);
-
-#ifdef __cplusplus
-}
-#endif
-
+    Message<AttGuidMsgPayload> attGuidOutMsg;              //!< output msg of attitude guidance
+    ReadFunctor<NavAttMsgPayload> attNavInMsg;                 //!< input msg measured attitude
+    ReadFunctor<AttRefMsgPayload> attRefInMsg;                 //!< input msg of reference attitude
+    BSKLogger bskLogger={};                       //!< BSK Logging
+};
 
 #endif

@@ -22,8 +22,15 @@
    #include "architecture/utilities/ukfUtilities.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap_3(relativeODuKF, RelODuKFConfig, relODuKF);
+
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "relativeODuKF.h"
 
 %include "architecture/utilities/ukfUtilities.h"
 

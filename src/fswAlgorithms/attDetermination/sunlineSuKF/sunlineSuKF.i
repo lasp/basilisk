@@ -22,20 +22,20 @@
    #include "architecture/utilities/ukfUtilities.h"
 %}
 
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
 %include "swig_conly_data.i"
 STRUCTASLIST(SunlineSuKFCFit)
 
-%include "swig_c_wrap.i"
-%c_wrap_2(sunlineSuKF, SunlineSuKFConfig);
+%include "sunlineSuKF.h"
 
 %include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-struct NavAttMsg_C;
 %include "architecture/msgPayloadDefC/CSSArraySensorMsgPayload.h"
-struct CSSArraySensorMsg_C;
 %include "architecture/msgPayloadDefC/SunlineFilterMsgPayload.h"
-struct SunlineFilterMsg_C;
 %include "architecture/msgPayloadDefC/CSSConfigMsgPayload.h"
-struct CSSConfigMsg_C;
 
 %include "architecture/utilities/ukfUtilities.h"
 

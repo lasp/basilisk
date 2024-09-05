@@ -117,7 +117,7 @@ def relOD_method_test(show_plots):
     dt = 10
     mu = 42828.314
     # Measurement Model Test
-    data = pixelLineBiasUKF.PixelLineBiasUKFConfig()
+    data = pixelLineBiasUKF.PixelLineBiasUKF()
     msg = messaging.OpNavCirclesMsgPayload()
     msg.circlesCenters = [100, 200]
     msg.circlesRadii = [100]
@@ -134,7 +134,7 @@ def relOD_method_test(show_plots):
     for i in range(len(state)):
         pixelLineBiasUKF.doubleArray_setitem(stateIn, i, state[i])
 
-    pixelLineBiasUKF.relODStateProp(data, stateIn, dt)
+    data.relODStateProp(stateIn, dt)
 
     propedState = []
     for i in range(len(state)):
@@ -146,7 +146,7 @@ def relOD_method_test(show_plots):
         testMessages.append("State Prop Failure")
 
     # Set up a measurement test
-    data = pixelLineBiasUKF.PixelLineBiasUKFConfig()
+    data = pixelLineBiasUKF.PixelLineBiasUKF()
     # Set up a circle input message
     msg = messaging.OpNavCirclesMsgPayload()
     msg.circlesCenters = [100, 200]
@@ -182,7 +182,7 @@ def relOD_method_test(show_plots):
 
     data.SP = np.transpose(SP).flatten().tolist()
     data.state = state
-    pixelLineBiasUKF.pixelLineBiasUKFMeasModel(data)
+    data.pixelLineBiasUKFMeasModel()
 
     yMeasOut = data.yMeas
     expectedMeas = np.zeros([6, 2*len(state)+1])
@@ -257,7 +257,7 @@ def StatePropRelOD(show_plots, dt):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = pixelLineBiasUKF.pixelLineBiasUKF()
+    module = pixelLineBiasUKF.PixelLineBiasUKF()
     module.ModelTag = "relodSuKF"
 
     # Add test module to runtime call list

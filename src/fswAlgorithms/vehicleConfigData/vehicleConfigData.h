@@ -1,7 +1,7 @@
 /*
  ISC License
 
- Copyright (c) 2016, Autonomous Vehicle Systems Lab, University of Colorado at Boulder
+ Copyright (c) 2024, Laboratory for Atmospheric Space Physics, University of Colorado at Boulder
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -17,36 +17,25 @@
 
  */
 
-#ifndef _VEHICLE_CONFIG_DATA_H_
-#define _VEHICLE_CONFIG_DATA_H_
+#ifndef VEHICLECONFIGDATACPP_H
+#define VEHICLECONFIGDATACPP_H
 
-#include <stdint.h>
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
 #include "architecture/utilities/macroDefinitions.h"
 
-#include "cMsgCInterface/VehicleConfigMsg_C.h"
+class VehicleConfigData : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
 
-#include "architecture/utilities/bskLogging.h"
-
-
-/*! @brief Structure used to define a common structure for top level vehicle information*/
-typedef struct {
     double ISCPntB_B[9];          /*!< [kg m^2] Spacecraft Inertia */
     double CoM_B[3];              /*!< [m] Center of mass of spacecraft in body*/
     double massSC;                /*!< [kg] Spacecraft mass */
-    VehicleConfigMsg_C vecConfigOutMsg; /*!< [-] Name of the output properties message*/
+    Message<VehicleConfigMsgPayload> vecConfigOutMsg; /*!< [-] Name of the output properties message*/
 
     BSKLogger *bskLogger;                             //!< BSK Logging
-}VehConfigInputData;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-void Update_vehicleConfigData(VehConfigInputData *configData, uint64_t callTime, int64_t moduleID);
-void SelfInit_vehicleConfigData(VehConfigInputData *configData, int64_t moduleID);
-void Reset_vehicleConfigData(VehConfigInputData *configData, uint64_t callTime, int64_t moduleID);
-#ifdef __cplusplus
-}
-#endif
+};
 
 
-#endif
+#endif //VEHICLECONFIGDATACPP_H

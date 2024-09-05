@@ -22,35 +22,28 @@
    #include "architecture/utilities/ukfUtilities.h"
 %}
 
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
 %include "swig_conly_data.i"
+
 STRUCTASLIST(LowPassFilterData)
 STRUCTASLIST(STMessage)
 
-%include "swig_c_wrap.i"
-%c_wrap_2(inertialUKF, InertialUKFConfig);
-
-
+%include "inertialUKF.h"
 %include "architecture/utilities/ukfUtilities.h"
+%include "architecture/utilities/signalCondition.h"
 
 %include "architecture/msgPayloadDefC/InertialFilterMsgPayload.h"
-struct InertialFilterMsg_C;
 %include "architecture/msgPayloadDefC/STAttMsgPayload.h"
-struct STAttMsg_C;
 %include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-struct VehicleConfigMsg_C;
 %include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
-struct RWArrayConfigMsg_C;
 %include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
-struct RWSpeedMsg_C;
 %include "architecture/msgPayloadDefC/AccDataMsgPayload.h"
-struct AccDataMsg_C;
 %include "architecture/msgPayloadDefC/AccPktDataMsgPayload.h"
-struct AccPktDataMsg_C;
 %include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-struct NavAttMsg_C;
-
-%include "architecture/utilities/signalCondition.h"
-struct LowPassFilterData;
 
 %pythoncode %{
 import sys

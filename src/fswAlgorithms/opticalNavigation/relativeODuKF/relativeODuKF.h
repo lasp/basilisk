@@ -22,9 +22,11 @@
 
 #include <stdint.h>
 
-#include "cMsgCInterface/NavTransMsg_C.h"
-#include "cMsgCInterface/OpNavMsg_C.h"
-#include "cMsgCInterface/OpNavFilterMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
+#include "architecture/msgPayloadDefC/OpNavMsgPayload.h"
+#include "architecture/msgPayloadDefC/OpNavFilterMsgPayload.h"
 
 #include "architecture/utilities/macroDefinitions.h"
 #include "architecture/utilities/linearAlgebra.h"
@@ -37,10 +39,19 @@
 /*! @brief Top level structure for the relative OD unscented kalman filter.
  Used to estimate the spacecraft's inertial position relative to a body.
  */
-typedef struct {
-    NavTransMsg_C navStateOutMsg;       //!< navigation output message
-    OpNavFilterMsg_C filtDataOutMsg;    //!< output filter data message
-    OpNavMsg_C opNavInMsg;              //!<  opnav input message
+class RelODuKF : public SysModel {
+    public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+    int relODuKFTimeUpdate(double updateTime);
+    int relODuKFMeasUpdate();
+    void relODuKFCleanUpdate();
+    void relODStateProp(double *stateInOut, double dt);
+    void relODuKFMeasModel();
+
+    Message<NavTransMsgPayload> navStateOutMsg;       //!< navigation output message
+    Message<OpNavFilterMsgPayload> filtDataOutMsg;    //!< output filter data message
+    ReadFunctor<OpNavMsgPayload> opNavInMsg;              //!<  opnav input message
     
     size_t numStates;             //!< [-] Number of states for this filter
     size_t countHalfSPs;          //!< [-] Number of sigma points over 2
@@ -89,30 +100,8 @@ typedef struct {
     
     OpNavMsgPayload opNavInBuffer; //!< [-] ST sensor data read in from message bus
 
-    BSKLogger *bskLogger;   //!< BSK Logging
+    BSKLogger bskLogger={};   //!< BSK Logging
 
-}RelODuKFConfig;
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_relODuKF(RelODuKFConfig *configData, int64_t moduleId);
-    void Update_relODuKF(RelODuKFConfig *configData, uint64_t callTime,
-                            int64_t moduleId);
-    void Reset_relODuKF(RelODuKFConfig *configData, uint64_t callTime,
-                           int64_t moduleId);
-    void relODuKFTwoBodyDyn(double state[ODUKF_N_STATES], double mu, double *stateDeriv);
-    int relODuKFTimeUpdate(RelODuKFConfig *configData, double updateTime);
-    int relODuKFMeasUpdate(RelODuKFConfig *configData);
-    void relODuKFCleanUpdate(RelODuKFConfig *configData);
-    void relODStateProp(RelODuKFConfig *configData, double *stateInOut, double dt);
-    void relODuKFMeasModel(RelODuKFConfig *configData);
-    
-#ifdef __cplusplus
-}
-#endif
-
+};
 
 #endif

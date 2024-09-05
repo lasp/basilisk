@@ -1,7 +1,7 @@
 /*
  ISC License
 
- Copyright (c) 2016, Autonomous Vehicle Systems Lab, University of Colorado at Boulder
+ Copyright (c) 2024, Laboratory for Atmospheric Space Physics, University of Colorado at Boulder
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -20,12 +20,15 @@
 %{
    #include "vehicleConfigData.h"
 %}
+%pythoncode %{
+from Basilisk.architecture.swig_common_model import *
+%}
 
-%include "swig_c_wrap.i"
-%c_wrap_2(vehicleConfigData, VehConfigInputData);
+%include "sys_model.i"
+%include "swig_conly_data.i"
+%include "vehicleConfigData.h"
 
 %include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-struct VehicleConfigMsg_C;
 
 %pythoncode %{
 import sys

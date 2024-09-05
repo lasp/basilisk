@@ -21,22 +21,22 @@
    #include "mtbMomentumManagement.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(mtbMomentumManagement);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "mtbMomentumManagement.h"
 
 // sample Module support file to be included in this sub-module
 %include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
-struct RWArrayConfigMsg_C;
 %include "architecture/msgPayloadDefC/MTBArrayConfigMsgPayload.h"
-struct MTBArrayConfigMsg_C;
 %include "architecture/msgPayloadDefC/TAMSensorBodyMsgPayload.h"
-struct TAMSensorBodyMsg_C;
 %include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
-struct RWSpeedMsg_C;
 %include "architecture/msgPayloadDefC/MTBCmdMsgPayload.h"
-struct MTBCmdMsg_C;
 %include "architecture/msgPayloadDefC/ArrayMotorTorqueMsgPayload.h"
-struct ArrayMotorTorqueMsg_C;
 
 %pythoncode %{
 import sys

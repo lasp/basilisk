@@ -68,7 +68,7 @@ def rateMsgConvertFunction(show_plots):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = rateMsgConverter.rateMsgConverter()
+    module = rateMsgConverter.RateMsgConverter()
     module.ModelTag = "rateMsgConverter"
 
     # Add test module to runtime call list

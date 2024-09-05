@@ -51,7 +51,7 @@ User Guide
 ----------
 The required module configuration is::
 
-    scheduler = torqueScheduler.torqueScheduler()
+    scheduler = torqueScheduler.TorqueScheduler()
     scheduler.ModelTag = "torqueScheduler"
     scheduler.lockFlag = lockFlag
     scheduler.tSwitch = tSwitch

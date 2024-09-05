@@ -140,15 +140,15 @@ class BSKFswModels:
         self.torqueScheduler2CruiseWrap = SimBase.setModelDataWrap(self.torqueScheduler2CruiseData)
         self.torqueScheduler2CruiseWrap.ModelTag = "torqueScheduler2Cruise"
 
-        self.trackingErrorData = attTrackingError.attTrackingErrorConfig()
+        self.trackingErrorData = attTrackingError.AttTrackingError()
         self.trackingErrorWrap = SimBase.setModelDataWrap(self.trackingErrorData)
         self.trackingErrorWrap.ModelTag = "trackingError"
 
-        self.mrpFeedbackRWsData = mrpFeedback.mrpFeedbackConfig()
+        self.mrpFeedbackRWsData = mrpFeedback.MrpFeedback()
         self.mrpFeedbackRWsWrap = SimBase.setModelDataWrap(self.mrpFeedbackRWsData)
         self.mrpFeedbackRWsWrap.ModelTag = "mrpFeedbackRWs"
 
-        self.rwMotorTorqueData = rwMotorTorque.rwMotorTorqueConfig()
+        self.rwMotorTorqueData = rwMotorTorque.RwMotorTorque()
         self.rwMotorTorqueWrap = SimBase.setModelDataWrap(self.rwMotorTorqueData)
         self.rwMotorTorqueWrap.ModelTag = "rwMotorTorque"
 
@@ -245,7 +245,7 @@ class BSKFswModels:
         self.earthPointData.attNavInMsg.subscribeTo(SimBase.DynModels[self.spacecraftIndex].simpleNavObject.attOutMsg)
         self.earthPointData.transNavInMsg.subscribeTo(SimBase.DynModels[self.spacecraftIndex].simpleNavObject.transOutMsg)
         self.earthPointData.ephemerisInMsg.subscribeTo(SimBase.EnvModel.ephemObject.ephemOutMsgs[SimBase.EnvModel.earth])
-        messaging.AttRefMsg_C_addAuthor(self.earthPointData.attRefOutMsg, self.attRefMsg)
+        self.earthPointData.attRefOutMsg = self.attRefMsg
 
     def SetSEPPointGuidance(self, SimBase):
         """
@@ -259,7 +259,7 @@ class BSKFswModels:
             self.sepPointData.bodyHeadingInMsg.subscribeTo(self.platform1ReferenceData.bodyHeadingOutMsg)
         else:
             self.sepPointData.bodyHeadingInMsg.subscribeTo(self.platform2ReferenceData.bodyHeadingOutMsg)
-        messaging.AttRefMsg_C_addAuthor(self.sepPointData.attRefOutMsg, self.attRefMsg)
+        self.sepPointData.attRefOutMsg = self.attRefMsg
 
     def SetCruisePointGuidance(self, SimBase):
         """
@@ -273,7 +273,7 @@ class BSKFswModels:
         self.cruisePointData.attNavInMsg.subscribeTo(SimBase.DynModels[self.spacecraftIndex].simpleNavObject.attOutMsg)
         self.cruisePointData.transNavInMsg.subscribeTo(SimBase.DynModels[self.spacecraftIndex].simpleNavObject.transOutMsg)
         self.cruisePointData.ephemerisInMsg.subscribeTo(SimBase.EnvModel.ephemObject.ephemOutMsgs[SimBase.EnvModel.earth])
-        messaging.AttRefMsg_C_addAuthor(self.cruisePointData.attRefOutMsg, self.attRefMsg)
+        self.cruisePointData.attRefOutMsg = self.attRefMsg
 
     def SetSolarArrayReference(self, SimBase):
         """
@@ -415,8 +415,8 @@ class BSKFswModels:
         self.torqueScheduler1EarthData.tSwitch = 60
         self.torqueScheduler1EarthData.motorTorque1InMsg.subscribeTo(self.platform1ControllerDataList[0].motorTorqueOutMsg)
         self.torqueScheduler1EarthData.motorTorque2InMsg.subscribeTo(self.platform1ControllerDataList[1].motorTorqueOutMsg)
-        messaging.ArrayMotorTorqueMsg_C_addAuthor(self.torqueScheduler1EarthData.motorTorqueOutMsg, self.platform1TorqueMsg)
-        messaging.ArrayEffectorLockMsg_C_addAuthor(self.torqueScheduler1EarthData.effectorLockOutMsg, self.platform1LockMsg)
+        self.torqueScheduler1EarthData.motorTorqueOutMsg = self.platform1TorqueMsg
+        self.torqueScheduler1EarthData.effectorLockOutMsg = self.platform1LockMsg
 
     def SetTorqueScheduler2Earth(self):
         """
@@ -426,8 +426,8 @@ class BSKFswModels:
         self.torqueScheduler2EarthData.tSwitch = 60
         self.torqueScheduler2EarthData.motorTorque1InMsg.subscribeTo(self.platform2ControllerDataList[0].motorTorqueOutMsg)
         self.torqueScheduler2EarthData.motorTorque2InMsg.subscribeTo(self.platform2ControllerDataList[1].motorTorqueOutMsg)
-        messaging.ArrayMotorTorqueMsg_C_addAuthor(self.torqueScheduler2EarthData.motorTorqueOutMsg, self.platform2TorqueMsg)
-        messaging.ArrayEffectorLockMsg_C_addAuthor(self.torqueScheduler2EarthData.effectorLockOutMsg, self.platform2LockMsg)
+        self.torqueScheduler2EarthData.motorTorqueOutMsg = self.platform2TorqueMsg
+        self.torqueScheduler2EarthData.effectorLockOutMsg = self.platform2LockMsg
 
     def SetTorqueScheduler1SEP(self):
         """
@@ -437,8 +437,8 @@ class BSKFswModels:
         self.torqueScheduler1SepData.tSwitch = 60
         self.torqueScheduler1SepData.motorTorque1InMsg.subscribeTo(self.platform1ControllerDataList[0].motorTorqueOutMsg)
         self.torqueScheduler1SepData.motorTorque2InMsg.subscribeTo(self.platform1ControllerDataList[1].motorTorqueOutMsg)
-        messaging.ArrayMotorTorqueMsg_C_addAuthor(self.torqueScheduler1SepData.motorTorqueOutMsg, self.platform1TorqueMsg)
-        messaging.ArrayEffectorLockMsg_C_addAuthor(self.torqueScheduler1SepData.effectorLockOutMsg, self.platform1LockMsg)
+        self.torqueScheduler1SepData.motorTorqueOutMsg = self.platform1TorqueMsg
+        self.torqueScheduler1SepData.effectorLockOutMsg = self.platform1LockMsg
 
     def SetTorqueScheduler2SEP(self):
         """
@@ -448,8 +448,8 @@ class BSKFswModels:
         self.torqueScheduler2SepData.tSwitch = 60
         self.torqueScheduler2SepData.motorTorque1InMsg.subscribeTo(self.platform2ControllerDataList[0].motorTorqueOutMsg)
         self.torqueScheduler2SepData.motorTorque2InMsg.subscribeTo(self.platform2ControllerDataList[1].motorTorqueOutMsg)
-        messaging.ArrayMotorTorqueMsg_C_addAuthor(self.torqueScheduler2SepData.motorTorqueOutMsg, self.platform2TorqueMsg)
-        messaging.ArrayEffectorLockMsg_C_addAuthor(self.torqueScheduler2SepData.effectorLockOutMsg, self.platform2LockMsg)
+        self.torqueScheduler2SepData.motorTorqueOutMsg = self.platform2TorqueMsg
+        self.torqueScheduler2SepData.effectorLockOutMsg = self.platform2LockMsg
 
     def SetTorqueScheduler1Cruise(self):
         """
@@ -459,8 +459,8 @@ class BSKFswModels:
         self.torqueScheduler1CruiseData.tSwitch = 60
         self.torqueScheduler1CruiseData.motorTorque1InMsg.subscribeTo(self.platform1ControllerDataList[0].motorTorqueOutMsg)
         self.torqueScheduler1CruiseData.motorTorque2InMsg.subscribeTo(self.platform1ControllerDataList[1].motorTorqueOutMsg)
-        messaging.ArrayMotorTorqueMsg_C_addAuthor(self.torqueScheduler1CruiseData.motorTorqueOutMsg, self.platform1TorqueMsg)
-        messaging.ArrayEffectorLockMsg_C_addAuthor(self.torqueScheduler1CruiseData.effectorLockOutMsg, self.platform1LockMsg)
+        self.torqueScheduler1CruiseData.motorTorqueOutMsg = self.platform1TorqueMsg
+        self.torqueScheduler1CruiseData.effectorLockOutMsg = self.platform1LockMsg
 
     def SetTorqueScheduler2Cruise(self):
         """
@@ -470,8 +470,8 @@ class BSKFswModels:
         self.torqueScheduler2CruiseData.tSwitch = 60
         self.torqueScheduler2CruiseData.motorTorque1InMsg.subscribeTo(self.platform1ControllerDataList[0].motorTorqueOutMsg)
         self.torqueScheduler2CruiseData.motorTorque2InMsg.subscribeTo(self.platform1ControllerDataList[1].motorTorqueOutMsg)
-        messaging.ArrayMotorTorqueMsg_C_addAuthor(self.torqueScheduler2CruiseData.motorTorqueOutMsg, self.platform2TorqueMsg)
-        messaging.ArrayEffectorLockMsg_C_addAuthor(self.torqueScheduler2CruiseData.effectorLockOutMsg, self.platform2LockMsg)
+        self.torqueScheduler2CruiseData.motorTorqueOutMsg = self.platform2TorqueMsg
+        self.torqueScheduler2CruiseData.effectorLockOutMsg = self.platform2LockMsg
 
     def SetAttitudeTrackingError(self, SimBase):
         """
@@ -479,7 +479,7 @@ class BSKFswModels:
         """
         self.trackingErrorData.attNavInMsg.subscribeTo(SimBase.DynModels[self.spacecraftIndex].simpleNavObject.attOutMsg)
         self.trackingErrorData.attRefInMsg.subscribeTo(self.attRefMsg)
-        messaging.AttGuidMsg_C_addAuthor(self.trackingErrorData.attGuidOutMsg, self.attGuidMsg)
+        self.trackingErrorData.attGuidOutMsg = self.attGuidMsg
 
     def SetMRPFeedbackRWA(self, SimBase):
         """
@@ -567,14 +567,14 @@ class BSKFswModels:
         Creates C-wrapped gateway messages such that different modules can write to and provide a common input msg for
         downstream modules
         """
-        self.attRefMsg = messaging.AttRefMsg_C()
-        self.attGuidMsg = messaging.AttGuidMsg_C()
-        self.platform1TorqueMsg = messaging.ArrayMotorTorqueMsg_C()
-        self.platform1LockMsg = messaging.ArrayEffectorLockMsg_C()
-        self.platform2TorqueMsg = messaging.ArrayMotorTorqueMsg_C()
-        self.platform2LockMsg = messaging.ArrayEffectorLockMsg_C()
-        self.thrConfigFMsg = messaging.THRConfigMsg_C()
-        self.fswVehConfigMsg = messaging.VehicleConfigMsg_C()
+        self.attRefMsg = messaging.AttRefMsg()
+        self.attGuidMsg = messaging.AttGuidMsg()
+        self.platform1TorqueMsg = messaging.ArrayMotorTorqueMsg()
+        self.platform1LockMsg = messaging.ArrayEffectorLockMsg()
+        self.platform2TorqueMsg = messaging.ArrayMotorTorqueMsg()
+        self.platform2LockMsg = messaging.ArrayEffectorLockMsg()
+        self.thrConfigFMsg = messaging.THRConfigMsg()
+        self.fswVehConfigMsg = messaging.VehicleConfigMsg()
        
         # Write fsw configuration message
         VehicleConfig = messaging.VehicleConfigMsgPayload()

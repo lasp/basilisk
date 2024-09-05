@@ -33,7 +33,7 @@ def vehicleConfigDataTestFunction():
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate)) # Add a new task to the process
 
     # Construct the cssComm module
-    module = vehicleConfigData.vehicleConfigData()
+    module = vehicleConfigData.VehicleConfigData()
     # Populate the config
     I = [1000., 0., 0.,
          0., 800., 0.,

@@ -94,7 +94,7 @@ def torqueSchedulerTestFunction(lockFlag, tSwitch, accuracy):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C container
-    scheduler = torqueScheduler.torqueScheduler()
+    scheduler = torqueScheduler.TorqueScheduler()
     scheduler.ModelTag = "torqueScheduler"
     scheduler.lockFlag = lockFlag
     scheduler.tSwitch = tSwitch

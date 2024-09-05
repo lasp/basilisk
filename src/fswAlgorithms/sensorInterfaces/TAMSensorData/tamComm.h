@@ -20,33 +20,26 @@
 #ifndef _TAM_COMM_H_
 #define _TAM_COMM_H_
 
-#include "cMsgCInterface/TAMSensorBodyMsg_C.h"
-#include "cMsgCInterface/TAMSensorMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/TAMSensorBodyMsgPayload.h"
+#include "architecture/msgPayloadDefC/TAMSensorMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 
 
 /*! module configuration message definition */
-typedef struct {
+class TamComm : public SysModel {
+public:
+    void UpdateState(uint64_t callTime) override;
+    void Reset(uint64_t callTime) override;
+
     double dcm_BS[9];                           //!< [T] Row - Sensor to Body DCM
-    TAMSensorMsg_C tamInMsg;                    //!< [-] TAM interface input message
-    TAMSensorBodyMsg_C tamOutMsg;               //!< [-] TAM interface output message
+    ReadFunctor<TAMSensorMsgPayload> tamInMsg;                    //!< [-] TAM interface input message
+    Message<TAMSensorBodyMsgPayload> tamOutMsg;               //!< [-] TAM interface output message
 
     TAMSensorBodyMsgPayload tamLocalOutput;     //!< [-] buffer of TAM output data structure
-    BSKLogger *bskLogger;                       //!< BSK Logging
-}tamConfigData;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_tamProcessTelem(tamConfigData *configData, int64_t moduleID);
-    void Update_tamProcessTelem(tamConfigData *configData, uint64_t callTime, int64_t moduleID);
-    void Reset_tamProcessTelem(tamConfigData* configData, uint64_t callTime, int64_t moduleID);
-    
-#ifdef __cplusplus
-}
-#endif
-
+    BSKLogger bskLogger{};                       //!< BSK Logging
+};
 
 #endif

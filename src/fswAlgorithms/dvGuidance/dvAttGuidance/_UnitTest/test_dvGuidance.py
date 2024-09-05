@@ -45,7 +45,7 @@ def dvGuidanceTestFunction(show_plots):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))  # Add a new task to the process
 
     # Construct the dvGuidance module
-    module = dvGuidance.dvGuidance()
+    module = dvGuidance.DvGuidance()
 
     # This calls the algContain to setup the selfInit, and update
     module.ModelTag = "dvGuidance"

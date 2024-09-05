@@ -21,21 +21,26 @@
 #define _OPNAV_POINT_H_
 
 
-#include "cMsgCInterface/NavAttMsg_C.h"
-#include "cMsgCInterface/CameraConfigMsg_C.h"
-#include "cMsgCInterface/AttGuidMsg_C.h"
-#include "cMsgCInterface/OpNavMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
+#include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
+#include "architecture/msgPayloadDefC/OpNavMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 #include <stdint.h>
 
 /*! @brief module configuration message definition
  */
-typedef struct {
-    AttGuidMsg_C attGuidanceOutMsg;                 /*!< The name of the output message*/
-    OpNavMsg_C opnavDataInMsg;                      /*!< The name of the Input message*/
-    NavAttMsg_C imuInMsg;                           /*!< The name of the incoming IMU message*/
-    CameraConfigMsg_C cameraConfigInMsg;            //!< The name of the camera config message
+class OpNavPoint : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+    Message<AttGuidMsgPayload> attGuidanceOutMsg;                 /*!< The name of the output message*/
+    ReadFunctor<OpNavMsgPayload> opnavDataInMsg;                      /*!< The name of the Input message*/
+    ReadFunctor<NavAttMsgPayload> imuInMsg;                           /*!< The name of the incoming IMU message*/
+    ReadFunctor<CameraConfigMsgPayload> cameraConfigInMsg;            //!< The name of the camera config message
 
     double minUnitMag;       /*!< -- The minimally acceptable norm of opNav body vector*/
     double opNavAngleErr;      /*!< -- rad The current error between cmd and obs opNav angle*/
@@ -50,21 +55,7 @@ typedef struct {
     double opNavAxisSpinRate;  /*!< -- r/s Desired constant spin rate about opNav vector */
 
     AttGuidMsgPayload attGuidanceOutBuffer;   /*!< -- The output data that we compute*/
-    BSKLogger *bskLogger;                             //!< BSK Logging
-}OpNavPointConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_opNavPoint(OpNavPointConfig *configData, int64_t moduleID);
-    void Update_opNavPoint(OpNavPointConfig *configData, uint64_t callTime,
-        int64_t moduleID);
-    void Reset_opNavPoint(OpNavPointConfig *configData, uint64_t callTime, int64_t moduleID);
-
-#ifdef __cplusplus
-}
-#endif
-
+    BSKLogger bskLogger={};                             //!< BSK Logging
+};
 
 #endif

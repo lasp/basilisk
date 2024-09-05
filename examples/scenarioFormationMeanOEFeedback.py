@@ -156,7 +156,7 @@ def run(show_plots, useClassicElem, numOrbits):
     fswProcess.addTask(scSim.CreateNewTask(fswTaskName, fswTimeStep))
 
     # meanOEFeedback
-    meanOEFeedbackObj = meanOEFeedback.meanOEFeedback()
+    meanOEFeedbackObj = meanOEFeedback.MeanOEFeedback()
     meanOEFeedbackObj.ModelTag = "meanOEFeedback"
     meanOEFeedbackObj.chiefTransInMsg.subscribeTo(simpleNavObject.transOutMsg)
     meanOEFeedbackObj.deputyTransInMsg.subscribeTo(simpleNavObject2.transOutMsg)

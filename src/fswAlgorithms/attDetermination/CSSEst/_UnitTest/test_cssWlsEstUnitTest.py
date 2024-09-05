@@ -171,7 +171,7 @@ def cssWlsEstTestFunction(show_plots):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, int(1E8)))
 
     # Construct algorithm and associated C++ container
-    CSSWlsEstFSW = cssWlsEst.cssWlsEst()
+    CSSWlsEstFSW = cssWlsEst.CssWlsEst()
     CSSWlsEstFSW.ModelTag = "CSSWlsEst"
 
     # Add module to runtime call list
@@ -432,7 +432,7 @@ def cssRateTestFunction(show_plots):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = cssWlsEst.cssWlsEst()
+    module = cssWlsEst.CssWlsEst()
     module.ModelTag = "CSSWlsEst"
 
     # Add module to runtime call list

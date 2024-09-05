@@ -35,7 +35,7 @@ def thrustRWDesatTestFunction():
 
     # Construct the thrustRWDesat module
     # Set the names for the input messages
-    module = thrustRWDesat.thrustRWDesat()
+    module = thrustRWDesat.ThrustRWDesat()
 
     # Set the necessary data in the module. NOTE: This information is more or less random
     module.thrFiringPeriod = .5 # The amount of time to rest between thruster firings [s]

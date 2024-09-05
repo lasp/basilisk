@@ -117,7 +117,7 @@ def hingedRigidBodyPIDMotorTestFunction(show_plots, thetaR, thetaDotR, theta, th
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    motor = hingedRigidBodyPIDMotor.hingedRigidBodyPIDMotor()
+    motor = hingedRigidBodyPIDMotor.HingedRigidBodyPIDMotor()
     motor.ModelTag = "hingedRigidBodyPIDMotor"  
     motor.K = K
     motor.P = P

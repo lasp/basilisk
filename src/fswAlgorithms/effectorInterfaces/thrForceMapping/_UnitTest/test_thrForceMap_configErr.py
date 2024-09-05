@@ -83,7 +83,7 @@ def thrusterForceTest(show_plots, useDVThruster, useCOMOffset, dropThruster, asy
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = thrForceMapping.thrForceMapping()
+    module = thrForceMapping.ThrForceMapping()
     module.ModelTag = "thrForceMapping"
 
     # Add test module to runtime call list

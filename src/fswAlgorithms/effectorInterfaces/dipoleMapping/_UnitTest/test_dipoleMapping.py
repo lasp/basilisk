@@ -76,7 +76,7 @@ def dipoleMappingModuleTestFunction():
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Initialize module under test's config message and add module to runtime call list
-    module = dipoleMapping.dipoleMapping()
+    module = dipoleMapping.DipoleMapping()
     module.steeringMatrix = [1., 0., 0., 0., 1., 0., 0., 0., 1.]
     module.ModelTag = "dipoleMapping"           # update python name of test module
     unitTestSim.AddModelToTask(unitTaskName, module)

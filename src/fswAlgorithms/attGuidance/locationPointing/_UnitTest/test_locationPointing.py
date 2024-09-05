@@ -88,7 +88,7 @@ def locationPointingTestFunction(show_plots, r_LS_NIn, locationType, use3DRate, 
     r_LN_N = r_LS_N + r_SN_N
 
     # setup module to be tested
-    module = locationPointing.locationPointing()
+    module = locationPointing.LocationPointing()
     module.ModelTag = "locationPointingTag"
     unitTestSim.AddModelToTask(unitTaskName, module)
     module.pHat_B = pHat_B

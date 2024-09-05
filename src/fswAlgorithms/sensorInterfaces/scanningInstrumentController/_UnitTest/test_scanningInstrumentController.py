@@ -108,7 +108,7 @@ def scanningInstrumentControllerTestFunction(att_limit = 0.1, att_mag = 0.1,
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # setup module to be tested
-    module = scanningInstrumentController.scanningInstrumentController()
+    module = scanningInstrumentController.ScanningInstrumentController()
     module.ModelTag = "scanningInstrumentControllerTag"
     unitTestSim.AddModelToTask(unitTaskName, module)
 

@@ -22,11 +22,16 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "architecture/utilities/bskLogging.h"
-#include "cMsgCInterface/PrescribedTranslationMsg_C.h"
-#include "cMsgCInterface/LinearTranslationRigidBodyMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/PrescribedTranslationMsgPayload.h"
+#include "architecture/msgPayloadDefC/LinearTranslationRigidBodyMsgPayload.h"
 
 /*! @brief Top level structure for the sub-module routines. */
-typedef struct {
+class PrescribedTrans : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
 
     /* User configurable variables */
     double scalarAccelMax;                                          //!< [m/s^2] Maximum acceleration mag
@@ -48,21 +53,11 @@ typedef struct {
     double b;                                                       //!< Parabolic constant for the second half of the maneuver
 
     // Messages
-    LinearTranslationRigidBodyMsg_C linearTranslationRigidBodyInMsg;  //!< Input message for the reference states
-    PrescribedTranslationMsg_C prescribedTranslationOutMsg;           //!< Output message for the prescribed translational states
+    ReadFunctor<LinearTranslationRigidBodyMsgPayload> linearTranslationRigidBodyInMsg;  //!< Input message for the reference states
+    Message<PrescribedTranslationMsgPayload> prescribedTranslationOutMsg;           //!< Output message for the prescribed translational states
 
-    BSKLogger *bskLogger;                                             //!< BSK Logging
+    BSKLogger bskLogger={};                                             //!< BSK Logging
 
-}PrescribedTransConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    void SelfInit_prescribedTrans(PrescribedTransConfig *configData, int64_t moduleID);
-    void Reset_prescribedTrans(PrescribedTransConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Update_prescribedTrans(PrescribedTransConfig *configData, uint64_t callTime, int64_t moduleID);
-#ifdef __cplusplus
-}
-#endif
+};
 
 #endif

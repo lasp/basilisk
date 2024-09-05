@@ -86,7 +86,7 @@ def sunSafePointTestFunction(show_plots, case):
 
 
     # Construct algorithm and associated C++ container
-    module = sunSafePoint.sunSafePoint()
+    module = sunSafePoint.SunSafePoint()
     module.ModelTag = "sunSafePoint"
 
     # Add test module to runtime call list

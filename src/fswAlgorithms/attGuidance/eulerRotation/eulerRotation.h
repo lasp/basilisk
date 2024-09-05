@@ -22,8 +22,10 @@
 
 #include <stdint.h>
 
-#include "cMsgCInterface/AttStateMsg_C.h"
-#include "cMsgCInterface/AttRefMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/AttStateMsgPayload.h"
+#include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 
@@ -31,7 +33,19 @@
 
 
 /*! @brief Top level structure for the sub-module routines. */
-typedef struct {
+class EulerRotation : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+
+
+    void checkRasterCommands();
+    void computeTimeStep(uint64_t callTime);
+    void computeEulerRotationReference(double sigma_R0N[3],
+                                       double omega_R0N_N[3],
+                                       double domega_R0N_N[3],
+                                       AttRefMsgPayload *attRefOut);
+
     /* Declare module public variables */
     double angleSet[3];                         //!< [-] current euler angle 321 set R/R0  with respect to the input reference
     double angleRates[3];                       //!< [rad/s] euler angle 321 rates
@@ -45,33 +59,11 @@ typedef struct {
     double dt;                                  //!< [s] integration time-step
     
     /* Declare module IO interfaces */
-    AttRefMsg_C attRefOutMsg;                   //!< The name of the output message containing the Reference
-    AttRefMsg_C attRefInMsg;                    //!< The name of the guidance reference input message
-    AttStateMsg_C  desiredAttInMsg;             //!< The name of the incoming message containing the desired EA set
+    Message<AttRefMsgPayload> attRefOutMsg;                   //!< The name of the output message containing the Reference
+    ReadFunctor<AttRefMsgPayload> attRefInMsg;                    //!< The name of the guidance reference input message
+    ReadFunctor<AttStateMsgPayload>  desiredAttInMsg;             //!< The name of the incoming message containing the desired EA set
 
-    BSKLogger *bskLogger;                             //!< BSK Logging
-}eulerRotationConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_eulerRotation(eulerRotationConfig *configData, int64_t moduleID);
-    void Reset_eulerRotation(eulerRotationConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Update_eulerRotation(eulerRotationConfig *configData, uint64_t callTime, int64_t moduleID);
-    
-    void checkRasterCommands(eulerRotationConfig *configData);
-    void computeTimeStep(eulerRotationConfig *configData, uint64_t callTime);
-    void computeEuler321_Binv_derivative(double angleSet[3], double angleRates[3], double B_inv_deriv[3][3]);
-    void computeEulerRotationReference(eulerRotationConfig *configData,
-                                       double sigma_R0N[3],
-                                       double omega_R0N_N[3],
-                                       double domega_R0N_N[3],
-                                       AttRefMsgPayload *attRefOut);
-    
-#ifdef __cplusplus
-}
-#endif
-
+    BSKLogger bskLogger={};                             //!< BSK Logging
+};
 
 #endif

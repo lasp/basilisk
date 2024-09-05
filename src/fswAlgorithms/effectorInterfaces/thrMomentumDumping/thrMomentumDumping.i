@@ -21,17 +21,19 @@
    #include "thrMomentumDumping.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(thrMomentumDumping);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "thrMomentumDumping.h"
 
 %include "architecture/msgPayloadDefC/THRArrayCmdForceMsgPayload.h"
-struct THRArrayCmdForceMsg_C;
 %include "architecture/msgPayloadDefC/THRArrayOnTimeCmdMsgPayload.h"
-struct THRArrayOnTimeCmdMsg_C;
 %include "architecture/msgPayloadDefC/THRArrayConfigMsgPayload.h"
-struct THRArrayConfigMsg_C;
 %include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
-struct CmdTorqueBodyMsg_C;
 
 %pythoncode %{
 import sys

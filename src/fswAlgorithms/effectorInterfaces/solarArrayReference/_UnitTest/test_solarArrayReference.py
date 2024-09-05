@@ -137,7 +137,7 @@ def solarArrayRotationTestFunction(show_plots, rHat_SB_N, sigma_BN, sigma_RN, at
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct tested module and associated C container
-    solarArray = solarArrayReference.solarArrayReference()
+    solarArray = solarArrayReference.SolarArrayReference()
     solarArray.ModelTag = "solarArrayReference"
 
     # Add test module to runtime call list

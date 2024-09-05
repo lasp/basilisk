@@ -63,7 +63,7 @@ def spacecraftReconfigTestFunction(show_plots, useRefAttitude, accuracy):
     testProc = unitTestSim.CreateNewProcess(unitProcessName)  # create new process
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))  # create new task
     # Construct algorithm and associated C++ container
-    module = spacecraftReconfig.spacecraftReconfig()
+    module = spacecraftReconfig.SpacecraftReconfig()
     module.ModelTag = "spacecraftReconfig"  # update python name of test spacecraftReconfig
     module.targetClassicOED = [0.0000, 0.0000, 0.0000, 0.0001, 0.0002, 0.0003]
     module.attControlTime = 400  # [s]

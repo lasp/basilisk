@@ -22,11 +22,16 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "architecture/utilities/bskLogging.h"
-#include "cMsgCInterface/HingedRigidBodyMsg_C.h"
-#include "cMsgCInterface/PrescribedRotationMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
+#include "architecture/msgPayloadDefC/PrescribedRotationMsgPayload.h"
 
 /*! @brief Top level structure for the sub-module routines. */
-typedef struct {
+class PrescribedRot1DOF : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
 
     /* User configurable variables */
     double thetaDDotMax;                                        //!< [rad/s^2] Maximum angular acceleration of spinning body
@@ -47,23 +52,13 @@ typedef struct {
     double a;                                                   //!< Parabolic constant for the first half of the maneuver
     double b;                                                   //!< Parabolic constant for the second half of the maneuver
 
-    BSKLogger *bskLogger;                                       //!< BSK Logging
+    BSKLogger bskLogger={};                                       //!< BSK Logging
 
     /* Messages */
-    HingedRigidBodyMsg_C spinningBodyInMsg;                     //!< Input msg for the spinning body reference angle and angle rate
-    HingedRigidBodyMsg_C spinningBodyOutMsg;                    //!< Output msg for the spinning body angle and angle rate
-    PrescribedRotationMsg_C prescribedRotationOutMsg;           //!< Output msg for the spinning body prescribed rotational states
+    ReadFunctor<HingedRigidBodyMsgPayload> spinningBodyInMsg;                     //!< Input msg for the spinning body reference angle and angle rate
+    Message<HingedRigidBodyMsgPayload> spinningBodyOutMsg;                    //!< Output msg for the spinning body angle and angle rate
+    Message<PrescribedRotationMsgPayload> prescribedRotationOutMsg;           //!< Output msg for the spinning body prescribed rotational states
 
-}PrescribedRot1DOFConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    void SelfInit_prescribedRot1DOF(PrescribedRot1DOFConfig *configData, int64_t moduleID);                     //!< Method for module initialization
-    void Reset_prescribedRot1DOF(PrescribedRot1DOFConfig *configData, uint64_t callTime, int64_t moduleID);     //!< Method for module reset
-    void Update_prescribedRot1DOF(PrescribedRot1DOFConfig *configData, uint64_t callTime, int64_t moduleID);    //!< Method for module time update
-#ifdef __cplusplus
-}
-#endif
+};
 
 #endif

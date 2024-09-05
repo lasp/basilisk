@@ -20,8 +20,10 @@
 #ifndef _DV_ATT_EFFECT_H_
 #define _DV_ATT_EFFECT_H_
 
-#include "cMsgCInterface/CmdTorqueBodyMsg_C.h"
-#include "cMsgCInterface/THRArrayOnTimeCmdMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
+#include "architecture/msgPayloadDefC/THRArrayOnTimeCmdMsgPayload.h"
 
 #include "fswAlgorithms/effectorInterfaces/_GeneralModuleFiles/thrustGroupData.h"
 #include "architecture/utilities/bskLogging.h"
@@ -40,32 +42,22 @@ typedef struct {
     uint32_t thrustIndex;       /*!< -  The actual thruster index associated with on-time*/
 }effPairs;
 
+void computeSingleThrustBlock(ThrustGroupData *thrData,
+                              uint64_t callTime,
+                              CmdTorqueBodyMsgPayload *contrReq,
+                              int64_t moduleID);
 
 /*! @brief module configuration message */
-typedef struct {
-    CmdTorqueBodyMsg_C cmdTorqueBodyInMsg; /*!< - The name of the Input message*/
+class DvAttEffect : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+    ReadFunctor<CmdTorqueBodyMsgPayload> cmdTorqueBodyInMsg; /*!< - The name of the Input message*/
 
     uint32_t numThrGroups;   /*!< - Count on the number of thrusters groups available*/
     ThrustGroupData thrGroups[MAX_NUM_THR_GROUPS]; /*!< - Thruster grouping container*/
-    BSKLogger *bskLogger;   //!< BSK Logging
-}dvAttEffectConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_dvAttEffect(dvAttEffectConfig *configData, int64_t moduleID);
-    void Update_dvAttEffect(dvAttEffectConfig *configData, uint64_t callTime,
-        int64_t moduleID);
-    void Reset_dvAttEffect(dvAttEffectConfig *configData, uint64_t callTime,
-                           int64_t moduleID);
-    void effectorVSort(effPairs *Input, effPairs *Output, size_t dim);
-    void computeSingleThrustBlock(ThrustGroupData *thrData, uint64_t callTime,
-                                  CmdTorqueBodyMsgPayload *contrReq, int64_t moduleID);
-    
-#ifdef __cplusplus
-}
-#endif
+    BSKLogger bskLogger={};   //!< BSK Logging
+};
 
 
 #endif

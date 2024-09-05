@@ -22,31 +22,25 @@
 #define ATTREFCORRECTION_H
 
 #include <stdint.h>
-#include "cMsgCInterface/AttRefMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
 #include "architecture/utilities/bskLogging.h"
 
 /*! @brief This module reads in the attitude reference message and adjusts it by a fixed rotation.  This allows a general body-fixed frame B to align with this corrected reference frame Rc.
  */
-typedef struct {
+class AttRefCorrection : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
 
     /* declare module IO interfaces */
-    AttRefMsg_C attRefInMsg;    //!< attitude reference input message
-    AttRefMsg_C attRefOutMsg;   //!< corrected attitude reference input message
+    ReadFunctor<AttRefMsgPayload> attRefInMsg;    //!< attitude reference input message
+    Message<AttRefMsgPayload> attRefOutMsg;   //!< corrected attitude reference input message
 
     double sigma_BcB[3];        //!< MRP from from body frame B to the corrected body frame Bc
 
-    BSKLogger *bskLogger;       //!< BSK Logging
-}attRefCorrectionConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    void SelfInit_attRefCorrection(attRefCorrectionConfig *configData, int64_t moduleID);
-    void Update_attRefCorrection(attRefCorrectionConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Reset_attRefCorrection(attRefCorrectionConfig *configData, uint64_t callTime, int64_t moduleID);
-
-#ifdef __cplusplus
-}
-#endif
+    BSKLogger bskLogger={};       //!< BSK Logging
+};
 
 #endif

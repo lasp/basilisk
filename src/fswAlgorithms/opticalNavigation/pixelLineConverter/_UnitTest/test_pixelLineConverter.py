@@ -72,7 +72,7 @@ def pixelLineConverterTestFunction():
 
     # Construct the ephemNavConverter module
     # Set the names for the input messages
-    pixelLine = pixelLineConverter.pixelLineConverter()
+    pixelLine = pixelLineConverter.PixelLineConverter()
 
     # This calls the algContain to setup the selfInit, update, and reset
     pixelLine.ModelTag = "pixelLineConverter"

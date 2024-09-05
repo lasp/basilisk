@@ -94,7 +94,7 @@ def prescribedRot1DOFTestFunction(show_plots, thetaInit, thetaRef, thetaDDotMax,
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Create an instance of the prescribedRot1DOF module to be tested
-    PrescribedRot1DOF = prescribedRot1DOF.prescribedRot1DOF()
+    PrescribedRot1DOF = prescribedRot1DOF.PrescribedRot1DOF()
     PrescribedRot1DOF.ModelTag = "prescribedRot1DOF"
 
     # Add the prescribedRot1DOF test module to runtime call list

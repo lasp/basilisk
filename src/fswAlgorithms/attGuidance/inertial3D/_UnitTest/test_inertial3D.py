@@ -68,7 +68,7 @@ def subModuleTestFunction(show_plots):
 
 
     # Construct algorithm and associated C++ container
-    module = inertial3D.inertial3D()
+    module = inertial3D.Inertial3D()
     module.ModelTag = "inertial3D"
 
     # Add test module to runtime call list
