@@ -19,13 +19,12 @@
 
 #include "orbitalMotion.h"
 
+#include <assert.h>
 #include <math.h>
-#include <stdio.h>
 #include <stdarg.h>
 
 #include "linearAlgebra.h"
 #include "astroConstants.h"
-#include "architecture/utilities/bsk_Print.h"
 
 
 /*!
@@ -144,16 +143,8 @@ void rv2hill(double *rc_N, double *vc_N, double *rd_N, double *vd_N, double *rho
  */
 double E2f(double Ecc, double e)
 {
-    double f;
-
-    if((e >= 0) && (e < 1)) {
-        f = 2 * atan2(sqrt(1 + e) * sin(Ecc / 2), sqrt(1 - e) * cos(Ecc / 2));
-    } else {
-        f = NAN;
-        BSK_PRINT(MSG_ERROR, "E2f() received e = %g. The value of e should be 0 <= e < 1.", e);
-    }
-
-    return f;
+    assert(0 <= e && e < 1);
+    return 2 * atan2(sqrt(1 + e) * sin(Ecc / 2), sqrt(1 - e) * cos(Ecc / 2));
 }
 
 /*!
@@ -168,16 +159,8 @@ double E2f(double Ecc, double e)
  */
 double E2M(double Ecc, double e)
 {
-    double M;
-
-    if((e >= 0) && (e < 1)) {
-        M = Ecc - e * sin(Ecc);
-    } else {
-        M = NAN;
-        BSK_PRINT(MSG_ERROR, "E2M() received e = %g. The value of e should be 0 <= e < 1.", e);
-    }
-
-    return M;
+    assert(0 <= e && e < 1);
+    return Ecc - e * sin(Ecc);
 }
 
 /*!
@@ -192,16 +175,8 @@ double E2M(double Ecc, double e)
  */
 double f2E(double f, double e)
 {
-    double Ecc;
-
-    if((e >= 0) && (e < 1)) {
-        Ecc = 2 * atan2(sqrt(1 - e) * sin(f / 2), sqrt(1 + e) * cos(f / 2));
-    } else {
-        Ecc = NAN;
-        BSK_PRINT(MSG_ERROR, "f2E() received e = %g. The value of e should be 0 <= e < 1.", e);
-    }
-
-    return Ecc;
+    assert(0 <= e && e < 1);
+    return 2 * atan2(sqrt(1 - e) * sin(f / 2), sqrt(1 + e) * cos(f / 2));
 }
 
 /*!
@@ -215,16 +190,8 @@ double f2E(double f, double e)
  */
 double f2H(double f, double e)
 {
-    double H;
-
-    if(e > 1) {
-        H = 2 * atanh(sqrt((e - 1) / (e + 1)) * tan(f / 2));
-    } else {
-        H = NAN;
-        BSK_PRINT(MSG_ERROR, "f2H() received e = %g. The value of e should be 1 < e.", e);
-    }
-
-    return H;
+    assert(1 < e);
+    return 2 * atanh(sqrt((e - 1) / (e + 1)) * tan(f / 2));
 }
 
 /*!
@@ -238,16 +205,8 @@ double f2H(double f, double e)
  */
 double H2f(double H, double e)
 {
-    double f;
-
-    if(e > 1) {
-        f = 2 * atan(sqrt((e + 1) / (e - 1)) * tanh(H / 2));
-    } else {
-        f = NAN;
-        BSK_PRINT(MSG_ERROR, "H2f() received e = %g. The value of e should be 1 < e.", e);
-    }
-
-    return f;
+    assert(1 < e);
+    return 2 * atan(sqrt((e + 1) / (e - 1)) * tanh(H / 2));
 }
 
 /*!
@@ -261,16 +220,8 @@ double H2f(double H, double e)
  */
 double H2N(double H, double e)
 {
-    double N;
-
-    if(e > 1) {
-        N = e * sinh(H) - H;
-    } else {
-        N = NAN;
-        BSK_PRINT(MSG_ERROR, "H2N() received e = %g. The value of e should be 1 < e.", e);
-    }
-
-    return N;
+    assert(1 < e);
+    return e * sinh(H) - H;
 }
 
 /*!
@@ -285,24 +236,18 @@ double H2N(double H, double e)
  */
 double M2E(double M, double e)
 {
+    assert(0 <= e && e < 1);
     double small = 1e-13;
     double dE = 10 * small;
     double E1 = M;
-    int    max = 200;
-    int    count = 0;
+    int    maxIterations = 200;
+    int    iterationCount = 0;
 
-    if((e >= 0) && (e < 1)) {
-        while(fabs(dE) > small) {
-            dE = (E1 - e * sin(E1) - M) / (1 - e * cos(E1));
-            E1 -= dE;
-            if(++count > max) {
-                BSK_PRINT(MSG_ERROR, "iteration error in M2E(%f,%f)", M, e);
-                dE = 0.;
-            }
-        }
-    } else {
-        E1 = NAN;
-        BSK_PRINT(MSG_ERROR, "M2E() received e = %g. The value of e should be 0 <= e < 1.", e);
+    while(fabs(dE) > small) {
+        assert(iterationCount <= maxIterations);
+        dE = (E1 - e * sin(E1) - M) / (1 - e * cos(E1));
+        E1 -= dE;
+        ++iterationCount;
     }
 
     return E1;
@@ -322,27 +267,20 @@ double N2H(double N, double e)
     double small = 1e-13;
     double dH = 10 * small;
     double H1 = N;
-    int    max = 200;
-    int    count = 0;
+    int    maxIterations = 200;
+    int    iterationCount = 0;
     if(fabs(H1) > 7.0)
     {
         H1 = N/fabs(N)*7.0;
     }
 
-    if(e > 1) {
-        while(fabs(dH) > small) {
-            dH = (e * sinh(H1) - H1 - N) / (e * cosh(H1) - 1);
-            H1 -= dH;
-            if(++count > max) {
-                BSK_PRINT(MSG_ERROR, "iteration error in N2H(%f,%f)", N, e);
-                dH = 0.;
-            }
-        }
-    } else {
-        H1 = NAN;
-        BSK_PRINT(MSG_ERROR, "N2H() received e = %g. The value of e should be e > 1.", e);
+    assert(1 < e);
+    while(fabs(dH) > small) {
+        assert(iterationCount <= maxIterations);
+        dH = (e * sinh(H1) - H1 - N) / (e * cosh(H1) - 1);
+        H1 -= dH;
+        ++iterationCount;
     }
-
     return H1;
 }
 
@@ -619,8 +557,9 @@ double atmosphericDensity(double alt)
  */
 double debyeLength(double alt)
 {
-    double debyedist;
-    double a;
+    assert((200.0 <= alt) && (alt <= 35000.0));
+    double debyedist=0;
+    double a=0;
     double X[N_DEBYE_PARAMETERS] = {200, 250, 300, 350, 400, 450, 500, 550,
                                     600, 650, 700, 750, 800, 850, 900, 950, 1000, 1050, 1100, 1150,
                                     1200, 1250, 1300, 1350, 1400, 1450, 1500, 1550, 1600, 1650, 1700,
@@ -633,7 +572,6 @@ double debyeLength(double alt)
                                     2.76E-02, 2.76E-02, 2.76E-02, 2.76E-02, 2.76E-02, 2.76E-02, 3.21E-02,
                                     3.96E-02, 3.96E-02, 3.96E-02, 3.96E-02, 3.96E-02
                                    };
-    int i;
 
     /* Flat debyeLength length for altitudes above 2000 km */
     if((alt > 2000.0) && (alt <= 30000.0)) {
@@ -641,20 +579,15 @@ double debyeLength(double alt)
     } else if((alt > 30000.0) && (alt <= 35000.0)) {
         debyedist = 0.1 * alt - 2999.7;
         return debyedist;
-    } else if((alt < 200.0) || (alt > 35000.0)) {
-        BSK_PRINT(MSG_ERROR, "debyeLength() received alt = %g\nThe value of alt should be in the range of [200 35000]", alt);
-        debyedist = NAN;
-        return debyedist;
     }
 
     /* Interpolation of data */
-    for(i = 0; i < N_DEBYE_PARAMETERS - 1; i++) {
-        if(X[i + 1] > alt) {
-            break;
-        }
+    for(int i = 0; i < N_DEBYE_PARAMETERS - 1; ++i) {
+        if(X[i + 1] < alt) continue;
+        a = (alt - X[i]) / (X[i + 1] - X[i]);
+        debyedist = Y[i] + a * (Y[i + 1] - Y[i]);
+        break;
     }
-    a = (alt - X[i]) / (X[i + 1] - X[i]);
-    debyedist = Y[i] + a * (Y[i + 1] - Y[i]);
 
     return debyedist;
 }
@@ -690,11 +623,7 @@ void atmosphericDrag(double Cd, double A, double m, double *rvec, double *vvec,
     alt = r - REQ_EARTH;
 
     /* Checking if user supplied a orbital position is inside the earth */
-    if(alt <= 0.) {
-        BSK_PRINT(MSG_ERROR, "atmosphericDrag() received rvec = [%g %g %g]The value of rvec should produce a positive altitude for the Earth.",  rvec[1], rvec[2], rvec[3]);
-        v3Set(NAN, NAN, NAN, advec);
-        return;
-    }
+    assert(0.0 < alt);
 
     /* get the Atmospheric density at the given altitude in kg/m^3 */
     density = atmosphericDensity(alt);
@@ -833,11 +762,7 @@ void jPerturb(double *rvec, int num, double *ajtot, ...)
     r = v3Norm(rvec);
 
     /* Error Checking */
-    if((num < 2) || (num > 6)) {
-        BSK_PRINT(MSG_ERROR, "jPerturb() received num = %d. The value of num should be 2 <= num <= 6.", num);
-        v3Set(NAN, NAN, NAN, ajtot);
-        return;
-    }
+    assert(2 <= num && num <= 6);
 
     /* Calculating the total acceleration based on user input */
     if(num >= 2) {

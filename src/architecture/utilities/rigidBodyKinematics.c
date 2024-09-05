@@ -19,9 +19,9 @@
 
 #include "rigidBodyKinematics.h"
 
+#include <assert.h>
 #include "linearAlgebra.h"
 #include "astroConstants.h"
-#include "architecture/utilities/bsk_Print.h"
 #include <string.h>
 
 #define nearZero 0.0000000000001
@@ -4502,7 +4502,7 @@ void Mi(double theta, int a, double C[3][3])
             break;
 
         default:
-            BSK_PRINT(MSG_ERROR, "Mi() error: incorrect axis %d selected.", a);
+            assert("Mi() error: axis selected not either 1, 2, or 3.");
     }
 }
 
