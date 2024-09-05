@@ -67,8 +67,9 @@ rule link_static_library
 
 
 # math support library
-build build/obj/linearAlgebra.o : build_c_object src/linearAlgebra.c
-build build/obj/rigidBodyKinematics.o : build_c_object src/rigidBodyKinematics.c
+build build/obj/linearAlgebra.o : build_c_object ../../src/architecture/utilities/linearAlgebra.c
+  cflags = $cflags -Wno-unused-parameter
+build build/obj/rigidBodyKinematics.o : build_c_object ../../src/architecture/utilities/rigidBodyKinematics.c
 build build/lib/bskmath.a : link_static_library $
   build/obj/linearAlgebra.o $
   build/obj/rigidBodyKinematics.o
