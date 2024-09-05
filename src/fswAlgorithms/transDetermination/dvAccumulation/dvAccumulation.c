@@ -20,8 +20,8 @@
 #include "fswAlgorithms/transDetermination/dvAccumulation/dvAccumulation.h"
 #include "architecture/utilities/macroDefinitions.h"
 #include "architecture/utilities/linearAlgebra.h"
+#include <assert.h>
 #include <string.h>
-#include "architecture/utilities/bsk_Print.h"
 
 
 /*! This method initializes the configData for the nav aggregation algorithm.
@@ -105,10 +105,7 @@ void dvAccumulation_QuickSort (AccPktDataMsgPayload *A, int start, int end)
 {
     /*! - Create an auxiliary stack array. This contains indicies. */
     int stack[MAX_ACC_BUF_PKT];
-    if((end-start + 1) > MAX_ACC_BUF_PKT)
-    {
-        BSK_PRINT(MSG_ERROR,"dvAccumulation_QuickSort: Stack insufficiently sized for quick-sort somehow.");
-    }
+    assert((end-start + 1) <= MAX_ACC_BUF_PKT && "Stack insufficiently sized for quick-sort.");
 
     /*! - initialize the index of the top of the stack */
     int top = -1;
