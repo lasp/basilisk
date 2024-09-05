@@ -47,12 +47,11 @@ void setDefaultLogLevel(logLevel_t logLevel);
 logLevel_t getDefaultLogLevel();
 
 /*! BSK logging class */
-class BSKLogger
+class BSKLogger final
 {
     public:
         BSKLogger();
         BSKLogger(logLevel_t logLevel);
-        virtual ~BSKLogger() = default;
         void setLogLevel(logLevel_t logLevel);
         void printLogLevel();
         int getLogLevel();
