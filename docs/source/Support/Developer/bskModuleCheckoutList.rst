@@ -43,7 +43,6 @@ Module Programming
    -  The ``Reset()`` in the FSW modules should reset all the default
       module configuration parameters.
 - Is the module using the :ref:`bskLogging` Basilisk logging function?
-  A general support library, i.e. non-Basilisk module, should use ``BSK_PRINT()`` instead.
 
 Module Documentation
 --------------------
