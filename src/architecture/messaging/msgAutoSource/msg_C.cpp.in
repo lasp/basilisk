@@ -14,7 +14,7 @@ void {type}_C_subscribe({type}_C *subscriber, {type}_C *source) {{
 int8_t {type}_C_isSubscribedTo({type}_C *subscriber, {type}_C *source) {{
 
     return ((subscriber->payloadPointer == &(source->payload))&&(subscriber->headerPointer == &(source->header)));
-    
+
 }};
 
 //! C interface to claim authorship to a message
@@ -116,5 +116,5 @@ int8_t {type}_cpp_isSubscribedTo({type}_C *subscriber, void* source) {{
     int8_t secondCheck = (subscriber->headerPointer == dummyMsgPtr);
 
     return (firstCheck && secondCheck);
-    
+
 }};
