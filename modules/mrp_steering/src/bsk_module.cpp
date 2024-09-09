@@ -25,17 +25,18 @@ namespace bsk::modules {
     };
 
     struct demo final : public bsk::SysModel {
-        struct {
-            bsk::read_functor<float> rate;
-            bsk::read_functor<foo> foo;
-        } inputs;
+        struct : bsk::io_group { using bsk::io_group::io_group;
+            bsk::read_functor<float> rate = {this, "rate"};
+            bsk::read_functor<foo> foo = {this, "foo"};
+        } inputs{this, "inputs"};
 
-        struct {
-            bsk::message<foo> foo = {42, 101.0f};
-            struct {
-                bsk::message<double> volume;
-            } bar;
-        } outputs;
+        struct : bsk::io_group { using bsk::io_group::io_group;
+            struct : bsk::io_group { using bsk::io_group::io_group;
+                bsk::message<double> volume = {this, "volume"};
+            } bar{this, "bar"};
+
+            bsk::message<foo> foo = {this, "foo", {42, 101.0f}};
+        } outputs{this, "outputs"};
 
         void UpdateState(std::uint64_t CurrentSimNanos) override {
             *this->outputs.bar.volume += this->inputs.rate.getOrElse(4.2) * CurrentSimNanos;
@@ -138,20 +139,21 @@ struct bsk::schema<bsk::modules::foo> final {
 
 static_assert(bsk::is_schema<bsk::schema<bsk::modules::foo>>);
 
+
 // mrp_steering basilisk adapter
 namespace bsk::modules {
     struct mrp_steering final : public bsk::SysModel {
-        struct {
+        BSK_INPUTS_START;
             //! Current attitude error estimate (MRPs) of B relative to R
-            bsk::read_functor<double[3]> sigma_BR;
-        } inputs;
+            BSK_INPUT2(double[3], sigma_BR);
+        BSK_INPUTS_END(inputs);
 
-        struct {
+        BSK_INPUTS_START;
             //! [r/s]   Desired body rate relative to R
-            bsk::message<double[3]> omega_BastR_B;
+            BSK_OUTPUT(double[3], omega_BastR_B);
             //! [r/s^2] Body-frame derivative of omega_BastR_B
-            bsk::message<double[3]> omegap_BastR_B;
-        } outputs;
+            BSK_OUTPUT(double[3], omegap_BastR_B);
+        BSK_INPUTS_END(outputs);
 
         ::MrpSteering params;
 

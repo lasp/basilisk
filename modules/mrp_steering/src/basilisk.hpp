@@ -398,6 +398,21 @@ namespace bsk {
         // TODO: add metadata
     };
 
+    class SysModel; // forward reference
+
+    struct io_group {
+        SysModel const& owner;
+        std::string const name;
+
+        io_group(SysModel const* const owner, char const name[])
+            : owner(*owner), name{name}
+        {}
+
+        io_group(io_group const* const parent, char const name[])
+            : owner(parent->owner), name{parent->name + "." + name}
+        {}
+    };
+
     struct message_base {
         virtual ~message_base() {}
         virtual std::shared_ptr<bsk::plug> to_shared_plug() const = 0;
@@ -411,17 +426,26 @@ namespace bsk {
     template<typename T>
     class message final : public message_base {
     private:
-        T payload = {};
+        SysModel const& owner;
+        std::string const name;
         message_header header = {};
+        T payload = {};
 
     public:
-        template<typename ...Args>
-        message(Args&&... args)
-            : payload {args...}
+        message(io_group const* parent, char const name[], T&& args)
+            : owner(parent->owner)
+            , name(parent->name + "." + name)
+            , payload {std::move(args)}
+        {}
+
+        message(io_group const* parent, char const name[])
+            : owner(parent->owner)
+            , name(parent->name + "." + name)
         {}
 
         T& operator*() {
-            // TODO: update header dirty/write information
+            // TODO: update header dirty/write information. use owner.moduleID
+            //       and, once it's implemented, owner.last_update_time.
             return this->payload;
         }
 
@@ -433,10 +457,18 @@ namespace bsk {
     template<typename T>
     class read_functor final : public read_functor_base {
     private:
-        T const* payload = nullptr;
+        SysModel const& owner;
+        std::string const name;
         message_header const* header = nullptr;
+        T const* payload = nullptr;
 
     public:
+        template<typename ...Args>
+        read_functor(io_group const* parent, char const name[])
+            : owner(parent->owner)
+            , name(parent->name + "." + name)
+        {}
+
         bool isLinked() const {
             return (this->payload != nullptr);
         }
@@ -763,3 +795,14 @@ namespace bsk {
         std::int64_t moduleID;
     };
 }
+
+// TODO: wrap BSK_INPUTS2 and BSK_INPUTS3 in a top-level macro BSK_INPUTS
+// that uses the technique described at https://stackoverflow.com/a/11763277.
+#define BSK_INPUTS_START struct : bsk::io_group { using bsk::io_group::io_group
+#define BSK_INPUT2(type, name) bsk::read_functor<type> name = {this, #name}
+#define BSK_INPUT3(type, name, init) bsk::read_functor<type> name = {this, #name, init}
+#define BSK_INPUTS_END(name) } name{this, #name}
+
+#define BSK_OUTPUTS_START struct : bsk::io_group { using bsk::io_group::io_group
+#define BSK_OUTPUT(type, name) bsk::message<type> name = {this, #name}
+#define BSK_OUTPUTS_END(name) } name{this, #name}
