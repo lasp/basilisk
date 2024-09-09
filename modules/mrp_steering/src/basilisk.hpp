@@ -401,8 +401,18 @@ namespace bsk {
         // TODO: add metadata
     };
 
+    struct message_base {
+        virtual ~message_base() {}
+        virtual std::shared_ptr<bsk::plug> to_shared_plug() const = 0;
+    };
+
+    struct read_functor_base {
+        virtual ~read_functor_base() {}
+        virtual std::shared_ptr<socket> to_shared_socket() = 0;
+    };
+
     template<typename T>
-    class message final {
+    class message final : public message_base {
     private:
         T payload;
         message_header header = {};
@@ -418,13 +428,13 @@ namespace bsk {
             return this->payload;
         }
 
-        std::shared_ptr<bsk::plug> to_shared_plug() const {
+        std::shared_ptr<bsk::plug> to_shared_plug() const override {
             return std::make_shared<plug_for<T>>(&this->header, &this->payload);
         }
     };
 
     template<typename T>
-    class read_functor final {
+    class read_functor final : public read_functor_base {
     private:
         T const* payload = nullptr;
         message_header const* header = nullptr;
@@ -444,7 +454,7 @@ namespace bsk {
                 : std::forward<T const>(alternative);
         }
 
-        std::shared_ptr<socket> to_shared_socket() {
+        std::shared_ptr<socket> to_shared_socket() override {
             return std::make_shared<socket_for<T>>(&this->header, &this->payload);
         }
     };
@@ -453,15 +463,16 @@ namespace bsk {
 namespace bsk {
     class outputs final : public plug {
     private:
-        std::unordered_map<std::string, std::shared_ptr<plug>> components;
+        using child = std::variant<bsk::message_base const*, std::shared_ptr<bsk::outputs>>;
+
+        std::unordered_map<std::string, child> components;
 
     public:
         struct component {
             std::string key;
-            std::shared_ptr<plug> value;
+            child value;
 
-            template<typename T>
-            component(std::string&& key, bsk::message<T> const& value);
+            component(std::string&& key, bsk::message_base const& value);
 
             component(std::string&& key, bsk::outputs&& value);
         };
@@ -471,16 +482,12 @@ namespace bsk {
             : components(components.size())
         {
             for (auto component : components) {
-                this->components[component.key] = component.value;
+                this->components.emplace(component.key, component.value);
             }
         }
 
-        std::shared_ptr<bsk::plug> to_shared_plug() && {
-            return std::make_shared<outputs>(std::move(*this));
-        }
-
-        void insert(std::string const& key, std::shared_ptr<plug> value) {
-            this->components[key] = value;
+        void insert(std::string const& key, child value) {
+            this->components.emplace(key, value);
         }
 
         decltype(components)::const_iterator begin() const {
@@ -507,11 +514,15 @@ namespace bsk {
         }
 
         std::shared_ptr<plug> focus(std::string const key) const override {
-            try {
-                return this->components.at(key);
-            } catch (std::out_of_range& ex) {
-                throw illegal_focus_error();
-            }
+            auto const&& value = ([&] {
+                try {
+                    return this->components.at(key);
+                } catch (std::out_of_range& ex) {
+                    throw illegal_focus_error();
+                }
+            })();
+
+            return this->upcast(value);
         }
 
         std::string repr() const override {
@@ -523,7 +534,7 @@ namespace bsk {
             buf << "bundle { ";
 
             for (; iter != end; ++iter) {
-                buf << "\"" << iter->first << "\": " << iter->second->repr() << ", ";
+                buf << "\"" << iter->first << "\": " << this->upcast(iter->second)->repr() << ", ";
             }
 
             // overwrite the trailing ", "
@@ -532,29 +543,50 @@ namespace bsk {
 
             return std::move(buf).str();
         }
+
+    private:
+        static std::shared_ptr<plug> upcast(child const& child) {
+            return std::visit([](auto&& arg) -> std::shared_ptr<plug> {
+                using T = std::decay_t<decltype(arg)>;
+                if constexpr (std::is_same_v<T, bsk::message_base const*>) {
+                    return arg->to_shared_plug();
+                } else if constexpr (std::is_same_v<T, std::shared_ptr<bsk::outputs>>) {
+                    return arg;
+                } else {
+                    // somehow, just `false` causes this static_assert to unconditionally fail,
+                    // even though, while `false && ...`, while *still always false*,
+                    // passes compilation.
+                    //
+                    // ??????
+                    static_assert(false && std::is_same_v<T, T>, "unexpected type case in visitor");
+                }
+            }, child);
+        }
     };
 
-    template<typename T>
-    outputs::component::component(std::string&& key, bsk::message<T> const& value)
-        : key(key), value(value.to_shared_plug())
+    inline outputs::component::component(std::string&& key, bsk::message_base const& value)
+        : key(std::move(key))
+        , value(&value)
     {}
 
-    outputs::component::component(std::string&& key, bsk::outputs&& value)
-        : key(key), value(std::move(value).to_shared_plug())
+    inline outputs::component::component(std::string&& key, bsk::outputs&& value)
+        : key(std::move(key))
+        , value(std::make_shared<bsk::outputs>(std::move(value)))
     {}
 
 
     class inputs final : public socket {
     private:
-        std::unordered_map<std::string, std::shared_ptr<socket>> components;
+        using child = std::variant<bsk::read_functor_base*, std::shared_ptr<bsk::inputs>>;
+
+        std::unordered_map<std::string, child> components;
 
     public:
         struct component {
             std::string key;
-            std::shared_ptr<socket> value;
+            child value;
 
-            template<typename T>
-            component(std::string&& key, bsk::read_functor<T>& value);
+            component(std::string&& key, bsk::read_functor_base& value);
 
             component(std::string&& key, bsk::inputs&& value);
         };
@@ -563,17 +595,13 @@ namespace bsk {
         inputs(std::initializer_list<component> components)
             : components(components.size())
         {
-            for (auto&& component : components) {
-                this->components[component.key] = std::move(component.value);
+            for (auto component : components) {
+                this->components.emplace(component.key, component.value);
             }
         }
 
-        std::shared_ptr<bsk::socket> to_shared_socket() && {
-            return std::make_shared<inputs>(std::move(*this));
-        }
-
-        void insert(std::string const& key, std::shared_ptr<socket> value) {
-            this->components[key] = value;
+        void insert(std::string const& key, child value) {
+            this->components.emplace(key, value);
         }
 
         decltype(components)::const_iterator begin() const {
@@ -587,7 +615,7 @@ namespace bsk {
         void subscribe_to(plug const& source) override {
             try {
                 for (auto const& entry : this->components) {
-                    entry.second->subscribe_to(*source.focus(entry.first));
+                    this->upcast(entry.second)->subscribe_to(*source.focus(entry.first));
                 }
             } catch (illegal_focus_error const& ex) {
                 throw mismatched_schemas_error();
@@ -598,7 +626,7 @@ namespace bsk {
 
         bool can_subscribe_to(plug const& source) const override {
             for (auto const& entry : this->components) {
-                if (!entry.second->can_subscribe_to(*source.focus(entry.first))) {
+                if (!this->upcast(entry.second)->can_subscribe_to(*source.focus(entry.first))) {
                     return false;
                 }
             }
@@ -621,11 +649,15 @@ namespace bsk {
         }
 
         std::shared_ptr<socket> focus(std::string const key) override {
-            try {
-                return this->components.at(key);
-            } catch (std::out_of_range& ex) {
-                throw illegal_focus_error();
-            }
+            auto const&& value = ([&] {
+                try {
+                    return this->components.at(key);
+                } catch (std::out_of_range& ex) {
+                    throw illegal_focus_error();
+                }
+            })();
+
+            return this->upcast(value);
         }
 
         std::string repr() const override {
@@ -637,7 +669,7 @@ namespace bsk {
             buf << "bundle { ";
 
             for (; iter != end; ++iter) {
-                buf << "\"" << iter->first << "\": " << iter->second->repr() << ", ";
+                buf << "\"" << iter->first << "\": " << this->upcast(iter->second)->repr() << ", ";
             }
 
             // overwrite the trailing ", "
@@ -646,15 +678,35 @@ namespace bsk {
 
             return std::move(buf).str();
         }
+
+        static std::shared_ptr<socket> upcast(child const& child) {
+            return std::visit([](auto&& arg) -> std::shared_ptr<socket> {
+                using T = std::decay_t<decltype(arg)>;
+                if constexpr (std::is_same_v<T, bsk::read_functor_base*>) {
+                    return arg->to_shared_socket();
+                } else if constexpr (std::is_same_v<T, std::shared_ptr<bsk::inputs>>) {
+                    return arg;
+                } else {
+                    // somehow, just `false` causes this static_assert to unconditionally fail,
+                    // even though, while `false && ...`, while *still always false*,
+                    // passes compilation.
+                    //
+                    // ??????
+                    static_assert(false && std::is_same_v<T, T>, "unexpected type case in visitor");
+                }
+            }, child);
+        }
     };
 
-    template<typename T>
-    inputs::component::component(std::string&& key, bsk::read_functor<T>& value)
-        : key(key), value(value.to_shared_socket())
+    inline inputs::component::component(std::string&& key, bsk::read_functor_base& value)
+        : key(std::move(key))
+        , value(&value)
     {}
 
-    inputs::component::component(std::string&& key, bsk::inputs&& value)
-        : key(key), value(std::move(value).to_shared_socket())
+    inline inputs::component::component(std::string&& key, bsk::inputs&& value)
+        : key(std::move(key))
+        , value(std::make_shared<bsk::inputs>(std::move(value)))
+
     {}
 
 

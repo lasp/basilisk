@@ -50,7 +50,7 @@ static void subscribe_to_py(bsk::socket& target, py::object source) {
         if (components == nullptr) throw bsk::mismatched_schemas_error();
 
         for (auto entry : *components) {
-            subscribe_to_py(*entry.second, source[py::cast(entry.first)]);
+            subscribe_to_py(*components->upcast(entry.second), source[py::cast(entry.first)]);
         }
     }
 }
@@ -66,7 +66,7 @@ static bool can_subscribe_to_py(bsk::socket& target, py::object source) {
         if (components == nullptr) return false;
 
         for (auto entry : *components) {
-            if (!can_subscribe_to_py(*entry.second, source[py::cast(entry.first)])) {
+            if (!can_subscribe_to_py(*components->upcast(entry.second), source[py::cast(entry.first)])) {
                 return false;
             }
         }
