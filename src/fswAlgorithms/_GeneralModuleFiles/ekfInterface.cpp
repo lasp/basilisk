@@ -40,7 +40,7 @@ void EkfInterface::Reset(uint64_t currentSimNanos)
     else {
         this->processNoise.resize(this->state.getPositionStates().size(), this->state.getPositionStates().size());
     }
-
+    this->minCovarNorm = this->minCovarNorm*this->unitConversion*this->unitConversion;
     this->customReset();
 }
 
@@ -110,7 +110,8 @@ void EkfInterface::measurementUpdate(const MeasurementModel &measurement)
 
     /*! - Update the covariance */
     EkfInterface::updateCovariance(measurementMatrix, measurement.getMeasurementNoise(), kalmanGain);
-    if (this->covar.maxCoeff() > this->minCovarNorm || this->filterType == FilterType::Classical){
+    if ((this->covar.maxCoeff() > this->minCovarNorm && this->filterType == FilterType::Extended) ||
+    this->filterType == FilterType::Classical){
         /*! - Compute the update with a CKF if the covariance is high at the time of the update to avoid divergence*/
         EkfInterface::ckfUpdate(kalmanGain, measurementDelta, measurementMatrix);
     }
@@ -204,9 +205,6 @@ void EkfInterface::setFilterDynamicsMatrix(const std::function<const Eigen::Matr
     @return void
     */
 void EkfInterface::setMinimumCovarianceNormForEkf(const double infiniteNorm){
-    assert(this->filterType == FilterType::Extended && "EKF minimum norm set in a Classical implementation: this is "
-                                                        "only used in an extended kalman filter to temporarily use "
-                                                        "linear updates when the covariance is high");
     this->minCovarNorm = infiniteNorm;
 }
 
@@ -214,8 +212,5 @@ void EkfInterface::setMinimumCovarianceNormForEkf(const double infiniteNorm){
     @return double infiniteNorm
     */
 double EkfInterface::getMinimumCovarianceNormForEkf() const {
-    assert(this->filterType == FilterType::Extended && "EKF minimum norm requested in a Classical implementation: "
-                                                        "this is only used in an extended kalman filter to temporarily "
-                                                        "use linear updates when the covariance is high");
-    return this->minCovarNorm;
+    return this->minCovarNorm/this->unitConversion/this->unitConversion;
 }
