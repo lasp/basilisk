@@ -19,48 +19,53 @@ namespace bsk::py {
 
 // custom schema demo
 namespace bsk::modules {
+    struct foo {
+        int x;
+        float y;
+    };
+
     struct demo final : public bsk::SysModel {
-        struct foo {
-            int x;
-            float y;
-        };
+        struct {
+            bsk::read_functor<float> rate;
+            bsk::read_functor<foo> foo;
+        } inputs;
+
+        struct {
+            bsk::message<foo> foo = {42, 101.0f};
+            struct {
+                bsk::message<double> volume;
+            } bar;
+        } outputs;
+
+        void UpdateState(std::uint64_t CurrentSimNanos) override {
+            *this->outputs.bar.volume += this->inputs.rate.getOrElse(4.2) * CurrentSimNanos;
+            *this->outputs.foo = *this->inputs.foo;
+        }
 
         bsk::inputs getInputs() override {
             return {
-                {"rate", this->rateInMsg},
-                {"foo", this->fooInMsg},
+                {"rate", this->inputs.rate},
+                {"foo", this->inputs.foo},
             };
         }
 
         bsk::outputs getOutputs() const override {
             return {
-                {"foo", this->fooOutMsg},
+                {"foo", this->outputs.foo},
                 {"bar", {
-                    {"baz", this->volumeOutMsg},
+                    {"volume", this->outputs.bar.volume},
                 }},
             };
         }
-
-        void UpdateState(std::uint64_t CurrentSimNanos) override {
-            *this->volumeOutMsg += this->rateInMsg.getOrElse(4.2) * CurrentSimNanos;
-            *this->fooOutMsg = *this->fooInMsg;
-        }
-
-    private:
-        bsk::read_functor<float> rateInMsg = {};
-        bsk::read_functor<foo> fooInMsg = {};
-
-        bsk::message<double> volumeOutMsg = 0.0;
-        bsk::message<foo> fooOutMsg = {42, 101.0f};
     };
 }
 
 template<>
-struct bsk::schema<bsk::modules::demo::foo> final {
-    using carrier = bsk::modules::demo::foo;
+struct bsk::schema<bsk::modules::foo> final {
+    using carrier = bsk::modules::foo;
 
     static std::string repr() {
-        return "bsk::modules::demo::foo { \"x\": "
+        return "bsk::modules::foo { \"x\": "
              + bsk::schema<int>::repr()
              + ", \"y\": "
              + bsk::schema<float>::repr()
@@ -131,43 +136,47 @@ struct bsk::schema<bsk::modules::demo::foo> final {
     };
 };
 
-static_assert(bsk::is_schema<bsk::schema<bsk::modules::demo::foo>>);
+static_assert(bsk::is_schema<bsk::schema<bsk::modules::foo>>);
 
 // mrp_steering basilisk adapter
 namespace bsk::modules {
-    class mrp_steering final : public bsk::SysModel {
-    private:
-        //! Current attitude error estimate (MRPs) of B relative to R
-        bsk::read_functor<double[3]> sigma_BR = {};
-        //! [r/s]   Desired body rate relative to R
-        bsk::message<double[3]> omega_BastR_B = {0.0};
-        //! [r/s^2] Body-frame derivative of omega_BastR_B
-        bsk::message<double[3]> omegap_BastR_B = {0.0};
+    struct mrp_steering final : public bsk::SysModel {
+        struct {
+            //! Current attitude error estimate (MRPs) of B relative to R
+            bsk::read_functor<double[3]> sigma_BR;
+        } inputs;
 
-    public:
+        struct {
+            //! [r/s]   Desired body rate relative to R
+            bsk::message<double[3]> omega_BastR_B;
+            //! [r/s^2] Body-frame derivative of omega_BastR_B
+            bsk::message<double[3]> omegap_BastR_B;
+        } outputs;
+
         ::MrpSteering params;
+
+
+        void UpdateState(std::uint64_t CurrentSimNanos [[maybe_unused]]) override {
+            if (!this->inputs.sigma_BR.isLinked()) throw "TODO";
+
+            MRPSteeringLaw(
+                &this->params,
+                *this->inputs.sigma_BR,
+                *this->outputs.omega_BastR_B,
+                *this->outputs.omegap_BastR_B );
+        }
 
         bsk::inputs getInputs() override {
             return {
-                {"sigma_BR", this->sigma_BR},
+                {"sigma_BR", this->inputs.sigma_BR},
             };
         }
 
         bsk::outputs getOutputs() const override {
             return {
-                {"omega_BastR_B", this->omega_BastR_B},
-                {"omegap_BastR_B", this->omegap_BastR_B},
+                {"omega_BastR_B", this->outputs.omega_BastR_B},
+                {"omegap_BastR_B", this->outputs.omegap_BastR_B},
             };
-        }
-
-        void UpdateState(std::uint64_t CurrentSimNanos [[maybe_unused]]) override {
-            if (!this->sigma_BR.isLinked()) throw "TODO";
-
-            MRPSteeringLaw(
-                &this->params,
-                *this->sigma_BR,
-                *this->omega_BastR_B,
-                *this->omegap_BastR_B );
         }
     };
 }

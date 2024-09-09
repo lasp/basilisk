@@ -411,7 +411,7 @@ namespace bsk {
     template<typename T>
     class message final : public message_base {
     private:
-        T payload;
+        T payload = {};
         message_header header = {};
 
     public:
