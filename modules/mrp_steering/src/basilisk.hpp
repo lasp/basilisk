@@ -1,12 +1,9 @@
 #pragma once
 
-#include <cstddef>
-#include <vector>
 #include <concepts>
-#include <memory>
-#include <string>
 #include <sstream>
 #include <unordered_map>
+#include <vector>
 
 namespace bsk {
     struct mismatched_schemas_error : public std::runtime_error {
