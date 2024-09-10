@@ -23,7 +23,7 @@
 
 void KalmanFilter::Reset(uint64_t currentSimNanos) {
     assert(this->stateInitial.size() == this->covarInitial.rows() &&
-    this->stateInitial.size() == this->covarInitial.cols());
+           this->stateInitial.size() == this->covarInitial.cols());
 
     this->state = this->stateInitial.scale(this->unitConversion);
     this->stateLogged = this->state;
@@ -195,7 +195,7 @@ std::optional<Eigen::VectorXd> KalmanFilter::getInitialConsiderParameters() cons
     @param Eigen::VectorXd initialStateInput
     @return void
     */
-void KalmanFilter::setFilterDynamics(const std::function<const StateVector(const double, const StateVector&)>&
+void KalmanFilter::setFilterDynamics(const std::function<const FilterStateVector(const double, const FilterStateVector&)>&
         dynamicsPropagator){
     this->dynamics.setDynamics(dynamicsPropagator);
 }

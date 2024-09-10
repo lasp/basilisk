@@ -56,9 +56,9 @@ void EkfInterface::timeUpdate(const double updateTime)
     std::array<double, 2> time = {0, dt};
 
     /*! - Propagate full state and STM vector using dynamics specified in child class */
-    StateVector stateStm = this->state;
+    FilterStateVector stateStm = this->state;
     stateStm.attachStm(this->stateTransitionMatrix);
-    StateVector propagatedStateStm = this->dynamics.propagate(time, stateStm, dt);
+    FilterStateVector propagatedStateStm = this->dynamics.propagate(time, stateStm, dt);
 
     this->stateTransitionMatrix = propagatedStateStm.detachStm();
 
@@ -194,7 +194,7 @@ Eigen::VectorXd EkfInterface::computeResiduals(const MeasurementModel &measureme
 /*! Get the filter dynamics matrix (A = df/dX evaluated at the reference)
     @return Eigen::VectorXd stateInitial
     */
-void EkfInterface::setFilterDynamicsMatrix(const std::function<const Eigen::MatrixXd(const double, const StateVector&)>&
+void EkfInterface::setFilterDynamicsMatrix(const std::function<const Eigen::MatrixXd(const double, const FilterStateVector&)>&
             dynamicsMatrixCalculator){
     this->dynamics.setDynamicsMatrix(dynamicsMatrixCalculator);
 }

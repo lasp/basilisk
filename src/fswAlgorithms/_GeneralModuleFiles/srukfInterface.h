@@ -59,7 +59,7 @@ private:
     Eigen::MatrixXd choleskyDecomposition(const Eigen::MatrixXd &input) const;
 
     Eigen::MatrixXd sBar; //!< [-] Time updated covariance
-    std::array<StateVector, 2*MAX_STATES_VECTOR+1> sigmaPoints; //!< [-]    sigma point vector
+    std::array<FilterStateVector, 2*MAX_STATES_VECTOR+1> sigmaPoints; //!< [-]    sigma point vector
     int numberSigmaPoints=0;//!< [-] number of sigma points
     Eigen::MatrixXd cholProcessNoise; //!< [-] cholesky of Qnoise
     Eigen::MatrixXd cholMeasNoise; //!< [-] cholesky of Measurement noise

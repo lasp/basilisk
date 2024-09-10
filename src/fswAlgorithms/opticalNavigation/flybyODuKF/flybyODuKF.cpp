@@ -31,8 +31,8 @@ void FlybyODuKF::customReset() {
     /*! - Initialize filter parameters and change units to km and s */
     this->muCentral *= pow(this->unitConversion, 3); // mu is input in meters
     double centralBody = this->muCentral;
-    std::function<StateVector(double, const StateVector)> twoBodyDynamics = [centralBody](double t, const StateVector &state){
-        StateVector XDot;
+    std::function<FilterStateVector(double, const FilterStateVector)> twoBodyDynamics = [centralBody](double t, const FilterStateVector &state){
+        FilterStateVector XDot;
         /*! Implement propagation with rate derivatives set to zero */
         /*! Implement point mass gravity for the propagation */
         PositionState flybyPosition;

@@ -22,15 +22,15 @@
 
 /*! Call the propagation function for the dynamics
    @param std::array<double, 2> interval : time interval
-   @param StateVector state : initial state
+   @param FilterStateVector state : initial state
    @param double dt: time step
-   @return StateVector propagatedState
+   @return FilterStateVector propagatedState
 */
-StateVector DynamicsModel::propagate(const std::array<double, 2> interval, const StateVector& state, const double dt) const {
+FilterStateVector DynamicsModel::propagate(const std::array<double, 2> interval, const FilterStateVector& state, const double dt) const {
     double t_0 = interval[0];
     double t_f = interval[1];
     double t = t_0;
-    StateVector X(state);
+    FilterStateVector X(state);
 
     /*! Propagate to t_final with an RK4 integrator */
     double N = ceil((t_f-t_0)/dt);
@@ -44,23 +44,23 @@ StateVector DynamicsModel::propagate(const std::array<double, 2> interval, const
 }
 
 /*! Set the propagation function for the dynamics
-   @param std::function<const StateVector(const StateVector&)>& dynamicsPropagator
+   @param std::function<const FilterStateVector(const FilterStateVector&)>& dynamicsPropagator
 */
-void DynamicsModel::setDynamics(const std::function<const StateVector(const double, const StateVector&)>& dynamicsPropagator){
+void DynamicsModel::setDynamics(const std::function<const FilterStateVector(const double, const FilterStateVector&)>& dynamicsPropagator){
     this->propagator = dynamicsPropagator;
 }
 
 /*! Call the dynamics matrix containing the partials of the dynamics with respect to the state
-   @param std::function<const Eigen::MatrixXd(const StateVector&)>& dynamicsMatrixCalculator
+   @param std::function<const Eigen::MatrixXd(const FilterStateVector&)>& dynamicsMatrixCalculator
 */
-Eigen::MatrixXd DynamicsModel::computeDynamicsMatrix(const double time, const StateVector& state) const {
+Eigen::MatrixXd DynamicsModel::computeDynamicsMatrix(const double time, const FilterStateVector& state) const {
     return this->dynamicsMatrix(time, state);
 }
 
 /*! Set the dynamics matrix containing the partials of the dynamics with respect to the state
-   @param std::function<const Eigen::MatrixXd(const StateVector&)>& dynamicsMatrixCalculator
+   @param std::function<const Eigen::MatrixXd(const FilterStateVector&)>& dynamicsMatrixCalculator
 */
-void DynamicsModel::setDynamicsMatrix(const std::function<const Eigen::MatrixXd(const double, const StateVector&)>&
+void DynamicsModel::setDynamicsMatrix(const std::function<const Eigen::MatrixXd(const double, const FilterStateVector&)>&
         dynamicsMatrixCalculator){
     this->dynamicsMatrix = dynamicsMatrixCalculator;
 }
@@ -72,16 +72,16 @@ void DynamicsModel::setDynamicsMatrix(const std::function<const Eigen::MatrixXd(
     @param dt time step
     @return Eigen::VectorXd
 */
-    StateVector DynamicsModel::rk4(std::function<const StateVector(const double, const StateVector&)> ODEfunction,
-            const StateVector& X0,
+    FilterStateVector DynamicsModel::rk4(std::function<const FilterStateVector(const double, const FilterStateVector&)> ODEfunction,
+            const FilterStateVector& X0,
             double t0,
             double dt) {
     double h = dt;
 
-    StateVector k1 = ODEfunction(t0, X0);
-    StateVector k2 = ODEfunction(t0 + h/2., X0.add(k1.scale(h/2.)));
-    StateVector k3 = ODEfunction(t0 + h/2., X0.add(k2.scale(h/2.)));
-    StateVector k4 = ODEfunction(t0 + h, X0.add(k3.scale(h)));
+    FilterStateVector k1 = ODEfunction(t0, X0);
+    FilterStateVector k2 = ODEfunction(t0 + h/2., X0.add(k1.scale(h/2.)));
+    FilterStateVector k3 = ODEfunction(t0 + h/2., X0.add(k2.scale(h/2.)));
+    FilterStateVector k4 = ODEfunction(t0 + h, X0.add(k3.scale(h)));
 
     return X0.add(k1.scale(h/6.).add(k2.scale(h/3.)).add(k3.scale(h/3.)).add(k4.scale(h/6.)));
 }

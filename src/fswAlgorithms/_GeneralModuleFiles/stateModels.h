@@ -30,8 +30,6 @@ class State{
 private:
     Eigen::VectorXd values;
 public:
-    State() = default;
-    ~State() = default;
     void setValues(const Eigen::VectorXd& componentValues);
     Eigen::VectorXd getValues() const;
 };
@@ -44,7 +42,7 @@ class ConsiderState : public State{};
 
 
 /*! @brief State models used to map a state vector to a measurement */
-class StateVector{
+class FilterStateVector{
 private:
     std::optional<PositionState> position;
     std::optional<VelocityState> velocity;
@@ -54,13 +52,10 @@ private:
     Eigen::MatrixXd stm;
 
 public:
-    StateVector() = default;
-    ~StateVector() = default;
-
     long size() const;
-    StateVector add(const StateVector &vector) const;
-    StateVector addVector(const Eigen::VectorXd &vector) const;
-    StateVector scale(const double scalar) const;
+    FilterStateVector add(const FilterStateVector &vector) const;
+    FilterStateVector addVector(const Eigen::VectorXd &vector) const;
+    FilterStateVector scale(const double scalar) const;
     Eigen::VectorXd returnValues() const;
 
     void setPosition(const PositionState &position);

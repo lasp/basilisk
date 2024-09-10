@@ -46,7 +46,7 @@ public:
     ~EkfInterface() = default;
     void Reset(uint64_t CurrentSimNanos) override;
 
-    void setFilterDynamicsMatrix(const std::function<const Eigen::MatrixXd(const double, const StateVector&)>&
+    void setFilterDynamicsMatrix(const std::function<const Eigen::MatrixXd(const double, const FilterStateVector&)>&
         dynamicsMatrixCalculator);
     void setMinimumCovarianceNormForEkf(double infiniteNorm);
     double getMinimumCovarianceNormForEkf() const;

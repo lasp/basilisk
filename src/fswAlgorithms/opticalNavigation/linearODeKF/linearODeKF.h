@@ -48,7 +48,7 @@ private:
     void customReset() final;
     void readFilterMeasurements() final;
     void writeOutputMessages(uint64_t CurrentSimNanos) final;
-    static Eigen::MatrixXd measurementMatrix(const StateVector &state);
+    static Eigen::MatrixXd measurementMatrix(const FilterStateVector &state);
 
 public:
     ReadFunctor<OpNavUnitVecMsgPayload> opNavHeadingMsg;

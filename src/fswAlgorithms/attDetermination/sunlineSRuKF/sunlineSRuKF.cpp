@@ -168,7 +168,7 @@ void SunlineSRuKF::readCssMeasurements() {
         }
     }
 
-    std::function<const Eigen::VectorXd(const StateVector)> linearModel = [hMatrix](const StateVector &state) {
+    std::function<const Eigen::VectorXd(const FilterStateVector)> linearModel = [hMatrix](const FilterStateVector &state) {
         Eigen::VectorXd observed = hMatrix * state.getPositionStates();
         return observed;
     };
@@ -200,11 +200,11 @@ void SunlineSRuKF::readFilterMeasurements() {
 
 /*! Define the equations of motion for the filter dynamics
     @param double time
-    @return StateVector inputState
-    @return StateVector outputState
+    @return FilterStateVector inputState
+    @return FilterStateVector outputState
     */
-StateVector SunlineSRuKF::stateDerivative(const double t, const StateVector &state){
-    StateVector XDot;
+FilterStateVector SunlineSRuKF::stateDerivative(const double t, const FilterStateVector &state){
+    FilterStateVector XDot;
     /*! Implement propagation with rate derivatives set to zero */
     Eigen::Vector3d sHat  = state.getPositionStates();
     Eigen::Vector3d omega = state.getVelocityStates();

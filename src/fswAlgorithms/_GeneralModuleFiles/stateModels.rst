@@ -18,7 +18,7 @@ The following table lists all the state class
       - return the values of a given state
 
 Position, Velocity, Acceleration, Bias, and ConsiderParameters all inherit the state type.
-The following table lists all the stateVector class, which contains all the different state types and a stm matrix
+The following table lists all the FilterStateVector class, which contains all the different state types and a stm matrix
 
 .. list-table:: Interface methods which remain private
     :widths: 25 75
@@ -33,7 +33,7 @@ The following table lists all the stateVector class, which contains all the diff
     * - addVector
       - add Eigen::Vector values to the state vector in order Position, Velocity, Accel, Bias, Consider
     * - scale
-      - scale a stateVector by a scalar
+      - scale a FilterStateVector by a scalar
     * - returnValues
       - return all fo the values in an Eigen::Vector following the previous order
 

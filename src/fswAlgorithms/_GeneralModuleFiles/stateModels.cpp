@@ -37,7 +37,7 @@ Eigen::VectorXd State::getValues() const {
 /*! Set the positional components of your state (cartesian position, attitude, etc)
    @param Eigen::VectorXd positionComponents
 */
-long StateVector::size() const{
+long FilterStateVector::size() const{
     long totalSize = 0;
     if (this->hasPosition()){
         totalSize += this->getPositionStates().size();
@@ -59,12 +59,12 @@ long StateVector::size() const{
 
 /*! Add a eigen vector to a state, assuming the order of position, velocity, acceleration, bias, consider
    @param Eigen::VectorXd vector
-   @return StateVector sumVector
+   @return FilterStateVector sumVector
 */
-StateVector StateVector::addVector(const Eigen::VectorXd &vector) const {
+FilterStateVector FilterStateVector::addVector(const Eigen::VectorXd &vector) const {
     assert(vector.size() == this->size());
     long lastIndex = 0;
-    StateVector sum;
+    FilterStateVector sum;
     if (this->hasPosition()){
         PositionState positionState;
         positionState.setValues(this->getPositionStates() + vector.segment(0, this->getPositionStates().size()));
@@ -99,11 +99,11 @@ StateVector StateVector::addVector(const Eigen::VectorXd &vector) const {
 }
 
 /*! Add two states together
-   @param StateVector vector
-   @return StateVector sumVector
+   @param FilterStateVector vector
+   @return FilterStateVector sumVector
 */
-StateVector StateVector::add(const StateVector &vector) const {
-    StateVector sum;
+FilterStateVector FilterStateVector::add(const FilterStateVector &vector) const {
+    FilterStateVector sum;
     if (this->hasPosition() && vector.hasPosition()){
         PositionState sumPosition;
         sumPosition.setValues(this->getPositionStates() + vector.getPositionStates());
@@ -135,10 +135,10 @@ StateVector StateVector::add(const StateVector &vector) const {
 
 /*! Scale a state vector by a constant
    @param double scalar
-   @return StateVector scaledVector
+   @return FilterStateVector scaledVector
 */
-StateVector StateVector::scale(const double scalar) const {
-    StateVector scaledVector;
+FilterStateVector FilterStateVector::scale(const double scalar) const {
+    FilterStateVector scaledVector;
     if (this->hasPosition()){
         PositionState scaledPosition;
         scaledPosition.setValues(this->getPositionStates()*scalar);
@@ -169,9 +169,9 @@ StateVector StateVector::scale(const double scalar) const {
 }
 
 /*! Return the full state vector
-   @return Eigen::VectorXd fullStateVector
+   @return Eigen::VectorXd fullFilterStateVector
 */
-Eigen::VectorXd StateVector::returnValues() const {
+Eigen::VectorXd FilterStateVector::returnValues() const {
     long numerOfStates = this->size();
     Eigen::VectorXd stateVectorValues;
     stateVectorValues.setZero(numerOfStates);
@@ -201,21 +201,21 @@ Eigen::VectorXd StateVector::returnValues() const {
 /*! Check if the state vector has a position state
    @return bool
 */
-bool StateVector::hasPosition() const {
+bool FilterStateVector::hasPosition() const {
     return this->position.has_value();
 }
 
 /*! Set the positional components of your state (cartesian position, attitude, etc)
    @param Eigen::VectorXd positionComponents
 */
-void StateVector::setPosition(const PositionState &positionState){
+void FilterStateVector::setPosition(const PositionState &positionState){
     this->position = positionState;
 }
 
 /*! Get the positional components of your state (cartesian position, attitude, etc)
    @return Eigen::VectorXd
 */
-Eigen::VectorXd StateVector::getPositionStates() const {
+Eigen::VectorXd FilterStateVector::getPositionStates() const {
     return this->getPosition().getValues();
 }
 
@@ -223,132 +223,132 @@ Eigen::VectorXd StateVector::getPositionStates() const {
 /*! Get the positional state class of your state vector(cartesian position, attitude, etc)
    @return PositionState
 */
-PositionState StateVector::getPosition() const {
+PositionState FilterStateVector::getPosition() const {
     return this->position.value();
 }
 
 /*! Check if the state vector has a velocity state
    @return bool
 */
-bool StateVector::hasVelocity() const {
+bool FilterStateVector::hasVelocity() const {
     return this->velocity.has_value();
 }
 
 /*! Set the velocity components of your state (cartesian velocity, angular rate, etc)
    @param Eigen::VectorXd velocityComponents
 */
-void StateVector::setVelocity(const VelocityState &velocityState){
+void FilterStateVector::setVelocity(const VelocityState &velocityState){
     this->velocity = velocityState;
 }
 
 /*! Get the velocity class of your state (cartesian velocity, angular rate, etc)
    @return Eigen::VectorXd
 */
-VelocityState StateVector::getVelocity() const {
+VelocityState FilterStateVector::getVelocity() const {
     return this->velocity.value();
 }
 
 /*! Get the velocity components of your state (cartesian velocity, angular rate, etc)
    @return Eigen::VectorXd
 */
-Eigen::VectorXd StateVector::getVelocityStates() const {
+Eigen::VectorXd FilterStateVector::getVelocityStates() const {
     return this->getVelocity().getValues();
 }
 
 /*! Check if the state vector has a acceleration state
    @return bool
 */
-bool StateVector::hasAcceleration() const {
+bool FilterStateVector::hasAcceleration() const {
     return this->acceleration.has_value();
 }
 
 /*! Set the acceleration class of your state (cartesian acceleration, angular acceleration, etc)
    @param Eigen::VectorXd velocityComponents
 */
-void StateVector::setAcceleration(const AccelerationState &accelerationState){
+void FilterStateVector::setAcceleration(const AccelerationState &accelerationState){
     this->acceleration = accelerationState;
 }
 
 /*! Get the velocity class of your state (cartesian acceleration, angular acceleration, etc)
    @return Eigen::VectorXd
 */
-AccelerationState StateVector::getAcceleration() const {
+AccelerationState FilterStateVector::getAcceleration() const {
     return this->acceleration.value();
 }
 
 /*! Get the acceleration components of your state (cartesian acceleration, angular acceleration, etc)
    @return Eigen::VectorXd
 */
-Eigen::VectorXd StateVector::getAccelerationStates() const {
+Eigen::VectorXd FilterStateVector::getAccelerationStates() const {
     return this->getAcceleration().getValues();
 }
 
 /*! Check if the state vector has a bias state
    @return bool
 */
-bool StateVector::hasBias() const {
+bool FilterStateVector::hasBias() const {
     return this->bias.has_value();
 }
 
 /*! Set the bias class of your state (cartesian bias, angular bias, etc)
    @param Eigen::VectorXd velocityComponents
 */
-void StateVector::setBias(const BiasState &biasState){
+void FilterStateVector::setBias(const BiasState &biasState){
     this->bias = biasState;
 }
 
 /*! Get the velocity class of your state (cartesian bias, angular bias, etc)
    @return Eigen::VectorXd
 */
-BiasState StateVector::getBias() const {
+BiasState FilterStateVector::getBias() const {
     return this->bias.value();
 }
 
 /*! Get the bias components of your state (cartesian bias, angular bias, etc)
    @return Eigen::VectorXd
 */
-Eigen::VectorXd StateVector::getBiasStates() const {
+Eigen::VectorXd FilterStateVector::getBiasStates() const {
     return this->getBias().getValues();
 }
 
 /*! Check if the state vector has a considerParameters state
    @return bool
 */
-bool StateVector::hasConsider() const {
+bool FilterStateVector::hasConsider() const {
     return this->considerParameters.has_value();
 }
 
 /*! Set the considerParameters class of your state (cartesian considerParameters, angular considerParameters, etc)
    @param Eigen::VectorXd velocityComponents
 */
-void StateVector::setConsider(const ConsiderState &considerParametersState){
+void FilterStateVector::setConsider(const ConsiderState &considerParametersState){
     this->considerParameters = considerParametersState;
 }
 
 /*! Get the velocity class of your state (cartesian considerParameters, angular considerParameters, etc)
    @return Eigen::VectorXd
 */
-ConsiderState StateVector::getConsider() const {
+ConsiderState FilterStateVector::getConsider() const {
     return this->considerParameters.value();
 }
 
 /*! Get the considerParameters components of your state (cartesian considerParameters, angular considerParameters, etc)
    @return Eigen::VectorXd
 */
-Eigen::VectorXd StateVector::getConsiderStates() const {
+Eigen::VectorXd FilterStateVector::getConsiderStates() const {
     return this->getConsider().getValues();
 }
 
 /*! Attach the state transition matrix of your state for simultaneous propagation
    @param Eigen::MatrixXd stm
 */
-void StateVector::attachStm(const Eigen::MatrixXd& stm){
+void FilterStateVector::attachStm(const Eigen::MatrixXd& stm){
     this->stm = stm;
 }
 
 /*! Detach the state transition matrix of your state for simultaneous propagation
    @return Eigen::MatrixXd stm
 */
-Eigen::MatrixXd StateVector::detachStm() const{
+Eigen::MatrixXd FilterStateVector::detachStm() const{
     return this->stm;
 }
