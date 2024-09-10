@@ -49,7 +49,7 @@ private:
     void readFilterMeasurements() final;
     void customFinalizeUpdate() final;
     void writeOutputMessages(uint64_t CurrentSimNanos) final;
-    static StateVector stateDerivative(double t, const StateVector &state);
+    static FilterStateVector stateDerivative(double t, const FilterStateVector &state);
 
     int filterMeasurement = 0;   //!< [-] Number of measurements of different types being read
     int numActiveCss = 0;        //!< [-] Number of currently active CSS sensors

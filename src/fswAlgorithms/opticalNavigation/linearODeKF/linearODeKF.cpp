@@ -31,8 +31,8 @@ void LinearODeKF::customReset() {
         this->constantVelocity = this->constantVelocityInitial.value()*this->unitConversion;
     }
     /*! - Set the dynamics matrix calculator*/
-    std::function<Eigen::MatrixXd(double, const StateVector)> dynamicsMatrixCalculator= [this]
-            (double time, const StateVector &state){
+    std::function<Eigen::MatrixXd(double, const FilterStateVector)> dynamicsMatrixCalculator= [this]
+            (double time, const FilterStateVector &state){
         Eigen::VectorXd position = state.getPositionStates();
         Eigen::MatrixXd dynamicsMatrix = Eigen::MatrixXd::Zero(state.size(), state.size());
         if (!this->constantVelocity) {
@@ -45,8 +45,8 @@ void LinearODeKF::customReset() {
     this->dynamics.setDynamicsMatrix(dynamicsMatrixCalculator);
 
     /*! - Set the filter dynamics (linear) */
-    std::function<StateVector(double, const StateVector)> twoBodyDynamics = [this](double t, const StateVector &state){
-        StateVector XDot;
+    std::function<FilterStateVector(double, const FilterStateVector)> twoBodyDynamics = [this](double t, const FilterStateVector &state){
+        FilterStateVector XDot;
         PositionState stateDerivative;
 
         if (this->constantVelocity) {
@@ -137,10 +137,10 @@ void LinearODeKF::readFilterMeasurements() {
 }
 
 /*! Compute the measurement matrix to linearize the measurement model
-    @param StateVector state
+    @param FilterStateVector state
     @return Eigen::MatrixXd
 */
-Eigen::MatrixXd LinearODeKF::measurementMatrix(const StateVector &state){
+Eigen::MatrixXd LinearODeKF::measurementMatrix(const FilterStateVector &state){
 
     Eigen::Vector3d position = state.getPositionStates();
     Eigen::MatrixXd measurementMatrix = Eigen::MatrixXd::Zero(position.size(), state.size());

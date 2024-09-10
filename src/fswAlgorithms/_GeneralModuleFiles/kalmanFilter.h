@@ -60,7 +60,7 @@ public:
     double getUnitConversionFromSItoState() const;
     void setMeasurementNoiseScale(double measurementNoiseScale);
     double getMeasurementNoiseScale() const;
-    void setFilterDynamics(const std::function<const StateVector(double, const StateVector&)> &dynamicsPropagator);
+    void setFilterDynamics(const std::function<const FilterStateVector(double, const FilterStateVector&)> &dynamicsPropagator);
 
 protected:
     virtual void customReset(){/* virtual */};
@@ -84,10 +84,10 @@ protected:
     double unitConversion = 1; //!< [-] Scale that converts input units (SI) to a desired unit for the inner maths
     double measNoiseScaling = 1; //!< [-] Scale factor for the measurement noise
 
-    StateVector state; //!< [-] State estimate for time TimeTag
-    StateVector stateInitial; //!< [-] State estimate for time TimeTag at previous time
-    StateVector stateLogged; //!< [-] State variable for logging
-    StateVector xBar; //!< [-] Current mean state estimate
+    FilterStateVector state; //!< [-] State estimate for time TimeTag
+    FilterStateVector stateInitial; //!< [-] State estimate for time TimeTag at previous time
+    FilterStateVector stateLogged; //!< [-] State variable for logging
+    FilterStateVector xBar; //!< [-] Current mean state estimate
     Eigen::VectorXd stateError; //!< [-] Current mean state error
 
     Eigen::MatrixXd processNoise; //!< [-] process noise matrix

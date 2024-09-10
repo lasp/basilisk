@@ -27,11 +27,11 @@
 /*! @brief Measurement models used to map a state vector to a measurement */
 class DynamicsModel{
 private:
-    std::function<const StateVector(const double, const StateVector&)> propagator; //!< [-] state propagator using dynamics
-    std::function<const Eigen::MatrixXd(const double, const StateVector&)> dynamicsMatrix; //!< [-] partial of dynamics wrt state
+    std::function<const FilterStateVector(const double, const FilterStateVector&)> propagator; //!< [-] state propagator using dynamics
+    std::function<const Eigen::MatrixXd(const double, const FilterStateVector&)> dynamicsMatrix; //!< [-] partial of dynamics wrt state
 
-    static StateVector rk4(std::function<const StateVector(const double, const StateVector&)> ODEfunction,
-            const StateVector& X0,
+    static FilterStateVector rk4(std::function<const FilterStateVector(const double, const FilterStateVector&)> ODEfunction,
+            const FilterStateVector& X0,
             double t0,
             double dt) ;
 
@@ -39,11 +39,11 @@ public:
     DynamicsModel() = default;
     ~DynamicsModel() = default;
 
-    StateVector propagate(std::array<double, 2>, const StateVector& state, double dt) const;
-    void setDynamics(const std::function<const StateVector(const double, const StateVector&)>& dynamicsPropagator);
+    FilterStateVector propagate(std::array<double, 2>, const FilterStateVector& state, double dt) const;
+    void setDynamics(const std::function<const FilterStateVector(const double, const FilterStateVector&)>& dynamicsPropagator);
 
-    Eigen::MatrixXd computeDynamicsMatrix(double time, const StateVector& state) const;
-    void setDynamicsMatrix(const std::function<const Eigen::MatrixXd(const double, const StateVector&)>&
+    Eigen::MatrixXd computeDynamicsMatrix(double time, const FilterStateVector& state) const;
+    void setDynamicsMatrix(const std::function<const Eigen::MatrixXd(const double, const FilterStateVector&)>&
             dynamicsMatrixCalculator);
 };
 

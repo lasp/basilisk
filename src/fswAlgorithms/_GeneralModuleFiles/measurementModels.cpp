@@ -21,33 +21,33 @@
 #include "measurementModels.h"
 
 /*! Function to represent measurement model which inputs a stateModel and outputs a matrix
- * @param StateVector
+ * @param FilterStateVector
  * @return Eigen::MatrixXd
  */
-Eigen::MatrixXd MeasurementModel::model(const StateVector& state) const {
+Eigen::MatrixXd MeasurementModel::model(const FilterStateVector& state) const {
     return this->measurementModel(state);
 }
 
 /*! Set function to represent measurement model which inputs a stateModel and outputs a matrix
- * @param std::function<const Eigen::MatrixXd(const StateVector&)>
+ * @param std::function<const Eigen::MatrixXd(const FilterStateVector&)>
  */
-void MeasurementModel::setMeasurementModel(const std::function<const Eigen::MatrixXd(const StateVector&)> &modelCalculator) {
+void MeasurementModel::setMeasurementModel(const std::function<const Eigen::MatrixXd(const FilterStateVector&)> &modelCalculator) {
     this->measurementModel = modelCalculator;
 }
 
 /*! Function to represent measurement matrix which inputs a stateModel and outputs a matrix (partial of measurement
- * @param StateVector
+ * @param FilterStateVector
  * @return Eigen::MatrixXd
  */
-Eigen::MatrixXd MeasurementModel::computeMeasurementMatrix(const StateVector& state) const {
+Eigen::MatrixXd MeasurementModel::computeMeasurementMatrix(const FilterStateVector& state) const {
     return this->measurementPartials(state);
 }
 
 /*! Set function to represent measurement matrix which inputs a stateModel and outputs a matrix (partial of measurement
  * model with respect to state)
- * @param std::function<const Eigen::MatrixXd(const StateVector&)>
+ * @param std::function<const Eigen::MatrixXd(const FilterStateVector&)>
  */
-void MeasurementModel::setMeasurementMatrix(const std::function<const Eigen::MatrixXd(const StateVector&)> &hMatrixCalculator){
+void MeasurementModel::setMeasurementMatrix(const std::function<const Eigen::MatrixXd(const FilterStateVector&)> &hMatrixCalculator){
     this->measurementPartials = hMatrixCalculator;
 }
 
@@ -157,37 +157,37 @@ void MeasurementModel::setPreFitResiduals(const Eigen::VectorXd& measurementPreF
 }
 
 /*! Measurement model that returns the position component of the state
- * @param StateVector state
+ * @param FilterStateVector state
  * @return Eigen::VectorXd
  */
-Eigen::VectorXd MeasurementModel::positionStates(const StateVector &state)
+Eigen::VectorXd MeasurementModel::positionStates(const FilterStateVector &state)
 {
     return state.getPositionStates();
 }
 
 /*! Measurement model that returns the unit vector of the position state
- * @param StateVector state
+ * @param FilterStateVector state
  * @return Eigen::VectorXd
  */
-Eigen::VectorXd MeasurementModel::normalizedPositionStates(const StateVector &state)
+Eigen::VectorXd MeasurementModel::normalizedPositionStates(const FilterStateVector &state)
 {
     return state.getPositionStates()/state.getPositionStates().norm();
 }
 
 /*! Measurement model that returns the position component of the state, and performs a MRP shadow set check
- * @param StateVector state
+ * @param FilterStateVector state
  * @return Eigen::VectorXd
  */
-Eigen::VectorXd MeasurementModel::mrpStates(const StateVector &state)
+Eigen::VectorXd MeasurementModel::mrpStates(const FilterStateVector &state)
 {
     return mrpSwitch(state.getPositionStates(), 1);
 }
 
 /*! Measurement model that returns the velocity component of the state
- * @param StateVector state
+ * @param FilterStateVector state
  * @return Eigen::VectorXd
  */
-Eigen::VectorXd MeasurementModel::velocityStates(const StateVector &state)
+Eigen::VectorXd MeasurementModel::velocityStates(const FilterStateVector &state)
 {
     return state.getVelocityStates();
 }

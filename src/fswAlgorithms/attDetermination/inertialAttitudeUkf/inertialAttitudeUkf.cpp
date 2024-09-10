@@ -26,12 +26,12 @@ InertialAttitudeUkf::InertialAttitudeUkf(AttitudeFilterMethod method){
 
 void InertialAttitudeUkf::customReset(){
     /*! No custom reset for this module */
-    std::function<StateVector(double, const StateVector)> attitudeDynamics = [this](double t, const StateVector &state){
+    std::function<FilterStateVector(double, const FilterStateVector)> attitudeDynamics = [this](double t, const FilterStateVector &state){
         Eigen::Vector3d mrp(state.getPositionStates());
         Eigen::Vector3d omega(state.getVelocityStates());
         Eigen::MatrixXd bMat = bmatMrp(mrp);
 
-        StateVector stateDerivative;
+        FilterStateVector stateDerivative;
         PositionState mrpDot;
         mrpDot.setValues(0.25*bMat*omega);
         stateDerivative.setPosition(mrpDot);
