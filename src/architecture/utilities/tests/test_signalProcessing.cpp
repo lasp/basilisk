@@ -46,9 +46,9 @@ class GeneralPerformance: public testing::TestWithParam<std::tuple<double, doubl
 
 TEST_P(GeneralPerformance, lowPassFilterProperties)
 {
-    double pi = std::atan(1)*4;
-    double noise_bound = 0.1;
-    int multipleOfSteps = 10;
+    const double pi = 3.141592653589793238462643383279502884;
+    const double noiseBound = 0.1;
+    const int multipleOfSteps = 10;
 
     auto [timeStep, omegaCutOff] = GetParam();
 
@@ -86,7 +86,7 @@ TEST_P(GeneralPerformance, lowPassFilterProperties)
     }
 
     double residualsStandardDev = calculateStandardDeviation(normOfResiduals);
-    EXPECT_TRUE(residualsStandardDev < noise_bound);
+    EXPECT_TRUE(residualsStandardDev < noiseBound);
 
 }
 
