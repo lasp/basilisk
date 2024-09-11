@@ -102,13 +102,10 @@ void PointCloudTriangulation::readMessages()
     CameraConfigMsgPayload cameraConfigInMsgBuffer = this->cameraConfigInMsg();
 
     /* velocity information either from ephemeris message or nav message */
-    uint64_t timeTagVelocityInfo{};
     if (this->initialPhase) {
         this->vScaleFactor = cArray2EigenVector3d(ephemerisInMsgBuffer.v_BdyZero_N).norm();
-        timeTagVelocityInfo = ephemerisInMsgBuffer.timeTag * SEC2NANO;
     } else {
         this->vScaleFactor = cArray2EigenVector3d(navTransInMsgBuffer.v_BN_N).norm();
-        timeTagVelocityInfo = navTransInMsgBuffer.timeTag * SEC2NANO;
     }
 
     /* direction of motion message */

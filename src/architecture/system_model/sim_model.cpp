@@ -52,7 +52,7 @@ void activateNewThread(void *threadData)
 }
 
 SimThreadExecution::SimThreadExecution(uint64_t threadIdent, uint64_t currentSimNanos) :
-    currentThreadNanos(currentSimNanos), threadID(threadIdent)
+    threadID(threadIdent), currentThreadNanos(currentSimNanos)
 {
 
 }
@@ -152,6 +152,7 @@ void SimThreadExecution::StepUntilStop()
  */
 void SimThreadExecution::moveProcessMessages() const {
     for(auto const* process : this->processList) {
+        static_cast<void>(process);  // "use" the unused variable
         //process->routeInterfaces(this->CurrentNanos);
     }
 }
@@ -197,6 +198,7 @@ void SimThreadExecution::selfInitProcesses() const {
  */
 void SimThreadExecution::crossInitProcesses() const {
     for(auto const* process : this->processList) {
+        static_cast<void>(process);  // "use" the unused variable
         //process->crossInitProcess();
     }
 }
