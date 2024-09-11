@@ -30,7 +30,7 @@
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/messaging/messaging.h"
 
-/*! @brief This module computes the barycenter of a swarm of satellites, either using cartesian coordinates or orbital elements. 
+/*! @brief This module computes the barycenter of a swarm of satellites, either using cartesian coordinates or orbital elements.
  */
 class FormationBarycenter: public SysModel {
 public:
@@ -47,7 +47,7 @@ public:
     std::vector<ReadFunctor<NavTransMsgPayload>> scNavInMsgs;  //!< spacecraft navigation input msg
     std::vector<ReadFunctor<VehicleConfigMsgPayload>> scPayloadInMsgs;  //!< spacecraft payload input msg
 
-    Message<NavTransMsgPayload> transOutMsg;    //!< translation navigation output msg   
+    Message<NavTransMsgPayload> transOutMsg;    //!< translation navigation output msg
 
     bool useOrbitalElements;        //!< flag that determines whether to use cartesian or orbital elementd weighted averaging
     double mu;      //!< gravitational parameter to be used with orbital elements averaging

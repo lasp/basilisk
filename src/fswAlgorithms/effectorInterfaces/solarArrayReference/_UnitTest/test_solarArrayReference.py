@@ -77,7 +77,7 @@ def computeRotationAngle(sigma_RN, rHat_SB_N, a1Hat_B, a2Hat_B, theta0):
                                       [0.5, 0.4, 0.3]])
 @pytest.mark.parametrize("sigma_RN", [[0.3, 0.2, 0.1],
                                       [0.9, 0.7, 0.8]])
-@pytest.mark.parametrize("bodyFrame", [0, 1])                                      
+@pytest.mark.parametrize("bodyFrame", [0, 1])
 @pytest.mark.parametrize("accuracy", [1e-12])
 
 
@@ -101,11 +101,11 @@ def test_solarArrayRotation(show_plots, rHat_SB_N, sigma_BN, sigma_RN, bodyFrame
 
     **Description of Variables Being Tested**
 
-    This unit test checks the correctness of the output attitude reference message 
+    This unit test checks the correctness of the output attitude reference message
 
     - ``hingedRigidBodyRefOutMsg``
 
-    in all its parts. The reference angle ``theta`` is checked versus the value computed by a python function that computes the same angle. 
+    in all its parts. The reference angle ``theta`` is checked versus the value computed by a python function that computes the same angle.
     The reference angle derivative ``thetaDot`` is checked versus zero, as the module is run for only one Update call.
     """
     # each test method requires a single assert method to be called

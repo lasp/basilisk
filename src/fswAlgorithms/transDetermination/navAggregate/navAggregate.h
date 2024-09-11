@@ -50,7 +50,7 @@ public:
     AggregateTransInput transMsgs[MAX_AGG_NAV_MSG]; /*!< [-] The incoming nav message buffer */
     Message<NavAttMsgPayload> navAttOutMsg; /*!< blended attitude navigation output message */
     Message<NavTransMsgPayload> navTransOutMsg; /*!< blended translation navigation output message */
-    
+
     uint32_t attTimeIdx;        /*!< [-] The index of the message to use for attitude message time */
     uint32_t transTimeIdx;      /*!< [-] The index of the message to use for translation message time */
     uint32_t attIdx;        /*!< [-] The index of the message to use for inertial MRP*/

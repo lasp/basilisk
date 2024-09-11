@@ -38,10 +38,10 @@ public:
     /* Inputs.*/
     ReadFunctor<TAMSensorBodyMsgPayload> tamSensorBodyInMsg;          //!< [Tesla] input message for magnetic field sensor data in the Body frame
     ReadFunctor<CmdTorqueBodyMsgPayload> tauRequestInMsg;             //!< [N-m] input message containing control torque in the Body frame
-    
+
     /* Outputs.*/
     Message<DipoleRequestBodyMsgPayload> dipoleRequestOutMsg;     //!< [A-m2] output message containing dipole request in the Body frame
-    
+
     /* Other. */
     BSKLogger bskLogger={};                           //!< BSK Logging
 };

@@ -130,7 +130,7 @@ def test_(show_plots, alpha, alignmentPriority, accuracy):
     sigma_BN = np.array([0, 0, 0])
     BN = rbk.MRP2C(sigma_BN)
     rS_B = np.matmul(BN, rHat_SB_N)
-    NavAttMessageData = messaging.NavAttMsgPayload()     
+    NavAttMessageData = messaging.NavAttMsgPayload()
     NavAttMessageData.sigma_BN = sigma_BN
     NavAttMessageData.vehSunPntBdy = rS_B
     NavAttMsg = messaging.NavAttMsg().write(NavAttMessageData)

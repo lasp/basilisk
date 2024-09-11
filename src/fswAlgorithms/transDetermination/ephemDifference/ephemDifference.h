@@ -43,7 +43,7 @@ public:
 
     ReadFunctor<EphemerisMsgPayload> ephBaseInMsg; //!< base ephemeris input message name
     EphemChangeConfig changeBodies[MAX_NUM_CHANGE_BODIES]; //!< [-] The list of bodies to change out
-    
+
     uint32_t ephBdyCount; //!< [-] The number of ephemeris bodies we are changing
 
     BSKLogger bskLogger{}; //!< BSK Logging

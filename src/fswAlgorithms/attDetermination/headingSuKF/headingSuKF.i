@@ -43,4 +43,3 @@
 import sys
 protectAllClasses(sys.modules[__name__])
 %}
-

@@ -20,15 +20,15 @@
 r"""
 Overview
 --------
-This script sets up a formation flying scenario with two spacecraft. 
+This script sets up a formation flying scenario with two spacecraft.
 The deputy spacecraft reconfigures its relative orbit in one orbit from one initial orbital element difference to
 target orbital element difference.
 This script is found in the folder ``basilisk/examples`` and executed by using::
 
       python3 scenarioFormationReconfig.py
 
-The simulation layout is shown in the following illustration. 
-Two spacecraft are orbiting the earth at close distance. No perturbation in assumed. 
+The simulation layout is shown in the following illustration.
+Two spacecraft are orbiting the earth at close distance. No perturbation in assumed.
 Each spacecraft sends a :ref:`simpleNav` output message of type :ref:`NavAttMsgPayload` message at a certain period
 to :ref:`spacecraftReconfig`,
 where burn scheduling is executed to achieve reconfiguration.

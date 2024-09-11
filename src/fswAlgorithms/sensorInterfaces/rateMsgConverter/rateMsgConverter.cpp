@@ -1,12 +1,12 @@
 /*
  ISC License
- 
+
  Copyright (c) 2016, Autonomous Vehicle Systems Lab, University of Colorado at Boulder
- 
+
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
  copyright notice and this permission notice appear in all copies.
- 
+
  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -23,7 +23,7 @@
             and adds this info to a msg of type NavAttMsgPayload.
     Author: Hanspeter Schaub
     Date:   June 30, 2018
- 
+
  */
 
 #include <string.h>
@@ -51,13 +51,13 @@ void RateMsgConverter::UpdateState(uint64_t callTime)
 {
     /*! - read in the message of type IMUSensorBodyMsgPayload */
     IMUSensorBodyMsgPayload inMsg = this->imuRateInMsg();
-    
+
     /*! - create a zero message of type NavAttMsgPayload which has the rate vector from the input message */
     NavAttMsgPayload outMsg = {};
     v3Copy(inMsg.AngVelBody, outMsg.omega_BN_B);
-    
+
     /*! - write output message */
     this->navRateOutMsg.write(&outMsg, this->moduleID, callTime);
-    
+
     return;
 }

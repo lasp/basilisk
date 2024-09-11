@@ -48,7 +48,7 @@ public:
     Message<SunlineFilterMsgPayload> filtDataOutMsg;              /*!< The name of the output filter data message*/
     ReadFunctor<CSSArraySensorMsgPayload> cssDataInMsg;               /*!< The name of the Input message*/
     ReadFunctor<CSSConfigMsgPayload> cssConfigInMsg;                  /*!< [-] The name of the CSS configuration message*/
-    
+
     double qObsVal;               /*!< [-] CSS instrument noise parameter*/
     double qProcVal;               /*!< [-] Process noise parameter*/
 
@@ -67,7 +67,7 @@ public:
 
     double dynMat[SKF_N_STATES_HALF*SKF_N_STATES_HALF];        /*!< [-] Dynamics Matrix, A */
     double measMat[MAX_N_CSS_MEAS*SKF_N_STATES_HALF];        /*!< [-] Measurement Matrix, H*/
-    
+
 	double obs[MAX_N_CSS_MEAS];          /*!< [-] Observation vector for frame*/
 	double yMeas[MAX_N_CSS_MEAS];        /*!< [-] Linearized measurement model data */
 

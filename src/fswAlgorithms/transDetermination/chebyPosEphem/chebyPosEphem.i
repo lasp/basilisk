@@ -38,4 +38,3 @@ STRUCTASLIST(ChebyEphemRecord)
 import sys
 protectAllClasses(sys.modules[__name__])
 %}
-

@@ -79,7 +79,7 @@ from typing import Optional, Union
 
 %extend GravBodyData {
     %pythoncode %{
-    
+
     """
     If we were to call GravBodyData::gravityModel we would obtain a pointer to the
     parent object GravityModel, as this is what is stored in the GravBodyData C++
@@ -92,7 +92,7 @@ from typing import Optional, Union
     @property
     def gravityModel(self):
         return self._pyGravityModel
-    
+
     @gravityModel.setter
     def gravityModel(self, value):
         self._gravityModel = value
@@ -101,7 +101,7 @@ from typing import Optional, Union
     @property
     def useSphericalHarmParams(self):
         return isinstance(self.gravityModel, SphericalHarmonicsGravityModel)
-   
+
     @useSphericalHarmParams.setter
     def useSphericalHarmParams(self, value: bool):
         deprecated.deprecationWarn(
@@ -122,7 +122,7 @@ from typing import Optional, Union
     @property
     def usePolyhedral(self):
         return isinstance(self.gravityModel, PolyhedralGravityModel)
-   
+
     @usePolyhedral.setter
     def usePolyhedral(self, value: bool):
         deprecated.deprecationWarn(
@@ -151,7 +151,7 @@ from typing import Optional, Union
     @spherHarm.setter
     def spherHarm(self, value: SphericalHarmonicsGravityModel):
         self.gravityModel = value
-   
+
     @property
     def poly(self) -> PolyhedralGravityModel:
         if self.usePolyhedral:
@@ -185,14 +185,13 @@ from typing import Optional, Union
                 data for the polyhedral.
         """
         self.gravityModel = PolyhedralGravityModel().loadFromFile(file)
-        
+
     %}
 }
 
 %pythoncode %{
 import sys
-protectAllClasses(sys.modules[__name__])        
+protectAllClasses(sys.modules[__name__])
 %}
 
 %pythoncode "simulation/dynamics/gravityEffector/gravCoeffOps.py"
-

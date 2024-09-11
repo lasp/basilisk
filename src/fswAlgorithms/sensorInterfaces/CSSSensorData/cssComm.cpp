@@ -46,7 +46,7 @@ void CSSComm::Reset(uint64_t callTime)
     {
         this->bskLogger.bskLog(BSK_WARNING, "There are zero CSS configured!");
     }
-    
+
     if (this->maxSensorValue == 0)
     {
         this->bskLogger.bskLog(BSK_WARNING, "Max CSS sensor value configured to zero! CSS sensor values will be normalized by zero, inducing faux saturation!");
@@ -85,7 +85,7 @@ void CSSComm::UpdateState(uint64_t callTime)
     for(i=0; i<this->numSensors; i++)
     {
         outputBuffer.CosValue[i] = (float) inputValues[i]/this->maxSensorValue; /* Scale Sensor Data */
-        
+
         /* Seed the polynomial computations */
         ValueMult = 2.0*outputBuffer.CosValue[i];
         ChebyPrev = 1.0;
@@ -93,7 +93,7 @@ void CSSComm::UpdateState(uint64_t callTime)
         ChebyDiffFactor = 0.0;
         ChebyDiffFactor = this->chebyCount > 0 ? ChebyPrev*this->kellyCheby[0] : ChebyDiffFactor; /* if only first order correction */
         ChebyDiffFactor = this->chebyCount > 1 ? ChebyNow*this->kellyCheby[1] + ChebyDiffFactor : ChebyDiffFactor; /* if higher order (> first) corrections */
-        
+
         /* Loop over remaining polynomials and add in values */
         for(j=2; j<this->chebyCount; j = j+1)
         {
@@ -102,9 +102,9 @@ void CSSComm::UpdateState(uint64_t callTime)
             ChebyPrev = ChebyLocalPrev;
             ChebyDiffFactor += this->kellyCheby[j]*ChebyNow;
         }
-        
+
         outputBuffer.CosValue[i] = outputBuffer.CosValue[i] + ChebyDiffFactor;
-        
+
         if(outputBuffer.CosValue[i] > 1.0)
         {
             outputBuffer.CosValue[i] = 1.0;
@@ -114,9 +114,9 @@ void CSSComm::UpdateState(uint64_t callTime)
             outputBuffer.CosValue[i] = 0.0;
         }
     }
-    
+
     /*! - Write aggregate output into output message */
     this->cssArrayOutMsg.write(&outputBuffer, this->moduleID, callTime);
-    
+
     return;
 }

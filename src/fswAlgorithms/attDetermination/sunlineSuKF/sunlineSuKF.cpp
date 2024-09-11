@@ -32,7 +32,7 @@
  */
 void SunlineSuKF::Reset(uint64_t callTime)
 {
-    
+
     CSSConfigMsgPayload cssConfigInBuffer;
     int32_t badUpdate;
     double tempMatrix[SKF_N_STATES_SWITCH*SKF_N_STATES_SWITCH];
@@ -65,18 +65,18 @@ void SunlineSuKF::Reset(uint64_t callTime)
     }
     /*! - Save the count of sun sensors for later use */
     this->numCSSTotal = cssConfigInBuffer.nCSS;
-    
+
     /*! - Initialize filter parameters to max values */
     this->dt = 0.0;
     this->timeTag = callTime*NANO2SEC;
     this->numStates = SKF_N_STATES_SWITCH;
     this->countHalfSPs = SKF_N_STATES_SWITCH;
     this->numObs = MAX_N_CSS_MEAS;
-    
+
     /*! Initalize the filter to use b_1 of the body frame to make frame*/
     v3Set(1, 0, 0, this->bVec_B);
     this->switchTresh = 0.866;
-    
+
     /*! - Ensure that all internal filter matrices are zeroed*/
     vSetZero(this->obs, this->numObs);
     vSetZero(this->wM, this->countHalfSPs * 2 + 1);
@@ -85,13 +85,13 @@ void SunlineSuKF::Reset(uint64_t callTime)
     mSetZero(this->SP, this->countHalfSPs * 2 + 1,
              this->numStates);
     mSetZero(this->sQnoise, this->numStates, this->numStates);
-    
+
     /*! - Set lambda/gamma to standard value for unscented kalman filters */
     this->lambdaVal = this->alpha*this->alpha*
     (this->numStates + this->kappa) - this->numStates;
     this->gamma = sqrt(this->numStates + this->lambdaVal);
-    
-    
+
+
     /*! - Set the wM/wC vectors to standard values for unscented kalman filters*/
     this->wM[0] = this->lambdaVal / (this->numStates +
                                                  this->lambdaVal);
@@ -103,8 +103,8 @@ void SunlineSuKF::Reset(uint64_t callTime)
                                              this->lambdaVal);
         this->wC[i] = this->wM[i];
     }
-    
-    /*! - User a cholesky decomposition to obtain the sBar and sQnoise matrices for use in 
+
+    /*! - User a cholesky decomposition to obtain the sBar and sQnoise matrices for use in
           filter at runtime*/
     mCopy(this->covarInit, this->numStates, this->numStates,
           this->covar);
@@ -121,7 +121,7 @@ void SunlineSuKF::Reset(uint64_t callTime)
                                (int32_t) this->numStates, this->sQnoise);
     mTranspose(this->sQnoise, this->numStates,
                this->numStates, this->sQnoise);
-    
+
     if (this->cssDataInMsg.isWritten()){
         this->cssSensorInBuffer = this->cssDataInMsg();
     } else {
@@ -186,16 +186,16 @@ void SunlineSuKF::UpdateState(uint64_t callTime)
         vCopy(this->stateInit, this->numStates, this->state);
         this->filterInitialized = 1;
     }
-    
+
     v3Normalize(&this->state[0], sunheading_hat);
-    
+
     /*! - Check for switching frames */
     if (fabs(v3Dot(this->bVec_B, sunheading_hat)) > this->switchTresh)
     {
         sunlineSuKFSwitch(this->bVec_B, this->state, this->covar);
     }
-    
-    /*! - If the time tag from the measured data is new compared to previous step, 
+
+    /*! - If the time tag from the measured data is new compared to previous step,
           propagate and update the filter*/
     newTimeTag = timeOfMsgWritten * NANO2SEC;
     if(newTimeTag >= this->timeTag && isWritten)
@@ -211,10 +211,10 @@ void SunlineSuKF::UpdateState(uint64_t callTime)
     {
         sunlineSuKFTimeUpdate(this, newTimeTag);
     }
-    
+
     /*! - Compute Post Fit Residuals, first get Y (eq 22) using the states post fit*/
     sunlineSuKFMeasModel(this);
-    
+
     /*! - Compute the value for the yBar parameter (equation 23)*/
     vSetZero(yBar, this->numObs);
     for(i=0; i<this->countHalfSPs*2+1; i++)
@@ -224,21 +224,21 @@ void SunlineSuKF::UpdateState(uint64_t callTime)
         vScale(this->wM[i], tempYVec, this->numObs, tempYVec);
         vAdd(yBar, this->numObs, tempYVec, yBar);
     }
-    
+
     /*! - The post fits are y- ybar*/
     mSubtract(this->obs, this->numObs, 1, yBar, this->postFits);
-    
+
     /*! - Write the sunline estimate into the copy of the navigation message structure*/
 	v3Copy(this->state, this->outputSunline.vehSunPntBdy);
     v3Normalize(this->outputSunline.vehSunPntBdy,
         this->outputSunline.vehSunPntBdy);
     this->outputSunline.timeTag = this->timeTag;
     this->navStateOutMsg.write(&this->outputSunline, this->moduleID, callTime);
-    
+
     /*! - Switch the rates back to omega_BN instead of omega_SB */
     vCopy(this->state, SKF_N_STATES_SWITCH, states_BN);
     vScale(-1, &(states_BN[3]), 2, &(states_BN[3])); /*! The Filter currently outputs omega_SB = -omega_BN (check doc for details)*/
-    
+
     /*! - Populate the filter states output buffer and write the output message*/
     sunlineDataOutBuffer.timeTag = this->timeTag;
     sunlineDataOutBuffer.numObs = (int) this->numObs;
@@ -247,11 +247,11 @@ void SunlineSuKF::UpdateState(uint64_t callTime)
     memmove(sunlineDataOutBuffer.state, states_BN, SKF_N_STATES_SWITCH*sizeof(double));
     memmove(sunlineDataOutBuffer.postFitRes, this->postFits, MAX_N_CSS_MEAS*sizeof(double));
     this->filtDataOutMsg.write(&sunlineDataOutBuffer, this->moduleID, callTime);
-    
+
     return;
 }
 
-/*! This method propagates a sunline state vector forward in time.  Note 
+/*! This method propagates a sunline state vector forward in time.  Note
     that the calling parameter is updated in place to save on data copies.
 	@return void
     @param stateInOut The state that is propagated
@@ -273,20 +273,20 @@ void sunlineStateProp(double *stateInOut, double *b_Vec, double dt)
     mMultV(dcm_BS, SKF_N_STATES_HALF, SKF_N_STATES_HALF, omega_BN_S, omega_BN_B);
     /* Set local variables to zero*/
     vSetZero(propagatedVel, SKF_N_STATES_HALF);
-    
+
     /*! Take omega cross d*/
     v3Cross(omega_BN_B, stateInOut, omegaCrossd);
-    
+
     /*! - Multiply omega cross d by dt and add to state to propagate */
     v3Scale(-dt, omegaCrossd, propagatedVel);
     v3Add(stateInOut, propagatedVel, stateInOut);
     v3Normalize(stateInOut, stateInOut);
-    
+
 	return;
 }
 
 /*! This method performs the time update for the sunline kalman filter.
-     It propagates the sigma points forward in time and then gets the current 
+     It propagates the sigma points forward in time and then gets the current
 	 covariance and state estimates.
 	 @return void
      @param configData The configuration data associated with the CSS estimator
@@ -297,12 +297,12 @@ int sunlineSuKFTimeUpdate(SunlineSuKF *data, double updateTime)
     int Index, badUpdate;
 	double sBarT[SKF_N_STATES_SWITCH*SKF_N_STATES_SWITCH];
 	double xComp[SKF_N_STATES_SWITCH], AT[(2 * SKF_N_STATES_SWITCH + SKF_N_STATES_SWITCH)*SKF_N_STATES_SWITCH];
-	double aRow[SKF_N_STATES_SWITCH], rAT[SKF_N_STATES_SWITCH*SKF_N_STATES_SWITCH], xErr[SKF_N_STATES_SWITCH]; 
+	double aRow[SKF_N_STATES_SWITCH], rAT[SKF_N_STATES_SWITCH*SKF_N_STATES_SWITCH], xErr[SKF_N_STATES_SWITCH];
 	double sBarUp[SKF_N_STATES_SWITCH*SKF_N_STATES_SWITCH];
 	double *spPtr;
     double procNoise[SKF_N_STATES_SWITCH*SKF_N_STATES_SWITCH];
     badUpdate = 0;
-    
+
     vCopy(data->state, data->numStates, data->statePrev);
     mCopy(data->sBar, data->numStates, data->numStates, data->sBarPrev);
     mCopy(data->covar, data->numStates, data->numStates, data->covarPrev);
@@ -331,7 +331,7 @@ int sunlineSuKFTimeUpdate(SunlineSuKF *data, double updateTime)
 		sunlineStateProp(spPtr, data->bVec_B, data->dt);
 		vScale(data->wM[Index], spPtr, data->numStates, xComp);
 		vAdd(xComp, data->numStates, data->xBar, data->xBar);
-		
+
 		Index = (int) i + 1 + (int) data->countHalfSPs;
         spPtr = &(data->SP[Index*(int)data->numStates]);
         vCopy(&sBarT[i*(int) data->numStates], data->numStates, spPtr);
@@ -345,11 +345,11 @@ int sunlineSuKFTimeUpdate(SunlineSuKF *data, double updateTime)
     mSetZero(AT, (2 * data->countHalfSPs + data->numStates),
         data->countHalfSPs);
 	/*! - Assemble the AT matrix.  Note that data matrix is the internals of
-          the qr decomposition call in the source design documentation.  It is 
+          the qr decomposition call in the source design documentation.  It is
           the inside of equation 20 in that document*/
 	for (uint64_t i = 0; i<2 * data->countHalfSPs; i++)
 	{
-		
+
         vScale(-1.0, data->xBar, data->numStates, aRow);
         vAdd(aRow, data->numStates,
              &(data->SP[(i+1)*(int) data->numStates]), aRow);
@@ -358,7 +358,7 @@ int sunlineSuKFTimeUpdate(SunlineSuKF *data, double updateTime)
 		memcpy((void *)&AT[i*(int) data->numStates], (void *)aRow,
 			data->numStates*sizeof(double));
 	}
-    
+
     /*! - Pop the sQNoise matrix on to the end of AT prior to getting QR decomposition*/
 	memcpy(&AT[2 * data->countHalfSPs*data->numStates],
 		procNoise, data->numStates*data->numStates
@@ -369,14 +369,14 @@ int sunlineSuKFTimeUpdate(SunlineSuKF *data, double updateTime)
     mCopy(rAT, data->numStates, data->numStates, sBarT);
     mTranspose(sBarT, data->numStates, data->numStates,
         data->sBar);
-    
-    /*! - Shift the sBar matrix over by the xBar vector using the appropriate weight 
+
+    /*! - Shift the sBar matrix over by the xBar vector using the appropriate weight
           like in equation 21 in design document.*/
     vScale(-1.0, data->xBar, data->numStates, xErr);
     vAdd(xErr, data->numStates, &data->SP[0], xErr);
     badUpdate += ukfCholDownDate(data->sBar, xErr, data->wC[0],
                                  (int32_t) data->numStates, sBarUp);
-    
+
     /*! - Save current sBar matrix, covariance, and state estimate off for further use*/
     mCopy(sBarUp, data->numStates, data->numStates, data->sBar);
     mTranspose(data->sBar, data->numStates, data->numStates,
@@ -385,9 +385,9 @@ int sunlineSuKFTimeUpdate(SunlineSuKF *data, double updateTime)
         data->covar, data->numStates, data->numStates,
            data->covar);
     vCopy(&(data->SP[0]), data->numStates, data->state );
-	
+
 	data->timeTag = updateTime;
-    
+
     if (badUpdate<0){
         sunlineSuKFCleanUpdate(data);
         return -1;
@@ -395,9 +395,9 @@ int sunlineSuKFTimeUpdate(SunlineSuKF *data, double updateTime)
     return 0;
 }
 
-/*! This method computes what the expected measurement vector is for each CSS 
-    that is present on the spacecraft.  All data is transacted from the main 
-    data structure for the model because there are many variables that would 
+/*! This method computes what the expected measurement vector is for each CSS
+    that is present on the spacecraft.  All data is transacted from the main
+    data structure for the model because there are many variables that would
     have to be updated otherwise.
  @return void
  @param configData The configuration data associated with the CSS estimator
@@ -461,11 +461,11 @@ void sunlineSuKFMeasModel(SunlineSuKF *data)
     /*! - yMeas matrix was set backwards deliberately so we need to transpose it through*/
     mTranspose(data->yMeas, obsCounter, data->countHalfSPs*2+1, data->yMeas);
     data->numObs = obsCounter;
-    
+
 }
 
 /*! This method performs the measurement update for the sunline kalman filter.
- It applies the observations in the obs vectors to the current state estimate and 
+ It applies the observations in the obs vectors to the current state estimate and
  updates the state/covariance with that information.
  @return void
  @param configData The configuration data associated with the CSS estimator
@@ -483,14 +483,14 @@ int sunlineSuKFMeasUpdate(SunlineSuKF *data, double updateTime)
     double sy[MAX_N_CSS_MEAS*MAX_N_CSS_MEAS], Ucol[SKF_N_STATES_SWITCH];
     double updMat[MAX_N_CSS_MEAS*MAX_N_CSS_MEAS], pXY[SKF_N_STATES_SWITCH*MAX_N_CSS_MEAS], Umat[SKF_N_STATES_SWITCH*MAX_N_CSS_MEAS];
     badUpdate = 0;
-    
+
     vCopy(data->state, data->numStates, data->statePrev);
     mCopy(data->sBar, data->numStates, data->numStates, data->sBarPrev);
     mCopy(data->covar, data->numStates, data->numStates, data->covarPrev);
-    
+
     /*! - Compute the valid observations and the measurement model for all observations*/
     sunlineSuKFMeasModel(data);
-    
+
     /*! - Compute the value for the yBar parameter (note that data is equation 23 in the
           time update section of the reference document*/
     vSetZero(yBar, data->numObs);
@@ -501,9 +501,9 @@ int sunlineSuKFMeasUpdate(SunlineSuKF *data, double updateTime)
         vScale(data->wM[i], tempYVec, data->numObs, tempYVec);
         vAdd(yBar, data->numObs, tempYVec, yBar);
     }
-    
-    /*! - Populate the matrix that we perform the QR decomposition on in the measurement 
-          update section of the code.  This is based on the differenence between the yBar 
+
+    /*! - Populate the matrix that we perform the QR decomposition on in the measurement
+          update section of the code.  This is based on the differenence between the yBar
           parameter and the calculated measurement models.  Equation 24 in driving doc. */
     mSetZero(AT, data->countHalfSPs*2+data->numObs,
         data->numObs);
@@ -517,9 +517,9 @@ int sunlineSuKFMeasUpdate(SunlineSuKF *data, double updateTime)
         memcpy(&(AT[i*data->numObs]), tempYVec,
                data->numObs*sizeof(double));
     }
-    
+
     /*! - This is the square-root of the Rk matrix which we treat as the Cholesky
-        decomposition of the observation variance matrix constructed for our number 
+        decomposition of the observation variance matrix constructed for our number
         of observations*/
     mSetZero(data->qObs, data->numCSSTotal, data->numCSSTotal);
     mSetIdentity(data->qObs, data->numObs, data->numObs);
@@ -528,13 +528,13 @@ int sunlineSuKFMeasUpdate(SunlineSuKF *data, double updateTime)
     ukfCholDecomp(data->qObs, (int32_t) data->numObs, (int32_t) data->numObs, qChol);
     memcpy(&(AT[2*data->countHalfSPs*data->numObs]),
            qChol, data->numObs*data->numObs*sizeof(double));
-    /*! - Perform QR decomposition (only R again) of the above matrix to obtain the 
+    /*! - Perform QR decomposition (only R again) of the above matrix to obtain the
           current Sy matrix*/
     ukfQRDJustR(AT, (int32_t) (2*data->countHalfSPs+data->numObs),
                 (int32_t) data->numObs, rAT);
     mCopy(rAT, data->numObs, data->numObs, syT);
     mTranspose(syT, data->numObs, data->numObs, sy);
-    /*! - Shift the matrix over by the difference between the 0th SP-based measurement 
+    /*! - Shift the matrix over by the difference between the 0th SP-based measurement
           model and the yBar matrix (cholesky down-date again)*/
     vScale(-1.0, yBar, data->numObs, tempYVec);
     vAdd(tempYVec, data->numObs, &(data->yMeas[0]), tempYVec);
@@ -544,7 +544,7 @@ int sunlineSuKFMeasUpdate(SunlineSuKF *data, double updateTime)
     mCopy(updMat, data->numObs, data->numObs, sy);
     mTranspose(sy, data->numObs, data->numObs, syT);
 
-    /*! - Construct the Pxy matrix (equation 26) which multiplies the Sigma-point cloud 
+    /*! - Construct the Pxy matrix (equation 26) which multiplies the Sigma-point cloud
           by the measurement model cloud (weighted) to get the total Pxy matrix*/
     mSetZero(pXY, data->numStates, data->numObs);
     for(i=0; i<2*data->countHalfSPs+1; i++)
@@ -561,26 +561,26 @@ int sunlineSuKFMeasUpdate(SunlineSuKF *data, double updateTime)
     }
 
     /*! - Then we need to invert the SyT*Sy matrix to get the Kalman gain factor.  Since
-          The Sy matrix is lower triangular, we can do a back-sub inversion instead of 
-          a full matrix inversion.  That is the ukfUInv and ukfLInv calls below.  Once that 
+          The Sy matrix is lower triangular, we can do a back-sub inversion instead of
+          a full matrix inversion.  That is the ukfUInv and ukfLInv calls below.  Once that
           multiplication is done (equation 27), we have the Kalman Gain.*/
     badUpdate += ukfUInv(syT, (int32_t) data->numObs, (int32_t) data->numObs, syInv);
-    
+
     mMultM(pXY, data->numStates, data->numObs, syInv,
            data->numObs, data->numObs, kMat);
     badUpdate += ukfLInv(sy, (int32_t) data->numObs, (int32_t) data->numObs, syInv);
     mMultM(kMat, data->numStates, data->numObs, syInv,
            data->numObs, data->numObs, kMat);
-    
-    
-    /*! - Difference the yBar and the observations to get the observed error and 
-          multiply by the Kalman Gain to get the state update.  Add the state update 
+
+
+    /*! - Difference the yBar and the observations to get the observed error and
+          multiply by the Kalman Gain to get the state update.  Add the state update
           to the state to get the updated state value (equation 27).*/
     vSubtract(data->obs, data->numObs, yBar, tempYVec);
     mMultM(kMat, data->numStates, data->numObs, tempYVec,
         data->numObs, 1, xHat);
     vAdd(data->state, data->numStates, xHat, data->state);
-    /*! - Compute the updated matrix U from equation 28.  Note that I then transpose it 
+    /*! - Compute the updated matrix U from equation 28.  Note that I then transpose it
          so that I can extract "columns" from adjacent memory*/
     mMultM(kMat, data->numStates, data->numObs, sy,
            data->numObs, data->numObs, Umat);
@@ -600,7 +600,7 @@ int sunlineSuKFMeasUpdate(SunlineSuKF *data, double updateTime)
     mMultM(data->sBar, data->numStates, data->numStates,
            data->covar, data->numStates, data->numStates,
            data->covar);
-    
+
     if (badUpdate<0){
         sunlineSuKFCleanUpdate(data);
         return -1;
@@ -624,19 +624,19 @@ void sunlineSuKFSwitch(double *bVec_B, double *states, double *covar)
     double dcm_SnewSold[SKF_N_STATES_HALF][SKF_N_STATES_HALF];
     double switchMatP[SKF_N_STATES_SWITCH][SKF_N_STATES_SWITCH];
     double switchMat[SKF_N_STATES_SWITCH][SKF_N_STATES_SWITCH];
-    
+
     double sun_heading_norm[SKF_N_STATES_HALF];
     double b1[SKF_N_STATES_HALF];
     double b2[SKF_N_STATES_HALF];
-    
+
     /*!  Set the body frame vectors*/
     v3Set(1, 0, 0, b1);
     v3Set(0, 1, 0, b2);
     v3Normalize(&(states[0]), sun_heading_norm);
-    
+
     /*! Populate the dcm_BS with the "old" S-frame*/
     sunlineSuKFComputeDCM_BS(sun_heading_norm, bVec_B, &dcm_BSold[0][0]);
-    
+
     if (v3IsEqual(bVec_B, b1, 1e-10))
     {
         sunlineSuKFComputeDCM_BS(sun_heading_norm, b2, &dcm_BSnew_T[0][0]);
@@ -647,14 +647,14 @@ void sunlineSuKFSwitch(double *bVec_B, double *states, double *covar)
         sunlineSuKFComputeDCM_BS(sun_heading_norm, b1, &dcm_BSnew_T[0][0]);
         v3Copy(b1, bVec_B);
     }
-    
+
     mTranspose(dcm_BSnew_T, SKF_N_STATES_HALF, SKF_N_STATES_HALF, dcm_BSnew_T);
     mMultM(dcm_BSnew_T, 3, 3, dcm_BSold, 3, 3, dcm_SnewSold);
-    
+
     mSetIdentity(switchMat, SKF_N_STATES_SWITCH, SKF_N_STATES_SWITCH);
     mSetSubMatrix(&dcm_SnewSold[1][1], 1, 2, &switchMat, SKF_N_STATES_SWITCH, SKF_N_STATES_SWITCH, 3, 3);
     mSetSubMatrix(&dcm_SnewSold[2][1], 1, 2, &switchMat, SKF_N_STATES_SWITCH, SKF_N_STATES_SWITCH, 4, 3);
-    
+
     mMultV(switchMat, SKF_N_STATES_SWITCH, SKF_N_STATES_SWITCH, states, states);
     mMultM(switchMat, SKF_N_STATES_SWITCH, SKF_N_STATES_SWITCH, covar, SKF_N_STATES_SWITCH, SKF_N_STATES_SWITCH, switchMatP);
     mTranspose(switchMat, SKF_N_STATES_SWITCH, SKF_N_STATES_SWITCH, switchMat);
@@ -667,11 +667,11 @@ void sunlineSuKFComputeDCM_BS(double sunheading[SKF_N_STATES_HALF], double bVec[
     double s1_B[SKF_N_STATES_HALF];
     double s2_B[SKF_N_STATES_HALF];
     double s3_B[SKF_N_STATES_HALF];
-    
+
     mSetZero(dcm, SKF_N_STATES_HALF, SKF_N_STATES_HALF);
     v3SetZero(s2_B);
     v3SetZero(s3_B);
-    
+
     v3Normalize(sunheading, s1_B);
     v3Cross(sunheading, bVec, s2_B);
     if (v3Norm(s2_B) < 1E-5){
@@ -687,7 +687,7 @@ void sunlineSuKFComputeDCM_BS(double sunheading[SKF_N_STATES_HALF], double bVec[
     mSetSubMatrix(&(s3_B), 1, SKF_N_STATES_HALF, dcm, SKF_N_STATES_HALF, SKF_N_STATES_HALF, 2, 0);
     mTranspose(dcm, SKF_N_STATES_HALF, SKF_N_STATES_HALF, dcm);
     }
-    
+
 }
 
 /*! This method cleans the filter states after a bad upadate on the fly.
@@ -703,7 +703,7 @@ void sunlineSuKFCleanUpdate(SunlineSuKF *data){
     vCopy(data->statePrev, data->numStates, data->state);
     mCopy(data->sBarPrev, data->numStates, data->numStates, data->sBar);
     mCopy(data->covarPrev, data->numStates, data->numStates, data->covar);
-    
+
     /*! - Reset the wM/wC vectors to standard values for unscented kalman filters*/
     data->wM[0] = data->lambdaVal / (data->numStates +
                                                  data->lambdaVal);
@@ -715,6 +715,6 @@ void sunlineSuKFCleanUpdate(SunlineSuKF *data){
                                              data->lambdaVal);
         data->wC[i] = data->wM[i];
     }
-    
+
     return;
 }

@@ -47,7 +47,7 @@ public:
 	double              defaultControlPeriod;                   //!< [s] Default control period used for first call
 
 	uint64_t			prevCallTime;							//!< callTime from previous function call
-	
+
 
 	/* declare module IO interfaces */
     ReadFunctor<THRArrayCmdForceMsgPayload> thrForceInMsg;        	            //!< The name of the Input message

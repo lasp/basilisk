@@ -764,4 +764,3 @@ void inertialUKFCleanUpdate(InertialUKF *configData){
 
     return;
 }
-

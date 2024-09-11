@@ -37,7 +37,7 @@ void ScanningInstrumentController::Reset(uint64_t callTime)
     }
 }
 
-/*! This method checks the status of the device and if there is access to target, as well if the magnitude of the attitude 
+/*! This method checks the status of the device and if there is access to target, as well if the magnitude of the attitude
 error and attitude rate are within the tolerance. If so, the instrument is turned on, otherwise it is turned off.
  @return void
  @param callTime The clock time at which the function was called (nanoseconds)
@@ -64,7 +64,7 @@ void ScanningInstrumentController::UpdateState(uint64_t callTime)
     // Compute the norms of the attitude and rate errors
     sigma_BR_norm = v3Norm(attGuidInMsgBuffer.sigma_BR);
     omega_BR_norm = v3Norm(attGuidInMsgBuffer.omega_BR_B);
-    
+
     // If the controller is active
     if (this->controllerStatus) {
         /* If the attitude error is less than the tolerance, the groundLocation is accessible, and (if enabled) the rate

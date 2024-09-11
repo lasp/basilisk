@@ -51,14 +51,14 @@ void Torque2Dipole::UpdateState(uint64_t callTime)
      * Initialize local variables.
      */
     double bFieldNormSqrd = 0.0;        // the norm squared of the local magnetic field vector
-    
+
     /*
      * Read the input messages and initialize output message.
      */
     TAMSensorBodyMsgPayload tamSensorBodyInMsgBuffer = this->tamSensorBodyInMsg();
     CmdTorqueBodyMsgPayload tauRequestInMsgBuffer = this->tauRequestInMsg();
     DipoleRequestBodyMsgPayload dipoleRequestOutMsgBuffer = {};
-    
+
     /*! - Transform the requested Body frame torque into a requested Body frame dipole protecting against a bogus
          magnetic field value. */
     bFieldNormSqrd = v3Dot(tamSensorBodyInMsgBuffer.tam_B, tamSensorBodyInMsgBuffer.tam_B);
@@ -67,7 +67,7 @@ void Torque2Dipole::UpdateState(uint64_t callTime)
         v3Cross(tamSensorBodyInMsgBuffer.tam_B, tauRequestInMsgBuffer.torqueRequestBody, dipoleRequestOutMsgBuffer.dipole_B);
         v3Scale(1 / bFieldNormSqrd, dipoleRequestOutMsgBuffer.dipole_B, dipoleRequestOutMsgBuffer.dipole_B);
     }
-    
+
     /*! - Write output message. This is the Body frame requested dipole from the torque rods.*/
     this->dipoleRequestOutMsg.write(&dipoleRequestOutMsgBuffer, this->moduleID, callTime);
 }

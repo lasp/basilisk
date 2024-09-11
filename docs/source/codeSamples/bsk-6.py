@@ -50,7 +50,7 @@ def run():
     mod2.dummy = 1
     mod2.dumVector = [1., 2., 3.]
 
-    # request these module variables to be recorded    
+    # request these module variables to be recorded
     mod1Logger = mod1.logger("dummy", macros.sec2nano(1.))
     scSim.AddModelToTask("dynamicsTask", mod1Logger)
     mod2WrapLogger = mod2.logger(["dummy", "dumVector"], macros.sec2nano(1.))

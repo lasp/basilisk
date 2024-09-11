@@ -43,7 +43,7 @@ public:
     /* declare module IO interfaces */
     Message<AttRefMsgPayload> attRefOutMsg;                     //!< reference attitude output message
     ReadFunctor<AttRefMsgPayload> attRefInMsg;                      //!< (optional) reference attitude input message
-    
+
     AttRefMsgPayload attRefOutBuffer;                    //!< [-] structure for the output data
     BSKLogger bskLogger={};                             //!< BSK Logging
 };

@@ -62,7 +62,7 @@ The required module configuration is::
     attReference.a1Hat_B = a1_B
     attReference.alignmentPriority = 0
     scSim.AddModelToTaskAddModelToTask(simTaskName, attReference)
-	
+
 The module is configurable with the following parameters:
 
 .. list-table:: Module Parameters

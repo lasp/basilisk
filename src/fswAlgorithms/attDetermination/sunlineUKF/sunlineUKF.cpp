@@ -37,10 +37,10 @@ static void sunlineUKFMeasModel(SunlineUKF *configData);
  */
 void SunlineUKF::Reset(uint64_t callTime)
 {
-    
+
     CSSConfigMsgPayload cssConfigInBuffer;
     double tempMatrix[SKF_N_STATES*SKF_N_STATES];
-    
+
     /*! - Zero the local configuration data structures and outputs */
     this->outputSunline = {};
     mSetZero(this->cssNHat_B, MAX_NUM_CSS_SENSORS, 3);
@@ -68,14 +68,14 @@ void SunlineUKF::Reset(uint64_t callTime)
     }
     /*! - Save the count of sun sensors for later use */
     this->numCSSTotal = cssConfigInBuffer.nCSS;
-    
+
     /*! - Initialize filter parameters to max values */
     this->timeTag = callTime*NANO2SEC;
     this->dt = 0.0;
     this->numStates = SKF_N_STATES;
     this->countHalfSPs = SKF_N_STATES;
     this->numObs = MAX_N_CSS_MEAS;
-    
+
     /*! - Ensure that all internal filter matrices are zeroed*/
     vSetZero(this->obs, this->numObs);
     vSetZero(this->wM, this->countHalfSPs * 2 + 1);
@@ -84,13 +84,13 @@ void SunlineUKF::Reset(uint64_t callTime)
     mSetZero(this->SP, this->countHalfSPs * 2 + 1,
              this->numStates);
     mSetZero(this->sQnoise, this->numStates, this->numStates);
-    
+
     /*! - Set lambda/gamma to standard value for unscented kalman filters */
     this->lambdaVal = this->alpha*this->alpha*
     (this->numStates + this->kappa) - this->numStates;
     this->gamma = sqrt(this->numStates + this->lambdaVal);
-    
-    
+
+
     /*! - Set the wM/wC vectors to standard values for unscented kalman filters*/
     this->wM[0] = this->lambdaVal / (this->numStates +
                                                  this->lambdaVal);
@@ -102,8 +102,8 @@ void SunlineUKF::Reset(uint64_t callTime)
                                              this->lambdaVal);
         this->wC[i] = this->wM[i];
     }
-    
-    /*! - User a cholesky decomposition to obtain the sBar and sQnoise matrices for use in 
+
+    /*! - User a cholesky decomposition to obtain the sBar and sQnoise matrices for use in
           filter at runtime*/
     mCopy(this->covar, this->numStates, this->numStates,
           this->sBar);
@@ -115,7 +115,7 @@ void SunlineUKF::Reset(uint64_t callTime)
                   this->numStates, this->sQnoise);
     mTranspose(this->sQnoise, this->numStates,
                this->numStates, this->sQnoise);
-    
+
 
     return;
 }
@@ -140,7 +140,7 @@ void SunlineUKF::UpdateState(uint64_t callTime)
     timeOfMsgWritten = this->cssDataInMsg.timeWritten();
     isWritten = this->cssDataInMsg.isWritten();
 
-    /*! - If the time tag from the measured data is new compared to previous step, 
+    /*! - If the time tag from the measured data is new compared to previous step,
           propagate and update the filter*/
     newTimeTag = timeOfMsgWritten * NANO2SEC;
     if(newTimeTag >= this->timeTag && isWritten)
@@ -148,7 +148,7 @@ void SunlineUKF::UpdateState(uint64_t callTime)
         sunlineUKFTimeUpdate(this, newTimeTag);
         sunlineUKFMeasUpdate(this, newTimeTag);
     }
-    
+
     /*! - If current clock time is further ahead than the measured time, then
           propagate to this current time-step*/
     newTimeTag = callTime*NANO2SEC;
@@ -156,10 +156,10 @@ void SunlineUKF::UpdateState(uint64_t callTime)
     {
         sunlineUKFTimeUpdate(this, newTimeTag);
     }
-    
+
     /*! - Compute Post Fit Residuals, first get Y (eq 22) using the states post fit*/
     sunlineUKFMeasModel(this);
-    
+
     /*! - Compute the value for the yBar parameter (equation 23)*/
     vSetZero(yBar, this->numObs);
     for(i=0; i<this->countHalfSPs*2+1; i++)
@@ -169,10 +169,10 @@ void SunlineUKF::UpdateState(uint64_t callTime)
         vScale(this->wM[i], tempYVec, this->numObs, tempYVec);
         vAdd(yBar, this->numObs, tempYVec, yBar);
     }
-    
+
     /*! - The post fits are y- ybar*/
     mSubtract(this->obs, MAX_N_CSS_MEAS, 1, yBar, this->postFits);
-    
+
     /*! - Write the sunline estimate into the copy of the navigation message structure*/
 	v3Copy(this->state, this->outputSunline.vehSunPntBdy);
     v3Normalize(this->outputSunline.vehSunPntBdy,
@@ -192,7 +192,7 @@ void SunlineUKF::UpdateState(uint64_t callTime)
     return;
 }
 
-/*! This method propagates a sunline state vector forward in time.  Note 
+/*! This method propagates a sunline state vector forward in time.  Note
     that the calling parameter is updated in place to save on data copies.
 	@return void
     @param stateInOut The state that is propagated
@@ -204,12 +204,12 @@ void sunlineStateProp(double *stateInOut, double dt)
     double propagatedVel[3];
     double pointUnit[3];
     double unitComp;
-    
+
     /*! - Unitize the current estimate to find direction to restrict motion*/
     v3Normalize(stateInOut, pointUnit);
     unitComp = v3Dot(&(stateInOut[3]), pointUnit);
     v3Scale(unitComp, pointUnit, pointUnit);
-    /*! - Subtract out rotation in the sunline axis because that is not observable 
+    /*! - Subtract out rotation in the sunline axis because that is not observable
           for coarse sun sensors*/
     v3Subtract(&(stateInOut[3]), pointUnit, &(stateInOut[3]));
     v3Scale(dt, &(stateInOut[3]), propagatedVel);
@@ -219,7 +219,7 @@ void sunlineStateProp(double *stateInOut, double dt)
 }
 
 /*! This method performs the time update for the sunline kalman filter.
-     It propagates the sigma points forward in time and then gets the current 
+     It propagates the sigma points forward in time and then gets the current
 	 covariance and state estimates.
 	 @return void
      @param configData The SunLineUKF class
@@ -230,13 +230,13 @@ void sunlineUKFTimeUpdate(SunlineUKF *configData, double updateTime)
 	int i, Index;
 	double sBarT[SKF_N_STATES*SKF_N_STATES];
 	double xComp[SKF_N_STATES], AT[(2 * SKF_N_STATES + SKF_N_STATES)*SKF_N_STATES];
-	double aRow[SKF_N_STATES], rAT[SKF_N_STATES*SKF_N_STATES], xErr[SKF_N_STATES]; 
+	double aRow[SKF_N_STATES], rAT[SKF_N_STATES*SKF_N_STATES], xErr[SKF_N_STATES];
 	double sBarUp[SKF_N_STATES*SKF_N_STATES];
 	double *spPtr;
 
     /*! Compute time step */
 	configData->dt = updateTime - configData->timeTag;
-    
+
     /*! - Copy over the current state estimate into the 0th Sigma point and propagate by dt*/
 	vCopy(configData->state, configData->numStates,
 		&(configData->SP[0 * configData->numStates + 0]));
@@ -260,7 +260,7 @@ void sunlineUKFTimeUpdate(SunlineUKF *configData, double updateTime)
 		sunlineStateProp(spPtr, configData->dt);
 		vScale(configData->wM[Index], spPtr, configData->numStates, xComp);
 		vAdd(xComp, configData->numStates, configData->xBar, configData->xBar);
-		
+
 		Index = i + 1 + configData->countHalfSPs;
         spPtr = &(configData->SP[Index*configData->numStates]);
         vCopy(&sBarT[i*configData->numStates], configData->numStates, spPtr);
@@ -273,12 +273,12 @@ void sunlineUKFTimeUpdate(SunlineUKF *configData, double updateTime)
     /*! - Zero the AT matrix prior to assembly*/
     mSetZero(AT, (2 * configData->countHalfSPs + configData->numStates),
         configData->countHalfSPs);
-	/*! - Assemble the AT matrix.  Note that this matrix is the internals of 
-          the qr decomposition call in the source design documentation.  It is 
+	/*! - Assemble the AT matrix.  Note that this matrix is the internals of
+          the qr decomposition call in the source design documentation.  It is
           the inside of equation 20 in that document*/
 	for (i = 0; i<2 * configData->countHalfSPs; i++)
 	{
-		
+
         vScale(-1.0, configData->xBar, configData->numStates, aRow);
         vAdd(aRow, configData->numStates,
              &(configData->SP[(i+1)*configData->numStates]), aRow);
@@ -296,14 +296,14 @@ void sunlineUKFTimeUpdate(SunlineUKF *configData, double updateTime)
     mCopy(rAT, configData->numStates, configData->numStates, sBarT);
     mTranspose(sBarT, configData->numStates, configData->numStates,
         configData->sBar);
-    
-    /*! - Shift the sBar matrix over by the xBar vector using the appropriate weight 
+
+    /*! - Shift the sBar matrix over by the xBar vector using the appropriate weight
           like in equation 21 in design document.*/
     vScale(-1.0, configData->xBar, configData->numStates, xErr);
     vAdd(xErr, configData->numStates, &configData->SP[0], xErr);
     ukfCholDownDate(configData->sBar, xErr, configData->wC[0],
         configData->numStates, sBarUp);
-    
+
     /*! - Save current sBar matrix, covariance, and state estimate off for further use*/
     mCopy(sBarUp, configData->numStates, configData->numStates, configData->sBar);
     mTranspose(configData->sBar, configData->numStates, configData->numStates,
@@ -312,13 +312,13 @@ void sunlineUKFTimeUpdate(SunlineUKF *configData, double updateTime)
         configData->covar, configData->numStates, configData->numStates,
            configData->covar);
     vCopy(&(configData->SP[0]), configData->numStates, configData->state );
-	
+
 	configData->timeTag = updateTime;
 }
 
-/*! This method computes what the expected measurement vector is for each CSS 
-    that is present on the spacecraft.  All data is transacted from the main 
-    data structure for the model because there are many variables that would 
+/*! This method computes what the expected measurement vector is for each CSS
+    that is present on the spacecraft.  All data is transacted from the main
+    data structure for the model because there are many variables that would
     have to be updated otherwise.
  @return void
  @param configData The SunLineUKF class
@@ -326,7 +326,7 @@ void sunlineUKFTimeUpdate(SunlineUKF *configData, double updateTime)
  */
 void sunlineUKFMeasModel(SunlineUKF *configData)
 {
-    
+
     double sensorNormal[3];
 
     int obsCounter = 0;
@@ -335,7 +335,7 @@ void sunlineUKFMeasModel(SunlineUKF *configData)
     {
         if(configData->cssSensorInBuffer.CosValue[i] > configData->sensorUseThresh)
         {
-            /*! - For each valid measurement, copy observation value and compute expected obs value 
+            /*! - For each valid measurement, copy observation value and compute expected obs value
                   on a per sigma-point basis.*/
             v3Scale(configData->CBias[i], &(configData->cssNHat_B[i*3]), sensorNormal);
             configData->obs[obsCounter] = configData->cssSensorInBuffer.CosValue[i];
@@ -351,11 +351,11 @@ void sunlineUKFMeasModel(SunlineUKF *configData)
     mTranspose(configData->yMeas, obsCounter, configData->countHalfSPs*2+1,
         configData->yMeas);
     configData->numObs = obsCounter;
-    
+
 }
 
 /*! This method performs the measurement update for the sunline kalman filter.
- It applies the observations in the obs vectors to the current state estimate and 
+ It applies the observations in the obs vectors to the current state estimate and
  updates the state/covariance with that information.
  @return void
  @param configData The SunLineUKF class
@@ -370,11 +370,11 @@ void sunlineUKFMeasUpdate(SunlineUKF *configData, double updateTime)
     double rAT[MAX_N_CSS_MEAS*MAX_N_CSS_MEAS], syT[MAX_N_CSS_MEAS*MAX_N_CSS_MEAS];
     double sy[MAX_N_CSS_MEAS*MAX_N_CSS_MEAS];
     double updMat[MAX_N_CSS_MEAS*MAX_N_CSS_MEAS], pXY[SKF_N_STATES*MAX_N_CSS_MEAS];
-        
+
     /*! - Compute the valid observations and the measurement model for all observations*/
     sunlineUKFMeasModel(configData);
-    
-    /*! - Compute the value for the yBar parameter (note that this is equation 23 in the 
+
+    /*! - Compute the value for the yBar parameter (note that this is equation 23 in the
           time update section of the reference document*/
     vSetZero(yBar, configData->numObs);
     for(int i=0; i<configData->countHalfSPs*2+1; i++)
@@ -384,9 +384,9 @@ void sunlineUKFMeasUpdate(SunlineUKF *configData, double updateTime)
         vScale(configData->wM[i], tempYVec, configData->numObs, tempYVec);
         vAdd(yBar, configData->numObs, tempYVec, yBar);
     }
-    
-    /*! - Populate the matrix that we perform the QR decomposition on in the measurement 
-          update section of the code.  This is based on the differenence between the yBar 
+
+    /*! - Populate the matrix that we perform the QR decomposition on in the measurement
+          update section of the code.  This is based on the differenence between the yBar
           parameter and the calculated measurement models.  Equation 24 in driving doc. */
     mSetZero(AT, configData->countHalfSPs*2+configData->numObs,
         configData->numObs);
@@ -399,9 +399,9 @@ void sunlineUKFMeasUpdate(SunlineUKF *configData, double updateTime)
         memcpy(&(AT[i*configData->numObs]), tempYVec,
                configData->numObs*sizeof(double));
     }
-    
+
     /*! - This is the square-root of the Rk matrix which we treat as the Cholesky
-        decomposition of the observation variance matrix constructed for our number 
+        decomposition of the observation variance matrix constructed for our number
         of observations*/
     mSetZero(configData->qObs, configData->numCSSTotal, configData->numCSSTotal);
     mSetIdentity(configData->qObs, configData->numObs, configData->numObs);
@@ -410,13 +410,13 @@ void sunlineUKFMeasUpdate(SunlineUKF *configData, double updateTime)
     ukfCholDecomp(configData->qObs, configData->numObs, configData->numObs, qChol);
     memcpy(&(AT[2*configData->countHalfSPs*configData->numObs]),
            qChol, configData->numObs*configData->numObs*sizeof(double));
-    /*! - Perform QR decomposition (only R again) of the above matrix to obtain the 
+    /*! - Perform QR decomposition (only R again) of the above matrix to obtain the
           current Sy matrix*/
     ukfQRDJustR(AT, 2*configData->countHalfSPs+configData->numObs,
                 configData->numObs, rAT);
     mCopy(rAT, configData->numObs, configData->numObs, syT);
     mTranspose(syT, configData->numObs, configData->numObs, sy);
-    /*! - Shift the matrix over by the difference between the 0th SP-based measurement 
+    /*! - Shift the matrix over by the difference between the 0th SP-based measurement
           model and the yBar matrix (cholesky down-date again)*/
     vScale(-1.0, yBar, configData->numObs, tempYVec);
     vAdd(tempYVec, configData->numObs, &(configData->yMeas[0]), tempYVec);
@@ -426,7 +426,7 @@ void sunlineUKFMeasUpdate(SunlineUKF *configData, double updateTime)
     mCopy(updMat, configData->numObs, configData->numObs, sy);
     mTranspose(sy, configData->numObs, configData->numObs, syT);
 
-    /*! - Construct the Pxy matrix (equation 26) which multiplies the Sigma-point cloud 
+    /*! - Construct the Pxy matrix (equation 26) which multiplies the Sigma-point cloud
           by the measurement model cloud (weighted) to get the total Pxy matrix*/
     mSetZero(pXY, configData->numStates, configData->numObs);
     for(int i=0; i<2*configData->countHalfSPs+1; i++)
@@ -443,31 +443,31 @@ void sunlineUKFMeasUpdate(SunlineUKF *configData, double updateTime)
     }
 
     /*! - Then we need to invert the SyT*Sy matrix to get the Kalman gain factor.  Since
-          The Sy matrix is lower triangular, we can do a back-sub inversion instead of 
-          a full matrix inversion.  That is the ukfUInv and ukfLInv calls below.  Once that 
+          The Sy matrix is lower triangular, we can do a back-sub inversion instead of
+          a full matrix inversion.  That is the ukfUInv and ukfLInv calls below.  Once that
           multiplication is done (equation 27), we have the Kalman Gain.*/
     ukfUInv(syT, configData->numObs, configData->numObs, syInv);
-    
+
     mMultM(pXY, configData->numStates, configData->numObs, syInv,
            configData->numObs, configData->numObs, kMat);
     ukfLInv(sy, configData->numObs, configData->numObs, syInv);
     mMultM(kMat, configData->numStates, configData->numObs, syInv,
            configData->numObs, configData->numObs, kMat);
-    
-    
-    /*! - Difference the yBar and the observations to get the observed error and 
-          multiply by the Kalman Gain to get the state update.  Add the state update 
+
+
+    /*! - Difference the yBar and the observations to get the observed error and
+          multiply by the Kalman Gain to get the state update.  Add the state update
           to the state to get the updated state value (equation 27).*/
     vSubtract(configData->obs, configData->numObs, yBar, tempYVec);
     mMultM(kMat, configData->numStates, configData->numObs, tempYVec,
         configData->numObs, 1, xHat);
     vAdd(configData->state, configData->numStates, xHat, configData->state);
-    /*! - Compute the updated matrix U from equation 28.  Note that I then transpose it 
+    /*! - Compute the updated matrix U from equation 28.  Note that I then transpose it
          so that I can extract "columns" from adjacent memory*/
     mMultM(kMat, configData->numStates, configData->numObs, sy,
            configData->numObs, configData->numObs, pXY);
     mTranspose(pXY, configData->numStates, configData->numObs, pXY);
-    /*! - For each column in the update matrix, perform a cholesky down-date on it to 
+    /*! - For each column in the update matrix, perform a cholesky down-date on it to
           get the total shifted S matrix (called sBar in internal parameters*/
     for(int i=0; i<configData->numObs; i++)
     {

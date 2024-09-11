@@ -18,7 +18,7 @@
  */
 /*
     FSW MODULE: RW motor voltage command
- 
+
  */
 
 #include "fswAlgorithms/effectorInterfaces/rwMotorVoltage/rwMotorVoltage.h"
@@ -121,7 +121,7 @@ void RwMotorVoltage::UpdateState(uint64_t callTime)
     }
 
     /*
-     store the output message 
+     store the output message
      */
     this->voltageOutMsg.write(&voltageOut, this->moduleID, callTime);
 

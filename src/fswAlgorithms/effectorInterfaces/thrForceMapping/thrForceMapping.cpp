@@ -116,7 +116,7 @@ void ThrForceMapping::UpdateState(uint64_t callTime)
     double      rCrossGt[3];
     CmdTorqueBodyMsgPayload LrInputMsg;
     THRArrayCmdForceMsgPayload thrusterForceOut = {};
-    
+
     /*! - clear arrays of the thruster mapping algorithm */
     vSetZero(F, MAX_EFF_CNT);
     mSetZero(D, 3, MAX_EFF_CNT);
@@ -134,7 +134,7 @@ void ThrForceMapping::UpdateState(uint64_t callTime)
     for (uint32_t i=0;i<this->numThrusters;i++) {
         v3Subtract(this->rThruster_B[i], this->sc.CoM_B, rThrusterRelCOM_B[i]); /* Part 1 of Eq. 4 */
     }
-   
+
     /*! - compute general thruster force mapping matrix */
     v3SetZero(Lr_offset);
 
@@ -151,20 +151,20 @@ void ThrForceMapping::UpdateState(uint64_t callTime)
             v3Subtract(Lr_offset, LrLocal, Lr_offset); /* Summing of individual torques -- Eq. 5 & Eq. 7 */
         }
     }
-    
+
     v3Add(Lr_offset, Lr_B, Lr_B);
-    
+
     /*! - copy the control axes into [C] */
     for (uint32_t i=0;i<this->numControlAxes;i++) {
         v3Copy(&this->controlAxes_B[3*i], C[i]);
     }
-    
+
     /*! - map the control torque onto the control axes*/
     m33MultV3(RECAST3X3 C, Lr_B, Lr_B_Bar); /* Note: Lr_B_Bar is projected only onto the available control axes. i.e. if using DV thrusters with only 1 control axis, Lr_B_Bar = [#, 0, 0] */
 
     /*! - 1st iteration of finding a set of force vectors to implement the control torque */
     this->findMinimumNormForce(D, Lr_B_Bar, this->numThrusters, F);
-    
+
     /*! - Remove forces components that are contributing to the RCS Null space (this is due to the geometry of the thrusters) */
     if (this->thrForceSign>0)
     {
@@ -201,7 +201,7 @@ void ThrForceMapping::UpdateState(uint64_t callTime)
             }
         }
     }
-    
+
     this->outTorqAngErr = computeTorqueAngErr(D, Lr_B_Bar, this->numThrusters, this->epsilon, F,
         this->thrForcMag); /* Eq. 16*/
     maxFractUse = 0.0;
@@ -263,7 +263,7 @@ void ThrForceMapping::findMinimumNormForce(double D[3][MAX_EFF_CNT],
                                            uint32_t numForces,
                                            double F[MAX_EFF_CNT])
 {
-    
+
     uint32_t         i,j,k;                          /* []     counters */
     double      C[3][3];                        /* [m^2]  (C) matrix */
     double      CD[3][MAX_EFF_CNT];             /* [m^2]  [C].[D] matrix -- Thrusters in body frame mapped on control axes */
@@ -273,7 +273,7 @@ void ThrForceMapping::findMinimumNormForce(double D[3][MAX_EFF_CNT],
 
     vSetZero(F, MAX_EFF_CNT);   /* zero the output force vector */
     m33SetZero(C);              /* zero the control basis */
-    
+
     /*! - copy the control axes into [C] */
     for (i=0;i<this->numControlAxes;i++) {
         v3Copy(&this->controlAxes_B[3*i], C[i]);
@@ -290,13 +290,13 @@ void ThrForceMapping::findMinimumNormForce(double D[3][MAX_EFF_CNT],
             }
         }
     }
-    
+
     if (m33Determinant(CDCDT) > this->epsilon){
         m33Inverse(CDCDT, CDCDTInv);
     } else {
         m33SetZero(CDCDTInv);
     }
-        
+
     m33MultV3(CDCDTInv, Lr_B_Bar, CDCDTInvLr);/* If fewer than 3 control axes, then the 1's along the diagonal of DDTInv will not conflict with the mapping, as Lr_B_Bar contains the nessessary 0s to inhibit projection */
     mtMultV(CD, 3, MAX_EFF_CNT, CDCDTInvLr, F); /* Eq. 15 */
 
@@ -316,12 +316,12 @@ double computeTorqueAngErr(double D[3][MAX_EFF_CNT],
     double returnAngle = 0.0;       /* [rad]  angle between requested and actual torque vector */
     /*! - make sure a control torque is requested, otherwise just return a zero angle error */
     if (v3Norm(BLr_B) > epsilon) {
-        
+
         double tauActual_B[3];          /* [Nm]   control torque with current thruster solution */
         double BLr_hat_B[3];            /* []     normalized BLr_B vector */
         double LrEffector_B[3];         /* [Nm]   torque of an individual thruster effector */
         double thrusterForce;           /* [N]    saturation constrained thruster force */
-        
+
         double DT[MAX_EFF_CNT][3];
         mTranspose(D, 3, MAX_EFF_CNT, DT);
         v3Normalize(BLr_B, BLr_hat_B);
@@ -343,5 +343,5 @@ double computeTorqueAngErr(double D[3][MAX_EFF_CNT],
         }
     }
     return(returnAngle);
-    
+
 }

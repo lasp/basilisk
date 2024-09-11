@@ -43,7 +43,7 @@ public:
     uint32_t wasControlOff;             /*!< boolean variable to keep track of the last Control status (ON/OFF) */
     double attError;                    /*!< current scalar attitude error */
     double rateError;                   /*!< current scalar rate error */
-    
+
     /* declare module IO interfaces */
     Message<AttGuidMsgPayload> attGuidOutMsg;    /*!< The name of the output message*/
     ReadFunctor<AttGuidMsgPayload> guidInMsg;        /*!< The name of the guidance reference Input message */

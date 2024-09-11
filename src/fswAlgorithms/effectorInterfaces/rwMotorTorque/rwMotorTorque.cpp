@@ -1,12 +1,12 @@
 /*
  ISC License
- 
+
  Copyright (c) 2016, Autonomous Vehicle Systems Lab, University of Colorado at Boulder
- 
+
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
  copyright notice and this permission notice appear in all copies.
- 
+
  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -14,11 +14,11 @@
  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- 
+
  */
 /*
  Mapping required attitude control torque Lr to RW motor torques
- 
+
  */
 
 #include "fswAlgorithms/effectorInterfaces/rwMotorTorque/rwMotorTorque.h"
@@ -34,7 +34,7 @@ void RwMotorTorque::Reset(uint64_t callTime)
 {
     double *pAxis;                 /* pointer to the current control axis */
     int i;
-    
+
     /*!- configure the number of axes that are controlled.
      This is determined by checking for a zero row to determinate search */
     this->numControlAxes = 0;
@@ -48,7 +48,7 @@ void RwMotorTorque::Reset(uint64_t callTime)
     if (this->numControlAxes == 0) {
         this->bskLogger.bskLog(BSK_INFORMATION,"rwMotorTorque() is not setup to control any axes!");
     }
-    
+
     // check if the required input messages are included
     if (!this->rwParamsInMsg.isLinked()) {
         this->bskLogger.bskLog(BSK_ERROR, "Error: rwMotorTorque.rwParamsInMsg wasn't connected.");
@@ -56,7 +56,7 @@ void RwMotorTorque::Reset(uint64_t callTime)
 
     /*! - Read static RW config data message and store it in module variables */
     this->rwConfigParams = this->rwParamsInMsg();
-    
+
     /*! - If no info is provided about RW availability we'll assume that all are available
      and create the [Gs] projection matrix once */
     if (!this->rwAvailInMsg.isLinked()) {
@@ -85,7 +85,7 @@ void RwMotorTorque::UpdateState(uint64_t callTime)
     v3SetZero(Lr_C);
     vSetZero(us, MAX_EFF_CNT);
     // wheelAvailability set to 0 (AVAILABLE) by default
-    
+
     // check if the required input messages are included
     if (!this->vehControlInMsg.isLinked()) {
         this->bskLogger.bskLog(BSK_ERROR, "Error: rwMotorTorque.vehControlInMsg wasn't connected.");
@@ -119,10 +119,10 @@ void RwMotorTorque::UpdateState(uint64_t callTime)
         /*! - update the number of currently available RWs */
         this->numAvailRW = numAvailRW;
     }
-    
+
     /*! - Lr is assumed to be a positive torque onto the body, the [Gs]us must generate -Lr */
     v3Scale(-1.0, Lr_B, Lr_B);
-    
+
     /*! - compute [Lr_C] = [C]Lr */
     mMultV(this->controlAxes_B, this->numControlAxes, 3, Lr_B, Lr_C);
 
@@ -139,7 +139,7 @@ void RwMotorTorque::UpdateState(uint64_t callTime)
         double v3_temp[3]; /* inv([M]) [Lr_C] */
         double M33[3][3]; /* [M] = [CGs][CGs].T */
         double us_avail[MAX_EFF_CNT];   /* matrix of available RW motor torques */
-        
+
         v3SetZero(v3_temp);
         mSetIdentity(M33, 3, 3);
         for (uint32_t i=0; i<this->numControlAxes; i++) {
@@ -161,7 +161,7 @@ void RwMotorTorque::UpdateState(uint64_t callTime)
                 us_avail[i] += CGs[j][i] * v3_temp[j];
             }
         }
-        
+
         /*! - map the desired RW motor torques to the available RWs */
         int j = 0;
         for (int i = 0; i < this->rwConfigParams.numRW; i++) {
@@ -172,11 +172,11 @@ void RwMotorTorque::UpdateState(uint64_t callTime)
             }
         }
     }
-    
+
     /* store the output message */
     ArrayMotorTorqueMsgPayload rwMotorTorques = {};
     vCopy(us, this->rwConfigParams.numRW, rwMotorTorques.motorTorque);
     this->rwMotorTorqueOutMsg.write(&rwMotorTorques, this->moduleID, callTime);
-    
+
     return;
 }

@@ -42,7 +42,7 @@ public:
     void UpdateState(uint64_t callTime) override;
     /* declare module public variables */
     double              level_on;                               //!< [-] ON duty cycle fraction
-    double              level_off;                              //!< [-] OFF duty cycle fraction 
+    double              level_off;                              //!< [-] OFF duty cycle fraction
     double              thrMinFireTime;                         //!< [s] Minimum ON time for thrusters
     int                 baseThrustState;                        //!< [-] Indicates on-pulsing (0) or off-pusling (1)
 

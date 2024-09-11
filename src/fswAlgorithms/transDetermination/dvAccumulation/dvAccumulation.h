@@ -35,7 +35,7 @@ public:
 
     Message<NavTransMsgPayload> dvAcumOutMsg; //!< accumulated DV output message
     ReadFunctor<AccDataMsgPayload> accPktInMsg; //!< [-] input accelerometer message
-    
+
     uint32_t msgCount;      //!< [-] The total number of messages read from inputs
     uint32_t dvInitialized; //!< [-] Flag indicating whether DV has been started completely
     uint64_t previousTime;  //!< [ns] The clock time associated with the previous run of algorithm

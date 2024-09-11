@@ -4153,4 +4153,3 @@ int MAG_GetAltitude(char* Query_String, MAGtype_Geoid *Geoid, MAGtype_CoordGeode
     }
     return 0;
 }
-

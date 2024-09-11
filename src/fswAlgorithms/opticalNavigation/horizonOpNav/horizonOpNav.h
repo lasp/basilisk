@@ -44,7 +44,7 @@ public:
     ReadFunctor<CameraConfigMsgPayload> cameraConfigInMsg; //!< camera config input message
     ReadFunctor<NavAttMsgPayload> attInMsg; //!< attitude input message
     ReadFunctor<OpNavLimbMsgPayload> limbInMsg; //!< limb input message
-    
+
     int32_t planetTarget; //!< The planet targeted (None = 0, Earth = 1, Mars = 2, Jupiter = 3 are allowed)
     double noiseSF;   //!< A scale factor to control measurement noise
 

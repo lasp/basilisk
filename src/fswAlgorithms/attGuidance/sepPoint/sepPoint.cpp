@@ -111,4 +111,3 @@ void SepPoint::UpdateState(uint64_t CurrentSimNanos)
     /*! Write the output messages */
     this->attRefOutMsg.write(&attRefOut, this->moduleID, CurrentSimNanos);
 }
-

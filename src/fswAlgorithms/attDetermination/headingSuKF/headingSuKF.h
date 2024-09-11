@@ -42,7 +42,7 @@ public:
     Message<HeadingFilterMsgPayload> filtDataOutMsg;      /*!< output message */
     ReadFunctor<OpNavMsgPayload> opnavDataInMsg;              /*!< input message */
     ReadFunctor<CameraConfigMsgPayload> cameraConfigInMsg;    /*!< (optional) input message */
-    
+
     int putInCameraFrame;         /*!< [-] If camera message is found output the result to the camera frame as well as the body and inertial frame*/
 	int numStates;                /*!< [-] Number of states for this filter*/
 	int countHalfSPs;             /*!< [-] Number of sigma points over 2 */
@@ -57,13 +57,13 @@ public:
 	double dt;                    /*!< [s] seconds since last data epoch */
 	double timeTag;               /*!< [s]  Time tag for statecovar/etc */
     double noiseSF;               /*!< [-]  Scale factor for noise */
-    
+
     double bVec_B[HEAD_N_STATES];       /*!< [-] current vector of the b frame used to make frame */
     double switchTresh;                 /*!< [-]  Threshold for switching frames */
-    
+
     double stateInit[HEAD_N_STATES_SWITCH];    /*!< [-] State to initialize filter to*/
     double state[HEAD_N_STATES_SWITCH];        /*!< [-] State estimate for time TimeTag*/
-    
+
 	double wM[2 * HEAD_N_STATES_SWITCH + 1]; /*!< [-] Weighting vector for sigma points*/
 	double wC[2 * HEAD_N_STATES_SWITCH + 1]; /*!< [-] Weighting vector for sigma points*/
 
@@ -75,19 +75,19 @@ public:
 	double obs[OPNAV_MEAS];                                         /*!< [-] Observation vector for frame*/
 	double yMeas[OPNAV_MEAS*(2*HEAD_N_STATES_SWITCH+1)];            /*!< [-] Measurement model data */
     double postFits[OPNAV_MEAS];                                    /*!< [-] PostFit residuals */
-    
+
 	double SP[(2*HEAD_N_STATES_SWITCH+1)*HEAD_N_STATES_SWITCH];     /*!< [-]    sigma point matrix */
 
 	double qNoise[HEAD_N_STATES_SWITCH*HEAD_N_STATES_SWITCH];       /*!< [-] process noise matrix */
 	double sQnoise[HEAD_N_STATES_SWITCH*HEAD_N_STATES_SWITCH];      /*!< [-] cholesky of Qnoise */
 
 	double qObs[OPNAV_MEAS*OPNAV_MEAS];  /*!< [-] Maximally sized obs noise matrix*/
-    
+
 
     double sensorUseThresh;  /*!< -- Threshold below which we discount sensors*/
 	NavAttMsgPayload outputHeading;   /*!< -- Output heading estimate data */
     OpNavMsgPayload opnavInBuffer;  /*!< -- message buffer */
-    
+
     BSKLogger bskLogger={};                             //!< BSK Logging
 
 };

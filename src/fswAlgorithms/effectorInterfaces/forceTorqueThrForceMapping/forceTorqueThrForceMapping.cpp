@@ -178,4 +178,3 @@ void ForceTorqueThrForceMapping::UpdateState(uint64_t callTime)
     vCopy(forceSubtracted_B, this->numThrusters, thrForceCmdOutMsgBuffer.thrForce);
     this->thrForceCmdOutMsg.write(&thrForceCmdOutMsgBuffer, this->moduleID, callTime);
 }
-

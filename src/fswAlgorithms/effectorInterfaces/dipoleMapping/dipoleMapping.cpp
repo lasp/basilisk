@@ -38,7 +38,7 @@ void DipoleMapping::Reset(uint64_t callTime)
     if (!this->mtbArrayConfigParamsInMsg.isLinked()){
         this->bskLogger.bskLog(BSK_ERROR, "Error: mtbMomentumManagement.mtbArrayConfigParamsInMsg is not connected.");
     }
-    
+
     /*! - Read in the torque rod input configuration message. This gives us the number of torque rods
          being used on the vehicle.*/
     this->mtbArrayConfigParams = this->mtbArrayConfigParamsInMsg();
@@ -56,7 +56,7 @@ void DipoleMapping::UpdateState(uint64_t callTime)
      * Initialize local variables.
      */
     int j = 0;  // counter used in loop over magnetic torque rods
-    
+
     /*
      * Read the input messages and initialize output message.
      */
@@ -65,7 +65,7 @@ void DipoleMapping::UpdateState(uint64_t callTime)
 
     /*! - Map the requested Body frame dipole request to individual torque rod dipoles.*/
     mMultV(this->steeringMatrix, this->mtbArrayConfigParams.numMTB, 3, dipoleRequestBodyInMsgBuffer.dipole_B, dipoleRequestMtbOutMsgBuffer.mtbDipoleCmds);
-    
+
     /*! - Saturate the dipole commands if necesarry.*/
     for (j = 0; j < this->mtbArrayConfigParams.numMTB; j++)
     {

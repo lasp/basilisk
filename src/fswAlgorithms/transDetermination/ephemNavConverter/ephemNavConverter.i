@@ -18,7 +18,7 @@
  */
 %module ephemNavConverter
 %{
-   #include "ephemNavConverter.h"   
+   #include "ephemNavConverter.h"
 %}
 
 %pythoncode %{
@@ -35,4 +35,3 @@ from Basilisk.architecture.swig_common_model import *
 import sys
 protectAllClasses(sys.modules[__name__])
 %}
-

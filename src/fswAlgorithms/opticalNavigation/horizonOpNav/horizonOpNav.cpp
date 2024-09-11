@@ -132,7 +132,7 @@ void HorizonOpNav::UpdateState(uint64_t callTime)
     cameraSpecs = this->cameraConfigInMsg();
     limbIn = this->limbInMsg();
     attInfo = this->attInMsg();
-    
+
     /*! Check the validity of the image*/
     if (limbIn.valid == 0){
         opNavMsgOut.valid = 0;
@@ -153,13 +153,13 @@ void HorizonOpNav::UpdateState(uint64_t callTime)
         opNavMsgOut.planetID = this->planetTarget;
     }
     m33Set(1/planetRad_Eq, 0, 0, 0, 1/planetRad_Eq, 0, 0, 0, 1/planetRad_Eq, Q);
-    
+
     /* Set the number of limb points for ease of use*/
     int32_t numPoints;
     double sigma_pix;
     numPoints = limbIn.numLimbPoints;
     sigma_pix = this->noiseSF*cameraSpecs.resolution[0]/(numPoints);
-    
+
     /*! Build DCMs */
     this->planetTarget = (int32_t) limbIn.planetIds;
     MRP2C(cameraSpecs.sigma_CB, dcm_CB);
@@ -191,7 +191,7 @@ void HorizonOpNav::UpdateState(uint64_t callTime)
     m33SetZero(tranf);
     /*! Set the map from pixel to position eq (8) in Journal*/
     m33Set(1/d_x, -alpha/(d_x*d_y), (alpha*v_p - d_y*u_p)/(d_x*d_y), 0, 1/d_y, -v_p/d_y, 0, 0, 1, tranf);
-    
+
     /*! Set the noise matrix in pix eq (53) in Engineering Note*/
     m33Set((sigma_pix*sigma_pix)/(d_x*d_x), 0, 0, 0, (sigma_pix*sigma_pix)/(d_x*d_x), 0, 0, 0, 0, R_s);
     /*! Rotate R_s with B eq (52) in Journal*/
@@ -250,7 +250,7 @@ void HorizonOpNav::UpdateState(uint64_t callTime)
         v3tMultM33(J, R_s, jTemp);
         R_yInv[numPoints*i+i] = 1/v3Dot(jTemp, J);
     }
-    
+
     /*! - Covar from least squares - probably the most computationally expensive segment*/
     double Pn[3][3];
     double F[3][3];
@@ -261,29 +261,29 @@ void HorizonOpNav::UpdateState(uint64_t callTime)
     mMultM(R_yInv, numPoints, numPoints, H, numPoints, 3, Rtemp);
     mtMultM(H, numPoints, 3, Rtemp, numPoints, 3, Pn);
     m33Inverse(Pn, Pn);
-    
+
     /*! - Compute Scale factor now that n is computed */
     nNorm2 = v3Dot(n, n);
     scaleFactor = -1./sqrt(nNorm2-1);
-    
+
     /*! - Build F from eq (55) of engineering note */
     v3OuterProduct(n, n, outer);
     m33Scale(1/(nNorm2-1), outer, outer);
     m33SetIdentity(IminusOuter);
     m33Subtract(IminusOuter, outer, IminusOuter);
-    
+
     /*! - Get the heading */
     m33Inverse(B, B);
     m33MultV3(B, n, n);
     v3Scale(scaleFactor, n, opNavMsgOut.r_BN_C);
-    
+
     /*! - Build F from eq (55) of engineering note */
     m33MultM33t(B, IminusOuter, F);
     m33Scale(scaleFactor, F, F);
     /*! - Get covar from eq (57) of engineering note */
     m33MultM33(F, Pn, covar_In_C);
     m33MultM33t(covar_In_C, F, covar_In_C);
-    
+
     /*! - Transform to desireable frames */
     m33MultV3(dcm_NC, opNavMsgOut.r_BN_C, opNavMsgOut.r_BN_N);
     m33MultV3(dcm_BN, opNavMsgOut.r_BN_N, opNavMsgOut.r_BN_B);

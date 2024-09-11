@@ -38,7 +38,7 @@ public:
 
     /* Configs.*/
     double steeringMatrix[MAX_EFF_CNT * 3];             //!< matrix for mapping body frame dipole request to individual torque bar dipoles
-    
+
     /* Inputs. */
     ReadFunctor<MTBArrayConfigMsgPayload> mtbArrayConfigParamsInMsg;      //!< input message containing configuration parameters for all the torque bars on the vehicle
     ReadFunctor<DipoleRequestBodyMsgPayload> dipoleRequestBodyInMsg;      //!< [A-m2] input message containing the requested body frame dipole

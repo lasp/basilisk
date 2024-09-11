@@ -33,7 +33,7 @@ void HillToAttRef::Reset(uint64_t callTime)
     if (!this->hillStateInMsg.isLinked()) {
         this->bskLogger.bskLog(BSK_ERROR, "Error: hillToAttRef.hillStateInMsg wasn't connected.");
     }
-    
+
     if (this->attRefInMsg.isLinked() && this->attNavInMsg.isLinked()) {
         this->bskLogger.bskLog(BSK_ERROR, "Error: hillToAttRef can't have both attRefInMsg and attNavInMsg connected.");
     }
@@ -62,7 +62,7 @@ AttRefMsgPayload HillToAttRef::relativeToInertialMRP(double relativeAtt[3], doub
     return(attRefOut);
 }
 
-/*! This module reads an OpNav image and extracts circle information from its content using OpenCV's HoughCircle Transform. It performs a greyscale, a bur, and a threshold on the image to facilitate circle-finding. 
+/*! This module reads an OpNav image and extracts circle information from its content using OpenCV's HoughCircle Transform. It performs a greyscale, a bur, and a threshold on the image to facilitate circle-finding.
  @return void
  @param callTime The clock time at which the function was called (nanoseconds)
  */
@@ -72,7 +72,7 @@ void HillToAttRef::UpdateState(uint64_t callTime) {
     NavAttMsgPayload attStateInPayload;
     AttRefMsgPayload attRefInPayload;
     AttRefMsgPayload attRefOutPayload;
-    
+
     double baseSigma[3];
     double relativeAtt[3];
     double hillState[6];
@@ -104,7 +104,7 @@ void HillToAttRef::UpdateState(uint64_t callTime) {
     mMultV(&this->gainMatrix, 3, 6,
                    hillState,
                    relativeAtt);
-                   
+
     // std::cout<<"Relative att components: "<<relativeAtt[0]<<" "<<relativeAtt[1]<<" "<<relativeAtt[2]<<std::endl;
     //  Convert that to an inertial attitude and write the attRef msg
     attRefOutPayload = this->relativeToInertialMRP(relativeAtt, baseSigma);
@@ -112,4 +112,3 @@ void HillToAttRef::UpdateState(uint64_t callTime) {
 
     // this->matrixIndex += 1;
 }
-

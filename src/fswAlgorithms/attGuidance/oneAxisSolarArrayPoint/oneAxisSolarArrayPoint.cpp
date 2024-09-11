@@ -140,7 +140,7 @@ void OneAxisSolarArrayPoint::UpdateState(uint64_t callTime)
         BodyHeadingMsgPayload bodyHeadingIn = this->bodyHeadingInMsg();
         v3Normalize(bodyHeadingIn.rHat_XB_B, hRefHat_B);
     }
-    
+
     /*! define the body frame orientation DCM BN */
     double BN[3][3];
     MRP2C(attNavIn.sigma_BN, BN);
@@ -183,7 +183,7 @@ void OneAxisSolarArrayPoint::UpdateState(uint64_t callTime)
     if (v3Norm(this->h2Hat_B) > epsilon) {
         // compute second reference frame
         oasapComputeFinalRotation(this->celestialBodyInput, this->alignmentPriority, BN, rHat_SB_B, this->h2Hat_B, hReqHat_B, a1Hat_B, a2Hat_B, RN);
-        
+
         // compute the relative rotation DCM and Sun direction in relative frame
         m33MultM33t(RN, BN, RB);
         double rHat_SB_R2[3];
@@ -491,4 +491,3 @@ void oasapComputeFinalRotation(CelestialBody celestialBody, AlignmentPriority al
         m33MultM33(R3R2, R2N, RN);
     }
 }
-

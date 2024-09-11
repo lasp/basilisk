@@ -55,7 +55,7 @@ void TorqueScheduler::UpdateState(uint64_t callTime)
     /*! populate output torque msg */
     motorTorqueOut.motorTorque[0] = motorTorque1In.motorTorque[0];
     motorTorqueOut.motorTorque[1] = motorTorque2In.motorTorque[0];
-    
+
     switch (this->lockFlag) {
 
         case 0:

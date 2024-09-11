@@ -38,7 +38,7 @@ from Basilisk.architecture.swig_common_model import *
 // However, modifiying in place is forbidden:
 //    mySpiceInterface.planetFrames[2] = "bb"
 // this raises an error because mySpiceInterface.planetFrames is returned by value
-%naturalvar SpiceInterface::planetFrames; 
+%naturalvar SpiceInterface::planetFrames;
 
 %include "sys_model.i"
 

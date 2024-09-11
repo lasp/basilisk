@@ -45,4 +45,3 @@ struct OpNavFilterMsg_C;
 import sys
 protectAllClasses(sys.modules[__name__])
 %}
-

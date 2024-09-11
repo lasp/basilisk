@@ -85,4 +85,3 @@ EXTERN void _bskLog(BSKLogger*, logLevel_t, const char*);
 /// \endcond
 
 #endif
-

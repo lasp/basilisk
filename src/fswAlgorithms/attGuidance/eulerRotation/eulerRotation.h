@@ -57,7 +57,7 @@ public:
     double priorCmdRates[3];                    //!< [rad/s] prior commanded 321 Euler angle rates
     uint64_t priorTime;                         //!< [ns] last time the guidance module is called
     double dt;                                  //!< [s] integration time-step
-    
+
     /* Declare module IO interfaces */
     Message<AttRefMsgPayload> attRefOutMsg;                   //!< The name of the output message containing the Reference
     ReadFunctor<AttRefMsgPayload> attRefInMsg;                    //!< The name of the guidance reference input message

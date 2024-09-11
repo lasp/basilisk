@@ -18,7 +18,7 @@
 
 from Basilisk.utilities import macros as mc
 from Basilisk.fswAlgorithms import (attTrackingError, mrpFeedback, rwMotorTorque, oneAxisSolarArrayPoint,
-                                    thrusterPlatformReference, thrusterPlatformState, solarArrayReference, 
+                                    thrusterPlatformReference, thrusterPlatformState, solarArrayReference,
                                     hingedRigidBodyPIDMotor, torqueScheduler, thrustCMEstimation)
 from Basilisk.architecture import messaging
 
@@ -241,7 +241,7 @@ class BSKFswModels:
         """
         self.earthPointData.a1Hat_B = [1, 0, 0]        # solar array axis drive
         self.earthPointData.a2Hat_B = [0, 1, 0]        # antiparallel direction to the sensitive surface
-        self.earthPointData.h1Hat_B = [0, 1, 0]        # high gain antenna 
+        self.earthPointData.h1Hat_B = [0, 1, 0]        # high gain antenna
         self.earthPointData.attNavInMsg.subscribeTo(SimBase.DynModels[self.spacecraftIndex].simpleNavObject.attOutMsg)
         self.earthPointData.transNavInMsg.subscribeTo(SimBase.DynModels[self.spacecraftIndex].simpleNavObject.transOutMsg)
         self.earthPointData.ephemerisInMsg.subscribeTo(SimBase.EnvModel.ephemObject.ephemOutMsgs[SimBase.EnvModel.earth])
@@ -532,7 +532,7 @@ class BSKFswModels:
         self.cmEstimationData.intFeedbackTorqueInMsg.subscribeTo(self.mrpFeedbackRWsData.intFeedbackTorqueOutMsg)
         self.cmEstimationData.attGuidInMsg.subscribeTo(self.attGuidMsg)
         self.cmEstimationData.vehConfigInMsg.subscribeTo(SimBase.DynModels[self.spacecraftIndex].simpleMassPropsObject.vehicleConfigOutMsg)
-        
+
 
     # Global call to initialize every module
     def InitAllFSWObjects(self, SimBase):
@@ -575,7 +575,7 @@ class BSKFswModels:
         self.platform2LockMsg = messaging.ArrayEffectorLockMsg()
         self.thrConfigFMsg = messaging.THRConfigMsg()
         self.fswVehConfigMsg = messaging.VehicleConfigMsg()
-       
+
         # Write fsw configuration message
         VehicleConfig = messaging.VehicleConfigMsgPayload()
         VehicleConfig.ISCPntB_B = [5720, -228, 134, -228, 11766, -203, 134, -203, 7570]

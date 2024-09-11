@@ -566,9 +566,8 @@ def run(planetCase):
 
     return
 
-    
+
 if __name__ == "__main__":
     run(
         "mars"   # venus, earth, mars
     )
-

@@ -66,14 +66,14 @@ public:
     double dynMat[EKF_N_STATES_SWITCH*EKF_N_STATES_SWITCH];        /*!< [-] Dynamics Matrix, A */
     double measMat[MAX_N_CSS_MEAS*EKF_N_STATES_SWITCH];        /*!< [-] Measurement Matrix, H*/
     double W_BS[EKF_N_STATES_SWITCH*EKF_N_STATES_SWITCH];        /*!< [-] Switch Matrix to bring states and covariance to new S-frame when switch occurs*/
-    
+
 	double obs[MAX_N_CSS_MEAS];          /*!< [-] Observation vector for frame*/
 	double yMeas[MAX_N_CSS_MEAS];        /*!< [-] Linearized measurement model data */
     double postFits[MAX_N_CSS_MEAS];  /*!< [-] PostFit residuals */
 
 	double procNoise[(EKF_N_STATES_SWITCH-3)*(EKF_N_STATES_SWITCH-3)];       /*!< [-] process noise matrix */
 	double measNoise[MAX_N_CSS_MEAS*MAX_N_CSS_MEAS];  /*!< [-] Maximally sized obs noise matrix*/
-    
+
     double cssNHat_B[MAX_NUM_CSS_SENSORS*3];     /*!< [-] CSS normal vectors converted over to body*/
     uint32_t numStates;                /*!< [-] Number of states for this filter*/
     size_t numObs;                   /*!< [-] Number of measurements this cycle */

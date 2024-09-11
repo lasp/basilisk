@@ -66,14 +66,14 @@ public:
 
     double dynMat[SKF_N_STATES*SKF_N_STATES];        /*!< [-] Dynamics Matrix, A */
     double measMat[MAX_N_CSS_MEAS*SKF_N_STATES];        /*!< [-] Measurement Matrix H*/
-    
+
 	double obs[MAX_N_CSS_MEAS];          /*!< [-] Observation vector for frame*/
 	double yMeas[MAX_N_CSS_MEAS];        /*!< [-] Linearized measurement model data */
 
 	double procNoise[SKF_N_STATES/2*SKF_N_STATES/2];       /*!< [-] process noise matrix */
 	double measNoise[MAX_N_CSS_MEAS*MAX_N_CSS_MEAS];  /*!< [-] Maximally sized obs noise matrix*/
     double postFits[MAX_N_CSS_MEAS];  /*!< [-] PostFit residuals */
-    
+
     double cssNHat_B[MAX_NUM_CSS_SENSORS*3];     /*!< [-] CSS normal vectors converted over to body*/
     double CBias[MAX_NUM_CSS_SENSORS];       /*!< [-] CSS individual calibration coefficients */
 
