@@ -19,10 +19,6 @@
 
 #include "architecture/utilities/signalProcessing.h"
 
-LowPassFilter::LowPassFilter()=default;
-
-LowPassFilter::~LowPassFilter()=default;
-
 /**
  * Process a measurement into the low pass filter
  * @param measurement Eigen::Vector3d

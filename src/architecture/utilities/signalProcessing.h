@@ -24,15 +24,12 @@
 
 class LowPassFilter{
 public:
-    LowPassFilter();
-    ~LowPassFilter();
-
-    void setFilterStep(const double filterStepSeconds);
+    void setFilterStep(double filterStepSeconds);
     double getFilterStep() const;
-    void setFilterCutoff(const double cutOffValue);
+    void setFilterCutoff(double cutOffValue);
     double getFilterCutoff() const;
 
-    void processMeasurement(const Eigen::Vector3d measurement);
+    void processMeasurement(Eigen::Vector3d measurement);
     Eigen::Vector3d getCurrentState() const;
 
 private:
