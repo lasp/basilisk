@@ -195,17 +195,6 @@ ConstrainedAttitudeManeuver::ConstrainedAttitudeManeuver(int N)
     return;
 }
 
-/*! Module Destructor.  */
-ConstrainedAttitudeManeuver::~ConstrainedAttitudeManeuver()
-{
-    return;
-}
-
-/*! Initialize C-wrapped output messages */
-void ConstrainedAttitudeManeuver::SelfInit(){
-    AttRefMsg_C_init(&this->attRefOutMsgC);
-}
-
 /*! Add keep-out body-frame direction  */
 void ConstrainedAttitudeManeuver::appendKeepOutDirection(double direction[3], double Fov)
 {
@@ -284,9 +273,6 @@ void ConstrainedAttitudeManeuver::UpdateState(uint64_t CurrentSimNanos)
 
 	// write output attitude reference message
     this->attRefOutMsg.write(&attMsgBuffer, this->moduleID, CurrentSimNanos);
-
-    /* Write to the C-wrapped output messages */
-    AttRefMsg_C_write(&attMsgBuffer, &this->attRefOutMsgC, this->moduleID, CurrentSimNanos);
 
 	return;
 }

@@ -35,13 +35,13 @@ from Basilisk.architecture.swig_common_model import *
 %include "magneticFieldWMM.h"
 
 %include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-struct SpicePlanetStateMsg_C;
+
 %include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-struct SCStatesMsg_C;
+
 %include "architecture/msgPayloadDefC/MagneticFieldMsgPayload.h"
-struct MagneticFieldMsg_C;
+
 %include "architecture/msgPayloadDefC/EpochMsgPayload.h"
-struct EpochMsg_C;
+
 
 %pythoncode %{
 import sys

@@ -23,19 +23,6 @@
 
 const double epsilon = 1e-12;                           // module tolerance for zero
 
-/*! Module constructor */
-SepPoint::SepPoint() = default;
-
-
-/*! Module destructor */
-SepPoint::~SepPoint() = default;
-
-
-/*! Initialize C-wrapped output messages */
-void SepPoint::SelfInit(){
-    AttRefMsg_C_init(&this->attRefOutMsgC);
-}
-
 /*! This method is used to reset the module.
  @return void
  */
@@ -123,8 +110,5 @@ void SepPoint::UpdateState(uint64_t CurrentSimNanos)
 
     /*! Write the output messages */
     this->attRefOutMsg.write(&attRefOut, this->moduleID, CurrentSimNanos);
-
-    /*! Write the C-wrapped output messages */
-    AttRefMsg_C_write(&attRefOut, &this->attRefOutMsgC, this->moduleID, CurrentSimNanos);
 }
 

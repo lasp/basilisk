@@ -97,7 +97,6 @@ torque exactly counters the action of the SRP torque according to:
 
 import os
 
-import Basilisk.architecture.cMsgCInterfacePy as cMsgPy
 import matplotlib.pyplot as plt
 import numpy as np
 from Basilisk import __path__

@@ -42,11 +42,11 @@ from Basilisk.simulation.gravityEffector import GravBodyVector
 %include "../_GeneralModuleFiles/hubEffector.h"
 
 %include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-struct SCStatesMsg_C;
+
 %include "architecture/msgPayloadDefC/SCMassPropsMsgPayload.h"
-struct SCMassPropsMsg_C;
+
 %include "architecture/msgPayloadDefC/SCEnergyMomentumMsgPayload.h"
-struct SCEnergyMomentumMsg_C;
+
 
 %pythoncode %{
 import sys

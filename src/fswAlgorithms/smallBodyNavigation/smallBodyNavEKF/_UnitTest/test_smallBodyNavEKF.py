@@ -113,8 +113,6 @@ def smallBodyNavEKFTestFunction(show_plots):
     unitTestSim.AddModelToTask(unitTaskName, navTransOutMsgRec)
     smallBodyNavOutMsgRec = module.smallBodyNavOutMsg.recorder()
     unitTestSim.AddModelToTask(unitTaskName, smallBodyNavOutMsgRec)
-    smallBodyNavOutMsgRecC = module.smallBodyNavOutMsgC.recorder()
-    unitTestSim.AddModelToTask(unitTaskName, smallBodyNavOutMsgRecC)
     asteroidEphemerisOutMsgRec = module.asteroidEphemerisOutMsg.recorder()
     unitTestSim.AddModelToTask(unitTaskName, asteroidEphemerisOutMsgRec)
 
@@ -123,17 +121,12 @@ def smallBodyNavEKFTestFunction(show_plots):
     unitTestSim.ExecuteSimulation()
 
     x_hat = smallBodyNavOutMsgRec.state
-    x_hat_c_wrapped = smallBodyNavOutMsgRecC.state
     true_x_hat = np.array([[1.33666664e+03,  1.18333330e+03,  1.00333330e+03, -4.77594532e-06,
                             1.33332617,     -6.10976335e-06,  1.13333333e-01,  0.00000000,
                             0.00000000,      0.00000000,      0.00000000,      0.00000000]])
 
     testFailCount, testMessages = unitTestSupport.compareArray(
         true_x_hat, np.array([x_hat[-1,:]]), 0.1, "x_hat",
-        testFailCount, testMessages)
-
-    testFailCount, testMessages = unitTestSupport.compareArray(
-        true_x_hat, np.array([x_hat_c_wrapped[-1,:]]), 0.1, "x_hat_c_wrapped",
         testFailCount, testMessages)
 
     plt.figure(1)

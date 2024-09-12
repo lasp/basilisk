@@ -24,7 +24,6 @@
 #include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
 #include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
 #include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
-#include "cMsgCInterface/AttRefMsg_C.h"
 #include "architecture/messaging/messaging.h"
 #include "architecture/utilities/bskLogging.h"
 #include <Eigen/Dense>
@@ -32,9 +31,6 @@
 /*! @brief A class to perform flyby pointing */
 class FlybyPoint: public SysModel {
 public:
-    FlybyPoint();
-    ~FlybyPoint();
-    void SelfInit() override;
     void Reset(uint64_t CurrentSimNanos) override;
     void UpdateState(uint64_t CurrentSimNanos) override;
 
@@ -48,7 +44,6 @@ public:
     ReadFunctor<NavTransMsgPayload>  filterInMsg;               //!< input msg relative position w.r.t. asteroid
     ReadFunctor<EphemerisMsgPayload> asteroidEphemerisInMsg;    //!< input asteroid ephemeris msg
     Message<AttRefMsgPayload> attRefOutMsg;                     //!< Attitude reference output message
-    AttRefMsg_C attRefOutMsgC = {};                             //!< C-wrapped attitude reference output message
 
 private:
     double timeBetweenFilterData = 0;       //!< time between two subsequent reads of the filter information

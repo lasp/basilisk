@@ -36,11 +36,11 @@
 
 
 %include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-struct EphemerisMsg_C;
+
 %include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-struct SCStatesMsg_C;
+
 %include "architecture/msgPayloadDefC/LandmarkMsgPayload.h"
-struct LandmarkMsg_C;
+
 
 
 %pythoncode %{

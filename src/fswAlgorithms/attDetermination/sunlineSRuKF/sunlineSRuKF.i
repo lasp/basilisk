@@ -31,13 +31,9 @@ from Basilisk.architecture.swig_common_model import *
 %include "sunlineSRuKF.h"
 
 %include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-struct NavAttMsg_C;
 %include "architecture/msgPayloadDefC/CSSConfigMsgPayload.h"
-struct CSSConfigMsg_C;
 %include "architecture/msgPayloadDefC/CSSUnitConfigMsgPayload.h"
-struct CSSUnitConfigMsg_C;
 %include "architecture/msgPayloadDefC/CSSArraySensorMsgPayload.h"
-struct CSSArraySensorMsg_C;
 %include "architecture/msgPayloadDefCpp/FilterMsgPayload.h"
 %include "architecture/msgPayloadDefCpp/FilterResidualsMsgPayload.h"
 

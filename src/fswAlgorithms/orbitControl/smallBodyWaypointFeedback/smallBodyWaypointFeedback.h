@@ -26,7 +26,6 @@
 #include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
 #include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
 #include "architecture/msgPayloadDefC/CmdForceBodyMsgPayload.h"
-#include "cMsgCInterface/CmdForceBodyMsg_C.h"
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/messaging/messaging.h"
 #include "architecture/utilities/orbitalMotion.h"
@@ -38,9 +37,7 @@
 class SmallBodyWaypointFeedback: public SysModel {
 public:
     SmallBodyWaypointFeedback();
-    ~SmallBodyWaypointFeedback();
 
-    void SelfInit();  //!< Self initialization for C-wrapped messages
     void Reset(uint64_t CurrentSimNanos);
     void UpdateState(uint64_t CurrentSimNanos);
     void readMessages();
@@ -54,8 +51,6 @@ public:
     ReadFunctor<EphemerisMsgPayload> sunEphemerisInMsg;  //!< sun ephemeris input message
 
     Message<CmdForceBodyMsgPayload> forceOutMsg;  //!< force command output
-
-    CmdForceBodyMsg_C forceOutMsgC = {};  //!< C-wrapped force output message
 
     BSKLogger bskLogger;              //!< -- BSK Logging
 

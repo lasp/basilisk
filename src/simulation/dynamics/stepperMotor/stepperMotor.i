@@ -31,9 +31,9 @@ from Basilisk.architecture.swig_common_model import *
 %include "stepperMotor.h"
 
 %include "architecture/msgPayloadDefC/MotorStepCommandMsgPayload.h"
-struct MotorStepCommandMsg_C;
+
 %include "architecture/msgPayloadDefC/StepperMotorMsgPayload.h"
-struct StepperMotorMsg_C;
+
 
 %pythoncode %{
 import sys

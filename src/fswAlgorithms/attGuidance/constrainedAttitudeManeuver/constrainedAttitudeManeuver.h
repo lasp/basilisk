@@ -30,7 +30,7 @@
 #include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
 #include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
 #include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-#include "cMsgCInterface/AttRefMsg_C.h"
+#include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
 
 //! @brief The constraintStruc structure is used to store the inertial direction of the keep-in and keep-out zones
 struct constraintStruct {
@@ -91,8 +91,7 @@ class ConstrainedAttitudeManeuver: public SysModel {
 public:
     ConstrainedAttitudeManeuver();
     ConstrainedAttitudeManeuver(int N);
-    ~ConstrainedAttitudeManeuver(); 
-    void SelfInit();  //!< Self initialization for C-wrapped messages
+
     void Reset(uint64_t CurrentSimNanos);
     void UpdateState(uint64_t CurrentSimNanos);
     void ReadInputs();
@@ -135,7 +134,6 @@ public:
     ReadFunctor<SpicePlanetStateMsgPayload> keepOutCelBodyInMsg;                    //!< Celestial body state msg - keep out direction
     ReadFunctor<SpicePlanetStateMsgPayload> keepInCelBodyInMsg;                     //!< Celestial body state msg - keep in direction
     Message<AttRefMsgPayload> attRefOutMsg;                                         //!< Attitude reference output message
-    AttRefMsg_C attRefOutMsgC = {};                                                 //!< C-wrapped attitude reference output message
 
     BSKLogger bskLogger;                                                            //!< BSK Logging
 

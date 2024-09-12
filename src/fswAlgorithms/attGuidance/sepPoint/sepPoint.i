@@ -32,13 +32,9 @@ from Basilisk.architecture.swig_common_model import *
 %include "sepPoint.h"
 %include "fswAlgorithms/attGuidance/_GeneralModuleFiles/constrainedAxisPointingLibrary.h"
 %include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-struct NavAttMsg_C;
 %include "architecture/msgPayloadDefC/BodyHeadingMsgPayload.h"
-struct BodyHeadingMsg_C;
 %include "architecture/msgPayloadDefC/InertialHeadingMsgPayload.h"
-struct InertialHeadingMsg_C;
 %include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
-struct AttRefMsg_C;
 
 %pythoncode %{
 import sys

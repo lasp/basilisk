@@ -33,9 +33,7 @@ from Basilisk.architecture.swig_common_model import *
 %include "rateDamp.h"
 
 %include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-struct NavAttMsg_C;
 %include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
-struct CmdTorqueBodyMsg_C;
 
 %pythoncode %{
 import sys

@@ -35,13 +35,13 @@
 %include "MtbEffector.h"
 
 %include "architecture/msgPayloadDefC/MTBCmdMsgPayload.h"
-struct MTBCmdMsg_C;
+
 %include "architecture/msgPayloadDefC/MagneticFieldMsgPayload.h"
-struct MagneticFieldMsg_C;
+
 %include "architecture/msgPayloadDefC/MTBArrayConfigMsgPayload.h"
-struct MTBArrayConfigMsg_C;
+
 %include "architecture/msgPayloadDefC/MTBMsgPayload.h"
-struct MTBMsg_C;
+
 
 %pythoncode %{
 import sys

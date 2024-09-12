@@ -19,20 +19,6 @@
 
 #include "rateDamp.h"
 
-
-/*! Module constructor */
-RateDamp::RateDamp() = default;
-
-
-/*! Module destructor */
-RateDamp::~RateDamp() = default;
-
-
-/*! Initialize C-wrapped output messages */
-void RateDamp::SelfInit(){
-    CmdTorqueBodyMsg_C_init(&this->cmdTorqueOutMsgC);
-}
-
 /*! This method is used to reset the module.
  @return void
  */
@@ -59,7 +45,6 @@ void RateDamp::UpdateState(uint64_t CurrentSimNanos)
 
     /*! Write output messages */
     this->cmdTorqueOutMsg.write(&cmdTorqueOutBuffer, this->moduleID, CurrentSimNanos);
-    CmdTorqueBodyMsg_C_write(&cmdTorqueOutBuffer, &this->cmdTorqueOutMsgC, this->moduleID, CurrentSimNanos);
 }
 
 /*! Set the module rate feedback gain

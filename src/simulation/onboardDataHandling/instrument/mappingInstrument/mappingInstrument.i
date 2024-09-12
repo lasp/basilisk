@@ -32,7 +32,7 @@
 %include "mappingInstrument.h"
 
 %include "architecture/msgPayloadDefC/AccessMsgPayload.h"
-struct AccessMsg_C;
+
 %include "architecture/msgPayloadDefC/DataNodeUsageMsgPayload.h"
 
 %pythoncode %{

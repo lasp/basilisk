@@ -32,10 +32,7 @@ from Basilisk.architecture.swig_common_model import *
 %include "prescribedLinearTranslation.h"
 
 %include "architecture/msgPayloadDefC/PrescribedTranslationMsgPayload.h"
-struct PrescribedTranslationMsg_C;
-
 %include "architecture/msgPayloadDefC/LinearTranslationRigidBodyMsgPayload.h"
-struct LinearTranslationRigidBodyMsg_C;
 
 %pythoncode %{
 import sys

@@ -31,7 +31,6 @@ from Basilisk.architecture.swig_common_model import *
 %include "simSynch.h"
 
 %include "architecture/msgPayloadDefC/SynchClockMsgPayload.h"
-struct SyncClockMsg_C;
 
 %pythoncode %{
 import sys

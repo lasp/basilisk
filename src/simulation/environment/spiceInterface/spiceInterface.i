@@ -45,17 +45,17 @@ from Basilisk.architecture.swig_common_model import *
 %include "spiceInterface.h"
 
 %include "architecture/msgPayloadDefC/EpochMsgPayload.h"
-struct EpochMsg_C;
+
 %include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-struct SpicePlanetStateMsg_C;
+
 %include "architecture/msgPayloadDefC/SpiceTimeMsgPayload.h"
-struct SpiceTimeMsg_C;
+
 %include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-struct SCStatesMsg_C;
+
 %include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
-struct AttRefMsg_C;
+
 %include "architecture/msgPayloadDefC/TransRefMsgPayload.h"
-struct TransRefMsg_C;
+
 
 
 %pythoncode %{

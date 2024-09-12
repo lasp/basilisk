@@ -35,11 +35,11 @@ from Basilisk.architecture.swig_common_model import *
 %include "spacecraftLocation.h"
 
 %include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-struct SpicePlanetStateMsg_C;
+
 %include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-struct SCStatesMsg_C;
+
 %include "architecture/msgPayloadDefC/AccessMsgPayload.h"
-struct AccessMsg_C;
+
 
 %pythoncode %{
 import sys

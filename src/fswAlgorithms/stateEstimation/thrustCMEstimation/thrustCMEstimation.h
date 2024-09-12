@@ -37,15 +37,13 @@
 #include "architecture/utilities/avsEigenSupport.h"
 #include "architecture/utilities/macroDefinitions.h"
 #include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "cMsgCInterface/VehicleConfigMsg_C.h"
+#include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
 #include <string.h>
 #include <array>
 #include <math.h>
 
 class ThrustCMEstimation: public SysModel {
 public:
-    ThrustCMEstimation();
-    ~ThrustCMEstimation() override;
     void Reset(uint64_t CurrentSimNanos) override;
     void UpdateState(uint64_t CurrentSimNanos) override;
 

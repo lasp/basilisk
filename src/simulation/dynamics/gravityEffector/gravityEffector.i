@@ -75,7 +75,7 @@ from typing import Optional, Union
 %include "simulation/dynamics/_GeneralModuleFiles/gravityEffector.h"
 
 %include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-struct SpicePlanetStateMsg_C;
+
 
 %extend GravBodyData {
     %pythoncode %{

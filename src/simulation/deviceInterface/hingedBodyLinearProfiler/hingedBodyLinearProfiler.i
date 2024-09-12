@@ -32,7 +32,7 @@
 %include "hingedBodyLinearProfiler.h"
 
 %include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
-struct HingedRigidBodyMsg_C;
+
 
 %pythoncode %{
 import sys

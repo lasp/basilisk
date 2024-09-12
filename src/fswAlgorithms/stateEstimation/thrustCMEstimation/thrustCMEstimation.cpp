@@ -20,10 +20,6 @@
 #include "thrustCMEstimation.h"
 #include <cmath>
 
-ThrustCMEstimation::ThrustCMEstimation() = default;
-
-ThrustCMEstimation::~ThrustCMEstimation() = default;
-
 /*! Reset the flyby OD filter to an initial state and
  initializes the internal estimation matrices.
  @return void

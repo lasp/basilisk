@@ -24,21 +24,13 @@
 #include "architecture/utilities/rigidBodyKinematics.h"
 #include <cmath>
 
-/*! This method self initializes the C-wrapped output messages.
- @return void
-*/
-void PrescribedRotation1DOF::SelfInit() {
-    HingedRigidBodyMsg_C_init(&this->spinningBodyOutMsgC);
-    PrescribedRotationMsg_C_init(&this->prescribedRotationOutMsgC);
-}
-
 /*! This method resets required module variables and checks the input messages to ensure they are linked.
  @return void
  @param callTime [ns] Time the method is called
 */
 void PrescribedRotation1DOF::Reset(uint64_t callTime) {
     if (!this->spinningBodyInMsg.isLinked()) {
-        _bskLog(this->bskLogger, BSK_ERROR, "prescribedRotation1DOF.spinningBodyInMsg wasn't connected.");
+        this->bskLogger->bskLog(BSK_ERROR, "prescribedRotation1DOF.spinningBodyInMsg wasn't connected.");
     }
 
     this->tInit = 0.0;
@@ -661,8 +653,6 @@ void PrescribedRotation1DOF::writeOutputMessages(uint64_t callTime) {
     // Write the output messages
     this->spinningBodyOutMsg.write(&spinningBodyOut, moduleID, callTime);
     this->prescribedRotationOutMsg.write(&prescribedRotationOut, moduleID, callTime);
-    HingedRigidBodyMsg_C_write(&spinningBodyOut, &spinningBodyOutMsgC, this->moduleID, callTime);
-    PrescribedRotationMsg_C_write(&prescribedRotationOut, &prescribedRotationOutMsgC, this->moduleID, callTime);
 }
 
 /*! This method computes the current spinning body MRP attitude relative to the mount frame: sigma_FM

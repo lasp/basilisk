@@ -33,13 +33,9 @@
 %include "smallBodyWaypointFeedback.h"
 
 %include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-struct NavTransMsg_C;
 %include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-struct NavAttMsg_C;
 %include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-struct EphemerisMsg_C;
 %include "architecture/msgPayloadDefC/CmdForceBodyMsgPayload.h"
-struct CmdForceBodyMsg_C;
 
 %pythoncode %{
 import sys

@@ -64,18 +64,6 @@ SmallBodyNavEKF::SmallBodyNavEKF()
     return;
 }
 
-/*! Module Destructor */
-SmallBodyNavEKF::~SmallBodyNavEKF()
-{
-}
-
-/*! Initialize C-wrapped output messages */
-void SmallBodyNavEKF::SelfInit(){
-    NavTransMsg_C_init(&this->navTransOutMsgC);
-    SmallBodyNavMsg_C_init(&this->smallBodyNavOutMsgC);
-    EphemerisMsg_C_init(&this->asteroidEphemerisOutMsgC);
-}
-
 /*! This method is used to reset the module and checks that required input messages are connect.
     @return void
 */
@@ -448,9 +436,4 @@ void SmallBodyNavEKF::writeMessages(uint64_t CurrentSimNanos){
     this->navTransOutMsg.write(&navTransOutMsgBuffer, this->moduleID, CurrentSimNanos);
     this->smallBodyNavOutMsg.write(&smallBodyNavOutMsgBuffer, this->moduleID, CurrentSimNanos);
     this->asteroidEphemerisOutMsg.write(&asteroidEphemerisOutMsgBuffer, this->moduleID, CurrentSimNanos);
-
-    /* Write to the C-wrapped output messages */
-    NavTransMsg_C_write(&navTransOutMsgBuffer, &this->navTransOutMsgC, this->moduleID, CurrentSimNanos);
-    SmallBodyNavMsg_C_write(&smallBodyNavOutMsgBuffer, &this->smallBodyNavOutMsgC, this->moduleID, CurrentSimNanos);
-    EphemerisMsg_C_write(&asteroidEphemerisOutMsgBuffer, &this->asteroidEphemerisOutMsgC, this->moduleID, CurrentSimNanos);
 }

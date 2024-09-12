@@ -33,7 +33,7 @@
 %include "planetNav.h"
 
 %include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-struct ephemerisMsg_C;
+
 
 %pythoncode %{
 import sys

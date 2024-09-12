@@ -22,11 +22,11 @@
 #define SMALLBODYNAVEKF_H
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "cMsgCInterface/NavTransMsg_C.h"
-#include "cMsgCInterface/NavAttMsg_C.h"
-#include "cMsgCInterface/EphemerisMsg_C.h"
-#include "cMsgCInterface/SmallBodyNavMsg_C.h"
-#include "cMsgCInterface/CmdForceBodyMsg_C.h"
+#include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
+#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
+#include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
+#include "architecture/msgPayloadDefC/SmallBodyNavMsgPayload.h"
+#include "architecture/msgPayloadDefC/CmdForceBodyMsgPayload.h"
 #include "architecture/msgPayloadDefCpp/THROutputMsgPayload.h"
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/messaging/messaging.h"
@@ -38,9 +38,7 @@
 class SmallBodyNavEKF: public SysModel {
 public:
     SmallBodyNavEKF();
-    ~SmallBodyNavEKF();
 
-    void SelfInit();  //!< Self initialization for C-wrapped messages
     void Reset(uint64_t CurrentSimNanos);  //!< Resets module
     void UpdateState(uint64_t CurrentSimNanos);  //!< Updates state
     void addThrusterToFilter(Message<THROutputMsgPayload> *tmpThrusterMsg);  //!< Adds thruster message
@@ -67,10 +65,6 @@ public:
     Message<NavTransMsgPayload> navTransOutMsg;  //!< Translational nav output message
     Message<SmallBodyNavMsgPayload> smallBodyNavOutMsg;  //!< Small body nav output msg - states and covariances
     Message<EphemerisMsgPayload> asteroidEphemerisOutMsg;  //!< Small body ephemeris output message
-
-    NavTransMsg_C navTransOutMsgC = {};  //!< C-wrapped Translational nav output message
-    SmallBodyNavMsg_C smallBodyNavOutMsgC = {};  //!< C-wrapped Small body nav output msg - states and covariances
-    EphemerisMsg_C asteroidEphemerisOutMsgC = {};  //!< C-wrapped Small body ephemeris output message
 
     BSKLogger bskLogger;  //!< -- BSK Logging
 

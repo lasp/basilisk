@@ -22,7 +22,7 @@
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
 #include "architecture/utilities/bskLogging.h"
-#include "cMsgCInterface/PrescribedTranslationMsg_C.h"
+#include "architecture/msgPayloadDefC/PrescribedTranslationMsgPayload.h"
 #include "architecture/msgPayloadDefC/LinearTranslationRigidBodyMsgPayload.h"
 #include <Eigen/Dense>
 #include <cstdint>
@@ -33,7 +33,6 @@ public:
     PrescribedLinearTranslation() = default;                                    //!< Constructor
     ~PrescribedLinearTranslation() = default;                                   //!< Destructor
 
-    void SelfInit() override;                                                   //!< Member function to initialize the C-wrapped output message
     void Reset(uint64_t CurrentSimNanos) override;                              //!< Reset member function
     void UpdateState(uint64_t CurrentSimNanos) override;                        //!< Update member function
     void setCoastOptionBangDuration(const double bangDuration);                 //!< Setter method for the coast option bang duration
@@ -49,7 +48,6 @@ public:
 
     ReadFunctor<LinearTranslationRigidBodyMsgPayload> linearTranslationRigidBodyInMsg;    //!< Input msg for the translational reference position and velocity
     Message<PrescribedTranslationMsgPayload> prescribedTranslationOutMsg;                 //!< Output msg for the translational body prescribed states
-    PrescribedTranslationMsg_C prescribedTranslationOutMsgC = {};                         //!< C-wrapped Output msg for the translational body prescribed states
 
     BSKLogger *bskLogger;                                                       //!< BSK Logging
 

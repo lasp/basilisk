@@ -35,11 +35,11 @@ from Basilisk.architecture.swig_common_model import *
 %include "ReactionWheelPower.h"
 
 %include "architecture/msgPayloadDefC/PowerNodeUsageMsgPayload.h"
-struct PowerNodeUsageMsg_C;
+
 %include "architecture/msgPayloadDefC/DeviceStatusMsgPayload.h"
-struct DeviceStatusMsg_C;
+
 %include "architecture/msgPayloadDefC/RWConfigLogMsgPayload.h"
-struct RWConfigLogMsg_C;
+
 
 %pythoncode %{
 import sys

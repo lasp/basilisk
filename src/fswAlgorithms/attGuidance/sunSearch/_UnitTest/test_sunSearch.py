@@ -119,8 +119,6 @@ def test_rateDamp(show_plots, axis1, axis2, axis3, omega_BN_B, accuracy):
     # Setup logging on the test module output message so that we get all the writes to it
     dataLog = attGuidance.attGuidOutMsg.recorder()
     unitTestSim.AddModelToTask(unitTaskName, dataLog)
-    dataLogC = attGuidance.attGuidOutMsgC.recorder()
-    unitTestSim.AddModelToTask(unitTaskName, dataLogC)
 
     alpha1, omega1, T1, tc1 = computeKinematicProperties(theta1, T_R, u_M, I[axis1-1], omega_M)
     alpha2, omega2, T2, tc2 = computeKinematicProperties(theta2, T_R, u_M, I[axis2-1], omega_M)
@@ -142,9 +140,6 @@ def test_rateDamp(show_plots, axis1, axis2, axis3, omega_BN_B, accuracy):
     omega_BR_B = dataLog.omega_BR_B
     omega_RN_B = dataLog.omega_RN_B
     omegaDot_RN_B = dataLog.domega_RN_B
-    omegaC_BR_B = dataLogC.omega_BR_B
-    omegaC_RN_B = dataLogC.omega_RN_B
-    omegaDotC_RN_B = dataLogC.domega_RN_B
 
     timeVector = [0, tc1, T1-tc1, T1, T1+tc2, T1+T2-tc2, T1+T2, T1+T2+tc3, T1+T2+T3-tc3, T1+T2+T3]
 
@@ -183,9 +178,6 @@ def test_rateDamp(show_plots, axis1, axis2, axis3, omega_BN_B, accuracy):
     np.testing.assert_allclose(omega_BR_B, omega_BR_B_truth, rtol=0, atol=accuracy, verbose=True)
     np.testing.assert_allclose(omega_RN_B, omega_RN_B_truth, rtol=0, atol=accuracy, verbose=True)
     np.testing.assert_allclose(omegaDot_RN_B, omegaDot_RN_B_truth, rtol=0, atol=accuracy, verbose=True)
-    np.testing.assert_allclose(omegaC_BR_B, omega_BR_B_truth, rtol=0, atol=accuracy, verbose=True)
-    np.testing.assert_allclose(omegaC_RN_B, omega_RN_B_truth, rtol=0, atol=accuracy, verbose=True)
-    np.testing.assert_allclose(omegaDotC_RN_B, omegaDot_RN_B_truth, rtol=0, atol=accuracy, verbose=True)
 
     return
 

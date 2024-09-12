@@ -33,11 +33,8 @@
 %include "smallBodyNavUKF.h"
 
 %include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-struct EphemerisMsg_C;
 %include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-struct NavTransMsg_C;
 %include "architecture/msgPayloadDefC/SmallBodyNavUKFMsgPayload.h"
-struct SmallBodyNavUKFMsg_C;
 
 %pythoncode %{
 import sys

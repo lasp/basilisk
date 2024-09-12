@@ -103,15 +103,12 @@ def smallBodyNavUKFTestFunction(show_plots):
     # setup output message recorder objects
     smallBodyNavUKFOutMsgRec = module.smallBodyNavUKFOutMsg.recorder()
     unitTestSim.AddModelToTask(unitTaskName, smallBodyNavUKFOutMsgRec)
-    smallBodyNavUKFOutMsgRecC = module.smallBodyNavUKFOutMsgC.recorder()
-    unitTestSim.AddModelToTask(unitTaskName, smallBodyNavUKFOutMsgRecC)
 
     unitTestSim.InitializeSimulation()
     unitTestSim.ConfigureStopTime(macros.sec2nano(600))
     unitTestSim.ExecuteSimulation()
 
     x_hat = smallBodyNavUKFOutMsgRec.state
-    x_hat_c_wrapped = smallBodyNavUKFOutMsgRecC.state
     covar = smallBodyNavUKFOutMsgRec.covar
 
     # Since the small body does not rotate, no inhomogeneous gravity has
@@ -128,10 +125,6 @@ def smallBodyNavUKFTestFunction(show_plots):
 
     testFailCount, testMessages = unitTestSupport.compareArrayRelative(
         [true_x_hat], np.array([x_hat[-1,:]]), 0.01, "x_hat",
-        testFailCount, testMessages)
-
-    testFailCount, testMessages = unitTestSupport.compareArrayRelative(
-        [true_x_hat], np.array([x_hat_c_wrapped[-1,:]]), 0.01, "x_hat_c_wrapped",
         testFailCount, testMessages)
 
     plt.figure(1)

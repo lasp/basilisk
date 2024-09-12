@@ -22,17 +22,13 @@
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
 #include "architecture/utilities/bskLogging.h"
-#include "cMsgCInterface/MotorStepCommandMsg_C.h"
-#include "cMsgCInterface/HingedRigidBodyMsg_C.h"
+#include "architecture/msgPayloadDefC/MotorStepCommandMsgPayload.h"
+#include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
 #include <cstdint>
 
 /*! @brief Stepper Motor Controller Class */
 class StepperMotorController: public SysModel{
 public:
-
-    StepperMotorController() = default;                                    //!< Constructor
-    ~StepperMotorController() = default;                                   //!< Destructor
-
     void Reset(uint64_t currentSimNanos) override;                         //!< Reset member function
     void UpdateState(uint64_t currentSimNanos) override;                   //!< Update member function
     double getThetaInit() const;                                           //!< Getter method for the initial motor angle

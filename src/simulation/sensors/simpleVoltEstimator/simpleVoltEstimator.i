@@ -32,7 +32,7 @@ from Basilisk.architecture.swig_common_model import *
 %include "simpleVoltEstimator.h"
 
 %include "architecture/msgPayloadDefC/VoltMsgPayload.h"
-struct VoltMsg_C;
+
 
 %pythoncode %{
 import sys

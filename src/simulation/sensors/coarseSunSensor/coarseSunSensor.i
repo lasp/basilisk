@@ -30,17 +30,17 @@
 %include "coarseSunSensor.h"
 
 %include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-struct SCStatesMsg_C;
+
 %include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-struct SpicePlanetStateMsg_C;
+
 %include "architecture/msgPayloadDefC/CSSRawDataMsgPayload.h"
-struct CSSRawDataMsg_C;
+
 %include "architecture/msgPayloadDefC/AlbedoMsgPayload.h"
-struct AlbedoMsg_C;
+
 %include "architecture/msgPayloadDefC/EclipseMsgPayload.h"
-struct EclipseMsg_C;
+
 %include "architecture/msgPayloadDefC/CSSArraySensorMsgPayload.h"
-struct CSSArraySensorMsg_C;
+
 
 %include "architecture/msgPayloadDefCpp/CSSConfigLogMsgPayload.h"
 

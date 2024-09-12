@@ -34,9 +34,7 @@ from Basilisk.architecture.swig_common_model import *
 %include "simulation/vizard/_GeneralModuleFiles/vizStructures.h"
 
 %include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-struct SCStatesMsg_C;
 %include "architecture/msgPayloadDefC/RWConfigLogMsgPayload.h"
-struct RWConfigLogMsg_C;
 %include "architecture/msgPayloadDefCpp/THROutputMsgPayload.h"
 
 
@@ -52,7 +50,6 @@ namespace std {
     %template(RWConfigLogMsgOutMsgsPtrVector) vector<Message<RWConfigLogMsgPayload>*, allocator<Message<RWConfigLogMsgPayload>*> >;
     %template(RWConfigLogMsgInMsgsVector) vector<ReadFunctor<RWConfigLogMsgPayload>, allocator<ReadFunctor<RWConfigLogMsgPayload>> >;
     %template(RWConfigLogMsgInMsgsVectorVector) vector <vector <Message<RWConfigLogMsgPayload>*, allocator<Message<RWConfigLogMsgPayload>*> >, allocator<vector <Message<RWConfigLogMsgPayload>*>> >;
-
 }
 
 %pythoncode %{

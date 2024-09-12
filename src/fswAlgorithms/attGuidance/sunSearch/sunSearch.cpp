@@ -21,19 +21,6 @@
 #include "architecture/utilities/macroDefinitions.h"
 #include <cmath>
 
-/*! Module constructor */
-SunSearch::SunSearch() = default;
-
-
-/*! Module destructor */
-SunSearch::~SunSearch() = default;
-
-
-/*! Initialize C-wrapped output messages */
-void SunSearch::SelfInit(){
-    AttGuidMsg_C_init(&this->attGuidOutMsgC);
-}
-
 /*! This method is used to reset the module.
  @return void
  */
@@ -100,9 +87,6 @@ void SunSearch::UpdateState(uint64_t CurrentSimNanos)
 
     /*! Write the output messages */
     this->attGuidOutMsg.write(&attGuidOut, this->moduleID, CurrentSimNanos);
-
-    /*! Write the C-wrapped output messages */
-    AttGuidMsg_C_write(&attGuidOut, &this->attGuidOutMsgC, this->moduleID, CurrentSimNanos);
 }
 
 

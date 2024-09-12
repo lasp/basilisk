@@ -139,9 +139,7 @@ def formationBarycenterTestFunction(show_plots, accuracy):
 
     # setup output message recorder objects
     barycenterOutMsg = barycenterModule.transOutMsg.recorder()
-    barycenterOutMsgC = barycenterModule.transOutMsgC.recorder()
     unitTestSim.AddModelToTask(unitTaskName, barycenterOutMsg)
-    unitTestSim.AddModelToTask(unitTaskName, barycenterOutMsgC)
 
     unitTestSim.InitializeSimulation()
     unitTestSim.TotalSim.SingleStepProcesses()
@@ -154,12 +152,8 @@ def formationBarycenterTestFunction(show_plots, accuracy):
     # Pull module data
     barycenter = barycenterOutMsg.r_BN_N
     barycenterVelocity = barycenterOutMsg.v_BN_N
-    barycenterC = barycenterOutMsgC.r_BN_N
-    barycenterVelocityC = barycenterOutMsgC.v_BN_N
     elements = orbitalMotion.rv2elem(mu, barycenter[1], barycenterVelocity[1])
     elementsArray = [elements.a, elements.e, elements.i, elements.Omega, elements.omega, elements.f]
-    elementsC = orbitalMotion.rv2elem(mu, barycenterC[1], barycenterVelocityC[1])
-    elementsArrayC = [elementsC.a, elementsC.e, elementsC.i, elementsC.Omega, elementsC.omega, elementsC.f]
 
     # Set the true values
     trueBarycenter = np.array([-2795.61091086, 4349.07305245, 4711.56751498])
@@ -175,15 +169,6 @@ def formationBarycenterTestFunction(show_plots, accuracy):
     if not unitTestSupport.isArrayEqual(elementsArray, trueElements, 6, accuracy):
         testFailCount += 1
         testMessages.append("FAILED: formationBarycenter orbital element unit test.")
-
-    if not unitTestSupport.isArrayEqual(barycenterC[0], trueBarycenter, 3, accuracy) or \
-            not unitTestSupport.isArrayEqual(barycenterVelocityC[0], trueBarycenterVelocity, 3, accuracy):
-        testFailCount += 1
-        testMessages.append("FAILED: formationBarycenter C message cartesian unit test.")
-
-    if not unitTestSupport.isArrayEqual(elementsArrayC, trueElements, 6, accuracy):
-        testFailCount += 1
-        testMessages.append("FAILED: formationBarycenter C message orbital element unit test.")
 
     if testFailCount == 0:
         print("PASSED: formationBarycenter unit test.")

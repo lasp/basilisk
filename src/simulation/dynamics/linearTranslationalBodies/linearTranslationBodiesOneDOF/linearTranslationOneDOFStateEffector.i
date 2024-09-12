@@ -39,13 +39,13 @@ from Basilisk.architecture.swig_common_model import *
 %include "linearTranslationOneDOFStateEffector.h"
 
 %include "architecture/msgPayloadDefC/ArrayMotorForceMsgPayload.h"
-struct ArrayMotorForceMsg_C;
+
 %include "architecture/msgPayloadDefC/ArrayEffectorLockMsgPayload.h"
-struct ArrayEffectorLockMsg_C;
+
 %include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-struct SCStatesMsg_C;
+
 %include "architecture/msgPayloadDefC/LinearTranslationRigidBodyMsgPayload.h"
-struct LinearTranslationRigidBodyMsg_C;
+
 
 %pythoncode %{
 import sys

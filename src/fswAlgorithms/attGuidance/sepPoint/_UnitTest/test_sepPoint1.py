@@ -151,8 +151,6 @@ def test_(show_plots, alpha, alignmentPriority, accuracy):
     # Setup logging on the test module output message so that we get all the writes to it
     dataLog = attGuid.attRefOutMsg.recorder()
     unitTestSim.AddModelToTask(unitTaskName, dataLog)
-    dataLogC = attGuid.attRefOutMsgC.recorder()
-    unitTestSim.AddModelToTask(unitTaskName, dataLogC)
 
     # Need to call the self-init and cross-init methods
     unitTestSim.InitializeSimulation()
