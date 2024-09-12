@@ -24,7 +24,7 @@
  * @param measurement Eigen::Vector3d
  * @return void
  */
-void LowPassFilter::processMeasurement(const Eigen::Vector3d measurement){
+void LowPassFilter::processMeasurement(const Eigen::Vector3d& measurement){
 
     double omegaStep = this->filterStep*this->filterCutOff;
     this->currentState = 1/(2+omegaStep)*(this->currentState*(2-omegaStep) + omegaStep*(measurement+this->currentMeasurement));

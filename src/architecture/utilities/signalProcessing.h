@@ -29,7 +29,7 @@ public:
     void setFilterCutoff(double cutOffValue);
     double getFilterCutoff() const;
 
-    void processMeasurement(Eigen::Vector3d measurement);
+    void processMeasurement(const Eigen::Vector3d& measurement);
     Eigen::Vector3d getCurrentState() const;
 
 private:
