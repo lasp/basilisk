@@ -20,8 +20,8 @@
  
 %module pyswice
 %{
-    #include "../libs/cspice/include/SpiceUsr.h"
-    #include "../libs/cspice/include/SpiceZpr.h"
+    #include "cspice/include/SpiceUsr.h"
+    #include "cspice/include/SpiceZpr.h"
 %}
 
 %ignore illumg_c;
@@ -67,5 +67,5 @@ typedef int SpiceBoolean;
 
 %cstring_bounded_mutable(SpiceChar *utcstr, 1024);
 
-%include "../../libs/cspice/include/SpiceZpr.h"
+%include "cspice/include/SpiceZpr.h"
 
