@@ -69,12 +69,7 @@ def writeConfigMessage():
     global thrList
 
     thrClass = messaging.THRArrayConfigMsgPayload()
-
-    i = 0
-    for item in thrList:
-        messaging.ThrustConfigArray_setitem(thrClass.thrusters, i, item)
-        i += 1
-
+    thrClass.thrusters = thrList
     thrClass.numThrusters = len(thrList)
     thrConfigInMsg = messaging.THRArrayConfigMsg().write(thrClass)
     thrConfigInMsg.this.disown()

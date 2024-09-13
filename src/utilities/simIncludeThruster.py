@@ -254,16 +254,16 @@ class thrusterFactory(object):
 
         thrMessage = messaging.THRArrayConfigMsgPayload()
 
-        i = 0
+        thrusterConfigMsgs = []
         for simThruster in self.thrusterList.values():
             #   Converts from THRConfigSimMsg to THRConfigFswMsg
             fswThruster = messaging.THRConfigMsgPayload()
             fswThruster.maxThrust = simThruster.MaxThrust
             fswThruster.rThrust_B = [val for sublist in simThruster.thrLoc_B for val in sublist]
             fswThruster.tHatThrust_B = [val for sublist in simThruster.thrDir_B for val in sublist]
-            messaging.ThrustConfigArray_setitem(thrMessage.thrusters, i, fswThruster)
-            i += 1
+            thrusterConfigMsgs.append(fswThruster)
 
+        thrMessage.thrusters = thrusterConfigMsgs
         thrMessage.numThrusters = len(self.thrusterList.values())
 
         thrConfigMsg = messaging.THRArrayConfigMsg().write(thrMessage)

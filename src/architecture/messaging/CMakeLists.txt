@@ -4,7 +4,7 @@ include(${SWIG_USE_FILE})
 find_package(PythonLibs 3 REQUIRED)
 find_package(PythonInterp 3 REQUIRED)
 
-function(generate_messages searchDir generateCCode)
+function(generate_messages searchDir)
   file(
     GLOB_RECURSE message_files
     RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/"
@@ -17,7 +17,6 @@ function(generate_messages searchDir generateCCode)
     add_custom_command(
       OUTPUT ${COMP_OUT_NAME}
       COMMAND ${PYTHON_EXECUTABLE} generateSWIGModules.py ${COMP_OUT_NAME} ${msgFile} ${TARGET_NAME} ${searchDir}
-              ${generateCCode}
       DEPENDS ${msgFile}
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/msgAutoSource/)
     set_property(SOURCE ${COMP_OUT_NAME} PROPERTY CPLUSPLUS ON)
@@ -85,5 +84,5 @@ add_custom_command(
 add_custom_target(swigtrick DEPENDS ${CMAKE_BINARY_DIR}/Basilisk/architecture/messaging/__init__.py)
 
 # Dependency
-generate_messages(msgPayloadDefCpp "False")
-generate_messages(msgPayloadDefC "False")
+generate_messages(msgPayloadDefCpp)
+generate_messages(msgPayloadDefC)

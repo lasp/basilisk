@@ -31,18 +31,14 @@ STRUCTASLIST(CSSUnitConfigMsgPayload)
 STRUCTASLIST(AccPktDataMsgPayload)
 STRUCTASLIST(RWConfigElementMsgPayload)
 STRUCTASLIST(CSSArraySensorMsgPayload)
+STRUCTASLIST(THRConfigMsgPayload)
+STRUCTASLIST(ReconfigBurnInfoMsgPayload)
 
 %include "messaging/messaging.h"
 %include "_GeneralModuleFiles/sys_model.h"
 
-%array_functions(THRConfigMsgPayload, ThrustConfigArray);
-%array_functions(RWConfigElementMsgPayload, RWConfigArray);
-%array_functions(ReconfigBurnInfoMsgPayload, ReconfigBurnArray);
-
 %rename(__subscribe_to) subscribeTo;  // we want the users to have a unified "subscribeTo" interface
-%rename(__subscribe_to_C) subscribeToC;  // we want the users to have a unified "subscribeTo" interface
 %rename(__is_subscribed_to) isSubscribedTo;  // we want the users to have a unified "isSubscribedTo" interface
-%rename(__is_subscribed_to_C) isSubscribedToC;  // we want the users to have a unified "isSubscribedTo" interface
 %rename(__time_vector) times;  // It's not really useful to give the user back a time vector
 %rename(__timeWritten_vector) timesWritten;
 %rename(__record_vector) record;

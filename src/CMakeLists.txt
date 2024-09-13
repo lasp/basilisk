@@ -134,7 +134,6 @@ function(sub_dir_list result curdir)
 endfunction(sub_dir_list)
 
 # add header search directories
-include_directories("${CMAKE_SOURCE_DIR}/../dist3/autoSource")
 include_directories("${CMAKE_SOURCE_DIR}")
 
 function(generate_package_libraries INIT_DIRECTORY AllLibs)
