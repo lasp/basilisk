@@ -30,7 +30,7 @@ jobs:
       security-events: write
     steps:
       - name: Checkout code
-        uses: nschloe/action-checkout-with-lfs-cache@v1
+        uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -101,7 +101,7 @@ jobs:
       CONAN_USER_HOME_SHORT: None
     steps:
       - name: Checkout code
-        uses: nschloe/action-checkout-with-lfs-cache@v1
+        uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
