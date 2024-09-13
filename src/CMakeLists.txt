@@ -173,7 +173,6 @@ function(generate_package_libraries INIT_DIRECTORY AllLibs)
     # Link all necessary libraries
     target_link_libraries(${LIB_NAME} PUBLIC ArchitectureUtilities)
     target_link_libraries(${LIB_NAME} PRIVATE ModuleIdGenerator)
-    target_link_libraries(${LIB_NAME} PUBLIC cMsgCInterface)
     target_link_libraries(${LIB_NAME} PRIVATE ${PYTHON_LIBRARIES})
     target_link_libraries(${LIB_NAME} PRIVATE Eigen3::Eigen3)
 
@@ -307,6 +306,7 @@ function(generate_package_targets TARGET_LIST LIB_DEP_LIST MODULE_DIR)
     foreach(LIB ${LIB_DEP_LIST})
       target_link_libraries(${TARGET_NAME} PRIVATE ${LIB})
     endforeach()
+    target_link_libraries(${TARGET_NAME} PRIVATE ${PYTHON_LIBRARIES})
 
     if(${MODULE_DIR} STREQUAL "ExternalModules")
       set_target_properties(${TARGET_NAME} PROPERTIES FOLDER ${MODULE_DIR})
@@ -511,7 +511,6 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # Targets that must be built first
 add_subdirectory("architecture/utilities")
 add_subdirectory("utilities") # has protobuffers included
-add_subdirectory("architecture/messaging/cMsgCInterface")
 add_subdirectory("architecture/messaging/")
 
 # TODO: I'd call this generate_libraries(), because it really does find all of them. TODO: I'd like for all generated
@@ -522,7 +521,7 @@ set(AllLibs "")
 generate_package_libraries("${CMAKE_SOURCE_DIR}" "${AllLibs}") # This finds GeneralModuleFiles and generates a library
                                                                # of the parentDirectory name
 
-set(ARCHITECTURE_LIBS architectureLib ArchitectureUtilities ModuleIdGenerator cMsgCInterface)
+set(ARCHITECTURE_LIBS architectureLib ArchitectureUtilities ModuleIdGenerator)
 
 # SIMULATION
 # TODO: Move the following commands into a seperate CMakeList.txt s.t. this file is just configuration (problem:

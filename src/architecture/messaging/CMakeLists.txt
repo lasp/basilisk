@@ -58,6 +58,7 @@ function(generate_messages searchDir generateCCode)
       ${SWIG_MODULE_${TARGET_NAME}_REAL_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY_RELEASE
                                                          "${CMAKE_BINARY_DIR}/Basilisk/architecture/messaging")
     target_link_libraries(${SWIG_MODULE_${TARGET_NAME}_REAL_NAME} PUBLIC architectureLib)
+    target_link_libraries(${SWIG_MODULE_${TARGET_NAME}_REAL_NAME} PRIVATE ${PYTHON_LIBRARIES})
   endforeach()
 endfunction(generate_messages)
 
@@ -85,4 +86,4 @@ add_custom_target(swigtrick DEPENDS ${CMAKE_BINARY_DIR}/Basilisk/architecture/me
 
 # Dependency
 generate_messages(msgPayloadDefCpp "False")
-generate_messages(msgPayloadDefC "True")
+generate_messages(msgPayloadDefC "False")

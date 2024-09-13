@@ -249,8 +249,6 @@ class BasiliskConan(ConanFile):
         # auto-generate C message definition files
         print(statusColor + "Auto-generating message definitions:" + endColor, end=" ")
         bskPath = os.getcwd()
-        os.chdir(os.path.join(bskPath, "src/architecture/messaging/msgAutoSource"))
-        self.generateMessageModules(bskPath)
 
         if self.options.pathToExternalModules:
             print(statusColor + "Including External Folder: " + endColor + str(self.options.pathToExternalModules))
@@ -334,8 +332,6 @@ if __name__ == "__main__":
     genMod.verbose = False
     makeDraftModule.fillCppInfo(genMod)
     genMod.createCppModule()
-    makeDraftModule.fillCInfo(genMod)
-    genMod.createCModule()
     print("Done")
 
     # run conan install
