@@ -16,7 +16,6 @@
 #  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-from Basilisk.moduleTemplates import cModuleTemplate
 from Basilisk.moduleTemplates import cppModuleTemplate
 from Basilisk.utilities import SimulationBaseClass
 from Basilisk.utilities import macros
@@ -38,10 +37,6 @@ def run():
     dynProcess.addTask(scSim.CreateNewTask("cppTask", macros.sec2nano(1.)))
 
     # create modules
-    mod1 = cModuleTemplate.cModuleTemplate()
-    mod1.ModelTag = "cModule1"
-    scSim.AddModelToTask("cTask", mod1)
-
     mod2 = cppModuleTemplate.CppModuleTemplate()
     mod2.ModelTag = "cppModule2"
     scSim.AddModelToTask("cppTask", mod2)
@@ -54,10 +49,6 @@ def run():
 
     dynProcess.disableAllTasks()
     print("all tasks disabled")
-    scSim.TotalSim.SingleStepProcesses()
-    print("BSK executed a single simulation step")
-
-    scSim.enableTask("cTask")
     scSim.TotalSim.SingleStepProcesses()
     print("BSK executed a single simulation step")
 

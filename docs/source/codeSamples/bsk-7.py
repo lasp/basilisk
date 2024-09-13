@@ -17,7 +17,6 @@
 #
 
 from Basilisk.architecture import messaging
-from Basilisk.moduleTemplates import cModuleTemplate
 from Basilisk.moduleTemplates import cppModuleTemplate
 from Basilisk.utilities import SimulationBaseClass
 from Basilisk.utilities import macros
@@ -38,19 +37,9 @@ def run():
     dynProcess.addTask(scSim.CreateNewTask("dynamicsTask", macros.sec2nano(1.)))
 
     # create modules
-    mod1 = cModuleTemplate.cModuleTemplate()
-    mod1.ModelTag = "cModule1"
-    scSim.AddModelToTask("dynamicsTask", mod1)
-
     mod2 = cppModuleTemplate.CppModuleTemplate()
     mod2.ModelTag = "cppModule2"
     scSim.AddModelToTask("dynamicsTask", mod2)
-
-    # create stand-alone message with a C interface and re-direct
-    # the C module output message writing to this stand-alone message
-    cMsg = messaging.CModuleTemplateMsg_C()
-    cMsg.write(messaging.CModuleTemplateMsgPayload())
-    messaging.CModuleTemplateMsg_C_addAuthor(mod1.dataOutMsg, cMsg)
 
     # create stand-along message with a C++ interface and re-direct
     # the C++ module output message writing to this stand-alone message
@@ -65,10 +54,6 @@ def run():
     scSim.ExecuteSimulation()
 
     # read the message values and print them to the terminal
-    print("mod1.dataOutMsg:")
-    print(mod1.dataOutMsg.read().dataVector)
-    print("cMsg:")
-    print(cMsg.read().dataVector)
     print("mod2.dataOutMsg:")
     print(mod2.dataOutMsg.read().dataVector)
     print("cppMsg:")

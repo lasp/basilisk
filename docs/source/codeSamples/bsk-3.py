@@ -16,11 +16,9 @@
 #  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-from Basilisk.moduleTemplates import cModuleTemplate
 from Basilisk.moduleTemplates import cppModuleTemplate
 from Basilisk.utilities import SimulationBaseClass
 from Basilisk.utilities import macros
-from Basilisk.architecture import messaging
 
 
 def run():
@@ -38,11 +36,11 @@ def run():
     dynProcess.addTask(scSim.CreateNewTask("dynamicsTask", macros.sec2nano(5.)))
 
     # create modules
-    mod1 = cModuleTemplate.cModuleTemplate()
-    mod1.ModelTag = "cModule1"
+    mod1 = cppModuleTemplate.CppModuleTemplate()
+    mod1.ModelTag = "module1"
 
     mod2 = cppModuleTemplate.CppModuleTemplate()
-    mod2.ModelTag = "cppModule2"
+    mod2.ModelTag = "module2"
 
     # add modules to task list
     scSim.AddModelToTask("dynamicsTask", mod1)

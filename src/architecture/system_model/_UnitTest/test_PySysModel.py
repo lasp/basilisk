@@ -17,7 +17,6 @@
 #
 from Basilisk.utilities import SimulationBaseClass
 from Basilisk.utilities import macros
-from Basilisk.moduleTemplates import cModuleTemplate
 from Basilisk.moduleTemplates import cppModuleTemplate
 from Basilisk.architecture import sysModel
 from Basilisk.architecture import bskLogging
@@ -38,14 +37,14 @@ def test_PySysModel():
     dynProcess.addTask(scSim.CreateNewTask("dynamicsTask", macros.sec2nano(5.)))
 
     # create copies of the Basilisk modules
-    mod1 = cModuleTemplate.cModuleTemplate()
-    mod1.ModelTag = "cModule1"
+    mod1 = cppModuleTemplate.CppModuleTemplate()
+    mod1.ModelTag = "module1"
 
     mod2 = cppModuleTemplate.CppModuleTemplate()
-    mod2.ModelTag = "cppModule2"
+    mod2.ModelTag = "module2"
 
-    mod3 = cModuleTemplate.cModuleTemplate()
-    mod3.ModelTag = "cModule3"
+    mod3 = cppModuleTemplate.CppModuleTemplate()
+    mod3.ModelTag = "module3"
 
     mod4 = PythonModule()
     mod4.ModelTag = "pythonModule4"
