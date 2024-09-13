@@ -12,7 +12,9 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
       - id: file_changes
         uses: tj-actions/changed-files@v44
       - uses: pre-commit/action@v3.0.1
