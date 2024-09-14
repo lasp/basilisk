@@ -215,3 +215,20 @@ void CobConverter::setRadius(const double radius){
 double CobConverter::getRadius() const {
     return this->objectRadius;
 }
+
+/*! Set the attitude error covariance matrix in body frame B, for unit vector measurements
+    @param cov_att_BN_B
+    @return void
+    */
+void CobConverter::setAttitudeCovariance(const Eigen::Matrix3d covAtt_BN_B)
+{
+    this->covarAtt_BN_B = covAtt_BN_B;
+}
+
+/*! Get the attitude error covariance matrix in body frame B, for unit vector measurements
+    @return Eigen::Matrix3d cov_att_BN_B
+    */
+Eigen::Matrix3d CobConverter::getAttitudeCovariance() const
+{
+    return this->covarAtt_BN_B;
+}
