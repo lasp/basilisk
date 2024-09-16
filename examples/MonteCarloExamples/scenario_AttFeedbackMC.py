@@ -117,4 +117,4 @@ def displayPlots(data, retentionPolicy):
 
 
 if __name__ == "__main__":
-    run(True)
+    run(False)
