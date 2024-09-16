@@ -273,3 +273,20 @@ Eigen::VectorXi CenterOfBrightness::getWindowSize() const
     Eigen::VectorXi center = {this->windowWidth, this->windowHeight};
     return center;
 }
+
+/*! Set threshold for the increase in brightness for images not to be invalidated
+    @param double increaseThreshold
+    @return void
+    */
+void CenterOfBrightness::setRelativeBrightnessIncreaseThreshold(double increaseThreshold)
+{
+    this->relativeBrightnessIncreaseThreshold = increaseThreshold;
+}
+
+/*! Get threshold for the increase in brightness for images not to be invalidated
+    @return double increaseThreshold
+    */
+double CenterOfBrightness::getRelativeBrightnessIncreaseThreshold() const
+{
+    return this->relativeBrightnessIncreaseThreshold;
+}
