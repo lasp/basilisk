@@ -83,6 +83,8 @@ add_custom_command(
 # Custom target for establishing dependency
 add_custom_target(swigtrick DEPENDS ${CMAKE_BINARY_DIR}/Basilisk/architecture/messaging/__init__.py)
 
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../../dist3/autoSource")
+
 # Dependency
 generate_messages(msgPayloadDefCpp)
 generate_messages(msgPayloadDefC)
