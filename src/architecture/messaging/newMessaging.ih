@@ -15,106 +15,58 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 */
 
-%pythoncode %{
+%pythonbegin %{
     import numpy as np
-%};
+%}
+
 %{
-#include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "architecture/messaging/messaging.h"
-#include <stdint.h>
-#include <vector>
-#include <string>
+    #include "architecture/_GeneralModuleFiles/sys_model.h"
+    #include "architecture/messaging/messaging.h"
+    #include <stdint.h>
+    #include <vector>
+    #include <string>
 %}
 
 %include "utilities/macroDefinitions.h"
-%include "_GeneralModuleFiles/sys_model.h"
-%include "messaging/messaging.h"
 %include "_GeneralModuleFiles/swig_eigen.i"
 %include "_GeneralModuleFiles/swig_conly_data.i"
+%include "_GeneralModuleFiles/sys_model.h"
+%include "messaging/messaging.h"
 %include "stdint.i"
 %include "std_vector.i"
 %include "std_string.i"
 
-%template(TimeVector) std::vector<unsigned long long, std::allocator<unsigned long long>>;
 
-%rename(__subscribe_to) subscribeTo;  // we want the users to have a unified "subscribeTo" interface
-%rename(__is_subscribed_to) isSubscribedTo;  // we want the users to have a unified "isSubscribedTo" interface
-%rename(__time_vector) times;  // It's not really useful to give the user back a time vector
-%rename(__timeWritten_vector) timesWritten;
-%rename(__record_vector) record;
+%ignore Message::write;
 
-%define INSTANTIATE_TEMPLATES(messageType, messageTypePayload, folder)
-
-%template(messageType) Message<messageTypePayload>;
-%template(messageType ## OutMsgsVector) std::vector<Message<messageType ## Payload>, std::allocator<Message<messageType ## Payload>>>;
-%template(messageType ## OutMsgsPtrVector) std::vector<Message<messageType ## Payload>*, std::allocator<Message<messageType ## Payload>*>>;
-%template(messageType ## InMsgsVector) std::vector<ReadFunctor<messageType ## Payload>, std::allocator<ReadFunctor<messageType ## Payload>>>;
-%template(messageType ## Reader) ReadFunctor<messageTypePayload>;
-%template(messageType ## Writer) WriteFunctor<messageTypePayload>;
-%template(messageType ## PayloadVector) std::vector<messageType ## Payload, std::allocator<messageType ## Payload>>;
-%template(messageType ## Recorder) Recorder<messageType ## Payload>;
-
-%extend ReadFunctor<messageTypePayload> {
-        %pythoncode %{
-            def subscribeTo(self, source):
-                if type(source) == messageType:
-                    self.__subscribe_to(source)
-                    return
-
-                try:
-                    from Basilisk.architecture.messaging.messageType ## Payload import messageType ## _C
-                    if type(source) == messageType ## _C:
-                        self.__subscribe_to_C(source)
-                        return
-                except ImportError:
-                    pass
-
-                raise Exception('tried to subscribe ReadFunctor<messageTypePayload> to output message type'
-                                + str(type(source)))
-
-
-            def isSubscribedTo(self, source):
-                if type(source) == messageType:
-                    return self.__is_subscribed_to(source)
-
-                try:
-                    from Basilisk.architecture.messaging.messageType ## Payload import messageType ## _C
-                except ImportError:
-                    return 0
-
-                if type(source) == messageType ## _C:
-                    return self.__is_subscribed_to_C(source)
-                else:
-                    return 0
-        %}
-};
-
-%extend Message<messageTypePayload>{
+%extend Message {
     %pythoncode %{
+        def read(self):
+            return self.addSubscriber()()
+
         def write(self, payload, time=0, moduleID=0):
             """Write the message payload.
             The 2nd argument is time in nanoseconds.  It is optional and defaults to 0.
             The 3rd argument is the module ID which defaults to 0.
             """
-            writeMsg = self.addAuthor()
-            writeMsg(payload, moduleID, time)  # msgs written in python have 0 module ID
+            self.addAuthor()(payload, moduleID, time)  # msgs written in python have 0 module ID
             return self
-
-        def read(self):
-            """Read the message payload."""
-            readMsg = self.addSubscriber()
-            return readMsg()
     %}
 };
 
-%extend Recorder<messageType ## Payload> {
+
+%template(TimeVector) std::vector<unsigned long long, std::allocator<unsigned long long>>;
+
+%pythonappend Recorder::times() %{
+    return np.array(val)
+%}
+
+%pythonappend Recorder::timesWritten() %{
+    return np.array(val)
+%}
+
+%extend Recorder {
     %pythoncode %{
-        def times(self):
-            return np.array(self.__time_vector())
-
-        def timesWritten(self):
-            return np.array(self.__timeWritten_vector())
-
         def explore_and_find_subattr(self, attr, attr_name, content):
             if "method" in str(type(attr)):
                 # The attribute is a method, nothing to do here
@@ -146,10 +98,10 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
                 # The attribute has a common type
                 content[attr_name] = attr
 
-        # This __getattr__ is written in message.i.
+        # This __getattr__ is written in newMessaging.ih.
         # It lets us return message struct attribute record as lists for plotting, etc.
         def __getattr__(self, name):
-            data = self.__record_vector()
+            data = self.record()
             data_record = []
             for rec in data.iterator():
                 content = {}
@@ -160,21 +112,28 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
                     data_record.append(content)
 
             return np.array(data_record)
-
-        def record(self):
-            return self.__record_vector
     %}
 };
 
-%extend std::vector<messageType ## Payload, std::allocator<messageType ## Payload>>{
-    %pythoncode %{
-        # This __getattr__ is written in message.i.
-        # It lets us return message struct attribute record as lists for plotting, etc.
-        def __getattr__(self, name):
-            data_record = []
-            for rec in self.iterator():
-                data_record.append(rec.__getattribute__(name))
-            return np.array(data_record)
-    %}
-};
+%define INSTANTIATE_TEMPLATES(messageType)
+    %template(messageType) Message<messageType ## Payload>;
+    %template(messageType ## OutMsgsVector) std::vector<Message<messageType ## Payload>, std::allocator<Message<messageType ## Payload>>>;
+    %template(messageType ## OutMsgsPtrVector) std::vector<Message<messageType ## Payload>*, std::allocator<Message<messageType ## Payload>*>>;
+    %template(messageType ## InMsgsVector) std::vector<ReadFunctor<messageType ## Payload>, std::allocator<ReadFunctor<messageType ## Payload>>>;
+    %template(messageType ## Reader) ReadFunctor<messageType ## Payload>;
+    %template(messageType ## Writer) WriteFunctor<messageType ## Payload>;
+    %template(messageType ## PayloadVector) std::vector<messageType ## Payload, std::allocator<messageType ## Payload>>;
+    %template(messageType ## Recorder) Recorder<messageType ## Payload>;
+
+    %extend std::vector<messageType ## Payload> {
+        %pythoncode %{
+            # This __getattr__ is written in newMessaging.ih.
+            # It lets us return message struct attribute record as lists for plotting, etc.
+            def __getattr__(self, name):
+                data_record = []
+                for rec in self:
+                    data_record.append(rec.__getattribute__(name))
+                return np.array(data_record)
+        %}
+    };
 %enddef

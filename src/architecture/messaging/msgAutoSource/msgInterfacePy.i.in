@@ -1,5 +1,3 @@
-#undef SWIGPYTHON_BUILTIN
-
 %module {type}Payload
 %{{
     #include "{baseDir}/{type}Payload.h"
@@ -8,7 +6,6 @@
 %}}
 
 %include "messaging/newMessaging.ih"
-%include "{baseDir}/{type}Payload.h"
 
 // for RWAvailabilityMsgPayload
 %include "fswAlgorithms/fswUtilities/fswDefinitions.h"
@@ -34,4 +31,6 @@ STRUCTASLIST(ReconfigBurnInfoMsgPayload)
 // for DataStorageStatusMsgPayload
 %template(StringVector) std::vector<std::string, std::allocator<std::string>>;
 
-INSTANTIATE_TEMPLATES({type}, {type}Payload, {baseDir})
+%include "{baseDir}/{type}Payload.h"
+
+INSTANTIATE_TEMPLATES({type})
