@@ -94,6 +94,8 @@ def centerOfBrightnessTest(show_plots, image, blur, saveTest, validImage, saveIm
     if windowCenter.all() != 0 and windowWidth != 0 and windowHeight != 0:
         moduleConfig.setWindowCenter(windowCenter)
         moduleConfig.setWindowSize(windowWidth, windowHeight)
+    brightnessIncreaseThreshold = 0.0
+    moduleConfig.setRelativeBrightnessIncreaseThreshold(brightnessIncreaseThreshold)
     unitTestSim.AddModelToTask(unitTaskName, moduleConfig)
 
     numberOfPointsBrightnessAverage = 3
@@ -131,7 +133,7 @@ def centerOfBrightnessTest(show_plots, image, blur, saveTest, validImage, saveIm
 
     # run simulation for 5 time steps (excluding initial time step at 0 ns), scale brightness each time step
     # necessary to test rolling brightness average
-    scaler = np.array([1.0, 0.9, 0.8, 0.7, 0.6])
+    scaler = np.array([0.5, 0.6, 0.8, 0.3, 0.9])
     brightness_ref = np.zeros([len(scaler)])
     brightnessAverage_ref = np.zeros([len(scaler)])
     for i in range(0, len(scaler)):
@@ -150,8 +152,8 @@ def centerOfBrightnessTest(show_plots, image, blur, saveTest, validImage, saveIm
             lower_idx = max(0, i-(numberOfPointsBrightnessAverage-1))
             brightnessAverage_ref[i] = np.mean(brightness_ref[lower_idx:i+1])
 
-    center = dataLog.centerOfBrightness[-1,:]
-    pixelNum = dataLog.pixelsFound[-1]
+    center = dataLog.centerOfBrightness[0, :]
+    pixelNum = dataLog.pixelsFound[0]
     brightnessAverage = dataLog.rollingAverageBrightness
 
     output_image = Image.new("RGB", input_image.size)
@@ -203,7 +205,7 @@ def centerOfBrightnessTest(show_plots, image, blur, saveTest, validImage, saveIm
 
         np.testing.assert_allclose(brightnessAverage,
                                    brightnessAverage_ref,
-                                   rtol=tolerance,
+                                   rtol=0.001,
                                    atol=0,
                                    err_msg='Variable: brightnessAverage',
                                    verbose=True)
