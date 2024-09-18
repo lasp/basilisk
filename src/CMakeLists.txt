@@ -106,9 +106,6 @@ function(sub_dir_list result curdir)
       PARENT_SCOPE)
 endfunction(sub_dir_list)
 
-# add header search directories
-include_directories("${CMAKE_SOURCE_DIR}")
-
 function(generate_package_libraries INIT_DIRECTORY AllLibs)
   # Find all _GeneralModuleFiles and put them into library targets so they aren't rewrapped, built with every module.
 
@@ -305,6 +302,9 @@ function(generate_package_targets TARGET_LIST LIB_DEP_LIST MODULE_DIR)
                                                     "${CMAKE_BINARY_DIR}/Basilisk/${MODULE_DIR}")
   endforeach()
 endfunction(generate_package_targets)
+
+# add header search directories
+include_directories("${CMAKE_SOURCE_DIR}")
 
 # Start of main projection configuration
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
