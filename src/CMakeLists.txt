@@ -325,6 +325,8 @@ endif()
 find_package(SWIG REQUIRED)
 include(UseSWIG)
 
+set(SWIG_USE_SWIG_DEPENDENCIES True)
+
 include(FetchContent)
 FetchContent_Declare(
   googletest
