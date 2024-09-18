@@ -1,7 +1,3 @@
-cmake_policy(SET CMP0078 NEW)
-find_package(SWIG REQUIRED)
-include(${SWIG_USE_FILE})
-
 function(generate_messages searchDir)
   file(
     GLOB_RECURSE message_files

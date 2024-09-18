@@ -181,10 +181,6 @@ function(find_package_targets PKG_DIR ALL_TARGET_LIST)
 endfunction(find_package_targets)
 
 function(generate_package_targets TARGET_LIST LIB_DEP_LIST MODULE_DIR)
-
-  find_package(SWIG REQUIRED)
-  include(UseSWIG REQUIRED)
-
   if(TARGET_LIST)
     string(REPLACE "/" ";" DirList "${TARGET_LIST}")
     list(GET DirList 1 SUBMODULE)
@@ -325,6 +321,9 @@ if(APPLE)
       "-Wl,@${CMAKE_CURRENT_SOURCE_DIR}/cmake/cpython-exported-symbols"
   )
 endif()
+
+find_package(SWIG REQUIRED)
+include(UseSwig)
 
 include(FetchContent)
 FetchContent_Declare(
