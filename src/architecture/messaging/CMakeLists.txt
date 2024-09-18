@@ -10,8 +10,17 @@ function(generate_messages searchDir)
     set(COMP_OUT_NAME "${CMAKE_CURRENT_SOURCE_DIR}/../../../dist3/autoSource/${TARGET_NAME}.i")
     add_custom_command(
       OUTPUT ${COMP_OUT_NAME}
-      COMMAND ${Python3_EXECUTABLE} generateSWIGModules.py ${COMP_OUT_NAME} ${msgFile} ${TARGET_NAME} ${searchDir}
-      DEPENDS ${msgFile}
+      COMMAND
+        ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/msgAutoSource/generateSWIGModules.py
+        ${COMP_OUT_NAME}
+        ${msgFile}
+        ${TARGET_NAME}
+        ${searchDir}
+      DEPENDS
+        ${CMAKE_CURRENT_SOURCE_DIR}/msgAutoSource/generateSWIGModules.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/msgAutoSource/msgInterfacePy.i.in
+        ${msgFile}
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/msgAutoSource/)
     set_property(SOURCE ${COMP_OUT_NAME} PROPERTY CPLUSPLUS ON)
 
