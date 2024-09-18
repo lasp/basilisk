@@ -19,9 +19,10 @@ if(BUILD_VIZINTERFACE)
      foreach(PROTO_DEF ${PROTO_DEFS})
          get_filename_component(PROTO_TARGET "${PROTO_DEF}" NAME_WE)
 
-         add_custom_command(TARGET GeneratedProtobufMessages PRE_BUILD
+         add_custom_command(
+             OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${PROTO_TARGET}.pb.cc" "${CMAKE_CURRENT_SOURCE_DIR}/${PROTO_TARGET}.pb.h"
+             DEPENDS "${PROTO_DEF}"
              COMMAND "${PROTOC_EXE}" "--proto_path=${CMAKE_CURRENT_SOURCE_DIR}" "--cpp_out=${CMAKE_CURRENT_SOURCE_DIR}" "${PROTO_DEF}"
-             BYPRODUCTS "${CMAKE_CURRENT_SOURCE_DIR}/${PROTO_TARGET}.pb.cc" "${CMAKE_CURRENT_SOURCE_DIR}/${PROTO_TARGET}.pb.h"
              WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
              COMMENT "Generating protobuf (C++): ${PROTO_TARGET}"
          )
