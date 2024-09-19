@@ -142,10 +142,16 @@ void FlybyPoint::setToleranceForCollinearity(double tolerance) {
     this->toleranceForCollinearity = tolerance;
 }
 
-int64_t FlybyPoint::getSignOfOrbitNormalFrameVector() const {
+/*! Get the sign (+1 or -1) of the axis of rotation of the Z axis during the flyby
+ @param int sign (+1 or -1)
+ */
+int FlybyPoint::getSignOfOrbitNormalFrameVector() const {
     return this->signOfOrbitNormalFrameVector;
 }
 
-void FlybyPoint::setSignOfOrbitNormalFrameVector(int64_t sign) {
+/*! Set the sign (+1 or -1) of the axis of rotation of the Z axis during the flyby
+ @param int sign (+1 or -1)
+ */
+void FlybyPoint::setSignOfOrbitNormalFrameVector(int sign) {
     this->signOfOrbitNormalFrameVector = sign;
 }
