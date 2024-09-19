@@ -81,7 +81,7 @@ class rwFactory(object):
                 Viscous friction coefficient
             Js: float
                 RW inertia about spin axis
-        
+
         Returns
         -------
         RWConfigSimMsg : message structure
@@ -142,24 +142,6 @@ class rwFactory(object):
             varMaxPower = -1.0              # default value turns off max power limit
         RW.P_max = varMaxPower
 
-        if 'fCoulomb' in kwargs:
-            varfCoulomb = kwargs['fCoulomb']
-            if not isinstance(varfCoulomb, float):
-                print('ERROR: fCoulomb must be a FLOAT argument')
-                exit(1)
-        else:
-            varfCoulomb = 0.0       # default value
-        RW.fCoulomb = varfCoulomb
-
-        if 'fStatic' in kwargs:
-            varfStatic = kwargs['fStatic']
-            if not isinstance(varfStatic, float):
-                print('ERROR: fStatic must be a FLOAT argument')
-                exit(1)
-        else:
-            varfStatic = 0.0       # default value
-        RW.fStatic = varfStatic
-
         if 'betaStatic' in kwargs:
             varbetaStatic = kwargs['betaStatic']
             if not isinstance(varbetaStatic, float):
@@ -200,6 +182,18 @@ class rwFactory(object):
         except:
             print('ERROR: RW type ' + rwType + ' is not implemented')
             exit(1)
+
+        if 'fCoulomb' in kwargs:
+            RW.fCoulomb = kwargs['fCoulomb']
+            if not isinstance(RW.fCoulomb, float):
+                print('ERROR: fCoulomb must be a FLOAT argument')
+                exit(1)
+
+        if 'fStatic' in kwargs:
+            RW.fStatic = kwargs['fStatic']
+            if not isinstance(RW.fStatic, float):
+                print('ERROR: fStatic must be a FLOAT argument')
+                exit(1)
 
         if 'u_min' in kwargs:
             varu_min = kwargs['u_min']
@@ -371,9 +365,9 @@ class rwFactory(object):
         JsList = []
         uMaxList = []
         for rw in self.rwList.values():
-            
+
             flatGsHat = [element for sublist in rw.gsHat_B for element in sublist]
-            
+
             GsMatrix_B.extend(flatGsHat)
             JsList.extend([rw.Js])
             uMaxList.extend([rw.u_max])
