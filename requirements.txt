@@ -1,4 +1,6 @@
 conan>=1.40.1, <2.00.0
+datashader==0.15.2
+holoviews==1.16.0
 opencv-contrib-python
 opencv-python
 pandas
