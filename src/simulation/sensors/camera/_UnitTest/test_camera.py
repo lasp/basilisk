@@ -157,8 +157,20 @@ def cameraTest(show_plots, image, gauss, darkCurrent, saltPepper, cosmic, blurSi
     inCamMsg = messaging.CameraImageMsg().write(inputMessageData)
     module.imageInMsg.subscribeTo(inCamMsg)
 
-    module.cameraIsOn = 1
-    module.sigma_CB = [0, 0, 1]
+    module.setCameraOn()
+    module.setBodyToCameraMrp([0, 0, 1])
+    module.setCameraBodyFramePosition([1, 1, 1])
+    module.setParentName("name")
+    module.setCameraId(1)
+    module.setResolution([2,2])
+    module.setFieldOfView([2.2, 2.2])
+    module.setImageCadence(1)
+    module.setFocalLength(2.1)
+    module.setGaussianPointSpreadFunction(3)
+    module.setCosmicRayFrequency(2.2)
+    module.setReadNoise(2.3)
+    module.setSystemGain(3.3)
+    module.setEnableStrayLight(True)
 
     # Noise parameters
     module.gaussian = gauss
@@ -170,6 +182,9 @@ def cameraTest(show_plots, image, gauss, darkCurrent, saltPepper, cosmic, blurSi
     # Setup logging on the test module output message so that we get all the writes to it
     dataLog = module.cameraConfigOutMsg.recorder()
     unitTestSim.AddModelToTask(unitTaskName, dataLog)
+    # For the CameraModelMsg
+    dataLogCameraModel = module.cameraModelOutMsg.recorder()
+    unitTestSim.AddModelToTask(unitTaskName, dataLogCameraModel)
 
     # Need to call the self-init and cross-init methods
     unitTestSim.InitializeSimulation()
@@ -193,6 +208,35 @@ def cameraTest(show_plots, image, gauss, darkCurrent, saltPepper, cosmic, blurSi
     isOnValues = dataLog.isOn
     pos = dataLog.sigma_CB
 
+    np.testing.assert_array_equal(dataLogCameraModel.cameraBodyFramePosition[-1, :],
+                                  np.array(module.getCameraBodyFramePosition()).reshape(3),
+                                  "Test failed camera position in the body frame")
+    np.testing.assert_array_equal(dataLogCameraModel.bodyToCameraMrp[-1, :],
+                                  np.array(module.getBodyToCameraMrp()).reshape(3),
+                                  "Test failed MRP defining the orientation of the camera frame relative to the body frame")
+    np.testing.assert_array_equal(dataLogCameraModel.resolution[-1, :], np.array(module.getResolution()).reshape(2),
+                                  "Test failed camera resolution")
+    np.testing.assert_array_equal(dataLogCameraModel.fieldOfView[-1, :], np.array(module.getFieldOfView()).reshape(2),
+                                  "Test failed camera field of view")
+    np.testing.assert_equal(dataLogCameraModel.cameraId, module.getCameraId(), "Test failed camera ID")
+    np.testing.assert_equal(dataLogCameraModel.isOn, module.isCameraOn(), "Test failed isOn")
+    np.testing.assert_equal(dataLogCameraModel.parentName, module.getParentName(),
+                            "Test failed name of the parent body to which the camera should be attached")
+    np.testing.assert_equal(dataLogCameraModel.renderRate, module.getImageCadence(),
+                            "Test failed frame time interval at which to capture images")
+    np.testing.assert_equal(dataLogCameraModel.focalLength, module.getFocalLength(),
+                            "Test failed camera focal length")
+    np.testing.assert_equal(dataLogCameraModel.gaussianPointSpreadFunction, module.getGaussianPointSpreadFunction(),
+                            "Test failed size of square Gaussian kernel to model point spread function")
+    np.testing.assert_equal(dataLogCameraModel.cosmicRayFrequency, module.getCosmicRayFrequency(),
+                            "Test failed frequency at which cosmic rays can strike the camera")
+    np.testing.assert_equal(dataLogCameraModel.readNoise, module.getReadNoise(),
+                            "Test failed read noise standard deviation")
+    np.testing.assert_equal(dataLogCameraModel.systemGain, module.getSystemGain(),
+                            "System failed mapping from current to pixel intensity")
+    np.testing.assert_equal(dataLogCameraModel.enableStrayLight, module.getEnableStrayLight(),
+                            "Test failed add basic stray light modelling to images")
+
     #  Error check for corruption
     err = np.linalg.norm(np.linalg.norm(input_image, axis=2) - np.linalg.norm(output_image, axis=2)) / np.linalg.norm(
         np.linalg.norm(input_image, axis=2))
@@ -207,7 +251,7 @@ def cameraTest(show_plots, image, gauss, darkCurrent, saltPepper, cosmic, blurSi
 
     #   print out success message if no error were found
     for i in range(3):
-        if np.abs(pos[-1, i] - module.sigma_CB[i]) > 1E-10:
+        if np.abs(pos[-1, i] - module.cameraPos_B[i]) > 1E-10:
             testFailCount += 1
             testMessages.append("Test failed position " + image)
 
