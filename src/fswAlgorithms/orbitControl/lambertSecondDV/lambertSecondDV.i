@@ -34,11 +34,8 @@
 %include "lambertSecondDV.h"
 
 %include "architecture/msgPayloadDefC/LambertSolutionMsgPayload.h"
-struct LambertSolutionMsg_C;
 %include "architecture/msgPayloadDefC/DesiredVelocityMsgPayload.h"
-struct DesiredVelocityMsg_C;
 %include "architecture/msgPayloadDefC/DvBurnCmdMsgPayload.h"
-struct DvBurnCmdMsg_C;
 
 %pythoncode %{
 import sys

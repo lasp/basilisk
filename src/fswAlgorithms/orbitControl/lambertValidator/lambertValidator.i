@@ -34,17 +34,11 @@
 %include "lambertValidator.h"
 
 %include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-struct NavTransMsg_C;
 %include "architecture/msgPayloadDefC/LambertProblemMsgPayload.h"
-struct LambertProblemMsg_C;
 %include "architecture/msgPayloadDefC/LambertSolutionMsgPayload.h"
-struct LambertSolutionMsg_C;
 %include "architecture/msgPayloadDefC/LambertPerformanceMsgPayload.h"
-struct LambertPerformanceMsg_C;
 %include "architecture/msgPayloadDefC/DvBurnCmdMsgPayload.h"
-struct DvBurnCmdMsg_C;
 %include "architecture/msgPayloadDefC/LambertValidatorMsgPayload.h"
-struct LambertValidatorMsg_C;
 
 %pythoncode %{
 import sys

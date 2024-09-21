@@ -37,9 +37,7 @@ from Basilisk.architecture.swig_common_model import *
 %include "architecture/msgPayloadDefCpp/SICPMsgPayload.h"
 %include "architecture/msgPayloadDefCpp/PointCloudMsgPayload.h"
 %include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-struct EphemerisMsg_C;
 %include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
-struct CameraConfigMsg_C;
 
 %pythoncode %{
 import sys

@@ -34,11 +34,8 @@
 %include "lambertSurfaceRelativeVelocity.h"
 
 %include "architecture/msgPayloadDefC/LambertProblemMsgPayload.h"
-struct LambertProblemMsg_C;
 %include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-struct EphemerisMsg_C;
 %include "architecture/msgPayloadDefC/DesiredVelocityMsgPayload.h"
-struct DesiredVelocityMsg_C;
 
 %pythoncode %{
 import sys

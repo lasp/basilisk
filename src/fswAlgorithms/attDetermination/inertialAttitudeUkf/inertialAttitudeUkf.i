@@ -34,19 +34,12 @@ from Basilisk.architecture.swig_common_model import *
 %include "architecture/msgPayloadDefCpp/FilterResidualsMsgPayload.h"
 
 %include "architecture/msgPayloadDefC/STAttMsgPayload.h"
-struct STAttMsg_C;
 %include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-struct VehicleConfigMsg_C;
 %include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
-struct RWArrayConfigMsg_C;
 %include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
-struct RWSpeedMsg_C;
 %include "architecture/msgPayloadDefC/AccDataMsgPayload.h"
-struct AccDataMsg_C;
 %include "architecture/msgPayloadDefC/AccPktDataMsgPayload.h"
-struct AccPktDataMsg_C;
 %include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-struct NavAttMsg_C;
 
 %pythoncode %{
 import sys

@@ -36,9 +36,7 @@
 %include "architecture/msgPayloadDefCpp/PointCloudMsgPayload.h"
 %include "architecture/msgPayloadDefCpp/PairedKeyPointsMsgPayload.h"
 %include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
-struct CameraConfigMsg_C;
 %include "architecture/msgPayloadDefC/CameraLocalizationMsgPayload.h"
-struct CameraLocalizationMsg_C;
 
 %pythoncode %{
 import sys
