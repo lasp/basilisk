@@ -2,6 +2,11 @@ Executive Summary
 -----------------
 This module computes a reference attitude frame for a spacecraft in relative motion about a small body. The implicit assumption is that the small body's mass does not perturb the motion of the spacecraft significantly. Conceptually, this module is equivalent to :ref:`hillPoint`, but for the relative motion of a spacecraft about a body that is not the main center of gravity.
 
+The module starts by reading the first input under the assumption it is valid in order to compute a solution.
+At a settable cadence, the module will update the pointing profile with the help of a new filter solution. In order to
+so it will check the validity of the solution: 1. It does not predict a collision trajectory 2. It does not predict
+excessive rates and accelerations. If the solution is valid a new pointing profile is constructed.
+
 Message Connection Descriptions
 -------------------------------
 The following table lists all the module input and output messages. The msg type contains a link to the message structure definition, while the description
@@ -54,6 +59,9 @@ The limitations of this module are inherent to the geometry of the problem, whic
 
 Due to the difficulty in developing an analytical formulation for the reference angular rate and angular acceleration vectors, these are computed via second-order finite differences. At every time step, the current reference attitude and time stamp are stored in a module variable and used in the following time updates to compute angular rates and accelerations via finite differences.
 
+Algorithmically, there is an assumption that the first solution is somewhat trustworthy as it seeds the algorithm.
+It will get overwritten by new measurements if they are valid, but it does not get checked for validity as the algorithm
+needs a seed.
 
 User Guide
 ----------
@@ -64,7 +72,7 @@ The required module configuration is::
     flybyGuid.dtFilterData = 60
     flybyGuid.signOfOrbitNormalFrameVector = 1
     unitTestSim.AddModelToTask(unitTaskName, flybyGuid)
-	
+
 The module is configurable with the following parameters:
 
 .. list-table:: Module Parameters
@@ -77,10 +85,15 @@ The module is configurable with the following parameters:
    * - ``dtFilterData``
      - 0
      - time between two consecutive filter reads. If defaulted to zero, the filter information is read at every update call
+   * - ``maxRate``
+     - 0
+     - If non-zero, the maximum allowable predicted rate at closest approach. If greater discard filter input
+   * - ``maxAcceleration``
+     - 0
+     - If non-zero, the maximum allowable predicted max acceleration. If greater discard filter input
    * - ``signOfOrbitNormalFrameVector``
      - 1
      - Sign of the orbit normal rxv vector used to build the frame. If equal to 1, the frame is a traditional Hill frame if -1, it flips the orbit normal axis to point "down" relative to the orbtial momentum
    * - ``flybyModel``
      - 0
      - 0 for rectilinear flyby model, 1 for Clohessy-Wiltshire model
-
