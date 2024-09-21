@@ -1,8 +1,6 @@
 cmake_policy(SET CMP0078 NEW)
 find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
-find_package(PythonLibs 3 REQUIRED)
-find_package(PythonInterp 3 REQUIRED)
 
 function(generate_messages searchDir)
   file(
@@ -16,7 +14,7 @@ function(generate_messages searchDir)
     set(COMP_OUT_NAME "${CMAKE_CURRENT_SOURCE_DIR}/../../../dist3/autoSource/${TARGET_NAME}.i")
     add_custom_command(
       OUTPUT ${COMP_OUT_NAME}
-      COMMAND ${PYTHON_EXECUTABLE} generateSWIGModules.py ${COMP_OUT_NAME} ${msgFile} ${TARGET_NAME} ${searchDir}
+      COMMAND ${Python3_EXECUTABLE} generateSWIGModules.py ${COMP_OUT_NAME} ${msgFile} ${TARGET_NAME} ${searchDir}
       DEPENDS ${msgFile}
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/msgAutoSource/)
     set_property(SOURCE ${COMP_OUT_NAME} PROPERTY CPLUSPLUS ON)
@@ -25,16 +23,15 @@ function(generate_messages searchDir)
       set_property(
         SOURCE ${COMP_OUT_NAME}
         PROPERTY SWIG_FLAGS "-I${CMAKE_CURRENT_SOURCE_DIR}/../" "-I${CMAKE_CURRENT_SOURCE_DIR}/../../"
-                 "-I${EXTERNAL_MODULES_PATH}/" "-I${CMAKE_BINARY_DIR}/autoSource/" "-I${PYTHON_INCLUDE_PATH}")
+                 "-I${EXTERNAL_MODULES_PATH}/" "-I${CMAKE_BINARY_DIR}/autoSource/")
       include_directories("${EXTERNAL_MODULES_PATH}/")
     else()
       set_property(
         SOURCE ${COMP_OUT_NAME}
         PROPERTY SWIG_FLAGS "-I${CMAKE_CURRENT_SOURCE_DIR}/../" "-I${CMAKE_CURRENT_SOURCE_DIR}/../../"
-                 "-I${CMAKE_BINARY_DIR}/autoSource/" "-I${PYTHON_INCLUDE_PATH}")
+                 "-I${CMAKE_BINARY_DIR}/autoSource/")
     endif(NOT "${EXTERNAL_MODULES_PATH}" STREQUAL "")
 
-    include_directories(${PYTHON_INCLUDE_PATH})
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../")
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/")
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../../")
@@ -57,7 +54,7 @@ function(generate_messages searchDir)
       ${SWIG_MODULE_${TARGET_NAME}_REAL_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY_RELEASE
                                                          "${CMAKE_BINARY_DIR}/Basilisk/architecture/messaging")
     target_link_libraries(${SWIG_MODULE_${TARGET_NAME}_REAL_NAME} PUBLIC architectureLib)
-    target_link_libraries(${SWIG_MODULE_${TARGET_NAME}_REAL_NAME} PRIVATE ${PYTHON_LIBRARIES})
+    target_link_libraries(${SWIG_MODULE_${TARGET_NAME}_REAL_NAME} PRIVATE Python3::SABIModule)
   endforeach()
 endfunction(generate_messages)
 
@@ -75,7 +72,7 @@ endif (NOT "${EXTERNAL_MODULES_PATH}" STREQUAL "")
 add_custom_command(
         OUTPUT ${CMAKE_BINARY_DIR}/Basilisk/architecture/messaging/__init__.py
         COMMAND
-        ${PYTHON_EXECUTABLE} generateMessagePackageInit.py ${message_directory_paths}
+        ${Python3_EXECUTABLE} generateMessagePackageInit.py ${message_directory_paths}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/msgAutoSource
         VERBATIM
 )
