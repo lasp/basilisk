@@ -26,9 +26,9 @@
 #include <string>
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 
-#include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-#include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-#include "architecture/msgPayloadDefC/AccessMsgPayload.h"
+#include "msgPayloadDef/SpicePlanetStateMsgPayload.h"
+#include "msgPayloadDef/SCStatesMsgPayload.h"
+#include "msgPayloadDef/AccessMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 
 #include "architecture/utilities/bskLogging.h"
@@ -43,7 +43,7 @@ public:
     bool ReadMessages();
     void WriteMessages(uint64_t CurrentClock);
     void addSpacecraftToModel(Message<SCStatesMsgPayload> *tmpScMsg);
-    
+
 private:
     void computeAccess();
 
@@ -59,7 +59,7 @@ public:
     std::vector<Message<AccessMsgPayload>*> accessOutMsgs;           //!< vector of ground location access messages
     std::vector<ReadFunctor<SCStatesMsgPayload>> scStateInMsgs; //!< vector of other sc state input messages
     Eigen::Vector3d r_LB_B;      //!< [m]  position of the location relative to the spacecraft frame origin B, in B frame components
-    
+
     BSKLogger bskLogger;         //!< -- BSK Logging
 
 private:

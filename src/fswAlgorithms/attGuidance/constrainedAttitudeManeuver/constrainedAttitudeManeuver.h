@@ -27,10 +27,10 @@
 #include <map>
 #include <iostream>
 #include <fstream>
-#include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-#include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-#include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-#include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
+#include "msgPayloadDef/SCStatesMsgPayload.h"
+#include "msgPayloadDef/VehicleConfigMsgPayload.h"
+#include "msgPayloadDef/SpicePlanetStateMsgPayload.h"
+#include "msgPayloadDef/AttRefMsgPayload.h"
 
 //! @brief The constraintStruc structure is used to store the inertial direction of the keep-in and keep-out zones
 struct constraintStruct {

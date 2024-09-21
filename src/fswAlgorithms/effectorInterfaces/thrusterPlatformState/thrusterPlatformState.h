@@ -24,9 +24,9 @@
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
-#include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
-#include "architecture/msgPayloadDefC/THRConfigMsgPayload.h"
+#include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
+#include "msgPayloadDef/HingedRigidBodyMsgPayload.h"
+#include "msgPayloadDef/THRConfigMsgPayload.h"
 
 
 /*! @brief Top level structure for the sub-module routines. */

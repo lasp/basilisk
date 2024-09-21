@@ -21,10 +21,10 @@
 #define CAMERATRIANGULATION_H
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "architecture/msgPayloadDefCpp/PointCloudMsgPayload.h"
-#include "architecture/msgPayloadDefCpp/PairedKeyPointsMsgPayload.h"
-#include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
-#include "architecture/msgPayloadDefC/CameraLocalizationMsgPayload.h"
+#include "msgPayloadDef/PointCloudMsgPayload.h"
+#include "msgPayloadDef/PairedKeyPointsMsgPayload.h"
+#include "msgPayloadDef/CameraConfigMsgPayload.h"
+#include "msgPayloadDef/CameraLocalizationMsgPayload.h"
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/messaging/messaging.h"
 #include "architecture/utilities/avsEigenSupport.h"

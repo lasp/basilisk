@@ -24,9 +24,9 @@
 #include "architecture/utilities/avsEigenSupport.h"
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-#include "architecture/msgPayloadDefC/CmdForceBodyMsgPayload.h"
-#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
+#include "msgPayloadDef/NavAttMsgPayload.h"
+#include "msgPayloadDef/CmdForceBodyMsgPayload.h"
+#include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
 
 
 /*! @brief A class to compute rate damping control */

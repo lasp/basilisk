@@ -10,19 +10,19 @@
 
 #include <vector>
 
-#include "architecture/msgPayloadDefC/RWConfigLogMsgPayload.h"
-#include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-#include "architecture/msgPayloadDefC/DeviceCmdMsgPayload.h"
-#include "architecture/msgPayloadDefC/DataNodeUsageMsgPayload.h"
-#include "architecture/msgPayloadDefC/DataNodeUsageMsgPayload.h"
-#include "architecture/msgPayloadDefCpp/DataStorageStatusMsgPayload.h"
-#include "architecture/msgPayloadDefC/PowerStorageStatusMsgPayload.h"
-#include "architecture/msgPayloadDefC/FuelTankMsgPayload.h"
-#include "architecture/msgPayloadDefC/ColorMsgPayload.h"
+#include "msgPayloadDef/RWConfigLogMsgPayload.h"
+#include "msgPayloadDef/SCStatesMsgPayload.h"
+#include "msgPayloadDef/DeviceCmdMsgPayload.h"
+#include "msgPayloadDef/DataNodeUsageMsgPayload.h"
+#include "msgPayloadDef/DataNodeUsageMsgPayload.h"
+#include "msgPayloadDef/DataStorageStatusMsgPayload.h"
+#include "msgPayloadDef/PowerStorageStatusMsgPayload.h"
+#include "msgPayloadDef/FuelTankMsgPayload.h"
+#include "msgPayloadDef/ColorMsgPayload.h"
 
-#include "architecture/msgPayloadDefCpp/CSSConfigLogMsgPayload.h"
-#include "architecture/msgPayloadDefCpp/THROutputMsgPayload.h"
-#include "architecture/msgPayloadDefCpp/ChargeMsmMsgPayload.h"
+#include "msgPayloadDef/CSSConfigLogMsgPayload.h"
+#include "msgPayloadDef/THROutputMsgPayload.h"
+#include "msgPayloadDef/ChargeMsmMsgPayload.h"
 
 #include "architecture/messaging/messaging.h"
 
@@ -324,9 +324,9 @@ VizSpacecraftData
     std::vector<GenericSensor *> genericSensorList;             //!< [-] (Optional) Vector of generic sensor configuration info
 
     std::vector<Transceiver *> transceiverList;                 //!< [-] (Optional) Vector of transceiver configuration info
-    
+
     std::vector<GenericStorage *> genericStorageList;           //!< [-] (Optional) Vector of generic storage configuration info
-    
+
     std::vector<Light *> lightList;                             //!<[-] (Optional) Vector of spacecraft light devices
 
     std::string spacecraftSprite = "";                          //!< Set sprite for this spacecraft only through shape name and optional int RGB color values [0,255] Possible settings: "CIRCLE","SQUARE", "STAR", "TRIANGLE" or "bskSat" for a 2D spacecraft sprite of the bskSat shape

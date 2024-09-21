@@ -30,8 +30,8 @@
 
 %include "rateMsgConverter.h"
 
-%include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-%include "architecture/msgPayloadDefC/IMUSensorBodyMsgPayload.h"
+%include "msgPayloadDef/NavAttMsgPayload.h"
+%include "msgPayloadDef/IMUSensorBodyMsgPayload.h"
 
 %pythoncode %{
 import sys

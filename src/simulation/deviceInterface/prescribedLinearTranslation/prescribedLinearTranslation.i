@@ -31,8 +31,8 @@ from Basilisk.architecture.swig_common_model import *
 %include "sys_model.i"
 %include "prescribedLinearTranslation.h"
 
-%include "architecture/msgPayloadDefC/PrescribedTranslationMsgPayload.h"
-%include "architecture/msgPayloadDefC/LinearTranslationRigidBodyMsgPayload.h"
+%include "msgPayloadDef/PrescribedTranslationMsgPayload.h"
+%include "msgPayloadDef/LinearTranslationRigidBodyMsgPayload.h"
 
 %pythoncode %{
 import sys

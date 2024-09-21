@@ -25,9 +25,9 @@
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/THRArrayConfigMsgPayload.h"
-#include "architecture/msgPayloadDefC/THRArrayCmdForceMsgPayload.h"
-#include "architecture/msgPayloadDefC/THRArrayOnTimeCmdMsgPayload.h"
+#include "msgPayloadDef/THRArrayConfigMsgPayload.h"
+#include "msgPayloadDef/THRArrayCmdForceMsgPayload.h"
+#include "msgPayloadDef/THRArrayOnTimeCmdMsgPayload.h"
 
 #include "architecture/utilities/macroDefinitions.h"
 #include "architecture/utilities/bskLogging.h"

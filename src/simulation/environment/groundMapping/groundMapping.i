@@ -32,13 +32,13 @@
 %include "sys_model.i"
 %include "groundMapping.h"
 
-%include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
+%include "msgPayloadDef/SpicePlanetStateMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
+%include "msgPayloadDef/SCStatesMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/AccessMsgPayload.h"
+%include "msgPayloadDef/AccessMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/GroundStateMsgPayload.h"
+%include "msgPayloadDef/GroundStateMsgPayload.h"
 
 
 %pythoncode %{

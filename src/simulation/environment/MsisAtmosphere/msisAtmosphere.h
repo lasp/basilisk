@@ -29,7 +29,7 @@
 
 #include "simulation/environment/_GeneralModuleFiles/atmosphereBase.h"
 
-#include "architecture/msgPayloadDefC/SwDataMsgPayload.h"
+#include "msgPayloadDef/SwDataMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 

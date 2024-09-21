@@ -25,7 +25,7 @@
 #include <Eigen/Dense>
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "architecture/msgPayloadDefC/TemperatureMsgPayload.h"
+#include "msgPayloadDef/TemperatureMsgPayload.h"
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/messaging/messaging.h"
 #include "architecture/utilities/gauss_markov.h"

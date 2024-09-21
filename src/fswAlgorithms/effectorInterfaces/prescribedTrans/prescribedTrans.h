@@ -24,8 +24,8 @@
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/PrescribedTranslationMsgPayload.h"
-#include "architecture/msgPayloadDefC/LinearTranslationRigidBodyMsgPayload.h"
+#include "msgPayloadDef/PrescribedTranslationMsgPayload.h"
+#include "msgPayloadDef/LinearTranslationRigidBodyMsgPayload.h"
 
 /*! @brief Top level structure for the sub-module routines. */
 class PrescribedTrans : public SysModel {

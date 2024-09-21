@@ -34,8 +34,8 @@ from Basilisk.architecture.swig_common_model import *
 
 %include "scalingIterativeClosestPoint.h"
 
-%include "architecture/msgPayloadDefCpp/SICPMsgPayload.h"
-%include "architecture/msgPayloadDefCpp/PointCloudMsgPayload.h"
+%include "msgPayloadDef/SICPMsgPayload.h"
+%include "msgPayloadDef/PointCloudMsgPayload.h"
 
 %pythoncode %{
 import sys

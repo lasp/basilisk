@@ -22,8 +22,8 @@
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/IMUSensorBodyMsgPayload.h"
-#include "architecture/msgPayloadDefC/IMUSensorMsgPayload.h"
+#include "msgPayloadDef/IMUSensorBodyMsgPayload.h"
+#include "msgPayloadDef/IMUSensorMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 

@@ -26,9 +26,9 @@
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/HillRelStateMsgPayload.h"
-#include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
-#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
+#include "msgPayloadDef/HillRelStateMsgPayload.h"
+#include "msgPayloadDef/AttRefMsgPayload.h"
+#include "msgPayloadDef/NavAttMsgPayload.h"
 
 
 

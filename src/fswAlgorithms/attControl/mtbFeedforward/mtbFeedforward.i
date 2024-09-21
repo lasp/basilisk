@@ -31,10 +31,10 @@
 
 %include "mtbFeedforward.h"
 
-%include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
-%include "architecture/msgPayloadDefC/MTBCmdMsgPayload.h"
-%include "architecture/msgPayloadDefC/TAMSensorBodyMsgPayload.h"
-%include "architecture/msgPayloadDefC/MTBArrayConfigMsgPayload.h"
+%include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
+%include "msgPayloadDef/MTBCmdMsgPayload.h"
+%include "msgPayloadDef/TAMSensorBodyMsgPayload.h"
+%include "msgPayloadDef/MTBArrayConfigMsgPayload.h"
 
 %pythoncode %{
 import sys

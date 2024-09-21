@@ -29,7 +29,7 @@ from Basilisk.architecture.swig_common_model import *
 %include "sys_model.i"
 %include "waypointReference.h"
 
-%include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
+%include "msgPayloadDef/AttRefMsgPayload.h"
 struct AttRefMsg_C;
 
 %pythoncode %{

@@ -23,10 +23,10 @@
 #include "architecture/utilities/bskLogging.h"
 #include <Eigen/Dense>
 
-#include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-#include "architecture/msgPayloadDefC/SolarFluxMsgPayload.h"
-#include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-#include "architecture/msgPayloadDefC/EclipseMsgPayload.h"
+#include "msgPayloadDef/SpicePlanetStateMsgPayload.h"
+#include "msgPayloadDef/SolarFluxMsgPayload.h"
+#include "msgPayloadDef/SCStatesMsgPayload.h"
+#include "msgPayloadDef/EclipseMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 
 
@@ -35,7 +35,7 @@ class SolarFlux: public SysModel {
 public:
     SolarFlux(){};
     ~SolarFlux(){};
-    
+
     void Reset(uint64_t CurrentSimNanos) override;
     void UpdateState(uint64_t CurrentSimNanos) override;
     void writeMessages(uint64_t CurrentSimNanos);

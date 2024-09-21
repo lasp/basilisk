@@ -30,16 +30,16 @@ from Basilisk.architecture.swig_common_model import *
 
 %include "inertialAttitudeUkf.h"
 
-%include "architecture/msgPayloadDefCpp/FilterMsgPayload.h"
-%include "architecture/msgPayloadDefCpp/FilterResidualsMsgPayload.h"
+%include "msgPayloadDef/FilterMsgPayload.h"
+%include "msgPayloadDef/FilterResidualsMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/STAttMsgPayload.h"
-%include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
-%include "architecture/msgPayloadDefC/AccDataMsgPayload.h"
-%include "architecture/msgPayloadDefC/AccPktDataMsgPayload.h"
-%include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
+%include "msgPayloadDef/STAttMsgPayload.h"
+%include "msgPayloadDef/VehicleConfigMsgPayload.h"
+%include "msgPayloadDef/RWArrayConfigMsgPayload.h"
+%include "msgPayloadDef/RWSpeedMsgPayload.h"
+%include "msgPayloadDef/AccDataMsgPayload.h"
+%include "msgPayloadDef/AccPktDataMsgPayload.h"
+%include "msgPayloadDef/NavAttMsgPayload.h"
 
 %pythoncode %{
 import sys

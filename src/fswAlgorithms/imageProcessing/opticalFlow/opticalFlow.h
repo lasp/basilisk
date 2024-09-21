@@ -28,10 +28,10 @@
 #include "opencv2/core/mat.hpp"
 #include "opencv2/imgcodecs.hpp"
 
-#include "architecture/msgPayloadDefC/CameraImageMsgPayload.h"
-#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-#include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-#include "architecture/msgPayloadDefCpp/PairedKeyPointsMsgPayload.h"
+#include "msgPayloadDef/CameraImageMsgPayload.h"
+#include "msgPayloadDef/NavAttMsgPayload.h"
+#include "msgPayloadDef/EphemerisMsgPayload.h"
+#include "msgPayloadDef/PairedKeyPointsMsgPayload.h"
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/avsEigenMRP.h"
@@ -45,7 +45,7 @@ class OpticalFlow: public SysModel {
 public:
     OpticalFlow();
     ~OpticalFlow();
-    
+
     void UpdateState(uint64_t CurrentSimNanos);
     void Reset(uint64_t CurrentSimNanos);
     void makeMask(cv::Mat const & inputBWImage, cv::Mat & mask) const;

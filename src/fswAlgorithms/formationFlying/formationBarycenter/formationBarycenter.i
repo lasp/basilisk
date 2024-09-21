@@ -31,8 +31,8 @@
 %include "sys_model.i"
 %include "formationBarycenter.h"
 
-%include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
+%include "msgPayloadDef/VehicleConfigMsgPayload.h"
+%include "msgPayloadDef/NavTransMsgPayload.h"
 
 %pythoncode %{
 import sys

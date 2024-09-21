@@ -30,9 +30,9 @@
 
 %include "solarArrayReference.h"
 
-%include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-%include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
-%include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
+%include "msgPayloadDef/NavAttMsgPayload.h"
+%include "msgPayloadDef/AttRefMsgPayload.h"
+%include "msgPayloadDef/HingedRigidBodyMsgPayload.h"
 
 %pythoncode %{
 import sys

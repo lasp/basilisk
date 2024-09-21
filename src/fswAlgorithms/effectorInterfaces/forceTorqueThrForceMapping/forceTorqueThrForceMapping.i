@@ -31,11 +31,11 @@
 
 %include "forceTorqueThrForceMapping.h"
 
-%include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
-%include "architecture/msgPayloadDefC/CmdForceBodyMsgPayload.h"
-%include "architecture/msgPayloadDefC/THRArrayConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/THRArrayCmdForceMsgPayload.h"
+%include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
+%include "msgPayloadDef/CmdForceBodyMsgPayload.h"
+%include "msgPayloadDef/THRArrayConfigMsgPayload.h"
+%include "msgPayloadDef/VehicleConfigMsgPayload.h"
+%include "msgPayloadDef/THRArrayCmdForceMsgPayload.h"
 
 %pythoncode %{
 import sys

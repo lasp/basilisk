@@ -22,8 +22,8 @@
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-#include "architecture/msgPayloadDefC/AccDataMsgPayload.h"
+#include "msgPayloadDef/NavTransMsgPayload.h"
+#include "msgPayloadDef/AccDataMsgPayload.h"
 #include "architecture/utilities/bskLogging.h"
 
 /*! @brief Top level structure for the CSS sensor interface system.  Contains all parameters for the

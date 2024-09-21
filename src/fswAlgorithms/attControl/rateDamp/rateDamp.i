@@ -32,8 +32,8 @@ from Basilisk.architecture.swig_common_model import *
 %include "sys_model.h"
 %include "rateDamp.h"
 
-%include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-%include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
+%include "msgPayloadDef/NavAttMsgPayload.h"
+%include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
 
 %pythoncode %{
 import sys

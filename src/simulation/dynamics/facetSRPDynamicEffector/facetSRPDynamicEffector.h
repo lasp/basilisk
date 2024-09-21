@@ -26,8 +26,8 @@
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-#include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
+#include "msgPayloadDef/SpicePlanetStateMsgPayload.h"
+#include "msgPayloadDef/HingedRigidBodyMsgPayload.h"
 #include "simulation/dynamics/_GeneralModuleFiles/stateData.h"
 #include "architecture/utilities/avsEigenSupport.h"
 #include "architecture/utilities/avsEigenMRP.h"
@@ -73,4 +73,4 @@ private:
     bool facetAngleMsgRead;                                                              //!< Boolean variable signaling that the facet articulation messages are read
 };
 
-#endif 
+#endif

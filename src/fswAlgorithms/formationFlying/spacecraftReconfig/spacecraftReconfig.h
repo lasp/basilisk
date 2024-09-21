@@ -24,12 +24,12 @@
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-#include "architecture/msgPayloadDefC/THRArrayConfigMsgPayload.h"
-#include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
-#include "architecture/msgPayloadDefC/THRArrayOnTimeCmdMsgPayload.h"
-#include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-#include "architecture/msgPayloadDefC/ReconfigBurnArrayInfoMsgPayload.h"
+#include "msgPayloadDef/NavTransMsgPayload.h"
+#include "msgPayloadDef/THRArrayConfigMsgPayload.h"
+#include "msgPayloadDef/AttRefMsgPayload.h"
+#include "msgPayloadDef/THRArrayOnTimeCmdMsgPayload.h"
+#include "msgPayloadDef/VehicleConfigMsgPayload.h"
+#include "msgPayloadDef/ReconfigBurnArrayInfoMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/utilities/orbitalMotion.h"

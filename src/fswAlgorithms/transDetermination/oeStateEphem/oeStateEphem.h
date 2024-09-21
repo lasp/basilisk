@@ -22,8 +22,8 @@
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/TDBVehicleClockCorrelationMsgPayload.h"
-#include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
+#include "msgPayloadDef/TDBVehicleClockCorrelationMsgPayload.h"
+#include "msgPayloadDef/EphemerisMsgPayload.h"
 
 #define MAX_OE_RECORDS 10
 #define MAX_OE_COEFF 20

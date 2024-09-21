@@ -24,12 +24,12 @@
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
-#include "architecture/msgPayloadDefC/BodyHeadingMsgPayload.h"
-#include "architecture/msgPayloadDefC/InertialHeadingMsgPayload.h"
-#include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-#include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
+#include "msgPayloadDef/AttRefMsgPayload.h"
+#include "msgPayloadDef/BodyHeadingMsgPayload.h"
+#include "msgPayloadDef/InertialHeadingMsgPayload.h"
+#include "msgPayloadDef/NavTransMsgPayload.h"
+#include "msgPayloadDef/EphemerisMsgPayload.h"
+#include "msgPayloadDef/NavAttMsgPayload.h"
 
 typedef enum celestialBody{
     notSun = 0,

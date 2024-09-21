@@ -25,10 +25,10 @@
 #include "fswAlgorithms/pointCloudProcessing/SICP/sicpDefinitions.h"
 #include "architecture/messaging/messaging.h"
 
-#include "architecture/msgPayloadDefCpp/SICPMsgPayload.h"
-#include "architecture/msgPayloadDefCpp/PointCloudMsgPayload.h"
-#include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-#include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
+#include "msgPayloadDef/SICPMsgPayload.h"
+#include "msgPayloadDef/PointCloudMsgPayload.h"
+#include "msgPayloadDef/EphemerisMsgPayload.h"
+#include "msgPayloadDef/CameraConfigMsgPayload.h"
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/avsEigenSupport.h"
@@ -40,7 +40,7 @@ class InitializeICP: public SysModel {
 public:
     InitializeICP();
     ~InitializeICP();
-    
+
     void UpdateState(uint64_t CurrentSimNanos) override;
     void Reset(uint64_t CurrentSimNanos) override;
 

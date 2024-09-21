@@ -30,8 +30,8 @@
 
 %include "hillStateConverter.h"
 
-%include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-%include "architecture/msgPayloadDefC/HillRelStateMsgPayload.h"
+%include "msgPayloadDef/NavTransMsgPayload.h"
+%include "msgPayloadDef/HillRelStateMsgPayload.h"
 
 %pythoncode %{
 import sys

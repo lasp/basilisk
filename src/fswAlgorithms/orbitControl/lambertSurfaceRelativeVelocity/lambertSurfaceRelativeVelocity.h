@@ -22,9 +22,9 @@
 #define LAMBERTSURFACERELATIVEVELOCITY_H
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "architecture/msgPayloadDefC/LambertProblemMsgPayload.h"
-#include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-#include "architecture/msgPayloadDefC/DesiredVelocityMsgPayload.h"
+#include "msgPayloadDef/LambertProblemMsgPayload.h"
+#include "msgPayloadDef/EphemerisMsgPayload.h"
+#include "msgPayloadDef/DesiredVelocityMsgPayload.h"
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/messaging/messaging.h"
 #include "architecture/utilities/avsEigenSupport.h"

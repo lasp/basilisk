@@ -33,8 +33,8 @@
 %include "sys_model.h"
 %include "visualOdometry.h"
 
-%include "architecture/msgPayloadDefCpp/PairedKeyPointsMsgPayload.h"
-%include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
+%include "msgPayloadDef/PairedKeyPointsMsgPayload.h"
+%include "msgPayloadDef/CameraConfigMsgPayload.h"
 struct CameraConfigMsg_C;
 
 %pythoncode %{

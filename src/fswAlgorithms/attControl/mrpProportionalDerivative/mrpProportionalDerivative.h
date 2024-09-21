@@ -22,9 +22,9 @@
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
-#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
-#include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
+#include "msgPayloadDef/AttGuidMsgPayload.h"
+#include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
+#include "msgPayloadDef/VehicleConfigMsgPayload.h"
 #include "architecture/utilities/bskLogging.h"
 #include <Eigen/Dense>
 #include <stdint.h>
@@ -48,7 +48,7 @@ public:
     ReadFunctor<AttGuidMsgPayload> guidInMsg;                         //!< Attitude guidance input message
     ReadFunctor<VehicleConfigMsgPayload> vehConfigInMsg;              //!< Vehicle configuration input message
     Message<CmdTorqueBodyMsgPayload> cmdTorqueOutMsg;                 //!< Commanded torque output message
-    
+
     BSKLogger *bskLogger;                                             //!< BSK Logging
 
 private:

@@ -30,7 +30,7 @@ from Basilisk.architecture.swig_common_model import *
 STRUCTASLIST(EphemChangeConfig)
 %include "ephemDifference.h"
 
-%include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
+%include "msgPayloadDef/EphemerisMsgPayload.h"
 
 %pythoncode %{
 import sys

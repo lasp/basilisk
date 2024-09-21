@@ -23,9 +23,9 @@
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-#include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-#include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
+#include "msgPayloadDef/NavAttMsgPayload.h"
+#include "msgPayloadDef/VehicleConfigMsgPayload.h"
+#include "msgPayloadDef/AttGuidMsgPayload.h"
 
 struct SlewProperties {
     // user-requested properties

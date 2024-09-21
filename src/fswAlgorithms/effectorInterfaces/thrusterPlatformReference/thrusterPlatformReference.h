@@ -24,13 +24,13 @@
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-#include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
-#include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
-#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
-#include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
-#include "architecture/msgPayloadDefC/BodyHeadingMsgPayload.h"
-#include "architecture/msgPayloadDefC/THRConfigMsgPayload.h"
+#include "msgPayloadDef/VehicleConfigMsgPayload.h"
+#include "msgPayloadDef/RWArrayConfigMsgPayload.h"
+#include "msgPayloadDef/RWSpeedMsgPayload.h"
+#include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
+#include "msgPayloadDef/HingedRigidBodyMsgPayload.h"
+#include "msgPayloadDef/BodyHeadingMsgPayload.h"
+#include "msgPayloadDef/THRConfigMsgPayload.h"
 
 
 enum momentumDumping{

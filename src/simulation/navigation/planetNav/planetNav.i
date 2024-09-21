@@ -32,7 +32,7 @@
 %include "sys_model.i"
 %include "planetNav.h"
 
-%include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
+%include "msgPayloadDef/EphemerisMsgPayload.h"
 
 
 %pythoncode %{

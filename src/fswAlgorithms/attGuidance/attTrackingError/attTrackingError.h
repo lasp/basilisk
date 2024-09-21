@@ -22,9 +22,9 @@
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
-#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-#include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
+#include "msgPayloadDef/AttGuidMsgPayload.h"
+#include "msgPayloadDef/NavAttMsgPayload.h"
+#include "msgPayloadDef/AttRefMsgPayload.h"
 
 #include <stdint.h>
 #include "architecture/utilities/bskLogging.h"

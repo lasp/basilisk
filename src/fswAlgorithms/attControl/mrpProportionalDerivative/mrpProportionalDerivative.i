@@ -31,11 +31,11 @@ from Basilisk.architecture.swig_common_model import *
 %include "sys_model.i"
 %include "mrpProportionalDerivative.h"
 
-%include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
+%include "msgPayloadDef/AttGuidMsgPayload.h"
 struct AttGuidMsg_C;
-%include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
+%include "msgPayloadDef/VehicleConfigMsgPayload.h"
 struct VehicleConfigMsg_C;
-%include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
+%include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
 struct CmdTorqueBodyMsg_C;
 
 %pythoncode %{

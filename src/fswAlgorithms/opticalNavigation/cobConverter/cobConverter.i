@@ -32,16 +32,16 @@ from Basilisk.architecture.swig_common_model import *
 
 %include "cobConverter.h"
 
-%include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
+%include "msgPayloadDef/CameraConfigMsgPayload.h"
 struct CameraConfigMsg_C;
-%include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
+%include "msgPayloadDef/NavAttMsgPayload.h"
 struct NavAttMsg_C;
-%include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
+%include "msgPayloadDef/EphemerisMsgPayload.h"
 struct EphemerisMsg_C;
 
-%include "architecture/msgPayloadDefCpp/OpNavUnitVecMsgPayload.h"
-%include "architecture/msgPayloadDefCpp/OpNavCOBMsgPayload.h"
-%include "architecture/msgPayloadDefCpp/OpNavCOMMsgPayload.h"
+%include "msgPayloadDef/OpNavUnitVecMsgPayload.h"
+%include "msgPayloadDef/OpNavCOBMsgPayload.h"
+%include "msgPayloadDef/OpNavCOMMsgPayload.h"
 
 
 %pythoncode %{

@@ -35,15 +35,15 @@ from Basilisk.architecture.swig_common_model import *
 %include "../_GeneralModuleFiles/powerNodeBase.h"
 %include "simpleSolarPanel.h"
 
-%include "architecture/msgPayloadDefC/PowerNodeUsageMsgPayload.h"
+%include "msgPayloadDef/PowerNodeUsageMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/DeviceStatusMsgPayload.h"
+%include "msgPayloadDef/DeviceStatusMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
+%include "msgPayloadDef/SCStatesMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
+%include "msgPayloadDef/SpicePlanetStateMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/EclipseMsgPayload.h"
+%include "msgPayloadDef/EclipseMsgPayload.h"
 
 
 %pythoncode %{

@@ -28,12 +28,12 @@
 %include "../_GeneralModuleFiles/dataNodeBase.h"
 %include "spaceToGroundTransmitter.h"
 
-%include "architecture/msgPayloadDefC/DataNodeUsageMsgPayload.h"
+%include "msgPayloadDef/DataNodeUsageMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/DeviceCmdMsgPayload.h"
+%include "msgPayloadDef/DeviceCmdMsgPayload.h"
 
-%include "architecture/msgPayloadDefCpp/DataStorageStatusMsgPayload.h"
-%include "architecture/msgPayloadDefC/AccessMsgPayload.h"
+%include "msgPayloadDef/DataStorageStatusMsgPayload.h"
+%include "msgPayloadDef/AccessMsgPayload.h"
 
 
 %pythoncode %{

@@ -22,7 +22,7 @@
 #define HINGEDRIGIDBODYMOTORSENSOR_H
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
+#include "msgPayloadDef/HingedRigidBodyMsgPayload.h"
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/messaging/messaging.h"
 #include "architecture/utilities/discretize.h"
@@ -37,7 +37,7 @@ public:
 
     void Reset(uint64_t CurrentSimNanos);
     void UpdateState(uint64_t CurrentSimNanos);
-    
+
     void setRNGSeed(unsigned int newSeed); //!< for setting the seed
 
 public:
@@ -48,7 +48,7 @@ public:
     double thetaDotBias;        //!< [rad/s] bias added to true theta dot
     double thetaLSB;            //!< [rad] discretization for theta
     double thetaDotLSB;         //!< [rad/s] discretization for theta dot
-    
+
     ReadFunctor<HingedRigidBodyMsgPayload> hingedRigidBodyMotorSensorInMsg;  //!< input message for true rigid body state (theta, theta dot)
 
     Message<HingedRigidBodyMsgPayload> hingedRigidBodyMotorSensorOutMsg;  //!< output message for sensed rigid body state

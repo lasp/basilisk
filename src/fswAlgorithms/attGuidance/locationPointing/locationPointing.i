@@ -31,12 +31,12 @@
 
 %include "locationPointing.h"
 
-%include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-%include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-%include "architecture/msgPayloadDefC/GroundStateMsgPayload.h"
-%include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
-%include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
-%include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
+%include "msgPayloadDef/NavAttMsgPayload.h"
+%include "msgPayloadDef/NavTransMsgPayload.h"
+%include "msgPayloadDef/GroundStateMsgPayload.h"
+%include "msgPayloadDef/AttGuidMsgPayload.h"
+%include "msgPayloadDef/AttRefMsgPayload.h"
+%include "msgPayloadDef/EphemerisMsgPayload.h"
 
 %pythoncode %{
 import sys

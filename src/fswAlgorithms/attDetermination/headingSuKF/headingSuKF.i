@@ -34,10 +34,10 @@
 
 %include "architecture/utilities/ukfUtilities.h"
 
-%include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/HeadingFilterMsgPayload.h"
-%include "architecture/msgPayloadDefC/OpNavMsgPayload.h"
-%include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
+%include "msgPayloadDef/VehicleConfigMsgPayload.h"
+%include "msgPayloadDef/HeadingFilterMsgPayload.h"
+%include "msgPayloadDef/OpNavMsgPayload.h"
+%include "msgPayloadDef/CameraConfigMsgPayload.h"
 
 %pythoncode %{
 import sys

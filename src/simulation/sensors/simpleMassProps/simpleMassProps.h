@@ -21,8 +21,8 @@
 #define SIMPLE_MASS_PROPS_H
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "architecture/msgPayloadDefC/SCMassPropsMsgPayload.h"
-#include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
+#include "msgPayloadDef/SCMassPropsMsgPayload.h"
+#include "msgPayloadDef/VehicleConfigMsgPayload.h"
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/messaging/messaging.h"
 
@@ -43,7 +43,7 @@ public:
 
     ReadFunctor<SCMassPropsMsgPayload> scMassPropsInMsg;        //!< sc mass properties input msg
     Message<VehicleConfigMsgPayload> vehicleConfigOutMsg;       //!< vehicle configuration output msg
-    
+
 
     BSKLogger bskLogger;              //!< -- BSK Logging
 

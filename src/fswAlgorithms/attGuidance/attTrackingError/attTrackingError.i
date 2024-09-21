@@ -30,9 +30,9 @@
 
 %include "attTrackingError.h"
 
-%include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-%include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
-%include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
+%include "msgPayloadDef/NavAttMsgPayload.h"
+%include "msgPayloadDef/AttGuidMsgPayload.h"
+%include "msgPayloadDef/AttRefMsgPayload.h"
 
 %pythoncode %{
     import sys

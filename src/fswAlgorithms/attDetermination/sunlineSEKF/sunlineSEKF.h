@@ -24,10 +24,10 @@
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-#include "architecture/msgPayloadDefC/CSSArraySensorMsgPayload.h"
-#include "architecture/msgPayloadDefC/SunlineFilterMsgPayload.h"
-#include "architecture/msgPayloadDefC/CSSConfigMsgPayload.h"
+#include "msgPayloadDef/NavAttMsgPayload.h"
+#include "msgPayloadDef/CSSArraySensorMsgPayload.h"
+#include "msgPayloadDef/SunlineFilterMsgPayload.h"
+#include "msgPayloadDef/CSSConfigMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 #include <string.h>

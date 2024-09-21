@@ -30,9 +30,9 @@
 
 %include "hillToAttRef.h"
 
-%include "architecture/msgPayloadDefC/HillRelStateMsgPayload.h"
-%include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
-%include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
+%include "msgPayloadDef/HillRelStateMsgPayload.h"
+%include "msgPayloadDef/AttRefMsgPayload.h"
+%include "msgPayloadDef/NavAttMsgPayload.h"
 
 %pythoncode %{
 import sys

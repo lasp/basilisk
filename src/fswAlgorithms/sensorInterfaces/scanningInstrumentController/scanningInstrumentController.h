@@ -23,10 +23,10 @@
 #include <stdint.h>
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/AccessMsgPayload.h"
-#include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
-#include "architecture/msgPayloadDefC/DeviceStatusMsgPayload.h"
-#include "architecture/msgPayloadDefC/DeviceCmdMsgPayload.h"
+#include "msgPayloadDef/AccessMsgPayload.h"
+#include "msgPayloadDef/AttGuidMsgPayload.h"
+#include "msgPayloadDef/DeviceStatusMsgPayload.h"
+#include "msgPayloadDef/DeviceCmdMsgPayload.h"
 #include "architecture/utilities/bskLogging.h"
 
 /*! @brief Module to perform continuous instrument control

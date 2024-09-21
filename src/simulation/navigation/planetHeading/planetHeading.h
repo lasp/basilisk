@@ -24,9 +24,9 @@
 #include "architecture/utilities/avsEigenMRP.h"
 #include "architecture/utilities/bskLogging.h"
 
-#include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-#include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-#include "architecture/msgPayloadDefC/BodyHeadingMsgPayload.h"
+#include "msgPayloadDef/SpicePlanetStateMsgPayload.h"
+#include "msgPayloadDef/SCStatesMsgPayload.h"
+#include "msgPayloadDef/BodyHeadingMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 
 
@@ -35,7 +35,7 @@ class PlanetHeading: public SysModel {
 public:
     PlanetHeading();
     ~PlanetHeading(){};
-    
+
     void UpdateState(uint64_t CurrentSimNanos) override;
     void Reset(uint64_t CurrentSimNanos) override;
     void writeMessages(uint64_t CurrentSimNanos);

@@ -24,12 +24,12 @@
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
-#include "architecture/msgPayloadDefC/ArrayMotorTorqueMsgPayload.h"
-#include "architecture/msgPayloadDefC/RWAvailabilityMsgPayload.h"
-#include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
-#include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
-#include "architecture/msgPayloadDefC/ArrayMotorVoltageMsgPayload.h"
+#include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
+#include "msgPayloadDef/ArrayMotorTorqueMsgPayload.h"
+#include "msgPayloadDef/RWAvailabilityMsgPayload.h"
+#include "msgPayloadDef/RWArrayConfigMsgPayload.h"
+#include "msgPayloadDef/RWSpeedMsgPayload.h"
+#include "msgPayloadDef/ArrayMotorVoltageMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 

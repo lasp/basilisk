@@ -22,11 +22,11 @@
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-#include "architecture/msgPayloadDefC/CSSConfigMsgPayload.h"
-#include "architecture/msgPayloadDefC/CSSUnitConfigMsgPayload.h"
-#include "architecture/msgPayloadDefC/CSSArraySensorMsgPayload.h"
-#include "architecture/msgPayloadDefC/SunlineFilterMsgPayload.h"
+#include "msgPayloadDef/NavAttMsgPayload.h"
+#include "msgPayloadDef/CSSConfigMsgPayload.h"
+#include "msgPayloadDef/CSSUnitConfigMsgPayload.h"
+#include "msgPayloadDef/CSSArraySensorMsgPayload.h"
+#include "msgPayloadDef/SunlineFilterMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 #include <stdint.h>

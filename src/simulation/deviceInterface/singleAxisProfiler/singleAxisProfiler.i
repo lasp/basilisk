@@ -31,8 +31,8 @@ from Basilisk.architecture.swig_common_model import *
 %include "sys_model.i"
 %include "singleAxisProfiler.h"
 
-%include "architecture/msgPayloadDefC/StepperMotorMsgPayload.h"
-%include "architecture/msgPayloadDefC/PrescribedRotationMsgPayload.h"
+%include "msgPayloadDef/StepperMotorMsgPayload.h"
+%include "msgPayloadDef/PrescribedRotationMsgPayload.h"
 
 %pythoncode %{
 import sys

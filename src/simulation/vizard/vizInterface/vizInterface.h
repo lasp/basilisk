@@ -1,10 +1,10 @@
 /*
  Copyright (c) 2016, Autonomous Vehicle Systems Lab, Univeristy of Colorado at Boulder
- 
+
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
  copyright notice and this permission notice appear in all copies.
- 
+
  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -12,7 +12,7 @@
  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- 
+
  */
 
 
@@ -28,11 +28,11 @@
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "simulation/vizard/_GeneralModuleFiles/vizStructures.h"
 
-#include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
-#include "architecture/msgPayloadDefC/CameraImageMsgPayload.h"
-#include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-#include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
-#include "architecture/msgPayloadDefC/EpochMsgPayload.h"
+#include "msgPayloadDef/CameraConfigMsgPayload.h"
+#include "msgPayloadDef/CameraImageMsgPayload.h"
+#include "msgPayloadDef/SpicePlanetStateMsgPayload.h"
+#include "msgPayloadDef/RWSpeedMsgPayload.h"
+#include "msgPayloadDef/EpochMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 
 #include "architecture/utilities/bskLogging.h"
@@ -70,7 +70,7 @@ public:
     std::vector<ReadFunctor<CameraConfigMsgPayload>> cameraConfInMsgs;        //!< [-] vector of incoming camera data messages
     std::vector<MsgCurrStatus> cameraConfMsgStatus;                           //!< [-] vector of msg status of incoming camera data
     std::vector<CameraConfigMsgPayload> cameraConfigBuffers;                  //!< [-] vector of Camera config buffers
-        
+
     int64_t FrameNumber;                        //!< Number of frames that have been updated for TimeStamp message
     std::string protoFilename;                  //!< Filename for where to save the protobuff message
     VizSettings settings;                       //!< [-] container for the Viz settings that can be specified from BSK
@@ -79,7 +79,7 @@ public:
     std::string comProtocol;                    //!< Communication protocol to use when connecting to Vizard
     std::string comAddress;                     //!< Communication address to use when connecting to Vizard
     std::string comPortNumber;                  //!< Communication port number to use when connecting to Vizard
-    
+
     ReadFunctor<EpochMsgPayload> epochInMsg;    //!< [-] simulation epoch date/time input msg
     MsgCurrStatus epochMsgStatus;                   //!< [-] ID of the epoch msg
     EpochMsgPayload epochMsgBuffer;                   //!< [-] epoch msg data

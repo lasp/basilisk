@@ -31,10 +31,10 @@ STRUCTASLIST(PixelLineConvertData)
 
 %include "pixelLineConverter.h"
 
-%include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-%include "architecture/msgPayloadDefC/OpNavCirclesMsgPayload.h"
-%include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/OpNavMsgPayload.h"
+%include "msgPayloadDef/NavAttMsgPayload.h"
+%include "msgPayloadDef/OpNavCirclesMsgPayload.h"
+%include "msgPayloadDef/CameraConfigMsgPayload.h"
+%include "msgPayloadDef/OpNavMsgPayload.h"
 
 %pythoncode %{
 import sys

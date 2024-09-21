@@ -31,7 +31,7 @@
 %include "sys_model.i"
 %include "tempMeasurement.h"
 
-%include "architecture/msgPayloadDefC/TemperatureMsgPayload.h"
+%include "msgPayloadDef/TemperatureMsgPayload.h"
 
 
 %pythoncode %{

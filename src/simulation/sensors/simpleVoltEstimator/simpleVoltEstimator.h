@@ -23,7 +23,7 @@
 #include <vector>
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/gauss_markov.h"
-#include "architecture/msgPayloadDefC/VoltMsgPayload.h"
+#include "msgPayloadDef/VoltMsgPayload.h"
 #include "architecture/utilities/bskLogging.h"
 #include <Eigen/Dense>
 #include "architecture/messaging/messaging.h"
@@ -49,7 +49,7 @@ public:
     VoltMsgPayload trueVoltState;    //!< -- voltage state without errors
     VoltMsgPayload estVoltState;     //!< -- voltage state including errors
     BSKLogger bskLogger;              //!< -- BSK Logging
-    
+
     ReadFunctor<VoltMsgPayload> voltInMsg;          //!< voltage input msg
 
 private:

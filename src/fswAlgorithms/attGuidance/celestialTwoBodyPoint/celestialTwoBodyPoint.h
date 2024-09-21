@@ -24,9 +24,9 @@
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-#include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-#include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
+#include "msgPayloadDef/EphemerisMsgPayload.h"
+#include "msgPayloadDef/NavTransMsgPayload.h"
+#include "msgPayloadDef/AttRefMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 

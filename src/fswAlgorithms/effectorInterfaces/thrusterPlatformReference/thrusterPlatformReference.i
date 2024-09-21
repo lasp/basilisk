@@ -30,13 +30,13 @@
 
 %include "thrusterPlatformReference.h"
 
-%include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/THRConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
-%include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
-%include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
-%include "architecture/msgPayloadDefC/BodyHeadingMsgPayload.h"
+%include "msgPayloadDef/VehicleConfigMsgPayload.h"
+%include "msgPayloadDef/THRConfigMsgPayload.h"
+%include "msgPayloadDef/RWArrayConfigMsgPayload.h"
+%include "msgPayloadDef/RWSpeedMsgPayload.h"
+%include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
+%include "msgPayloadDef/HingedRigidBodyMsgPayload.h"
+%include "msgPayloadDef/BodyHeadingMsgPayload.h"
 
 %pythoncode %{
 import sys

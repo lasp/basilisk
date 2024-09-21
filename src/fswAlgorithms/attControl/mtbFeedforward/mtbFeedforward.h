@@ -24,10 +24,10 @@
 #include <stdint.h>
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
-#include "architecture/msgPayloadDefC/MTBCmdMsgPayload.h"
-#include "architecture/msgPayloadDefC/TAMSensorBodyMsgPayload.h"
-#include "architecture/msgPayloadDefC/MTBArrayConfigMsgPayload.h"
+#include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
+#include "msgPayloadDef/MTBCmdMsgPayload.h"
+#include "msgPayloadDef/TAMSensorBodyMsgPayload.h"
+#include "msgPayloadDef/MTBArrayConfigMsgPayload.h"
 
 /*! @brief Top level structure for the sub-module routines. */
 class MtbFeedforward : public SysModel {

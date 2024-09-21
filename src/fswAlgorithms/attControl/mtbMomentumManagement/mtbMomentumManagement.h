@@ -22,12 +22,12 @@
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/MTBCmdMsgPayload.h"
-#include "architecture/msgPayloadDefC/TAMSensorBodyMsgPayload.h"
-#include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
-#include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
-#include "architecture/msgPayloadDefC/MTBArrayConfigMsgPayload.h"
-#include "architecture/msgPayloadDefC/ArrayMotorTorqueMsgPayload.h"
+#include "msgPayloadDef/MTBCmdMsgPayload.h"
+#include "msgPayloadDef/TAMSensorBodyMsgPayload.h"
+#include "msgPayloadDef/RWSpeedMsgPayload.h"
+#include "msgPayloadDef/RWArrayConfigMsgPayload.h"
+#include "msgPayloadDef/MTBArrayConfigMsgPayload.h"
+#include "msgPayloadDef/ArrayMotorTorqueMsgPayload.h"
 #include <stdio.h>
 #include "architecture/utilities/macroDefinitions.h"
 

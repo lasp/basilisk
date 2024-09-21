@@ -33,9 +33,9 @@
 %include "sys_model.h"
 %include "lambertPlanner.h"
 
-%include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
+%include "msgPayloadDef/NavTransMsgPayload.h"
 struct NavTransMsg_C;
-%include "architecture/msgPayloadDefC/LambertProblemMsgPayload.h"
+%include "msgPayloadDef/LambertProblemMsgPayload.h"
 struct LambertProblemMsg_C;
 
 %pythoncode %{

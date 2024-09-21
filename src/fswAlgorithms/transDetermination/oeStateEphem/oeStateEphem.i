@@ -31,8 +31,8 @@ from Basilisk.architecture.swig_common_model import *
 STRUCTASLIST(ChebyOERecord)
 %include "oeStateEphem.h"
 
-%include "architecture/msgPayloadDefC/TDBVehicleClockCorrelationMsgPayload.h"
-%include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
+%include "msgPayloadDef/TDBVehicleClockCorrelationMsgPayload.h"
+%include "msgPayloadDef/EphemerisMsgPayload.h"
 
 %pythoncode %{
 import sys

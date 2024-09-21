@@ -42,9 +42,9 @@ from Basilisk.architecture.swig_common_model import *
 
 %include "simulation/onboardDataHandling/_GeneralModuleFiles/dataStorageUnitBase.h"
 %include "simpleStorageUnit.h"
-%include "architecture/msgPayloadDefC/DataNodeUsageMsgPayload.h"
+%include "msgPayloadDef/DataNodeUsageMsgPayload.h"
 
-%include "architecture/msgPayloadDefCpp/DataStorageStatusMsgPayload.h"
+%include "msgPayloadDef/DataStorageStatusMsgPayload.h"
 
 %pythoncode %{
 import sys

@@ -31,9 +31,9 @@ from Basilisk.architecture.swig_common_model import *
 %include "sys_model.i"
 %include "imuSensor.h"
 
-%include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
+%include "msgPayloadDef/SCStatesMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/IMUSensorMsgPayload.h"
+%include "msgPayloadDef/IMUSensorMsgPayload.h"
 
 
 %pythoncode %{

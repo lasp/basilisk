@@ -32,9 +32,9 @@ from Basilisk.architecture.swig_common_model import *
 %include "sys_model.i"
 %include "camera.h"
 
-%include "architecture/msgPayloadDefC/CameraImageMsgPayload.h"
+%include "msgPayloadDef/CameraImageMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
+%include "msgPayloadDef/CameraConfigMsgPayload.h"
 
 
 %pythoncode %{

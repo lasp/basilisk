@@ -33,11 +33,11 @@
 %include "simulation/onboardDataHandling/_GeneralModuleFiles/dataNodeBase.h"
 %include "simpleTransmitter.h"
 
-%include "architecture/msgPayloadDefC/DataNodeUsageMsgPayload.h"
+%include "msgPayloadDef/DataNodeUsageMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/DeviceCmdMsgPayload.h"
+%include "msgPayloadDef/DeviceCmdMsgPayload.h"
 
-%include "architecture/msgPayloadDefCpp/DataStorageStatusMsgPayload.h"
+%include "msgPayloadDef/DataStorageStatusMsgPayload.h"
 
 %pythoncode %{
 import sys

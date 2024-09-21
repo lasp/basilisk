@@ -22,7 +22,7 @@
 #define BASILISK_SPACETOGROUNDTRANSMITTER_H
 
 #include "simulation/onboardDataHandling/_GeneralModuleFiles/dataNodeBase.h"
-#include "architecture/msgPayloadDefC/AccessMsgPayload.h"
+#include "msgPayloadDef/AccessMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 

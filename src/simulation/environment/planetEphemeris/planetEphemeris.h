@@ -23,7 +23,7 @@
 #include <vector>
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 
-#include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
+#include "msgPayloadDef/SpicePlanetStateMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 
 #include "architecture/utilities/orbitalMotion.h"

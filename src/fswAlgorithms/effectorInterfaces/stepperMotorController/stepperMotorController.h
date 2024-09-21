@@ -22,8 +22,8 @@
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
 #include "architecture/utilities/bskLogging.h"
-#include "architecture/msgPayloadDefC/MotorStepCommandMsgPayload.h"
-#include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
+#include "msgPayloadDef/MotorStepCommandMsgPayload.h"
+#include "msgPayloadDef/HingedRigidBodyMsgPayload.h"
 #include <cstdint>
 
 /*! @brief Stepper Motor Controller Class */

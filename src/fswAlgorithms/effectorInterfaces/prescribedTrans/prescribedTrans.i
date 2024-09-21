@@ -30,9 +30,9 @@
 
 %include "prescribedTrans.h"
 
-%include "architecture/msgPayloadDefC/PrescribedTranslationMsgPayload.h"
+%include "msgPayloadDef/PrescribedTranslationMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/LinearTranslationRigidBodyMsgPayload.h"
+%include "msgPayloadDef/LinearTranslationRigidBodyMsgPayload.h"
 
 %pythoncode %{
 import sys

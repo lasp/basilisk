@@ -33,9 +33,9 @@ from Basilisk.architecture.swig_common_model import *
 %include "sys_model.i"
 %include "radiationPressure.h"
 
-%include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
+%include "msgPayloadDef/SpicePlanetStateMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/EclipseMsgPayload.h"
+%include "msgPayloadDef/EclipseMsgPayload.h"
 
 
 %pythoncode %{

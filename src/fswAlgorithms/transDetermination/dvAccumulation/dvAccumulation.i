@@ -29,9 +29,9 @@ from Basilisk.architecture.swig_common_model import *
 %include "swig_conly_data.i"
 %include "dvAccumulation.h"
 
-%include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-%include "architecture/msgPayloadDefC/AccDataMsgPayload.h"
-%include "architecture/msgPayloadDefC/AccPktDataMsgPayload.h"
+%include "msgPayloadDef/NavTransMsgPayload.h"
+%include "msgPayloadDef/AccDataMsgPayload.h"
+%include "msgPayloadDef/AccPktDataMsgPayload.h"
 
 %pythoncode %{
 import sys

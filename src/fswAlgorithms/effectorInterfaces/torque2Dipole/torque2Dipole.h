@@ -25,9 +25,9 @@
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/TAMSensorBodyMsgPayload.h"
-#include "architecture/msgPayloadDefC/DipoleRequestBodyMsgPayload.h"
-#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
+#include "msgPayloadDef/TAMSensorBodyMsgPayload.h"
+#include "msgPayloadDef/DipoleRequestBodyMsgPayload.h"
+#include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
 
 /*! @brief Top level structure for the sub-module routines. */
 class Torque2Dipole : public SysModel {

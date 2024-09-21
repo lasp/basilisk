@@ -34,11 +34,11 @@
 
 %include "architecture/utilities/ukfUtilities.h"
 
-%include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
+%include "msgPayloadDef/NavTransMsgPayload.h"
 struct NavTransMsg_C;
-%include "architecture/msgPayloadDefC/OpNavMsgPayload.h"
+%include "msgPayloadDef/OpNavMsgPayload.h"
 struct OpNavMsg_C;
-%include "architecture/msgPayloadDefC/OpNavFilterMsgPayload.h"
+%include "msgPayloadDef/OpNavFilterMsgPayload.h"
 struct OpNavFilterMsg_C;
 
 %pythoncode %{

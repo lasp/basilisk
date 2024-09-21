@@ -32,10 +32,10 @@ from Basilisk.architecture.swig_common_model import *
 
 %include "timeClosestApproach.h"
 
-%include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
+%include "msgPayloadDef/NavTransMsgPayload.h"
 struct NavTransMsg_C;
-%include "architecture/msgPayloadDefCpp/FilterMsgPayload.h"
-%include "architecture/msgPayloadDefCpp/TimeClosestApproachMsgPayload.h"
+%include "msgPayloadDef/FilterMsgPayload.h"
+%include "msgPayloadDef/TimeClosestApproachMsgPayload.h"
 
 %pythoncode %{
 import sys

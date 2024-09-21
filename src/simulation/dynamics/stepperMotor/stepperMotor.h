@@ -21,8 +21,8 @@
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/MotorStepCommandMsgPayload.h"
-#include "architecture/msgPayloadDefC/StepperMotorMsgPayload.h"
+#include "msgPayloadDef/MotorStepCommandMsgPayload.h"
+#include "msgPayloadDef/StepperMotorMsgPayload.h"
 #include <stdint.h>
 
 /*! @brief Stepper motor class. */

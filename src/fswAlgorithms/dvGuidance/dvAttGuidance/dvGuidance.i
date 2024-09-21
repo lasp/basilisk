@@ -30,8 +30,8 @@
 
 %include "dvGuidance.h"
 
-%include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
-%include "architecture/msgPayloadDefC/DvBurnCmdMsgPayload.h"
+%include "msgPayloadDef/AttRefMsgPayload.h"
+%include "msgPayloadDef/DvBurnCmdMsgPayload.h"
 
 %pythoncode %{
 import sys

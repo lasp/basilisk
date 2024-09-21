@@ -23,8 +23,8 @@
 
 #include <vector>
 
-#include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-#include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
+#include "msgPayloadDef/VehicleConfigMsgPayload.h"
+#include "msgPayloadDef/NavTransMsgPayload.h"
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/bskLogging.h"

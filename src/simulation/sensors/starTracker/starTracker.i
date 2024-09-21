@@ -32,9 +32,9 @@ from Basilisk.architecture.swig_common_model import *
 %include "sys_model.i"
 %include "starTracker.h"
 
-%include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
+%include "msgPayloadDef/SCStatesMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/STSensorMsgPayload.h"
+%include "msgPayloadDef/STSensorMsgPayload.h"
 
 
 %pythoncode %{

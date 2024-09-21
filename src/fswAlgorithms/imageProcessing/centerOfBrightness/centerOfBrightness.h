@@ -26,8 +26,8 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/core/mat.hpp"
 
-#include "architecture/msgPayloadDefC/CameraImageMsgPayload.h"
-#include "architecture/msgPayloadDefCpp/OpNavCOBMsgPayload.h"
+#include "msgPayloadDef/CameraImageMsgPayload.h"
+#include "msgPayloadDef/OpNavCOBMsgPayload.h"
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/bskLogging.h"

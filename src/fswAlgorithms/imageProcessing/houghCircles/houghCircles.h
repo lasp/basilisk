@@ -30,8 +30,8 @@
 #include "opencv2/imgproc.hpp"
 #include "opencv2/dnn.hpp"
 
-#include "architecture/msgPayloadDefC/CameraImageMsgPayload.h"
-#include "architecture/msgPayloadDefC/OpNavCirclesMsgPayload.h"
+#include "msgPayloadDef/CameraImageMsgPayload.h"
+#include "msgPayloadDef/OpNavCirclesMsgPayload.h"
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/avsEigenMRP.h"
@@ -43,10 +43,10 @@ class HoughCircles: public SysModel {
 public:
     HoughCircles();
     ~HoughCircles();
-    
+
     void UpdateState(uint64_t CurrentSimNanos);
     void Reset(uint64_t CurrentSimNanos);
-    
+
 public:
     std::string filename;                //!< Filename for module to read an image directly
     Message<OpNavCirclesMsgPayload> opnavCirclesOutMsg;  //!< The name of the OpNavCirclesMsg output message

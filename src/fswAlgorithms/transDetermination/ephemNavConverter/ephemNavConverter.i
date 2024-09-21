@@ -28,8 +28,8 @@ from Basilisk.architecture.swig_common_model import *
 %include "sys_model.i"
 %include "swig_conly_data.i"
 %include "ephemNavConverter.h"
-%include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-%include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
+%include "msgPayloadDef/NavTransMsgPayload.h"
+%include "msgPayloadDef/EphemerisMsgPayload.h"
 
 %pythoncode %{
 import sys

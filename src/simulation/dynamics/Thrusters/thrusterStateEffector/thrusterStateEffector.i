@@ -40,10 +40,10 @@ from Basilisk.architecture.swig_common_model import *
 %include "simulation/dynamics/_GeneralModuleFiles/THRSimConfig.h"
 %include "thrusterStateEffector.h"
 
-%include "architecture/msgPayloadDefC/THRArrayOnTimeCmdMsgPayload.h"
+%include "msgPayloadDef/THRArrayOnTimeCmdMsgPayload.h"
 
-%include "architecture/msgPayloadDefCpp/THROutputMsgPayload.h"
-%include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
+%include "msgPayloadDef/THROutputMsgPayload.h"
+%include "msgPayloadDef/SCStatesMsgPayload.h"
 
 
 %pythoncode %{

@@ -29,9 +29,9 @@
 #include "architecture/utilities/avsEigenSupport.h"
 #include "architecture/utilities/bskLogging.h"
 
-#include "architecture/msgPayloadDefC/ArrayMotorTorqueMsgPayload.h"
-#include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-#include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
+#include "msgPayloadDef/ArrayMotorTorqueMsgPayload.h"
+#include "msgPayloadDef/SCStatesMsgPayload.h"
+#include "msgPayloadDef/HingedRigidBodyMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 
 
@@ -137,7 +137,7 @@ private:
     Eigen::MatrixXd *inertialPositionProperty;  //!< [m] r_N inertial position relative to system spice zeroBase/refBase
     Eigen::MatrixXd *inertialVelocityProperty;  //!< [m] v_N inertial velocity relative to system spice zeroBase/refBase
     Eigen::MatrixXd *g_N;             //!< [m/s^2] Gravitational acceleration in N frame components
-    
+
 };
 
 

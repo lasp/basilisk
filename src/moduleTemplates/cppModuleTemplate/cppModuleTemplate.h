@@ -21,7 +21,7 @@
 #define CPP_MODULE_TEMPLATE_H
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "architecture/msgPayloadDefC/CModuleTemplateMsgPayload.h"
+#include "msgPayloadDef/CModuleTemplateMsgPayload.h"
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/messaging/messaging.h"
 

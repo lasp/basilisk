@@ -37,9 +37,9 @@
 #include "architecture/utilities/geodeticConversion.h"
 #include "architecture/utilities/linearAlgebra.h"
 // Sim Messages
-#include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-#include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-#include "architecture/msgPayloadDefC/AlbedoMsgPayload.h"
+#include "msgPayloadDef/SCStatesMsgPayload.h"
+#include "msgPayloadDef/SpicePlanetStateMsgPayload.h"
+#include "msgPayloadDef/AlbedoMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 
 #include "architecture/utilities/macroDefinitions.h"
@@ -84,7 +84,7 @@ public:
     ReadFunctor<SCStatesMsgPayload> spacecraftStateInMsg;   //!< input message name for spacecraft data
     std::vector<ReadFunctor<SpicePlanetStateMsgPayload>> planetInMsgs; //!< vector of planet data input data
 
-    BSKLogger bskLogger;                        //!< BSK Logging    
+    BSKLogger bskLogger;                        //!< BSK Logging
     int defaultNumLat;                                 //!< [-] default number of latitude grid points
     int defaultNumLon;                                 //!< [-] default number of longitude grid points
     Eigen::Vector3d nHat_B_default;             //!< [-] default value for unit normal of the instrument (spacecraft body)

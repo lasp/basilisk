@@ -24,8 +24,8 @@
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/gauss_markov.h"
 
-#include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-#include "architecture/msgPayloadDefC/STSensorMsgPayload.h"
+#include "msgPayloadDef/SCStatesMsgPayload.h"
+#include "msgPayloadDef/STSensorMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 
 #include <Eigen/Dense>
@@ -38,7 +38,7 @@ class StarTracker: public SysModel {
 public:
     StarTracker();
     ~StarTracker();
-    
+
     void UpdateState(uint64_t CurrentSimNanos);
     void Reset(uint64_t CurrentClock);          //!< Method for reseting the module
     void readInputMessages();
@@ -47,9 +47,9 @@ public:
     void applySensorErrors();
     void computeTrueOutput();
     void computeQuaternion(double *sigma, STSensorMsgPayload *sensorValue);
-    
+
 public:
-    
+
     uint64_t sensorTimeTag;            //!< [ns] Current time tag for sensor out
     ReadFunctor<SCStatesMsgPayload> scStateInMsg;    //!< [-] sc input state message
     Message<STSensorMsgPayload> sensorOutMsg;   //!< [-] sensor output state message

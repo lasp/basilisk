@@ -36,13 +36,13 @@ from Basilisk.architecture.swig_common_model import *
 %include "../_GeneralModuleFiles/dynamicObject.h"
 %include "vscmgStateEffector.h"
 
-%include "architecture/msgPayloadDefC/VSCMGCmdMsgPayload.h"
+%include "msgPayloadDef/VSCMGCmdMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/VSCMGSpeedMsgPayload.h"
+%include "msgPayloadDef/VSCMGSpeedMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/VSCMGArrayTorqueMsgPayload.h"
+%include "msgPayloadDef/VSCMGArrayTorqueMsgPayload.h"
 
-%include "architecture/msgPayloadDefCpp/VSCMGConfigMsgPayload.h"
+%include "msgPayloadDef/VSCMGConfigMsgPayload.h"
 
 %include "architecture/utilities/macroDefinitions.h"
 

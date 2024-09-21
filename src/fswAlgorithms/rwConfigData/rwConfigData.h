@@ -22,8 +22,8 @@
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
-#include "architecture/msgPayloadDefC/RWConstellationMsgPayload.h"
+#include "msgPayloadDef/RWArrayConfigMsgPayload.h"
+#include "msgPayloadDef/RWConstellationMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 #include <stdint.h>

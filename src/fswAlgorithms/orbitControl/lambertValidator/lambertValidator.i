@@ -33,12 +33,12 @@
 %include "sys_model.h"
 %include "lambertValidator.h"
 
-%include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-%include "architecture/msgPayloadDefC/LambertProblemMsgPayload.h"
-%include "architecture/msgPayloadDefC/LambertSolutionMsgPayload.h"
-%include "architecture/msgPayloadDefC/LambertPerformanceMsgPayload.h"
-%include "architecture/msgPayloadDefC/DvBurnCmdMsgPayload.h"
-%include "architecture/msgPayloadDefC/LambertValidatorMsgPayload.h"
+%include "msgPayloadDef/NavTransMsgPayload.h"
+%include "msgPayloadDef/LambertProblemMsgPayload.h"
+%include "msgPayloadDef/LambertSolutionMsgPayload.h"
+%include "msgPayloadDef/LambertPerformanceMsgPayload.h"
+%include "msgPayloadDef/DvBurnCmdMsgPayload.h"
+%include "msgPayloadDef/LambertValidatorMsgPayload.h"
 
 %pythoncode %{
 import sys

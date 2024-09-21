@@ -37,11 +37,11 @@ from Basilisk.architecture.swig_common_model import *
 %include "simulation/dynamics/_GeneralModuleFiles/stateData.h"
 %include "prescribedMotionStateEffector.h"
 
-%include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
+%include "msgPayloadDef/SCStatesMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/PrescribedTranslationMsgPayload.h"
+%include "msgPayloadDef/PrescribedTranslationMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/PrescribedRotationMsgPayload.h"
+%include "msgPayloadDef/PrescribedRotationMsgPayload.h"
 
 
 %pythoncode %{

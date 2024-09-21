@@ -25,7 +25,7 @@
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include <chrono>
 
-#include "architecture/msgPayloadDefC/SynchClockMsgPayload.h"
+#include "msgPayloadDef/SynchClockMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 
 #include "architecture/utilities/bskLogging.h"
@@ -35,10 +35,10 @@ class ClockSynch: public SysModel {
 public:
     ClockSynch();
     ~ClockSynch();
-   
+
     void Reset(uint64_t currentSimNanos);
     void UpdateState(uint64_t currentSimNanos);
-    
+
 public:
 	double accelFactor;          //!< [-] Factor used to accelerate sim-time relative to clock
     SynchClockMsgPayload outputData; //!< [-] Output data for the synch module
@@ -50,7 +50,7 @@ public:
 private:
     bool timeInitialized;        //!< [-] Flag that the module has been reset
 	std::chrono::high_resolution_clock::time_point startTime; //! [-] first time stamp of pass through data
-    uint64_t startSimTimeNano;   //!< [ns] Previous simulation time observed    
+    uint64_t startSimTimeNano;   //!< [ns] Previous simulation time observed
 };
 
 

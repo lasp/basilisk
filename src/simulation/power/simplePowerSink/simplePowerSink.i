@@ -34,9 +34,9 @@ from Basilisk.architecture.swig_common_model import *
 %include "simplePowerSink.h"
 %include "swig_conly_data.i"
 
-%include "architecture/msgPayloadDefC/PowerNodeUsageMsgPayload.h"
+%include "msgPayloadDef/PowerNodeUsageMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/DeviceStatusMsgPayload.h"
+%include "msgPayloadDef/DeviceStatusMsgPayload.h"
 
 
 %pythoncode %{

@@ -34,10 +34,10 @@ from Basilisk.architecture.swig_common_model import *
 
 %include "initializeICP.h"
 
-%include "architecture/msgPayloadDefCpp/SICPMsgPayload.h"
-%include "architecture/msgPayloadDefCpp/PointCloudMsgPayload.h"
-%include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-%include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
+%include "msgPayloadDef/SICPMsgPayload.h"
+%include "msgPayloadDef/PointCloudMsgPayload.h"
+%include "msgPayloadDef/EphemerisMsgPayload.h"
+%include "msgPayloadDef/CameraConfigMsgPayload.h"
 
 %pythoncode %{
 import sys

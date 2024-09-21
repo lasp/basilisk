@@ -25,9 +25,9 @@
 #include "simulation/power/_GeneralModuleFiles/powerNodeBase.h"
 #include "architecture/messaging/messaging.h"
 
-#include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-#include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-#include "architecture/msgPayloadDefC/EclipseMsgPayload.h"
+#include "msgPayloadDef/SCStatesMsgPayload.h"
+#include "msgPayloadDef/SpicePlanetStateMsgPayload.h"
+#include "msgPayloadDef/EclipseMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 

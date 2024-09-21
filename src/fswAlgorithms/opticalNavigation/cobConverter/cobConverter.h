@@ -25,12 +25,12 @@
 #include "architecture/utilities/avsEigenSupport.h"
 #include "architecture/messaging/messaging.h"
 
-#include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
-#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-#include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-#include "architecture/msgPayloadDefCpp/OpNavCOBMsgPayload.h"
-#include "architecture/msgPayloadDefCpp/OpNavCOMMsgPayload.h"
-#include "architecture/msgPayloadDefCpp/OpNavUnitVecMsgPayload.h"
+#include "msgPayloadDef/CameraConfigMsgPayload.h"
+#include "msgPayloadDef/NavAttMsgPayload.h"
+#include "msgPayloadDef/EphemerisMsgPayload.h"
+#include "msgPayloadDef/OpNavCOBMsgPayload.h"
+#include "msgPayloadDef/OpNavCOMMsgPayload.h"
+#include "msgPayloadDef/OpNavUnitVecMsgPayload.h"
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/rigidBodyKinematics.h"

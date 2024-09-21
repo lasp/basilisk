@@ -30,10 +30,10 @@
 
 %include "opNavPoint.h"
 
-%include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-%include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
-%include "architecture/msgPayloadDefC/OpNavMsgPayload.h"
+%include "msgPayloadDef/NavAttMsgPayload.h"
+%include "msgPayloadDef/CameraConfigMsgPayload.h"
+%include "msgPayloadDef/AttGuidMsgPayload.h"
+%include "msgPayloadDef/OpNavMsgPayload.h"
 
 %pythoncode %{
 import sys

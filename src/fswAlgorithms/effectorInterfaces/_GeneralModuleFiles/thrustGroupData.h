@@ -21,7 +21,7 @@
 #define _THRUST_GROUP_DATA_
 
 #include "architecture/utilities/macroDefinitions.h"
-#include "architecture/msgPayloadDefC/THRArrayOnTimeCmdMsgPayload.h"
+#include "msgPayloadDef/THRArrayOnTimeCmdMsgPayload.h"
 
 
 

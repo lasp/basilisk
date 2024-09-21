@@ -30,11 +30,11 @@ from Basilisk.architecture.swig_common_model import *
 
 %include "flybyODuKF.h"
 
-%include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
+%include "msgPayloadDef/NavTransMsgPayload.h"
 struct NavTransMsg_C;
-%include "architecture/msgPayloadDefCpp/FilterMsgPayload.h"
-%include "architecture/msgPayloadDefCpp/FilterResidualsMsgPayload.h"
-%include "architecture/msgPayloadDefCpp/OpNavUnitVecMsgPayload.h"
+%include "msgPayloadDef/FilterMsgPayload.h"
+%include "msgPayloadDef/FilterResidualsMsgPayload.h"
+%include "msgPayloadDef/OpNavUnitVecMsgPayload.h"
 
 %pythoncode %{
 import sys

@@ -30,12 +30,12 @@ from Basilisk.architecture.swig_common_model import *
 
 %include "sunlineSRuKF.h"
 
-%include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-%include "architecture/msgPayloadDefC/CSSConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/CSSUnitConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/CSSArraySensorMsgPayload.h"
-%include "architecture/msgPayloadDefCpp/FilterMsgPayload.h"
-%include "architecture/msgPayloadDefCpp/FilterResidualsMsgPayload.h"
+%include "msgPayloadDef/NavAttMsgPayload.h"
+%include "msgPayloadDef/CSSConfigMsgPayload.h"
+%include "msgPayloadDef/CSSUnitConfigMsgPayload.h"
+%include "msgPayloadDef/CSSArraySensorMsgPayload.h"
+%include "msgPayloadDef/FilterMsgPayload.h"
+%include "msgPayloadDef/FilterResidualsMsgPayload.h"
 
 %pythoncode %{
 import sys

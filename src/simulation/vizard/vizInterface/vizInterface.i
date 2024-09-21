@@ -54,16 +54,16 @@ namespace std {
 %include "vizInterface.h"
 %include "simulation/vizard/_GeneralModuleFiles/vizStructures.h"
 
-%include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/RWConfigLogMsgPayload.h"
-%include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-%include "architecture/msgPayloadDefC/CameraImageMsgPayload.h"
-%include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-%include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
-%include "architecture/msgPayloadDefC/EpochMsgPayload.h"
-%include "architecture/msgPayloadDefCpp/CSSConfigLogMsgPayload.h"
-%include "architecture/msgPayloadDefCpp/THROutputMsgPayload.h"
-%include "architecture/msgPayloadDefCpp/ChargeMsmMsgPayload.h"
+%include "msgPayloadDef/CameraConfigMsgPayload.h"
+%include "msgPayloadDef/RWConfigLogMsgPayload.h"
+%include "msgPayloadDef/SCStatesMsgPayload.h"
+%include "msgPayloadDef/CameraImageMsgPayload.h"
+%include "msgPayloadDef/SpicePlanetStateMsgPayload.h"
+%include "msgPayloadDef/RWSpeedMsgPayload.h"
+%include "msgPayloadDef/EpochMsgPayload.h"
+%include "msgPayloadDef/CSSConfigLogMsgPayload.h"
+%include "msgPayloadDef/THROutputMsgPayload.h"
+%include "msgPayloadDef/ChargeMsmMsgPayload.h"
 
 %pythoncode %{
 import sys

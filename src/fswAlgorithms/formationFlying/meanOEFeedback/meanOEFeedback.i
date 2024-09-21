@@ -30,8 +30,8 @@
 
 %include "meanOEFeedback.h"
 
-%include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-%include "architecture/msgPayloadDefC/CmdForceInertialMsgPayload.h"
+%include "msgPayloadDef/NavTransMsgPayload.h"
+%include "msgPayloadDef/CmdForceInertialMsgPayload.h"
 
 %pythoncode %{
 import sys

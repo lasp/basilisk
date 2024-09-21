@@ -24,7 +24,7 @@
 #include "architecture/messaging/messaging.h"
 #include "simulation/power/_GeneralModuleFiles/powerNodeBase.h"
 
-#include "architecture/msgPayloadDefC/RWConfigLogMsgPayload.h"
+#include "msgPayloadDef/RWConfigLogMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 

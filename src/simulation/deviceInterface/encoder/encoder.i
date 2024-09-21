@@ -33,7 +33,7 @@ from Basilisk.architecture.swig_common_model import *
 %include "architecture/utilities/macroDefinitions.h"
 %include "encoder.h"
 
-%include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
+%include "msgPayloadDef/RWSpeedMsgPayload.h"
 
 
 %pythoncode %{

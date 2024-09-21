@@ -74,7 +74,7 @@ from typing import Optional, Union
 #pragma SWIG nowarn=362
 %include "simulation/dynamics/_GeneralModuleFiles/gravityEffector.h"
 
-%include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
+%include "msgPayloadDef/SpicePlanetStateMsgPayload.h"
 
 
 %extend GravBodyData {

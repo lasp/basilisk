@@ -25,8 +25,8 @@
 #include "sicpDefinitions.h"
 #include "architecture/messaging/messaging.h"
 
-#include "architecture/msgPayloadDefCpp/SICPMsgPayload.h"
-#include "architecture/msgPayloadDefCpp/PointCloudMsgPayload.h"
+#include "msgPayloadDef/SICPMsgPayload.h"
+#include "msgPayloadDef/PointCloudMsgPayload.h"
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/avsEigenMRP.h"
@@ -38,7 +38,7 @@ class ScalingIterativeClosestPoint: public SysModel {
 public:
     ScalingIterativeClosestPoint();
     ~ScalingIterativeClosestPoint();
-    
+
     void UpdateState(uint64_t CurrentSimNanos) override;
     void Reset(uint64_t CurrentSimNanos) override;
 

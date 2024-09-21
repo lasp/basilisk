@@ -24,9 +24,9 @@
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
-#include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
-#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
+#include "msgPayloadDef/RWArrayConfigMsgPayload.h"
+#include "msgPayloadDef/RWSpeedMsgPayload.h"
+#include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
 
 /*! @brief Module configuration message definition. */
 class ThrMomentumManagement : public SysModel {

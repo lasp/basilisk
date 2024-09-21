@@ -22,9 +22,9 @@
 #define LAMBERTSECONDDV_H
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "architecture/msgPayloadDefC/LambertSolutionMsgPayload.h"
-#include "architecture/msgPayloadDefC/DesiredVelocityMsgPayload.h"
-#include "architecture/msgPayloadDefC/DvBurnCmdMsgPayload.h"
+#include "msgPayloadDef/LambertSolutionMsgPayload.h"
+#include "msgPayloadDef/DesiredVelocityMsgPayload.h"
+#include "msgPayloadDef/DvBurnCmdMsgPayload.h"
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/messaging/messaging.h"
 #include "architecture/utilities/avsEigenSupport.h"

@@ -26,10 +26,10 @@
 #include "architecture/utilities/avsEigenMRP.h"
 #include "architecture/utilities/bskLogging.h"
 
-#include "architecture/msgPayloadDefC/ArrayMotorForceMsgPayload.h"
-#include "architecture/msgPayloadDefC/ArrayEffectorLockMsgPayload.h"
-#include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-#include "architecture/msgPayloadDefC/LinearTranslationRigidBodyMsgPayload.h"
+#include "msgPayloadDef/ArrayMotorForceMsgPayload.h"
+#include "msgPayloadDef/ArrayEffectorLockMsgPayload.h"
+#include "msgPayloadDef/SCStatesMsgPayload.h"
+#include "msgPayloadDef/LinearTranslationRigidBodyMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 
 /*! @brief linear spring mass damper state effector class */
@@ -51,7 +51,7 @@ public:
     /** setter for `k` property */
     void setK(double k);
     /** setter for `c` property */
-    void setC(double c);                
+    void setC(double c);
     /** setter for `rhoInit` property */
     void setRhoInit(double rhoInit) {this->rhoInit = rhoInit;};
     /** setter for `rhoDotInit` property */

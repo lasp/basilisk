@@ -30,9 +30,9 @@
 
 %include "velocityPoint.h"
 
-%include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-%include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-%include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
+%include "msgPayloadDef/EphemerisMsgPayload.h"
+%include "msgPayloadDef/NavTransMsgPayload.h"
+%include "msgPayloadDef/AttRefMsgPayload.h"
 
 %pythoncode %{
 import sys

@@ -28,7 +28,7 @@ from Basilisk.architecture.swig_common_model import *
 %include "swig_conly_data.i"
 %include "vehicleConfigData.h"
 
-%include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
+%include "msgPayloadDef/VehicleConfigMsgPayload.h"
 
 %pythoncode %{
 import sys

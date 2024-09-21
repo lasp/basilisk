@@ -23,9 +23,9 @@
 #include <vector>
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 
-#include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-#include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-#include "architecture/msgPayloadDefC/ClassicElementsMsgPayload.h"
+#include "msgPayloadDef/SCStatesMsgPayload.h"
+#include "msgPayloadDef/SpicePlanetStateMsgPayload.h"
+#include "msgPayloadDef/ClassicElementsMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 
 #include "architecture/utilities/orbitalMotion.h"

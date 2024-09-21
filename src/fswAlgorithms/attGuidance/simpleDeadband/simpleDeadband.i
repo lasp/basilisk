@@ -30,7 +30,7 @@
 
 %include "simpleDeadband.h"
 
-%include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
+%include "msgPayloadDef/AttGuidMsgPayload.h"
 
 %pythoncode %{
     import sys

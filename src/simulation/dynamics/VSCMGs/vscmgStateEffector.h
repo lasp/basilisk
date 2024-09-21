@@ -28,10 +28,10 @@
 #include <Eigen/Dense>
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 
-#include "architecture/msgPayloadDefC/VSCMGSpeedMsgPayload.h"
-#include "architecture/msgPayloadDefC/VSCMGCmdMsgPayload.h"
-#include "architecture/msgPayloadDefC/VSCMGArrayTorqueMsgPayload.h"
-#include "architecture/msgPayloadDefCpp/VSCMGConfigMsgPayload.h"
+#include "msgPayloadDef/VSCMGSpeedMsgPayload.h"
+#include "msgPayloadDef/VSCMGCmdMsgPayload.h"
+#include "msgPayloadDef/VSCMGArrayTorqueMsgPayload.h"
+#include "msgPayloadDef/VSCMGConfigMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 
 #include "architecture/utilities/macroDefinitions.h"
@@ -50,7 +50,7 @@ public:
 	void linkInStates(DynParamManager& states);
     void updateEffectorMassProps(double integTime);
     void Reset(uint64_t CurrentSimNanos);
-    void AddVSCMG(VSCMGConfigMsgPayload *NewVSCMG); 
+    void AddVSCMG(VSCMGConfigMsgPayload *NewVSCMG);
 	void UpdateState(uint64_t CurrentSimNanos);
 	void WriteOutputMessages(uint64_t CurrentClock);
 	void ReadInputs();

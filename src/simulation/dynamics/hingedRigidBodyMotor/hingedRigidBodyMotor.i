@@ -31,9 +31,9 @@
 %include "sys_model.i"
 %include "hingedRigidBodyMotor.h"
 
-%include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
+%include "msgPayloadDef/HingedRigidBodyMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/ArrayMotorTorqueMsgPayload.h"
+%include "msgPayloadDef/ArrayMotorTorqueMsgPayload.h"
 
 
 %pythoncode %{

@@ -30,8 +30,8 @@
 
 %include "thrusterPlatformState.h"
 
-%include "architecture/msgPayloadDefC/THRConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
+%include "msgPayloadDef/THRConfigMsgPayload.h"
+%include "msgPayloadDef/HingedRigidBodyMsgPayload.h"
 
 %pythoncode %{
 import sys

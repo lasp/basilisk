@@ -30,8 +30,8 @@
 
 %include "hingedRigidBodyPIDMotor.h"
 
-%include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
-%include "architecture/msgPayloadDefC/ArrayMotorTorqueMsgPayload.h"
+%include "msgPayloadDef/HingedRigidBodyMsgPayload.h"
+%include "msgPayloadDef/ArrayMotorTorqueMsgPayload.h"
 
 %pythoncode %{
 import sys

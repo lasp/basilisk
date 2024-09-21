@@ -20,7 +20,7 @@
 #define FUEL_TANK_H
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "architecture/msgPayloadDefC/FuelTankMsgPayload.h"
+#include "msgPayloadDef/FuelTankMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 #include "simulation/dynamics/Thrusters/thrusterDynamicEffector/thrusterDynamicEffector.h"
 #include "simulation/dynamics/_GeneralModuleFiles/fuelSlosh.h"

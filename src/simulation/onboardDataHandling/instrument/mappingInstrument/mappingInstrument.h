@@ -26,8 +26,8 @@
 #include <string>
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "architecture/msgPayloadDefC/AccessMsgPayload.h"
-#include "architecture/msgPayloadDefC/DataNodeUsageMsgPayload.h"
+#include "msgPayloadDef/AccessMsgPayload.h"
+#include "msgPayloadDef/DataNodeUsageMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 
 /*! @brief This module receives a vector of accessMsgPayloads and outputs a vector of DataNodeUsageMsgPayloads for each accessible point.

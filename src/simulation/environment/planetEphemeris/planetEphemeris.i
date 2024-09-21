@@ -39,7 +39,7 @@ namespace std {
 %include "architecture/utilities/astroConstants.h"
 
 
-%include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
+%include "msgPayloadDef/SpicePlanetStateMsgPayload.h"
 
 
 

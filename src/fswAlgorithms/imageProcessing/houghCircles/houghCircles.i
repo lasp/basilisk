@@ -32,9 +32,9 @@ from Basilisk.architecture.swig_common_model import *
 
 %include "houghCircles.h"
 
-%include "architecture/msgPayloadDefC/OpNavCirclesMsgPayload.h"
+%include "msgPayloadDef/OpNavCirclesMsgPayload.h"
 struct OpNavCirclesMsg_C;
-%include "architecture/msgPayloadDefC/CameraImageMsgPayload.h"
+%include "msgPayloadDef/CameraImageMsgPayload.h"
 struct CameraImageMsg_C;
 
 

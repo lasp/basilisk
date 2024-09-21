@@ -33,9 +33,9 @@
 %include "sys_model.h"
 %include "lambertSecondDV.h"
 
-%include "architecture/msgPayloadDefC/LambertSolutionMsgPayload.h"
-%include "architecture/msgPayloadDefC/DesiredVelocityMsgPayload.h"
-%include "architecture/msgPayloadDefC/DvBurnCmdMsgPayload.h"
+%include "msgPayloadDef/LambertSolutionMsgPayload.h"
+%include "msgPayloadDef/DesiredVelocityMsgPayload.h"
+%include "msgPayloadDef/DvBurnCmdMsgPayload.h"
 
 %pythoncode %{
 import sys

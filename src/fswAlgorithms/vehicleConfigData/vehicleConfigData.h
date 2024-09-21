@@ -22,7 +22,7 @@
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
+#include "msgPayloadDef/VehicleConfigMsgPayload.h"
 #include "architecture/utilities/macroDefinitions.h"
 
 class VehicleConfigData : public SysModel {

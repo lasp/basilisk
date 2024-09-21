@@ -32,11 +32,11 @@ from Basilisk.architecture.swig_common_model import *
 %include "architecture/utilities/orbitalMotion.h"
 %include "orbElemConvert.h"
 
-%include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
+%include "msgPayloadDef/SpicePlanetStateMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
+%include "msgPayloadDef/SCStatesMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/ClassicElementsMsgPayload.h"
+%include "msgPayloadDef/ClassicElementsMsgPayload.h"
 
 
 

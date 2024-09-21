@@ -33,9 +33,9 @@
 %include "sys_model.h"
 %include "lambertSurfaceRelativeVelocity.h"
 
-%include "architecture/msgPayloadDefC/LambertProblemMsgPayload.h"
-%include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-%include "architecture/msgPayloadDefC/DesiredVelocityMsgPayload.h"
+%include "msgPayloadDef/LambertProblemMsgPayload.h"
+%include "msgPayloadDef/EphemerisMsgPayload.h"
+%include "msgPayloadDef/DesiredVelocityMsgPayload.h"
 
 %pythoncode %{
 import sys

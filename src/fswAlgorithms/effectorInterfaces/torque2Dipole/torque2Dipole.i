@@ -31,9 +31,9 @@
 
 %include "torque2Dipole.h"
 
-%include "architecture/msgPayloadDefC/TAMSensorBodyMsgPayload.h"
-%include "architecture/msgPayloadDefC/DipoleRequestBodyMsgPayload.h"
-%include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
+%include "msgPayloadDef/TAMSensorBodyMsgPayload.h"
+%include "msgPayloadDef/DipoleRequestBodyMsgPayload.h"
+%include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
 
 %pythoncode %{
 import sys

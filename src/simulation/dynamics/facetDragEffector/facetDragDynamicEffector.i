@@ -37,7 +37,7 @@ from Basilisk.architecture.swig_common_model import *
 %include "simulation/dynamics/_GeneralModuleFiles/dynParamManager.h"
 %include "facetDragDynamicEffector.h"
 
-%include "architecture/msgPayloadDefC/AtmoPropsMsgPayload.h"
+%include "msgPayloadDef/AtmoPropsMsgPayload.h"
 
 
 %pythoncode %{

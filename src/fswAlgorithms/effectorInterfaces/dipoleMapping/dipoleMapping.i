@@ -31,9 +31,9 @@
 
 %include "dipoleMapping.h"
 
-%include "architecture/msgPayloadDefC/DipoleRequestBodyMsgPayload.h"
-%include "architecture/msgPayloadDefC/MTBArrayConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/MTBCmdMsgPayload.h"
+%include "msgPayloadDef/DipoleRequestBodyMsgPayload.h"
+%include "msgPayloadDef/MTBArrayConfigMsgPayload.h"
+%include "msgPayloadDef/MTBCmdMsgPayload.h"
 
 %pythoncode %{
 import sys

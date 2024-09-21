@@ -24,8 +24,8 @@
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
-#include "architecture/msgPayloadDefC/ArrayMotorTorqueMsgPayload.h"
+#include "msgPayloadDef/HingedRigidBodyMsgPayload.h"
+#include "msgPayloadDef/ArrayMotorTorqueMsgPayload.h"
 
 /*! @brief Top level structure for the sub-module routines. */
 class HingedRigidBodyPIDMotor : public SysModel {

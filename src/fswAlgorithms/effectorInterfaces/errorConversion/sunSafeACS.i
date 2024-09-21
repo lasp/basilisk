@@ -30,8 +30,8 @@
 
 %include "dvAttEffect.h"
 
-%include "architecture/msgPayloadDefC/THRArrayOnTimeCmdMsgPayload.h"
-%include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
+%include "msgPayloadDef/THRArrayOnTimeCmdMsgPayload.h"
+%include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
 
 struct ThrustGroupData;
 

@@ -30,12 +30,12 @@
 
 %include "oneAxisSolarArrayPoint.h"
 
-%include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-%include "architecture/msgPayloadDefC/BodyHeadingMsgPayload.h"
-%include "architecture/msgPayloadDefC/InertialHeadingMsgPayload.h"
-%include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-%include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-%include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
+%include "msgPayloadDef/NavAttMsgPayload.h"
+%include "msgPayloadDef/BodyHeadingMsgPayload.h"
+%include "msgPayloadDef/InertialHeadingMsgPayload.h"
+%include "msgPayloadDef/NavTransMsgPayload.h"
+%include "msgPayloadDef/EphemerisMsgPayload.h"
+%include "msgPayloadDef/AttRefMsgPayload.h"
 
 %pythoncode %{
 import sys

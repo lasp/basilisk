@@ -30,8 +30,8 @@
 
 %include "prvSteering.h"
 
-%include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
-%include "architecture/msgPayloadDefC/RateCmdMsgPayload.h"
+%include "msgPayloadDef/AttGuidMsgPayload.h"
+%include "msgPayloadDef/RateCmdMsgPayload.h"
 
 %pythoncode %{
 import sys

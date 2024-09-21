@@ -27,7 +27,7 @@
 #include "simulation/dynamics/_GeneralModuleFiles/stateData.h"
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 
-#include "architecture/msgPayloadDefC/AtmoPropsMsgPayload.h"
+#include "msgPayloadDef/AtmoPropsMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 
 #include "architecture/utilities/rigidBodyKinematics.h"
@@ -80,4 +80,4 @@ private:
 
 };
 
-#endif 
+#endif

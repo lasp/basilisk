@@ -24,10 +24,10 @@
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/THRArrayConfigMsgPayload.h"
-#include "architecture/msgPayloadDefC/THRArrayCmdForceMsgPayload.h"
-#include "architecture/msgPayloadDefC/THRArrayOnTimeCmdMsgPayload.h"
-#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
+#include "msgPayloadDef/THRArrayConfigMsgPayload.h"
+#include "msgPayloadDef/THRArrayCmdForceMsgPayload.h"
+#include "msgPayloadDef/THRArrayOnTimeCmdMsgPayload.h"
+#include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 

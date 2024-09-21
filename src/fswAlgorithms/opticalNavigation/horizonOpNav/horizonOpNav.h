@@ -22,10 +22,10 @@
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-#include "architecture/msgPayloadDefC/OpNavLimbMsgPayload.h"
-#include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
-#include "architecture/msgPayloadDefC/OpNavMsgPayload.h"
+#include "msgPayloadDef/NavAttMsgPayload.h"
+#include "msgPayloadDef/OpNavLimbMsgPayload.h"
+#include "msgPayloadDef/CameraConfigMsgPayload.h"
+#include "msgPayloadDef/OpNavMsgPayload.h"
 
 #include "architecture/utilities/macroDefinitions.h"
 #include "architecture/utilities/linearAlgebra.h"

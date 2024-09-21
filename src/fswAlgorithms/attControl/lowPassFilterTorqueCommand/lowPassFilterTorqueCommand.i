@@ -31,7 +31,7 @@
 %include "lowPassFilterTorqueCommand.h"
 
 // sample Module support file to be included in this sub-module
-%include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
+%include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
 
 %pythoncode %{
 import sys

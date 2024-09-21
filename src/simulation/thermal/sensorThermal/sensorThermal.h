@@ -24,11 +24,11 @@
 #include <vector>
 #include "architecture/messaging/messaging.h"
 
-#include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-#include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-#include "architecture/msgPayloadDefC/EclipseMsgPayload.h"
-#include "architecture/msgPayloadDefC/TemperatureMsgPayload.h"
-#include "architecture/msgPayloadDefC/DeviceStatusMsgPayload.h"
+#include "msgPayloadDef/SCStatesMsgPayload.h"
+#include "msgPayloadDef/SpicePlanetStateMsgPayload.h"
+#include "msgPayloadDef/EclipseMsgPayload.h"
+#include "msgPayloadDef/TemperatureMsgPayload.h"
+#include "msgPayloadDef/DeviceStatusMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 

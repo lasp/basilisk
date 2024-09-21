@@ -31,7 +31,7 @@ from Basilisk.architecture.swig_common_model import *
 %include "sys_model.i"
 %include "simpleVoltEstimator.h"
 
-%include "architecture/msgPayloadDefC/VoltMsgPayload.h"
+%include "msgPayloadDef/VoltMsgPayload.h"
 
 
 %pythoncode %{

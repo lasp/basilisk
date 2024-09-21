@@ -27,8 +27,8 @@
 #include "architecture/utilities/discretize.h"
 #include "architecture/utilities/saturate.h"
 
-#include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-#include "architecture/msgPayloadDefC/IMUSensorMsgPayload.h"
+#include "msgPayloadDef/SCStatesMsgPayload.h"
+#include "msgPayloadDef/IMUSensorMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 
 #include <Eigen/Dense>
@@ -41,7 +41,7 @@ class ImuSensor: public SysModel {
 public:
     ImuSensor();
     ~ImuSensor();
-    
+
     void Reset(uint64_t CurrentSimNanos);
     void UpdateState(uint64_t CurrentSimNanos);
     void readInputMessages();
@@ -82,10 +82,10 @@ public:
 
     IMUSensorMsgPayload trueValues;         //!< [-] total measurement without perturbations
     IMUSensorMsgPayload sensedValues;       //!< [-] total measurement including perturbations
-    
+
     Eigen::Vector3d accelScale;         //!< (-) scale factor for acceleration axes
     Eigen::Vector3d gyroScale;          //!< (-) scale factors for acceleration axes
-    
+
     Discretize aDisc;                  //!<  (-) instance of discretization utility for linear acceleration
     Discretize oDisc;                  //!<  (-) instance of idscretization utility for angular rate
     Saturate aSat;                     //!<  (-) instance of saturate utility for linear acceleration
@@ -100,7 +100,7 @@ private:
     SCStatesMsgPayload StateCurrent;    //!< -- Current SSBI-relative state
     GaussMarkov errorModelAccel;        //!< [-] Gauss-markov error states
     GaussMarkov errorModelGyro;         //!< [-] Gauss-markov error states
-    
+
     Eigen::MRPd previous_sigma_BN;              //!< -- sigma_BN from the previous spacecraft message
     Eigen::MRPd current_sigma_BN;               //!< -- sigma_BN from the most recent spacecraft message
     Eigen::Vector3d previous_omega_BN_B;        //!< -- omega_BN_B from the previous spacecraft message
@@ -109,7 +109,7 @@ private:
     Eigen::Vector3d current_omegaDot_BN_B;      //!< -- omegaDot_BN_B from the curret spacecraft message
     Eigen::Vector3d previous_TotalAccumDV_BN_B; //!< -- TotalAccumDV_BN_B from the previous spacecraft message
     Eigen::Vector3d current_TotalAccumDV_BN_B; //!< -- TotalAccumDV_BN_B from the current spacecraft message
-    
+
     Eigen::Vector3d accel_SN_P_out;             //!< -- rDotDot_SN_P for either next method or output messages
     Eigen::Vector3d DV_SN_P_out;                //!< -- time step deltaV for either next method or output messages
     Eigen::Vector3d omega_PN_P_out;             //!< -- omega_PN_P for either next method or output messages

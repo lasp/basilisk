@@ -24,9 +24,9 @@
 #include <Eigen/Dense>
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 
-#include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-#include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-#include "architecture/msgPayloadDefC/EclipseMsgPayload.h"
+#include "msgPayloadDef/SCStatesMsgPayload.h"
+#include "msgPayloadDef/SpicePlanetStateMsgPayload.h"
+#include "msgPayloadDef/EclipseMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 
 #include "architecture/utilities/linearAlgebra.h"
@@ -38,13 +38,13 @@ class Eclipse: public SysModel {
 public:
     Eclipse();
     ~Eclipse();
-    
+
     void Reset(uint64_t CurrenSimNanos);
     void UpdateState(uint64_t CurrentSimNanos);
     void writeOutputMessages(uint64_t CurrentClock);
     void addSpacecraftToModel(Message<SCStatesMsgPayload> *tmpScMsg);
     void addPlanetToModel(Message<SpicePlanetStateMsgPayload> *tmpSpMsg);
-    
+
 public:
     ReadFunctor<SpicePlanetStateMsgPayload> sunInMsg;   //!< sun ephemeris input message name
     std::vector<ReadFunctor<SpicePlanetStateMsgPayload>> planetInMsgs;  //!< A vector of planet incoming state message names ordered by the sequence in which planet are added to the module

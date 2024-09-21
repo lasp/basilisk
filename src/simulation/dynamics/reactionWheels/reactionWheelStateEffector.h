@@ -29,11 +29,11 @@
 #include "architecture/utilities/macroDefinitions.h"
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 
-#include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
-#include "architecture/msgPayloadDefC/RWCmdMsgPayload.h"
-#include "architecture/msgPayloadDefCpp/RWConfigMsgPayload.h"
-#include "architecture/msgPayloadDefC/RWConfigLogMsgPayload.h"
-#include "architecture/msgPayloadDefC/ArrayMotorTorqueMsgPayload.h"
+#include "msgPayloadDef/RWSpeedMsgPayload.h"
+#include "msgPayloadDef/RWCmdMsgPayload.h"
+#include "msgPayloadDef/RWConfigMsgPayload.h"
+#include "msgPayloadDef/RWConfigLogMsgPayload.h"
+#include "msgPayloadDef/ArrayMotorTorqueMsgPayload.h"
 
 #include "architecture/messaging/messaging.h"
 #include "architecture/utilities/bskLogging.h"
@@ -62,7 +62,7 @@ public:
 	void WriteOutputMessages(uint64_t CurrentClock);
 	void ReadInputs();
 	void ConfigureRWRequests(double CurrentTime);
-    
+
 public:
 	std::vector<RWConfigMsgPayload *> ReactionWheelData;          //!< -- RW information
 

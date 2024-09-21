@@ -30,11 +30,11 @@
 
 %include "etSphericalControl.h"
 
-%include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-%include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-%include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/CmdForceInertialMsgPayload.h"
-%include "architecture/msgPayloadDefC/CmdForceBodyMsgPayload.h"
+%include "msgPayloadDef/NavTransMsgPayload.h"
+%include "msgPayloadDef/NavAttMsgPayload.h"
+%include "msgPayloadDef/VehicleConfigMsgPayload.h"
+%include "msgPayloadDef/CmdForceInertialMsgPayload.h"
+%include "msgPayloadDef/CmdForceBodyMsgPayload.h"
 
 %pythoncode %{
 import sys

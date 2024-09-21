@@ -23,13 +23,13 @@
 #include <vector>
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 
-#include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-#include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-#include "architecture/msgPayloadDefCpp/CSSConfigLogMsgPayload.h"
-#include "architecture/msgPayloadDefC/CSSRawDataMsgPayload.h"
-#include "architecture/msgPayloadDefC/EclipseMsgPayload.h"
-#include "architecture/msgPayloadDefC/AlbedoMsgPayload.h"
-#include "architecture/msgPayloadDefC/CSSArraySensorMsgPayload.h"
+#include "msgPayloadDef/SCStatesMsgPayload.h"
+#include "msgPayloadDef/SpicePlanetStateMsgPayload.h"
+#include "msgPayloadDef/CSSConfigLogMsgPayload.h"
+#include "msgPayloadDef/CSSRawDataMsgPayload.h"
+#include "msgPayloadDef/EclipseMsgPayload.h"
+#include "msgPayloadDef/AlbedoMsgPayload.h"
+#include "msgPayloadDef/CSSArraySensorMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 
 #include "architecture/utilities/gauss_markov.h"

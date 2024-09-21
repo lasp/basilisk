@@ -33,12 +33,12 @@
 
 %include "pointCloudTriangulation.h"
 
-%include "architecture/msgPayloadDefCpp/PointCloudMsgPayload.h"
-%include "architecture/msgPayloadDefCpp/PairedKeyPointsMsgPayload.h"
-%include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-%include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-%include "architecture/msgPayloadDefCpp/DirectionOfMotionMsgPayload.h"
-%include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
+%include "msgPayloadDef/PointCloudMsgPayload.h"
+%include "msgPayloadDef/PairedKeyPointsMsgPayload.h"
+%include "msgPayloadDef/EphemerisMsgPayload.h"
+%include "msgPayloadDef/NavTransMsgPayload.h"
+%include "msgPayloadDef/DirectionOfMotionMsgPayload.h"
+%include "msgPayloadDef/CameraConfigMsgPayload.h"
 
 %pythoncode %{
 import sys

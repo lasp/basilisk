@@ -25,10 +25,10 @@
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/DipoleRequestBodyMsgPayload.h"
-#include "architecture/msgPayloadDefC/MTBCmdMsgPayload.h"
-#include "architecture/msgPayloadDefC/MTBArrayConfigMsgPayload.h"
-#include "architecture/msgPayloadDefC/TAMSensorBodyMsgPayload.h"
+#include "msgPayloadDef/DipoleRequestBodyMsgPayload.h"
+#include "msgPayloadDef/MTBCmdMsgPayload.h"
+#include "msgPayloadDef/MTBArrayConfigMsgPayload.h"
+#include "msgPayloadDef/TAMSensorBodyMsgPayload.h"
 
 /*! @brief Top level structure for the sub-module routines. */
 class DipoleMapping : public SysModel {

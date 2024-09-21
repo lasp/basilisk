@@ -30,9 +30,9 @@
 
 %include "thrFiringRemainder.h"
 
-%include "architecture/msgPayloadDefC/THRArrayConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/THRArrayCmdForceMsgPayload.h"
-%include "architecture/msgPayloadDefC/THRArrayOnTimeCmdMsgPayload.h"
+%include "msgPayloadDef/THRArrayConfigMsgPayload.h"
+%include "msgPayloadDef/THRArrayCmdForceMsgPayload.h"
+%include "msgPayloadDef/THRArrayOnTimeCmdMsgPayload.h"
 
 %pythoncode %{
 import sys

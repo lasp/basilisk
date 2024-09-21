@@ -38,13 +38,13 @@ from Basilisk.architecture.swig_common_model import *
 %include "simulation/dynamics/_GeneralModuleFiles/dynParamManager.h"
 %include "linearTranslationOneDOFStateEffector.h"
 
-%include "architecture/msgPayloadDefC/ArrayMotorForceMsgPayload.h"
+%include "msgPayloadDef/ArrayMotorForceMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/ArrayEffectorLockMsgPayload.h"
+%include "msgPayloadDef/ArrayEffectorLockMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
+%include "msgPayloadDef/SCStatesMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/LinearTranslationRigidBodyMsgPayload.h"
+%include "msgPayloadDef/LinearTranslationRigidBodyMsgPayload.h"
 
 
 %pythoncode %{

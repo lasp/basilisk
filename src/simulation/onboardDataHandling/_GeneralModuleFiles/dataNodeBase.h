@@ -25,9 +25,9 @@
 #include <string>
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 
-#include "architecture/msgPayloadDefC/DataNodeUsageMsgPayload.h"
-#include "architecture/msgPayloadDefC/DeviceCmdMsgPayload.h"
-#include "architecture/msgPayloadDefCpp/DataStorageStatusMsgPayload.h"
+#include "msgPayloadDef/DataNodeUsageMsgPayload.h"
+#include "msgPayloadDef/DeviceCmdMsgPayload.h"
+#include "msgPayloadDef/DataStorageStatusMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 
 

@@ -25,10 +25,10 @@
 #ifndef THRUSTCMESTIMATION_H
 #define THRUSTCMESTIMATION_H
 
-#include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
-#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
-#include "architecture/msgPayloadDefC/CMEstDataMsgPayload.h"
-#include "architecture/msgPayloadDefC/THRConfigMsgPayload.h"
+#include "msgPayloadDef/AttGuidMsgPayload.h"
+#include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
+#include "msgPayloadDef/CMEstDataMsgPayload.h"
+#include "msgPayloadDef/THRConfigMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 #include "architecture/utilities/avsEigenSupport.h"
 #include "architecture/utilities/bskLogging.h"
@@ -37,7 +37,7 @@
 #include "architecture/utilities/avsEigenSupport.h"
 #include "architecture/utilities/macroDefinitions.h"
 #include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
+#include "msgPayloadDef/VehicleConfigMsgPayload.h"
 #include <string.h>
 #include <array>
 #include <math.h>

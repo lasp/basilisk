@@ -27,12 +27,12 @@
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/utilities/avsEigenSupport.h"
 
-#include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-#include "architecture/msgPayloadDefC/SpiceTimeMsgPayload.h"
-#include "architecture/msgPayloadDefC/EpochMsgPayload.h"
-#include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-#include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
-#include "architecture/msgPayloadDefC/TransRefMsgPayload.h"
+#include "msgPayloadDef/SpicePlanetStateMsgPayload.h"
+#include "msgPayloadDef/SpiceTimeMsgPayload.h"
+#include "msgPayloadDef/EpochMsgPayload.h"
+#include "msgPayloadDef/SCStatesMsgPayload.h"
+#include "msgPayloadDef/AttRefMsgPayload.h"
+#include "msgPayloadDef/TransRefMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 
 /*! @brief spice interface class */
@@ -40,7 +40,7 @@ class SpiceInterface: public SysModel {
 public:
     SpiceInterface();
     ~SpiceInterface();
-    
+
     void UpdateState(uint64_t CurrentSimNanos);
     int loadSpiceKernel(char *kernelName, const char *dataPath);
     int unloadSpiceKernel(char *kernelName, const char *dataPath);
@@ -72,7 +72,7 @@ public:
     std::string UTCCalInit;     //!< -- UTC time string for init time
 
     std::vector<std::string>planetFrames; //!< -- Optional vector of planet frame names.  Default values are IAU_ + planet name
-    
+
     bool timeDataInit;          //!< -- Flag indicating whether time has been init
     double J2000ETInit;         //!< s Seconds elapsed since J2000 at init
     double J2000Current;        //!< s Current J2000 elapsed time

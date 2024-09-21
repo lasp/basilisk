@@ -31,11 +31,11 @@
 %include "sys_model.i"
 %include "dentonFluxModel.h"
 
-%include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
+%include "msgPayloadDef/SCStatesMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
+%include "msgPayloadDef/SpicePlanetStateMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/PlasmaFluxMsgPayload.h"
+%include "msgPayloadDef/PlasmaFluxMsgPayload.h"
 
 
 %pythoncode %{

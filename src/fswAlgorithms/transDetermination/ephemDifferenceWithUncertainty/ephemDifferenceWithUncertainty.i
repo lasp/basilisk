@@ -34,10 +34,10 @@ from Basilisk.architecture.swig_common_model import *
 
 %include "ephemDifferenceWithUncertainty.h"
 
-%include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-%include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
+%include "msgPayloadDef/EphemerisMsgPayload.h"
+%include "msgPayloadDef/NavTransMsgPayload.h"
 
-%include "architecture/msgPayloadDefCpp/FilterMsgPayload.h"
+%include "msgPayloadDef/FilterMsgPayload.h"
 
 
 %pythoncode %{

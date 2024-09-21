@@ -36,14 +36,14 @@ STRUCTASLIST(STMessage)
 %include "architecture/utilities/ukfUtilities.h"
 %include "architecture/utilities/signalCondition.h"
 
-%include "architecture/msgPayloadDefC/InertialFilterMsgPayload.h"
-%include "architecture/msgPayloadDefC/STAttMsgPayload.h"
-%include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
-%include "architecture/msgPayloadDefC/AccDataMsgPayload.h"
-%include "architecture/msgPayloadDefC/AccPktDataMsgPayload.h"
-%include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
+%include "msgPayloadDef/InertialFilterMsgPayload.h"
+%include "msgPayloadDef/STAttMsgPayload.h"
+%include "msgPayloadDef/VehicleConfigMsgPayload.h"
+%include "msgPayloadDef/RWArrayConfigMsgPayload.h"
+%include "msgPayloadDef/RWSpeedMsgPayload.h"
+%include "msgPayloadDef/AccDataMsgPayload.h"
+%include "msgPayloadDef/AccPktDataMsgPayload.h"
+%include "msgPayloadDef/NavAttMsgPayload.h"
 
 %pythoncode %{
 import sys

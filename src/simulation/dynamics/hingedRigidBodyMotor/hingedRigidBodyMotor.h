@@ -22,8 +22,8 @@
 #define HINGEDRIGIDBODYMOTOR_H
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
-#include "architecture/msgPayloadDefC/ArrayMotorTorqueMsgPayload.h"
+#include "msgPayloadDef/HingedRigidBodyMsgPayload.h"
+#include "msgPayloadDef/ArrayMotorTorqueMsgPayload.h"
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/messaging/messaging.h"
 
@@ -39,7 +39,7 @@ public:
     void UpdateState(uint64_t CurrentSimNanos);
 
 public:
-    
+
     double K;  //!< gain on theta
     double P; //!< gain on theta dot
 

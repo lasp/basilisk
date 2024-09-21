@@ -30,8 +30,8 @@
 
 %include "eulerRotation.h"
 
-%include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
-%include "architecture/msgPayloadDefC/AttStateMsgPayload.h"
+%include "msgPayloadDef/AttRefMsgPayload.h"
+%include "msgPayloadDef/AttStateMsgPayload.h"
 
 %pythoncode %{
 import sys

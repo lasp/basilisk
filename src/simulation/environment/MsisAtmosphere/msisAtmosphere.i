@@ -35,15 +35,15 @@ from Basilisk.architecture.swig_common_model import *
 %include "msisAtmosphere.h"
 #include "nrlmsise-00.h"
 
-%include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
+%include "msgPayloadDef/SpicePlanetStateMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
+%include "msgPayloadDef/SCStatesMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/AtmoPropsMsgPayload.h"
+%include "msgPayloadDef/AtmoPropsMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/SwDataMsgPayload.h"
+%include "msgPayloadDef/SwDataMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/EpochMsgPayload.h"
+%include "msgPayloadDef/EpochMsgPayload.h"
 
 
 %include "swig_conly_data.i"

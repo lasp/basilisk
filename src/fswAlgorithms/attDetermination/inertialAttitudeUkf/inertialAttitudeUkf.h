@@ -31,15 +31,15 @@
 #include "architecture/utilities/rigidBodyKinematics.hpp"
 #include "architecture/utilities/signalProcessing.h"
 
-#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-#include "architecture/msgPayloadDefCpp/FilterMsgPayload.h"
-#include "architecture/msgPayloadDefCpp/FilterResidualsMsgPayload.h"
+#include "msgPayloadDef/NavAttMsgPayload.h"
+#include "msgPayloadDef/FilterMsgPayload.h"
+#include "msgPayloadDef/FilterResidualsMsgPayload.h"
 
-#include "architecture/msgPayloadDefC/STAttMsgPayload.h"
-#include "architecture/msgPayloadDefC/AccDataMsgPayload.h"
-#include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
-#include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-#include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
+#include "msgPayloadDef/STAttMsgPayload.h"
+#include "msgPayloadDef/AccDataMsgPayload.h"
+#include "msgPayloadDef/RWSpeedMsgPayload.h"
+#include "msgPayloadDef/VehicleConfigMsgPayload.h"
+#include "msgPayloadDef/RWArrayConfigMsgPayload.h"
 
 #include "fswAlgorithms/_GeneralModuleFiles/srukfInterface.h"
 #include "fswAlgorithms/_GeneralModuleFiles/measurementModels.h"

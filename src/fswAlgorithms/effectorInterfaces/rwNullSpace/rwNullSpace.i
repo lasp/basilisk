@@ -30,9 +30,9 @@
 
 %include "rwNullSpace.h"
 
-%include "architecture/msgPayloadDefC/ArrayMotorTorqueMsgPayload.h"
-%include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
-%include "architecture/msgPayloadDefC/RWConstellationMsgPayload.h"
+%include "msgPayloadDef/ArrayMotorTorqueMsgPayload.h"
+%include "msgPayloadDef/RWSpeedMsgPayload.h"
+%include "msgPayloadDef/RWConstellationMsgPayload.h"
 
 %pythoncode %{
 import sys

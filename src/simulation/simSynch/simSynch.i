@@ -30,7 +30,7 @@ from Basilisk.architecture.swig_common_model import *
 %include "sys_model.i"
 %include "simSynch.h"
 
-%include "architecture/msgPayloadDefC/SynchClockMsgPayload.h"
+%include "msgPayloadDef/SynchClockMsgPayload.h"
 
 %pythoncode %{
 import sys

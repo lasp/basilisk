@@ -28,8 +28,8 @@
 #include "opencv2/core/mat.hpp"
 #include "opencv2/imgcodecs.hpp"
 
-#include "architecture/msgPayloadDefC/CameraImageMsgPayload.h"
-#include "architecture/msgPayloadDefC/OpNavLimbMsgPayload.h"
+#include "msgPayloadDef/CameraImageMsgPayload.h"
+#include "msgPayloadDef/OpNavLimbMsgPayload.h"
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/avsEigenMRP.h"
@@ -42,10 +42,10 @@ class LimbFinding: public SysModel {
 public:
     LimbFinding();
     ~LimbFinding();
-    
+
     void UpdateState(uint64_t CurrentSimNanos);
     void Reset(uint64_t CurrentSimNanos);
-    
+
 public:
     std::string filename;                //!< Filename for module to read an image directly
     Message<OpNavLimbMsgPayload> opnavLimbOutMsg;  //!< The name of the Limb output message
@@ -59,7 +59,7 @@ public:
     int32_t cannyThreshLow;                  //!< [-] Second Threshold for Canny detection
     int32_t saveImages;                  //!< [-] 1 to save images to file for debugging
     int32_t limbNumThresh;                  //!< [-] Threshold for when a limb is detected
-    
+
     BSKLogger bskLogger;                //!< -- BSK Logging
 
 };

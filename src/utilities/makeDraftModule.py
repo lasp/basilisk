@@ -295,10 +295,7 @@ class moduleGenerator:
         for msg in inMsgList + outMsgList:
             # ensure we don't include message definition files multiple times
             if msg['type'] not in includedMsgs:
-                if msg['wrap'] == 'C':
-                    headerFile += '#include "architecture/msgPayloadDefC/' + msg['type'] + 'Payload.h"\n'
-                if msg['wrap'] == 'C++':
-                    headerFile += '#include "architecture/msgPayloadDefCpp/' + msg['type'] + 'Payload.h"\n'
+                headerFile += '#include "msgPayloadDef/' + msg['type'] + 'Payload.h"\n'
                 includedMsgs.append(msg['type'])
         headerFile += '#include "architecture/utilities/bskLogging.h"\n'
         headerFile += '#include "architecture/messaging/messaging.h"\n'
@@ -420,11 +417,7 @@ class moduleGenerator:
         for msg in inMsgList + outMsgList:
             # ensure we don't include message definition files multiple times
             if msg['type'] not in includedMsgs:
-                if msg['wrap'] == 'C':
-                    swigFile += '%include "architecture/msgPayloadDefC/' + msg['type'] + 'Payload.h"\n'
-                    swigFile += 'struct ' + msg['type'] + '_C;\n'
-                if msg['wrap'] == 'C++':
-                    swigFile += '%include "architecture/msgPayloadDefCpp/' + msg['type'] + 'Payload.h"\n'
+                swigFile += '%include "msgPayloadDef/' + msg['type'] + 'Payload.h"\n'
                 includedMsgs.append(msg['type'])
         swigFile += '\n'
         swigFile += '%pythoncode %{\n'
@@ -460,18 +453,18 @@ def fillCppInfo(module):
     # provide list of input messages
     # leave list empty if there are no input messages
     inMsgList = list()
-    inMsgList.append({'type': 'AttRefMsg', 'var': 'someInMsg', 'desc': 'input msg description', 'wrap': 'C'})
-    inMsgList.append({'type': 'AttRefMsg', 'var': 'some2InMsg', 'desc': 'input msg description', 'wrap': 'C'})
-    inMsgList.append({'type': 'CSSConfigMsg', 'var': 'anotherInMsg', 'desc': 'input msg description', 'wrap': 'C'})
-    inMsgList.append({'type': 'CSSConfigLogMsg', 'var': 'anotherCppInMsg', 'desc': 'input msg description', 'wrap': 'C++'})
+    inMsgList.append({'type': 'AttRefMsg', 'var': 'someInMsg', 'desc': 'input msg description'})
+    inMsgList.append({'type': 'AttRefMsg', 'var': 'some2InMsg', 'desc': 'input msg description'})
+    inMsgList.append({'type': 'CSSConfigMsg', 'var': 'anotherInMsg', 'desc': 'input msg description'})
+    inMsgList.append({'type': 'CSSConfigLogMsg', 'var': 'anotherCppInMsg', 'desc': 'input msg description'})
     module.inMsgList = inMsgList
 
     # provide list of output messages
     # leave list empty if there are no input messages
     outMsgList = list()
-    outMsgList.append({'type': 'AttRefMsg', 'var': 'some2OutMsg', 'desc': 'output msg description', 'wrap': 'C'})
-    outMsgList.append({'type': 'SCStatesMsg', 'var': 'someOutMsg', 'desc': 'output msg description', 'wrap': 'C'})
-    outMsgList.append({'type': 'RWConfigMsg', 'var': 'anotherCppOutMsg', 'desc': 'output msg description', 'wrap': 'C++'})
+    outMsgList.append({'type': 'AttRefMsg', 'var': 'some2OutMsg', 'desc': 'output msg description'})
+    outMsgList.append({'type': 'SCStatesMsg', 'var': 'someOutMsg', 'desc': 'output msg description'})
+    outMsgList.append({'type': 'RWConfigMsg', 'var': 'anotherCppOutMsg', 'desc': 'output msg description'})
     module.outMsgList = outMsgList
 
 

@@ -2,7 +2,7 @@ function(generate_messages searchDir)
   file(
     GLOB_RECURSE message_files
     RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/"
-    "../${searchDir}/*Payload.h" "${EXTERNAL_MODULES_PATH}/${searchDir}/*Payload.h")
+    "../../${searchDir}/*Payload.h" "${EXTERNAL_MODULES_PATH}/${searchDir}/*Payload.h")
 
   foreach(msgFile ${message_files})
     get_filename_component(TARGET_NAME ${msgFile} NAME_WE)
@@ -66,13 +66,11 @@ endfunction(generate_messages)
 
 set(message_directory_paths
         "${CMAKE_BINARY_DIR}/Basilisk/architecture/messaging/"
-        "../../msgPayloadDefC/"
-        "../../msgPayloadDefCpp/"
+        "../../../msgPayloadDef/"
 )
 if(NOT "${EXTERNAL_MODULES_PATH}" STREQUAL "")
    list(APPEND message_directory_paths
-          "${EXTERNAL_MODULES_PATH}/msgPayloadDefC/"
-          "${EXTERNAL_MODULES_PATH}/msgPayloadDefCpp/")
+          "${EXTERNAL_MODULES_PATH}/msgPayloadDef/")
 endif (NOT "${EXTERNAL_MODULES_PATH}" STREQUAL "")
 
 add_custom_command(
@@ -89,5 +87,4 @@ add_custom_target(swigtrick DEPENDS ${CMAKE_BINARY_DIR}/Basilisk/architecture/me
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../../dist3/autoSource")
 
 # Dependency
-generate_messages(msgPayloadDefCpp)
-generate_messages(msgPayloadDefC)
+generate_messages(msgPayloadDef)

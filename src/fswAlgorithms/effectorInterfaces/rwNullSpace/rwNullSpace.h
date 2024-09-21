@@ -22,9 +22,9 @@
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/ArrayMotorTorqueMsgPayload.h"
-#include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
-#include "architecture/msgPayloadDefC/RWConstellationMsgPayload.h"
+#include "msgPayloadDef/ArrayMotorTorqueMsgPayload.h"
+#include "msgPayloadDef/RWSpeedMsgPayload.h"
+#include "msgPayloadDef/RWConstellationMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 #include <stdint.h>

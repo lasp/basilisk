@@ -30,11 +30,11 @@
 
 %include "cssWlsEst.h"
 
-%include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-%include "architecture/msgPayloadDefC/CSSConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/CSSUnitConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/SunlineFilterMsgPayload.h"
-%include "architecture/msgPayloadDefC/CSSArraySensorMsgPayload.h"
+%include "msgPayloadDef/NavAttMsgPayload.h"
+%include "msgPayloadDef/CSSConfigMsgPayload.h"
+%include "msgPayloadDef/CSSUnitConfigMsgPayload.h"
+%include "msgPayloadDef/SunlineFilterMsgPayload.h"
+%include "msgPayloadDef/CSSArraySensorMsgPayload.h"
 
 %pythoncode %{
 import sys

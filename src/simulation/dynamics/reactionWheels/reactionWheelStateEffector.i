@@ -38,14 +38,14 @@ from Basilisk.architecture.swig_common_model import *
 %include "reactionWheelStateEffector.h"
 %include "architecture/utilities/macroDefinitions.h"
 
-%include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
+%include "msgPayloadDef/RWSpeedMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/RWCmdMsgPayload.h"
+%include "msgPayloadDef/RWCmdMsgPayload.h"
 
-%include "architecture/msgPayloadDefCpp/RWConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/RWConfigLogMsgPayload.h"
+%include "msgPayloadDef/RWConfigMsgPayload.h"
+%include "msgPayloadDef/RWConfigLogMsgPayload.h"
 
-%include "architecture/msgPayloadDefC/ArrayMotorTorqueMsgPayload.h"
+%include "msgPayloadDef/ArrayMotorTorqueMsgPayload.h"
 
 
 %include "std_vector.i"
