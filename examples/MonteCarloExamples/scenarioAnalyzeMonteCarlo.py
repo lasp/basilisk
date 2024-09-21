@@ -131,7 +131,7 @@ def plotSuite(dataDir):
 
     """
     plotList = []
-    sigma_BR = pull_and_format_df(dataDir + "attGuidMsg.sigma_BR.data", 3)
+    sigma_BR = pull_and_format_df(os.path.join(dataDir, "attGuidMsg.sigma_BR.data"), 3)
     sigmaPlot = DS_Plot(sigma_BR, title="Attitude Error",
                         xAxisLabel='time [s]', yAxisLabel='Sigma_BR',
                         macro_x=macros.NANO2SEC,
@@ -139,7 +139,7 @@ def plotSuite(dataDir):
                         plotFcn=curve_per_df_column)
     plotList.append(sigmaPlot)
 
-    sigma_BR = pull_and_format_df(dataDir + "attGuidMsg.omega_BR_B.data", 3)
+    sigma_BR = pull_and_format_df(os.path.join(dataDir, "attGuidMsg.omega_BR_B.data"), 3)
     sigmaPlot = DS_Plot(sigma_BR, title="Attitude Rate Error",
                         xAxisLabel='time [s]', yAxisLabel='omega_BR_B',
                         macro_x=macros.NANO2SEC, macro_y=macros.R2D,
@@ -173,12 +173,12 @@ def run(show_plots):
 
     plotList = []
     analysis = mcAnalysisBaseClass()
-    analysis.dataDir = path + "/scenario_AttFeedbackMC/"
+    analysis.dataDir = os.path.join(path, "scenario_AttFeedbackMC")
 
     # save_as_static: save off static .html files of the plots generated into the staticDir directory.
     # The staticDir will be created inside the dataDir folder.
     # (Note: This inhibits dynamic plotting!
-    analysis.save_as_static = False
+    analysis.save_as_static = True
     analysis.staticDir = "/plots/"
 
     if show_all_data:
@@ -191,13 +191,13 @@ def run(show_plots):
         extrema_run_numbers = analysis.getExtremaRunIndices(numExtrema=1, window=[500 * 1e9, 550 * 1e9])
 
         analysis.extractSubsetOfRuns(runIdx=extrema_run_numbers)
-        plotList.extend(plotSuite(analysis.dataDir + "subset/"))
+        plotList.extend(plotSuite(os.path.join(analysis.dataDir, "subset")))
 
     if optional_plots:
         # nominalRuns = analysis.getNominalRunIndices(50)
         # statPlots = analysis.generateStatPlots()
 
-        shadowFactor = pull_and_format_df(analysis.dataDir + "/eclipse_data_0.shadowFactor.data", 1)
+        shadowFactor = pull_and_format_df(os.path.join(analysis.dataDir, "eclipse_data_0.shadowFactor.data"), 1)
         shadowFactor = shadowFactor.dropna(axis=1)
         shadowFactorPlot = DS_Plot(shadowFactor, title="Optional Plots: Eclipse",
                                                xAxisLabel='time[s]', yAxisLabel='Eclipse Factor',

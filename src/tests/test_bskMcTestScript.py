@@ -71,6 +71,7 @@ def test_scenarioBskMcScenarios(show_plots):
 
         except OSError as err:
             testFailCount = testFailCount + 1
+            print(bskSimCase)
             testMessages.append("OS error: {0}".format(err))
 
 

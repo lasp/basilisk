@@ -1,9 +1,12 @@
+bokeh==3.5.2
 conan>=1.40.1, <2.00.0
-datashader==0.15.2
-holoviews==1.16.0
+datashader==0.16.3
+holoviews==1.19.1
+hvplot==0.10.0
 opencv-contrib-python
 opencv-python
 pandas
+param==2.1.1
 parse>=1.18.0
 Pillow
 pytest
