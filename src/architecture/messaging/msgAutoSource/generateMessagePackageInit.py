@@ -16,7 +16,7 @@ if __name__ == "__main__":
     for i in range(2, len(sys.argv)):
         headerInputPath = sys.argv[i]
         for fileName in os.listdir(headerInputPath):
-            if fileName.endswith(".h") or fileName.endswith(".hpp"):
+            if fileName.endswith(".i"):
                 className = os.path.splitext(fileName)[0]
                 msgName = className.split('Payload')[0]
                 mainImportFid.write('from Basilisk.architecture.messaging.' + className + ' import *\n')

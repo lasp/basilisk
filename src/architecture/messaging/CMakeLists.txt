@@ -2,37 +2,21 @@ function(generate_messages searchDir)
   file(
     GLOB_RECURSE message_files
     RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/"
-    "../../${searchDir}/*Payload.h" "${EXTERNAL_MODULES_PATH}/${searchDir}/*Payload.h")
+    "../../${searchDir}/*Payload.i" "${EXTERNAL_MODULES_PATH}/${searchDir}/*Payload.i")
 
   foreach(msgFile ${message_files})
     get_filename_component(TARGET_NAME ${msgFile} NAME_WE)
-    get_filename_component(TARGET_DIR ${msgFile} DIRECTORY)
-    set(COMP_OUT_NAME "${CMAKE_CURRENT_SOURCE_DIR}/../../../dist3/autoSource/${TARGET_NAME}.i")
-    add_custom_command(
-      OUTPUT ${COMP_OUT_NAME}
-      COMMAND
-        ${Python3_EXECUTABLE}
-        ${CMAKE_CURRENT_SOURCE_DIR}/msgAutoSource/generateSWIGModules.py
-        ${COMP_OUT_NAME}
-        ${msgFile}
-        ${TARGET_NAME}
-        ${searchDir}
-      DEPENDS
-        ${CMAKE_CURRENT_SOURCE_DIR}/msgAutoSource/generateSWIGModules.py
-        ${CMAKE_CURRENT_SOURCE_DIR}/msgAutoSource/msgInterfacePy.i.in
-        ${msgFile}
-      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/msgAutoSource/)
-    set_property(SOURCE ${COMP_OUT_NAME} PROPERTY CPLUSPLUS ON)
+    set_property(SOURCE ${msgFile} PROPERTY CPLUSPLUS ON)
 
     if(NOT "${EXTERNAL_MODULES_PATH}" STREQUAL "")
       set_property(
-        SOURCE ${COMP_OUT_NAME}
+        SOURCE ${msgFile}
         PROPERTY SWIG_FLAGS "-I${CMAKE_CURRENT_SOURCE_DIR}/../" "-I${CMAKE_CURRENT_SOURCE_DIR}/../../"
                  "-I${EXTERNAL_MODULES_PATH}/" "-I${CMAKE_BINARY_DIR}/autoSource/")
       include_directories("${EXTERNAL_MODULES_PATH}/")
     else()
       set_property(
-        SOURCE ${COMP_OUT_NAME}
+        SOURCE ${msgFile}
         PROPERTY SWIG_FLAGS "-I${CMAKE_CURRENT_SOURCE_DIR}/../" "-I${CMAKE_CURRENT_SOURCE_DIR}/../../"
                  "-I${CMAKE_BINARY_DIR}/autoSource/")
     endif(NOT "${EXTERNAL_MODULES_PATH}" STREQUAL "")
@@ -45,7 +29,7 @@ function(generate_messages searchDir)
       ${TARGET_NAME}
       LANGUAGE "python"
       TYPE MODULE
-      SOURCES ${COMP_OUT_NAME} OUTFILE_DIR "${CMAKE_BINARY_DIR}/Basilisk/architecture/messaging/" # _wrap.c/.cxx file
+      SOURCES ${msgFile} OUTFILE_DIR "${CMAKE_BINARY_DIR}/Basilisk/architecture/messaging/" # _wrap.c/.cxx file
               OUTPUT_DIR "${CMAKE_BINARY_DIR}/Basilisk/architecture/messaging/")
 
     add_dependencies(${TARGET_NAME} swigtrick)
@@ -77,14 +61,15 @@ add_custom_command(
         OUTPUT ${CMAKE_BINARY_DIR}/Basilisk/architecture/messaging/__init__.py
         COMMAND
         ${Python3_EXECUTABLE} generateMessagePackageInit.py ${message_directory_paths}
+        DEPENDS
+          msgAutoSource/generateMessagePackageInit.py
+          # TODO: add dependency on all message `.i` files
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/msgAutoSource
         VERBATIM
 )
 
 # Custom target for establishing dependency
 add_custom_target(swigtrick DEPENDS ${CMAKE_BINARY_DIR}/Basilisk/architecture/messaging/__init__.py)
-
-file(MAKE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../../dist3/autoSource")
 
 # Dependency
 generate_messages(msgPayloadDef)
