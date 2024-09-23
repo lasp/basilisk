@@ -17,7 +17,6 @@
 
  */
 
-#include <iostream>
 #include "dragDynamicEffector.h"
 #include "architecture/utilities/linearAlgebra.h"
 #include "architecture/utilities/astroConstants.h"
@@ -25,34 +24,21 @@
 /*! This method is used to reset the module.
  @return void
  */
-void DragDynamicEffector::Reset(uint64_t CurrentSimNanos)
+void DragDynamicEffector::Reset(uint64_t currentSimNanos)
 {
-    // check if input message has not been included
     if (!this->atmoDensInMsg.isLinked()) {
         bskLogger.bskLog(BSK_ERROR, "dragDynamicEffector.atmoDensInMsg was not linked.");
     }
 
 }
 
-/*! The DragEffector does not write output messages to the rest of the sim.
-@return void
- */
-void DragDynamicEffector::WriteOutputMessages(uint64_t CurrentClock)
-{
-	return;
-}
-
-
 /*! This method is used to read the incoming density message and update the internal density/
 atmospheric data.
  @return void
  */
-bool DragDynamicEffector::ReadInputs()
+void DragDynamicEffector::readMessages()
 {
-	bool dataGood;
     this->atmoInData = this->atmoDensInMsg();
-    dataGood = this->atmoDensInMsg.isWritten();
-	return(dataGood);
 }
 
 /*!
@@ -75,8 +61,6 @@ void DragDynamicEffector::updateDragDir(){
     
 	this->v_B = dcm_BN*this->hubVelocity->getState(); // [m/s] sc velocity
 	this->v_hat_B = this->v_B / this->v_B.norm();
-	
-	return;
 }
 
 /*! This method implements a simple "cannnonball" (attitude-independent) drag model.
@@ -87,30 +71,27 @@ void DragDynamicEffector::cannonballDrag(){
   	this->forceExternal_B.setZero();
     this->torqueExternalPntB_B.setZero();
     
-  	this->forceExternal_B  = 0.5 * this->coreParams.dragCoeff * pow(this->v_B.norm(), 2.0) * this->coreParams.projectedArea * this->atmoInData.neutralDensity * (-1.0)*this->v_hat_B;
+  	this->forceExternal_B  = 0.5 * this->coreParams.dragCoeff * pow(this->v_B.norm(), 2.0)
+              * this->coreParams.projectedArea * this->atmoInData.neutralDensity * (-1.0)*this->v_hat_B;
   	this->torqueExternalPntB_B = this->coreParams.comOffset.cross(forceExternal_B);
-
-  	return;
 }
 
 /*! This method computes the body forces and torques for the dragEffector in a simulation loop,
 selecting the model type based on the settable attribute "modelType."
 */
 void DragDynamicEffector::computeForceTorque(double integTime, double timeStep){
-	updateDragDir();
+	this->updateDragDir();
 	if(this->modelType == "cannonball"){
-		cannonballDrag();
+		this->cannonballDrag();
   	}
-  	return;
 }
 
 /*! This method is called to update the local atmospheric conditions at each timestep.
-Naturally, this means that conditions are held piecewise-constant over an integration step.
+Naturally, this means that atmospheric conditions are held piecewise-constant over an integration step.
  @return void
  @param CurrentSimNanos The current simulation time in nanoseconds
  */
-void DragDynamicEffector::UpdateState(uint64_t CurrentSimNanos)
+void DragDynamicEffector::UpdateState(uint64_t currentSimNanos)
 {
-	ReadInputs();
-	return;
+	this->readMessages();
 }
