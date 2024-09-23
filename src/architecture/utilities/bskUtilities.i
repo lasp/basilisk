@@ -21,14 +21,18 @@
    #include "architecture/utilities/macroDefinitions.h"
    #include "fswAlgorithms/fswUtilities/fswDefinitions.h"
    #include "simulation/dynamics/reactionWheels/reactionWheelSupport.h"
-   #include <vector>
+
+   #include <Eigen/Dense>
 %}
 
+// For some reason, "std_vector.i" needs to be included here,
+// even though it's also included in "swig_common_model.i".
+// Also, it *has* to appear before "swig_common_model.i";
+// it can't appear after. *shrug*.
+// Otherwise, we get weird errors involving an unknown type SWIGPY_SLICEOBJECT.
 %include "std_vector.i"
-%include "std_string.i"
-%include "swig_eigen.i"
-%include "swig_conly_data.i"
-%include "stdint.i"
+
+%import "swig_common_model.i"
 
 %include "architecture/utilities/macroDefinitions.h"
 %include "fswAlgorithms/fswUtilities/fswDefinitions.h"

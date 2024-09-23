@@ -25,6 +25,7 @@
 %include "std_set.i"
 %include "std_pair.i"
 %include "swig_conly_data.i"
+%include "swig_eigen.i"
 %feature("copyctor");
 %array_functions(bool, boolArray);
 %array_functions(double, doubleArray);
@@ -43,5 +44,3 @@ namespace std {
    %template(MultiArray) vector < vector <double> >;
    %template(MultiArray3d) vector < vector < vector <double> > >;
 }
-
-%include "swig_eigen.i"

@@ -20,17 +20,20 @@
 %module swigEigenCheck
 #pragma SWIG nowarn=509
 %{
+    #include <Eigen/Dense>
+    #include "architecture/utilities/avsEigenMRP.h"
+
     #include <vector>
     #include <array>
 %}
 
 %include "std_vector.i"
 %include "std_array.i"
+%include "swig_eigen.i"
 
 %template(IntVector) std::vector<int>;
 %template(IntArray3) std::array<int, 3>;
 
-%include "swig_eigen.i"
 
 %define ADD_QUALIFIER_FUNCTIONS(type, memberName)
     void qualifierTest ## memberName ## Value   (      Eigen:: ## type   input) {this-> ## memberName = input;};
