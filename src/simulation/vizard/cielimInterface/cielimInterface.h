@@ -21,19 +21,24 @@
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
 #include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-#include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
+#include "architecture/msgPayloadDefCpp/CameraModelMsgPayload.h"
 #include "architecture/msgPayloadDefC/CameraImageMsgPayload.h"
 #include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
 #include "architecture/msgPayloadDefC/EpochMsgPayload.h"
+#include "architecture/msgPayloadDefC/CelestialBodyParametersMsgPayload.h"
+#include "architecture/msgPayloadDefC/CameraRenderingMsgPayload.h"
+
 #include "architecture/utilities/rigidBodyKinematics.hpp"
-#include "utilities/vizProtobuffer/vizMessage.pb.h"
+#include "utilities/vizProtobuffer/cielimMessage.pb.h"
 #include "simulation/vizard/cielimInterface/zmqConnector.h"
 
+#include <google/protobuf/util/delimited_message_util.h>
 #include <google/protobuf/io/coded_stream.h>
 #include <fstream>
 #include <vector>
 #include <zmq.h>
 #include <iostream>
+#include <filesystem>
 
 enum class ClosedLoopMode {
     OPEN_LOOP = 0,
@@ -41,11 +46,23 @@ enum class ClosedLoopMode {
     REQUESTED_FRAMES = 2
 };
 
-struct MessageStatus{
+class MessageStatus{
+public:
     uint64_t lastTimeTag = 0xFFFFFFFFFFFFFFFF;  //!< [ns] The previous read time-tag for msg
     bool dataFresh = false;                     //!< [-] Flag indicating that new data has been read
 };
 
+/*! Structure defining vizard gravity body values */
+class SpiceBody{
+public:
+    std::string name{};               //!< [-] celestial body name
+    ReadFunctor<SpicePlanetStateMsgPayload> spiceStateMessage{};               //!< [-] celestial body name
+    SpicePlanetStateMsgPayload spiceStatePayload{};               //!< [-] celestial body name
+    bool isCentralBody = false;               //!< [-] celestial body name
+};
+
+/*!  @brief The interface to Cielim via ZMQ and protobuffers
+*/
 class CielimInterface : public SysModel {
 public:
 
@@ -57,13 +74,18 @@ public:
     void setOpNavMode(ClosedLoopMode mode);
     ClosedLoopMode getOpNavMode() const;
     int64_t getFrameNumber() const;
-    void setSaveFile(const std::string pathAndFilename);
-    void setLiveStream(const bool liveStreaming);
+    void setSaveFile(const std::string &pathAndFilename);
+    std::string getSaveFilename() const;
+    void closeProtobufFile();
+    void setLiveStream(bool liveStreaming);
+    void addCelestialBody(const SpiceBody &celestialBodiesList);
+    std::vector<SpiceBody> getCelestialBodies() const;
 
 
     ReadFunctor<SCStatesMsgPayload> spacecraftMessage;      //!< [-] vector of spacecraft data containers
-    std::vector<ReadFunctor<SpicePlanetStateMsgPayload>> spiceBodyMessages; //!< [-] input messages of planet Spice data
-    ReadFunctor<CameraConfigMsgPayload> cameraModelMessage;        //!< [-] incoming camera data message
+    ReadFunctor<CameraModelMsgPayload> cameraModelMessage;        //!< [-] incoming camera data message
+    ReadFunctor<CameraRenderingMsgPayload > cameraRenderingMessage;      //!< [-] camera rendering message
+    ReadFunctor<CelestialBodyParametersMsgPayload> celestialParametersMessage;  //!< [-] celestial body parameters
     ReadFunctor<EpochMsgPayload> epochMessage;    //!< [-] simulation epoch date/time input msg
 
     Message<CameraImageMsgPayload> imageOutMessage;  //!< vector of vizard instrument camera output messages
@@ -88,12 +110,19 @@ private:
 
     std::vector<SpicePlanetStateMsgPayload> spiceBodyPayloads; //!< [-] payloads of planet Spice data
     std::vector<MessageStatus> spiceBodyMessageStatus;         //!< [-] status of the incoming planets' spice data
+    std::vector<SpiceBody> celestialBodiesList;     //!< [-] celestial body names
 
-    CameraConfigMsgPayload cameraModelPayload{};      //!< [-] camera config buffers
+    CameraModelMsgPayload cameraModelPayload{};      //!< [-] camera config buffers
     MessageStatus cameraModelMessageStatus{};         //!< [-] message status of incoming camera data
 
-    std::string protoFilename{""};                  //!< Filename for where to save the protobuff message
-    std::ofstream *outputStream{};                //!< [-] Output file stream opened in reset
+    CelestialBodyParametersMsgPayload celestialParametersPayload{}; //!< [-] buffer for celestial parameters
+    MessageStatus celestialParametersMessageStatus{};     //!< [-] message status of celestial parameter message
+
+    CameraRenderingMsgPayload cameraRenderingPayload{};      //!< [-] buffer for camera rendering settings
+    MessageStatus cameraRenderingMessageStatus{};     //!< [-] message status of the camera rendering message
+
+    std::string protoFilename{};                  //!< Filename for where to save the protobuff message
+    std::ofstream outputStream{};              //!< [-] Output file stream opened in reset
 };
 
 #endif /* CIELIM_INTERFACE_H */
