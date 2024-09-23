@@ -26,6 +26,10 @@
 %include "swig_conly_data.i"
 %feature("copyctor");
 %array_functions(bool, boolArray);
+%array_functions(double, doubleArray);
+%array_functions(long, longArray);
+%array_functions(int, intArray);
+%array_functions(short, shortArray);
 
 // Instantiate templates used by example
 namespace std {

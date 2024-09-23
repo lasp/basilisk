@@ -260,11 +260,6 @@ ARRAY2ASLIST(unsigned int)
 %include "cmalloc.i"
 #define GEN_SIZEOF(type) %sizeof(type, type)
 
-%array_functions(double, doubleArray);
-%array_functions(long, longArray);
-%array_functions(int, intArray);
-%array_functions(short, shortArray);
-
 %pythoncode %{
 
 def getStructSize(self):
