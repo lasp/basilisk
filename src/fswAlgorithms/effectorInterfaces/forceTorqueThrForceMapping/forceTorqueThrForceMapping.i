@@ -18,23 +18,17 @@
 */
 
 %module(package="Basilisk.fswAlgorithms") forceTorqueThrForceMapping
-%{
-    #include "forceTorqueThrForceMapping.h"
-%}
 
 %import "swig_common_model.i"
+%import "sys_model.i"
 
-%include "sys_model.i"
+%import "msgPayloadDef/CmdTorqueBodyMsgPayload.i"
+%import "msgPayloadDef/CmdForceBodyMsgPayload.i"
+%import "msgPayloadDef/THRArrayConfigMsgPayload.i"
+%import "msgPayloadDef/VehicleConfigMsgPayload.i"
+%import "msgPayloadDef/THRArrayCmdForceMsgPayload.i"
 
 %include "forceTorqueThrForceMapping.h"
-
-%include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
-%include "msgPayloadDef/CmdForceBodyMsgPayload.h"
-%include "msgPayloadDef/THRArrayConfigMsgPayload.h"
-%include "msgPayloadDef/VehicleConfigMsgPayload.h"
-%include "msgPayloadDef/THRArrayCmdForceMsgPayload.h"
-
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
+%header %{
+    #include "forceTorqueThrForceMapping.h"
 %}
