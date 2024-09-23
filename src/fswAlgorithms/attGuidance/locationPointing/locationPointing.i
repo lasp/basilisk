@@ -22,9 +22,7 @@
     #include "locationPointing.h"
 %}
 
-%pythoncode %{
-    from Basilisk.architecture.swig_common_model import *
-%}
+%import "swig_common_model.i"
 
 %include "sys_model.i"
 %include "swig_conly_data.i"
