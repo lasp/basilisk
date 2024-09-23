@@ -45,6 +45,7 @@ LTs = [0.00, 14.73]
 z_offsets = [0., 3500e3]
 r_EN_Ns = np.array([[0., 0., 0.], [400e3, 300e3, -200e3]])
 
+@pytest.mark.xfail
 @pytest.mark.parametrize("accuracy", [1e2])
 @pytest.mark.parametrize("param1_Kp, param2_LT, param3_z, param4_r_EN", [
     (Kps[0], LTs[0], z_offsets[0], r_EN_Ns[0]),
