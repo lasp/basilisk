@@ -1,5 +1,4 @@
-
-%module cSysModel
+%module(package="Basilisk.architecture") cSysModel
 %{
    #include "sys_model.h"
 %}

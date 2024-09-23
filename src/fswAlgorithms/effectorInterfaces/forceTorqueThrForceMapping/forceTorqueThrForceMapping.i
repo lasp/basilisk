@@ -17,7 +17,7 @@
 
 */
 
-%module forceTorqueThrForceMapping
+%module(package="Basilisk.fswAlgorithms") forceTorqueThrForceMapping
 %{
     #include "forceTorqueThrForceMapping.h"
 %}

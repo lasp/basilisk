@@ -17,7 +17,7 @@
 
  */
 
-%module swig_common_model
+%module(package="Basilisk.architecture") swig_common_model
 
 %include "std_vector.i"
 %include "std_string.i"
