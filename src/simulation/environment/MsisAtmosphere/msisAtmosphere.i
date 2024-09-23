@@ -48,12 +48,6 @@ from Basilisk.architecture.swig_common_model import *
 
 %include "swig_conly_data.i"
 
-
-GEN_SIZEOF(ap_array)
-GEN_SIZEOF(nrlmsise_input)
-GEN_SIZEOF(nrlmsise_flags)
-GEN_SIZEOF(nrlmsise_output)
-
 %pythoncode %{
 import sys
 protectAllClasses(sys.modules[__name__])
