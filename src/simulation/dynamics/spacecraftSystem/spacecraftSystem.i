@@ -48,7 +48,3 @@ from Basilisk.simulation.gravityEffector import GravBodyVector
 %include "msgPayloadDef/SCEnergyMomentumMsgPayload.h"
 
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

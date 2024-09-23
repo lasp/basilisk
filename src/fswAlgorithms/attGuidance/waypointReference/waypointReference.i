@@ -32,7 +32,3 @@ from Basilisk.architecture.swig_common_model import *
 %include "msgPayloadDef/AttRefMsgPayload.h"
 struct AttRefMsg_C;
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

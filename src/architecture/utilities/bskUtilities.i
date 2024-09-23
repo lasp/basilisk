@@ -40,7 +40,3 @@
 
 %template(Eigen3dVector) std::vector<Eigen::Vector3d, std::allocator<Eigen::Vector3d>>;
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

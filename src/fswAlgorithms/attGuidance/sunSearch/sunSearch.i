@@ -35,7 +35,3 @@ from Basilisk.architecture.swig_common_model import *
 %include "msgPayloadDef/VehicleConfigMsgPayload.h"
 %include "msgPayloadDef/AttGuidMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

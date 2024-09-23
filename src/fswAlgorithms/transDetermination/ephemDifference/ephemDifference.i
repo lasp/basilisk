@@ -32,7 +32,3 @@ STRUCTASLIST(EphemChangeConfig)
 
 %include "msgPayloadDef/EphemerisMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

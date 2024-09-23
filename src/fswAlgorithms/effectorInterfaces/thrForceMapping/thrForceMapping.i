@@ -33,9 +33,5 @@
 %include "msgPayloadDef/THRArrayConfigMsgPayload.h"
 %include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}
 
 %pythoncode "_UnitTest/Support/Results_thrForceMapping.py"

@@ -31,7 +31,3 @@
 %include "msgPayloadDef/NavTransMsgPayload.h"
 %include "msgPayloadDef/CmdForceInertialMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

@@ -34,7 +34,3 @@
 %include "msgPayloadDef/VehicleConfigMsgPayload.h"
 %include "msgPayloadDef/THRArrayOnTimeCmdMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

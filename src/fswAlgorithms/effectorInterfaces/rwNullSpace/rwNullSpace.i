@@ -32,7 +32,3 @@
 %include "msgPayloadDef/RWSpeedMsgPayload.h"
 %include "msgPayloadDef/RWConstellationMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

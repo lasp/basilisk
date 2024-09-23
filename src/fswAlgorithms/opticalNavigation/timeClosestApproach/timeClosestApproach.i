@@ -37,7 +37,3 @@ struct NavTransMsg_C;
 %include "msgPayloadDef/FilterMsgPayload.h"
 %include "msgPayloadDef/TimeClosestApproachMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

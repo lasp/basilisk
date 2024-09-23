@@ -35,7 +35,3 @@
 %include "msgPayloadDef/DesiredVelocityMsgPayload.h"
 %include "msgPayloadDef/DvBurnCmdMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

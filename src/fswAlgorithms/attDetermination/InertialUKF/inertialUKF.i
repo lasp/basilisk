@@ -43,7 +43,3 @@ STRUCTASLIST(STMessage)
 %include "msgPayloadDef/AccPktDataMsgPayload.h"
 %include "msgPayloadDef/NavAttMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

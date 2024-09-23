@@ -51,7 +51,3 @@ from Basilisk.simulation.gravityEffector import GravBodyVector
 
 %include "../_GeneralModuleFiles/hubEffector.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

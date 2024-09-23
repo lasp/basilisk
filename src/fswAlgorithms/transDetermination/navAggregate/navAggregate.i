@@ -34,7 +34,3 @@ STRUCTASLIST(AggregateTransInput)
 %include "msgPayloadDef/NavAttMsgPayload.h"
 %include "msgPayloadDef/NavTransMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

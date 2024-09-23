@@ -226,7 +226,4 @@ def svIntegratorAdaptiveRungeKutta(
     stages = len(b_coefficients)
 
     return _rk_adaptive_base_classes[stages](dynamic_object, a_coefficients, b_coefficients, b_star_coefficients, c_coefficients, largest_order)
-
-import sys
-protectAllClasses(sys.modules[__name__])
 %}

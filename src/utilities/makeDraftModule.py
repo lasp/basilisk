@@ -420,11 +420,6 @@ class moduleGenerator:
                 swigFile += '%include "msgPayloadDef/' + msg['type'] + 'Payload.h"\n'
                 includedMsgs.append(msg['type'])
         swigFile += '\n'
-        swigFile += '%pythoncode %{\n'
-        swigFile += 'import sys\n'
-        swigFile += 'protectAllClasses(sys.modules[__name__])\n'
-        swigFile += '%}\n'
-        swigFile += '\n'
 
         with open(swigFileName, 'w') as w:
             w.write(swigFile)

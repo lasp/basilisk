@@ -31,7 +31,3 @@
 %include "msgPayloadDef/NavTransMsgPayload.h"
 %include "msgPayloadDef/HillRelStateMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

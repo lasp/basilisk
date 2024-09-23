@@ -33,7 +33,3 @@ STRUCTASLIST(FaultDetectionData)
 %include "msgPayloadDef/NavAttMsgPayload.h"
 %include "msgPayloadDef/OpNavMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

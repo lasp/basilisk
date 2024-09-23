@@ -32,7 +32,3 @@
 %include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
 %include "msgPayloadDef/RWSpeedMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

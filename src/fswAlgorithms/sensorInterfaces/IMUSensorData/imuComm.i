@@ -31,7 +31,3 @@
 %include "msgPayloadDef/IMUSensorBodyMsgPayload.h"
 %include "msgPayloadDef/IMUSensorMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

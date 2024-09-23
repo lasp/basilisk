@@ -31,7 +31,3 @@
 %include "msgPayloadDef/RWArrayConfigMsgPayload.h"
 %include "msgPayloadDef/RWConstellationMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

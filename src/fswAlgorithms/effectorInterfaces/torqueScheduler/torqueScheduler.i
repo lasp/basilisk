@@ -31,7 +31,3 @@
 %include "msgPayloadDef/ArrayMotorTorqueMsgPayload.h"
 %include "msgPayloadDef/ArrayEffectorLockMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

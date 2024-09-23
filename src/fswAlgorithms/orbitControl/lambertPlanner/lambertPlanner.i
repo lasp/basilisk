@@ -36,7 +36,3 @@ struct NavTransMsg_C;
 %include "msgPayloadDef/LambertProblemMsgPayload.h"
 struct LambertProblemMsg_C;
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

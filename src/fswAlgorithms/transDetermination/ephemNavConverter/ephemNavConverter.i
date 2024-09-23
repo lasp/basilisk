@@ -31,7 +31,3 @@ from Basilisk.architecture.swig_common_model import *
 %include "msgPayloadDef/NavTransMsgPayload.h"
 %include "msgPayloadDef/EphemerisMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

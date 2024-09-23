@@ -35,7 +35,3 @@ struct OpNavCirclesMsg_C;
 %include "msgPayloadDef/CameraImageMsgPayload.h"
 struct CameraImageMsg_C;
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

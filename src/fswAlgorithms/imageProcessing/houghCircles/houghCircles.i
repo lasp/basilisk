@@ -38,7 +38,3 @@ struct OpNavCirclesMsg_C;
 struct CameraImageMsg_C;
 
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

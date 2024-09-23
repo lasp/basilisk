@@ -31,8 +31,3 @@
 %include "msgPayloadDef/NavAttMsgPayload.h"
 %include "msgPayloadDef/AttGuidMsgPayload.h"
 %include "msgPayloadDef/AttRefMsgPayload.h"
-
-%pythoncode %{
-    import sys
-    protectAllClasses(sys.modules[__name__])
-%}

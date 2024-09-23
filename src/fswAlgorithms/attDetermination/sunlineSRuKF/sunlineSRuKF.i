@@ -37,7 +37,3 @@ from Basilisk.architecture.swig_common_model import *
 %include "msgPayloadDef/FilterMsgPayload.h"
 %include "msgPayloadDef/FilterResidualsMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

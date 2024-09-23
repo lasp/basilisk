@@ -48,7 +48,3 @@ namespace std {
     %template(CSSVector) vector<CoarseSunSensor *, allocator<CoarseSunSensor *> >;
 }
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

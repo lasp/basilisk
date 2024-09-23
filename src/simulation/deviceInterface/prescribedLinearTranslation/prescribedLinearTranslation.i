@@ -34,7 +34,3 @@ from Basilisk.architecture.swig_common_model import *
 %include "msgPayloadDef/PrescribedTranslationMsgPayload.h"
 %include "msgPayloadDef/LinearTranslationRigidBodyMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

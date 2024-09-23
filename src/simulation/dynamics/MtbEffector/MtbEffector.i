@@ -41,7 +41,3 @@
 %include "msgPayloadDef/MTBMsgPayload.h"
 
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

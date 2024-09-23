@@ -34,7 +34,3 @@ STRUCTASLIST(ThrustGroupData)
 struct ThrustGroupData;
 struct effPairs;
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

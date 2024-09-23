@@ -36,7 +36,3 @@
 %include "msgPayloadDef/CameraConfigMsgPayload.h"
 %include "msgPayloadDef/CameraLocalizationMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

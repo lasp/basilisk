@@ -33,7 +33,3 @@
 %include "msgPayloadDef/DvBurnCmdMsgPayload.h"
 %include "msgPayloadDef/DvExecutionDataMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

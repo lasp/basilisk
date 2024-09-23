@@ -35,7 +35,3 @@
 %include "msgPayloadDef/VehicleConfigMsgPayload.h"
 %include "msgPayloadDef/ReconfigBurnArrayInfoMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

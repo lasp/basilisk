@@ -39,9 +39,5 @@ int testOrbitalHill(double);
 %include "avsLibrarySelfCheck.h"
 
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}
 
 

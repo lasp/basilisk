@@ -34,7 +34,3 @@
 %include "msgPayloadDef/TAMSensorBodyMsgPayload.h"
 %include "msgPayloadDef/MTBArrayConfigMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

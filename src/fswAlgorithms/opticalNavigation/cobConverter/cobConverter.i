@@ -44,7 +44,3 @@ struct EphemerisMsg_C;
 %include "msgPayloadDef/OpNavCOMMsgPayload.h"
 
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

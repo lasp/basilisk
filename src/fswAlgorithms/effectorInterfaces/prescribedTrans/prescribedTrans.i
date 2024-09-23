@@ -32,7 +32,3 @@
 
 %include "msgPayloadDef/LinearTranslationRigidBodyMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

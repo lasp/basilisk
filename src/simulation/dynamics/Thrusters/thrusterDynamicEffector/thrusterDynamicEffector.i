@@ -52,7 +52,3 @@ namespace std {
 %include "msgPayloadDef/SCStatesMsgPayload.h"
 
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

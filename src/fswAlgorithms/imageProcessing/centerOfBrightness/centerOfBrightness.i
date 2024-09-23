@@ -40,7 +40,3 @@ struct CameraImageMsg_C;
 
 %include "msgPayloadDef/OpNavCOBMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

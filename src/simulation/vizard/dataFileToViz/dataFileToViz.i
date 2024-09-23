@@ -52,7 +52,3 @@ namespace std {
     %template(RWConfigLogMsgInMsgsVectorVector) vector <vector <Message<RWConfigLogMsgPayload>*, allocator<Message<RWConfigLogMsgPayload>*> >, allocator<vector <Message<RWConfigLogMsgPayload>*>> >;
 }
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

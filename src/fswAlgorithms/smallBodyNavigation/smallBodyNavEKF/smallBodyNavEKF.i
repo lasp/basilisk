@@ -36,7 +36,3 @@
 %include "msgPayloadDef/SmallBodyNavMsgPayload.h"
 %include "msgPayloadDef/CmdForceBodyMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

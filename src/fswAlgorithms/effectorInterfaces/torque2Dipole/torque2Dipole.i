@@ -33,7 +33,3 @@
 %include "msgPayloadDef/DipoleRequestBodyMsgPayload.h"
 %include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

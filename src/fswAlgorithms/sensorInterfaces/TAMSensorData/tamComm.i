@@ -33,7 +33,3 @@ from Basilisk.architecture.swig_common_model import *
 %include "msgPayloadDef/TAMSensorBodyMsgPayload.h"
 %include "msgPayloadDef/TAMSensorMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

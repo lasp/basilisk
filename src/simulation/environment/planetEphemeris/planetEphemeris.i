@@ -43,7 +43,3 @@ namespace std {
 
 
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

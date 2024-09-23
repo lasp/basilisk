@@ -38,7 +38,3 @@
 %include "msgPayloadDef/DvBurnCmdMsgPayload.h"
 %include "msgPayloadDef/LambertValidatorMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

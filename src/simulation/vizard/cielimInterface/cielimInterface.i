@@ -65,7 +65,3 @@ namespace std {
 %include "msgPayloadDef/THROutputMsgPayload.h"
 %include "msgPayloadDef/ChargeMsmMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

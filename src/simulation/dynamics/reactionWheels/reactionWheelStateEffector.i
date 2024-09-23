@@ -53,7 +53,3 @@ namespace std {
     %template(RWConfigPointerVector) vector<RWConfigMsgPayload *, allocator<RWConfigMsgPayload *> >;
 }
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

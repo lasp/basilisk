@@ -34,7 +34,3 @@ from Basilisk.architecture.swig_common_model import *
 %include "msgPayloadDef/HingedRigidBodyMsgPayload.h"
 %include "msgPayloadDef/MotorStepCommandMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

@@ -40,7 +40,3 @@ struct CameraLocalizationMsg_C;
 %include "msgPayloadDef/FilterMsgPayload.h"
 %include "msgPayloadDef/FilterResidualsMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

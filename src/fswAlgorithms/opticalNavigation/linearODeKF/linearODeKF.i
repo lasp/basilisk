@@ -37,7 +37,3 @@ struct NavTransMsg_C;
 %include "msgPayloadDef/FilterResidualsMsgPayload.h"
 %include "msgPayloadDef/OpNavUnitVecMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

@@ -39,7 +39,3 @@ struct OpNavMsg_C;
 %include "msgPayloadDef/OpNavFilterMsgPayload.h"
 struct OpNavFilterMsg_C;
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

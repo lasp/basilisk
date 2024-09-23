@@ -37,7 +37,3 @@
 %include "fswAlgorithms/fswUtilities/fswDefinitions.h"
 %include "architecture/utilities/macroDefinitions.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

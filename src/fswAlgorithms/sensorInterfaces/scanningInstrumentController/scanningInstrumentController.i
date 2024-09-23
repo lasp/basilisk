@@ -34,7 +34,3 @@
 %include "msgPayloadDef/DeviceStatusMsgPayload.h"
 %include "msgPayloadDef/DeviceCmdMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

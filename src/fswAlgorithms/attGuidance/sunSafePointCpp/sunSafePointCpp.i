@@ -36,7 +36,3 @@ struct NavAttMsg_C;
 %include "msgPayloadDef/AttGuidMsgPayload.h"
 struct AttGuidMsg_C;
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

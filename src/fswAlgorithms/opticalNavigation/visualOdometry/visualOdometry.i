@@ -35,7 +35,3 @@
 %include "msgPayloadDef/CameraConfigMsgPayload.h"
 struct CameraConfigMsg_C;
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

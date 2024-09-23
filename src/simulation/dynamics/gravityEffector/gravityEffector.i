@@ -189,9 +189,5 @@ from typing import Optional, Union
     %}
 }
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}
 
 %pythoncode "simulation/dynamics/gravityEffector/gravCoeffOps.py"

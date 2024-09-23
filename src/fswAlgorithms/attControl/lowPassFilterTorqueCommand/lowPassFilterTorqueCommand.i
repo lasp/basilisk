@@ -31,7 +31,3 @@
 // sample Module support file to be included in this sub-module
 %include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

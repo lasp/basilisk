@@ -31,7 +31,3 @@
 %include "msgPayloadDef/AttRefMsgPayload.h"
 %include "msgPayloadDef/AttStateMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

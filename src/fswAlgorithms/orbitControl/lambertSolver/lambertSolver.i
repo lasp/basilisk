@@ -38,8 +38,4 @@ struct LambertSolutionMsg_C;
 %include "msgPayloadDef/LambertPerformanceMsgPayload.h"
 struct LambertPerformanceMsg_C;
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}
 

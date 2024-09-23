@@ -44,8 +44,4 @@ struct EphemerisMsg_C;
 
 %include "msgPayloadDef/PairedKeyPointsMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}
 

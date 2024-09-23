@@ -34,7 +34,3 @@
 %include "msgPayloadDef/SunlineFilterMsgPayload.h";
 %include "msgPayloadDef/CSSConfigMsgPayload.h";
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

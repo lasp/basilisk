@@ -38,7 +38,3 @@ struct VehicleConfigMsg_C;
 %include "msgPayloadDef/CmdTorqueBodyMsgPayload.h"
 struct CmdTorqueBodyMsg_C;
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}

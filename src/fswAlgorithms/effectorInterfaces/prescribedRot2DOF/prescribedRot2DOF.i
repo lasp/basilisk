@@ -32,7 +32,3 @@
 
 %include "msgPayloadDef/PrescribedRotationMsgPayload.h"
 
-%pythoncode %{
-import sys
-protectAllClasses(sys.modules[__name__])
-%}
