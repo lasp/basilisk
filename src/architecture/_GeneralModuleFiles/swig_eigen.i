@@ -17,7 +17,8 @@
 
  */
 %module swig_eigen
-%{
+
+%fragment("eigenHeaders", "header") %{
     #include <Eigen/Dense>
     #include "architecture/utilities/avsEigenMRP.h"
     #include <type_traits>
@@ -38,7 +39,7 @@
     inline constexpr bool always_false_v = false;
 }
 
-%fragment("castPyToC", "header", fragment="static_fail") %{
+%fragment("castPyToC", "header", fragment="static_fail", fragment="eigenHeaders") %{
     /*
     The following method takes a Python object and tries to convert it to the type T
     If this is succesful, the value is returned. If it is unsucessful, an appropriate
@@ -112,7 +113,7 @@
     }
 %}
 
-%fragment("castCToPy", "header", fragment="static_fail") {
+%fragment("castCToPy", "header", fragment="static_fail", fragment="eigenHeaders") {
     template<class T>
     PyObject * castCToPy(T input)
     {
@@ -137,7 +138,7 @@
     }
 }
 
-%fragment("rotationConversion", "header") {
+%fragment("rotationConversion", "header", fragment="eigenHeaders") {
     /*
     Converts from one rotation type to other (for example, MRPd to Quaterniond).
     */
@@ -172,7 +173,7 @@
     };
 }
 
-%fragment("getInputSize", "header") {
+%fragment("getInputSize", "header", fragment="eigenHeaders") {
     /*
     This function returns the size of the input.
     If the input is not a sequence, then an empty optional is returned.
