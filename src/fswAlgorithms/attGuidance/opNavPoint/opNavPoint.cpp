@@ -46,7 +46,7 @@ void OpNavPoint::Reset(uint64_t callTime)
     /* compute an Eigen axis orthogonal to alignAxis_C */
     if (v3Norm(this->alignAxis_C)  < 0.1) {
         char info[MAX_LOGGING_LENGTH];
-        sprintf(info, "The module vector alignAxis_C is not setup as a unit vector [%f, %f %f]",
+        snprintf(info, sizeof(info), "The module vector alignAxis_C is not setup as a unit vector [%f, %f %f]",
           this->alignAxis_C[0], this->alignAxis_C[1], this->alignAxis_C[2]);
         this->bskLogger.bskLog(BSK_ERROR, info);
     } else {

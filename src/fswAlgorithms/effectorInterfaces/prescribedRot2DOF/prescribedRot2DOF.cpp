@@ -78,7 +78,6 @@ void PrescribedRot2DOF::UpdateState(uint64_t callTime)
     // Create buffer messages
     HingedRigidBodyMsgPayload spinningBodyRef1In = {};
     HingedRigidBodyMsgPayload spinningBodyRef2In = {};
-    HingedRigidBodyMsgPayload spinningBodyOut = {};
     PrescribedRotationMsgPayload prescribedRotationOut = {};
 
     // Read the input messages

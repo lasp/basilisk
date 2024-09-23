@@ -226,7 +226,7 @@ void OkeefeEKF::sunlineMeasUpdate(double updateTime)
 void sunlineRateCompute(double states[SKF_N_STATES_HALF], double dt, double prev_states[SKF_N_STATES_HALF], double *omega)
 {
 
-    double dk_dot_dkmin1, dk_dot_dkmin1_normal, dk_cross_dkmin1_normal[SKF_N_STATES_HALF];
+    double dk_dot_dkmin1_normal, dk_cross_dkmin1_normal[SKF_N_STATES_HALF];
     double dk_hat[SKF_N_STATES_HALF], dkmin1_hat[SKF_N_STATES_HALF];
 
     if (dt < 1E-10){
@@ -240,7 +240,6 @@ void sunlineRateCompute(double states[SKF_N_STATES_HALF], double dt, double prev
         }
         else{
             /* Set local variables to zero */
-            dk_dot_dkmin1=0;
             dk_dot_dkmin1_normal=0;
             vSetZero(dk_hat, SKF_N_STATES_HALF);
             vSetZero(dkmin1_hat, SKF_N_STATES_HALF);

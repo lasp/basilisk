@@ -38,7 +38,7 @@ void CSSComm::Reset(uint64_t callTime)
     if(this->numSensors > MAX_NUM_CSS_SENSORS)
     {
         char info[MAX_LOGGING_LENGTH];
-        sprintf(info, "The configured number of CSS sensors exceeds the maximum, %d > %d! Changing the number of sensors to the max.", this->numSensors, MAX_NUM_CSS_SENSORS);
+        snprintf(info, sizeof(info), "The configured number of CSS sensors exceeds the maximum, %d > %d! Changing the number of sensors to the max.", this->numSensors, MAX_NUM_CSS_SENSORS);
         this->bskLogger.bskLog(BSK_WARNING, info);
         this->numSensors = MAX_NUM_CSS_SENSORS;
     }

@@ -40,7 +40,7 @@ void NavAggregate::Reset(uint64_t callTime)
     }
     if (this->transMsgCount > MAX_AGG_NAV_MSG) {
         char info[MAX_LOGGING_LENGTH];
-        sprintf(info, "The translation message count %d is larger than allowed (%d). Setting count to max value.",
+        snprintf(info, sizeof(info), "The translation message count %d is larger than allowed (%d). Setting count to max value.",
                   this->transMsgCount, MAX_AGG_NAV_MSG);
         this->bskLogger.bskLog(BSK_ERROR, info);
 
@@ -65,7 +65,7 @@ void NavAggregate::Reset(uint64_t callTime)
     /*! - ensure the attitude message index locations are less than MAX_AGG_NAV_MSG */
     if (this->attTimeIdx >= MAX_AGG_NAV_MSG) {
         char info[MAX_LOGGING_LENGTH];
-        sprintf(info, "The attTimeIdx variable %d is too large. Must be less than %d. Setting index to max value.",
+        snprintf(info, sizeof(info), "The attTimeIdx variable %d is too large. Must be less than %d. Setting index to max value.",
               this->attTimeIdx, MAX_AGG_NAV_MSG);
         this->bskLogger.bskLog(BSK_ERROR, info);
 
@@ -73,7 +73,7 @@ void NavAggregate::Reset(uint64_t callTime)
     }
     if (this->attIdx >= MAX_AGG_NAV_MSG) {
         char info[MAX_LOGGING_LENGTH];
-        sprintf(info, "The attIdx variable %d is too large. Must be less than %d. Setting index to max value.",
+        snprintf(info, sizeof(info), "The attIdx variable %d is too large. Must be less than %d. Setting index to max value.",
                   this->attIdx, MAX_AGG_NAV_MSG);
         this->bskLogger.bskLog(BSK_ERROR, info);
 
@@ -81,7 +81,7 @@ void NavAggregate::Reset(uint64_t callTime)
     }
     if (this->rateIdx >= MAX_AGG_NAV_MSG) {
         char info[MAX_LOGGING_LENGTH];
-        sprintf(info, "The rateIdx variable %d is too large. Must be less than %d. Setting index to max value.",
+        snprintf(info, sizeof(info), "The rateIdx variable %d is too large. Must be less than %d. Setting index to max value.",
                   this->rateIdx, MAX_AGG_NAV_MSG);
         this->bskLogger.bskLog(BSK_ERROR, info);
 
@@ -89,7 +89,7 @@ void NavAggregate::Reset(uint64_t callTime)
     }
     if (this->sunIdx >= MAX_AGG_NAV_MSG) {
         char info[MAX_LOGGING_LENGTH];
-        sprintf(info, "The sunIdx variable %d is too large. Must be less than %d. Setting index to max value.",
+        snprintf(info, sizeof(info), "The sunIdx variable %d is too large. Must be less than %d. Setting index to max value.",
                 this->sunIdx, MAX_AGG_NAV_MSG);
         this->bskLogger.bskLog(BSK_ERROR, info);
 
@@ -99,7 +99,7 @@ void NavAggregate::Reset(uint64_t callTime)
     /*! - ensure the translational message index locations are less than MAX_AGG_NAV_MSG */
     if (this->transTimeIdx >= MAX_AGG_NAV_MSG) {
         char info[MAX_LOGGING_LENGTH];
-        sprintf(info, "The transTimeIdx variable %d is too large. Must be less than %d. Setting index to max value.",
+        snprintf(info, sizeof(info), "The transTimeIdx variable %d is too large. Must be less than %d. Setting index to max value.",
                 this->transTimeIdx, MAX_AGG_NAV_MSG);
         this->bskLogger.bskLog(BSK_ERROR, info);
 
@@ -107,7 +107,7 @@ void NavAggregate::Reset(uint64_t callTime)
     }
     if (this->posIdx >= MAX_AGG_NAV_MSG) {
         char info[MAX_LOGGING_LENGTH];
-        sprintf(info, "The posIdx variable %d is too large. Must be less than %d. Setting index to max value.",
+        snprintf(info, sizeof(info), "The posIdx variable %d is too large. Must be less than %d. Setting index to max value.",
                   this->posIdx, MAX_AGG_NAV_MSG);
         this->bskLogger.bskLog(BSK_ERROR, info);
 
@@ -115,7 +115,7 @@ void NavAggregate::Reset(uint64_t callTime)
     }
     if (this->velIdx >= MAX_AGG_NAV_MSG) {
         char info[MAX_LOGGING_LENGTH];
-        sprintf(info, "The velIdx variable %d is too large. Must be less than %d. Setting index to max value.",
+        snprintf(info, sizeof(info), "The velIdx variable %d is too large. Must be less than %d. Setting index to max value.",
                   this->velIdx, MAX_AGG_NAV_MSG);
         this->bskLogger.bskLog(BSK_ERROR, info);
 
@@ -123,7 +123,7 @@ void NavAggregate::Reset(uint64_t callTime)
     }
     if (this->dvIdx >= MAX_AGG_NAV_MSG) {
         char info[MAX_LOGGING_LENGTH];
-        sprintf(info, "The dvIdx variable %d is too large. Must be less than %d. Setting index to max value.",
+        snprintf(info, sizeof(info), "The dvIdx variable %d is too large. Must be less than %d. Setting index to max value.",
                 this->dvIdx, MAX_AGG_NAV_MSG);
         this->bskLogger.bskLog(BSK_ERROR, info);
 

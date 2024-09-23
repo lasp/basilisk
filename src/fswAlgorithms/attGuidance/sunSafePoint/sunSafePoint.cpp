@@ -42,7 +42,7 @@ void SunSafePoint::Reset(uint64_t callTime)
     /* compute an Eigen axis orthogonal to sHatBdyCmd */
     if (v3Norm(this->sHatBdyCmd)  < 0.1) {
       char info[MAX_LOGGING_LENGTH];
-      sprintf(info, "The module vector sHatBdyCmd is not setup as a unit vector [%f, %f %f]",
+      snprintf(info, sizeof(info), "The module vector sHatBdyCmd is not setup as a unit vector [%f, %f %f]",
                 this->sHatBdyCmd[0], this->sHatBdyCmd[1], this->sHatBdyCmd[2]);
       this->bskLogger.bskLog(BSK_ERROR, info);
     } else {

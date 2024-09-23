@@ -121,7 +121,7 @@ void HorizonOpNav::Reset(uint64_t callTime)
 void HorizonOpNav::UpdateState(uint64_t callTime)
 {
     double dcm_NC[3][3], dcm_CB[3][3], dcm_BN[3][3], Q[3][3], B[3][3];
-    double planetRad_Eq, planetRad_Pol;
+    double planetRad_Eq;
     double covar_In_C[3][3], covar_In_B[3][3], covar_In_N[3][3];
     CameraConfigMsgPayload cameraSpecs;
     OpNavLimbMsgPayload limbIn;
@@ -142,17 +142,14 @@ void HorizonOpNav::UpdateState(uint64_t callTime)
     /*! Create Q matrix, the square root inverse of the A matrix, eq (6) in Engineering Note*/
     if(this->planetTarget ==1){
         planetRad_Eq = REQ_EARTH*1E3;//in m
-        planetRad_Pol = RP_EARTH*1E3;
         opNavMsgOut.planetID = this->planetTarget;
     }
     if(this->planetTarget ==2){
         planetRad_Eq = REQ_MARS*1E3;//in m
-        planetRad_Pol = RP_MARS*1E3;
         opNavMsgOut.planetID = this->planetTarget;
     }
     if(this->planetTarget ==3){
         planetRad_Eq = REQ_JUPITER*1E3;//in m
-        planetRad_Pol = planetRad_Eq;
         opNavMsgOut.planetID = this->planetTarget;
     }
     m33Set(1/planetRad_Eq, 0, 0, 0, 1/planetRad_Eq, 0, 0, 0, 1/planetRad_Eq, Q);

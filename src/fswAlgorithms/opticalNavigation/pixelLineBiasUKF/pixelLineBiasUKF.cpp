@@ -138,7 +138,6 @@ void PixelLineBiasUKF::Reset(uint64_t callTime)
 void PixelLineBiasUKF::UpdateState(uint64_t callTime)
 {
     double newTimeTag = 0.0;  /* [s] Local Time-tag variable*/
-    int32_t trackerValid; /* [-] Indicates whether the star tracker was valid*/
     double yBar[PIXLINE_N_MEAS], tempYVec[PIXLINE_N_MEAS];
     uint64_t i;
     int computePostFits;
@@ -157,7 +156,6 @@ void PixelLineBiasUKF::UpdateState(uint64_t callTime)
     this->attInfo = this->attInMsg();
 
     /*! - Handle initializing time in filter and discard initial messages*/
-    trackerValid = 0;
     /*! - If the time tag from the measured data is new compared to previous step,
      propagate and update the filter*/
     newTimeTag = this->attInMsg.timeWritten() * NANO2SEC;

@@ -59,7 +59,7 @@ void LocationPointing::Reset(uint64_t callTime)
     /* compute an Eigen axis orthogonal to sHatBdyCmd */
     if (v3Norm(this->pHat_B)  < 0.1) {
       char info[MAX_LOGGING_LENGTH];
-      sprintf(info, "locationPoint: vector pHat_B is not setup as a unit vector [%f, %f %f]",
+      snprintf(info, sizeof(info), "locationPoint: vector pHat_B is not setup as a unit vector [%f, %f %f]",
                 this->pHat_B[0], this->pHat_B[1], this->pHat_B[2]);
       this->bskLogger.bskLog(BSK_ERROR, info);
     } else {

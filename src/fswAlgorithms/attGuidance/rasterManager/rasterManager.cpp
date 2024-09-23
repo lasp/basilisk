@@ -56,7 +56,7 @@ void RasterManager::UpdateState(uint64_t callTime)
         this->scanSelector += 1;
 
         char info[MAX_LOGGING_LENGTH];
-        sprintf(info, "Raster: %i. AngleSet = [%f, %f, %f], RateSet = [%f, %f, %f] ", this->scanSelector,
+        snprintf(info, sizeof(info), "Raster: %i. AngleSet = [%f, %f, %f], RateSet = [%f, %f, %f] ", this->scanSelector,
                this->attOutSet.state[0],
                this->attOutSet.state[1],
                this->attOutSet.state[2],
