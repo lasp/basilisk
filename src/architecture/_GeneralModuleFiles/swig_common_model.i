@@ -19,6 +19,7 @@
 
 %module(package="Basilisk.architecture") swig_common_model
 
+%include "carrays.i"
 %include "std_vector.i"
 %include "std_string.i"
 %include "std_set.i"
