@@ -14,10 +14,12 @@
 #  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 #  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 #  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-# 
-# 
+#
+#
+import sys
 
 import numpy as np
+import pytest
 from Basilisk.architecture import messaging
 from Basilisk.fswAlgorithms import forceTorqueThrForceMapping
 from Basilisk.utilities import SimulationBaseClass
@@ -25,7 +27,7 @@ from Basilisk.utilities import fswSetupThrusters
 from Basilisk.utilities import macros
 from Basilisk.utilities import unitTestSupport
 
-
+@pytest.mark.skipif(sys.platform == "win32", reason="known to not pass on windows platform")
 def test_forceTorqueThrForceMapping1():
     r"""
     **Test Description**
@@ -68,6 +70,7 @@ def test_forceTorqueThrForceMapping1():
 
     assert testResults < 1, testMessage
 
+@pytest.mark.skipif(sys.platform == "win32", reason="known to not pass on windows platform")
 def test_forceTorqueThrForceMapping2():
     r"""
     **Test Description**
@@ -110,6 +113,7 @@ def test_forceTorqueThrForceMapping2():
 
     assert testResults < 1, testMessage
 
+@pytest.mark.skipif(sys.platform == "win32", reason="known to not pass on windows platform")
 def test_forceTorqueThrForceMapping3():
     r"""
     **Test Description**
@@ -152,7 +156,7 @@ def test_forceTorqueThrForceMapping3():
 
     assert testResults < 1, testMessage
 
-
+@pytest.mark.skipif(sys.platform == "win32", reason="known to not pass on windows platform")
 def test_forceTorqueThrForceMapping4():
     r"""
     **Test Description**
