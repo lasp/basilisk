@@ -27,11 +27,11 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
     #include <string>
 %}
 
-%include "utilities/macroDefinitions.h"
-%include "_GeneralModuleFiles/swig_eigen.i"
-%include "_GeneralModuleFiles/swig_conly_data.i"
-%include "_GeneralModuleFiles/sys_model.h"
-%include "messaging/messaging.h"
+%include "architecture/utilities/macroDefinitions.h"
+%include "architecture/_GeneralModuleFiles/swig_eigen.i"
+%include "architecture/_GeneralModuleFiles/swig_conly_data.i"
+%include "architecture/_GeneralModuleFiles/sys_model.h"
+%include "architecture/messaging/messaging.h"
 %include "stdint.i"
 %include "std_vector.i"
 %include "std_string.i"
