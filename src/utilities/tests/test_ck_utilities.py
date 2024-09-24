@@ -13,15 +13,19 @@
 # WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-
-import numpy as np
 import os
 import tempfile
 
+import numpy as np
 from Basilisk.simulation import spacecraft
-from Basilisk.utilities import SimulationBaseClass, macros, pyswice_ck_utilities, simIncludeGravBody, RigidBodyKinematics as rbk
-from Basilisk.architecture import messaging
 from Basilisk.topLevelModules import pyswice
+from Basilisk.utilities import (
+    SimulationBaseClass,
+    macros,
+    pyswice_ck_utilities,
+    simIncludeGravBody,
+    RigidBodyKinematics as rbk
+)
 
 
 def test_ck_read_write(show_plots):
