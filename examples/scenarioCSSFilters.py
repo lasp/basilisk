@@ -485,7 +485,7 @@ def run(saveFigures, show_plots, FilterType, simTime):
     numStates = 6
     bVecLogger = None
     if FilterType == 'EKF':
-        module = sunlineEKF.sunlineEKF()
+        module = sunlineEKF.SunlineEKF()
         module.ModelTag = "SunlineEKF"
         setupEKFData(module)
 
@@ -495,7 +495,7 @@ def run(saveFigures, show_plots, FilterType, simTime):
     if FilterType == 'OEKF':
         numStates = 3
 
-        module = okeefeEKF.okeefeEKF()
+        module = okeefeEKF.OkeefeEKF()
         module.ModelTag = "okeefeEKF"
         setupOEKFData(module)
 
@@ -503,7 +503,7 @@ def run(saveFigures, show_plots, FilterType, simTime):
         scSim.AddModelToTask(simTaskName, module)
 
     if FilterType == 'uKF':
-        module = sunlineUKF.sunlineUKF()
+        module = sunlineUKF.SunlineUKF()
         module.ModelTag = "SunlineUKF"
         setupUKFData(module)
 
@@ -513,7 +513,7 @@ def run(saveFigures, show_plots, FilterType, simTime):
     if FilterType == 'SEKF':
         numStates = 5
 
-        module = sunlineSEKF.sunlineSEKF()
+        module = sunlineSEKF.SunlineSEKF()
         module.ModelTag = "SunlineSEKF"
         setupSEKFData(module)
 
@@ -524,7 +524,7 @@ def run(saveFigures, show_plots, FilterType, simTime):
 
     if FilterType == 'SuKF':
         numStates = 6
-        module = sunlineSuKF.sunlineSuKF()
+        module = sunlineSuKF.SunlineSuKF()
         module.ModelTag = "SunlineSuKF"
         setupSuKFData(module)
 

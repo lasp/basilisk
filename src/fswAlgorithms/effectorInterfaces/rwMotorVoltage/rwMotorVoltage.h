@@ -22,12 +22,14 @@
 
 #include <stdint.h>
 
-#include "cMsgCInterface/CmdTorqueBodyMsg_C.h"
-#include "cMsgCInterface/ArrayMotorTorqueMsg_C.h"
-#include "cMsgCInterface/RWAvailabilityMsg_C.h"
-#include "cMsgCInterface/RWArrayConfigMsg_C.h"
-#include "cMsgCInterface/RWSpeedMsg_C.h"
-#include "cMsgCInterface/ArrayMotorVoltageMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
+#include "architecture/msgPayloadDefC/ArrayMotorTorqueMsgPayload.h"
+#include "architecture/msgPayloadDefC/RWAvailabilityMsgPayload.h"
+#include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
+#include "architecture/msgPayloadDefC/ArrayMotorVoltageMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 
@@ -35,7 +37,10 @@
 /*!@brief module configuration message
  */
 
-typedef struct {
+class RwMotorVoltage : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
     /* declare module private variables */
     double VMin;                                    /*!< [V]    minimum voltage below which the torque is zero */
     double VMax;                                    /*!< [V]    maximum output voltage */
@@ -45,29 +50,16 @@ typedef struct {
     int    resetFlag;                               /*!< []     Flag indicating that a module reset occured */
 
     /* declare module IO interfaces */
-    ArrayMotorVoltageMsg_C voltageOutMsg;      /*!< voltage output message*/
-    ArrayMotorTorqueMsg_C torqueInMsg;      /*!< Input torque message*/
-    RWArrayConfigMsg_C rwParamsInMsg;       /*!< RW array input message*/
-    RWSpeedMsg_C rwSpeedInMsg;              /*!< [] The name for the reaction wheel speeds message. Must be provided to enable speed tracking loop */
-    RWAvailabilityMsg_C rwAvailInMsg;       /*!< [-] The name of the RWs availability message*/
+    Message<ArrayMotorVoltageMsgPayload> voltageOutMsg;      /*!< voltage output message*/
+    ReadFunctor<ArrayMotorTorqueMsgPayload> torqueInMsg;      /*!< Input torque message*/
+    ReadFunctor<RWArrayConfigMsgPayload> rwParamsInMsg;       /*!< RW array input message*/
+    ReadFunctor<RWSpeedMsgPayload> rwSpeedInMsg;              /*!< [] The name for the reaction wheel speeds message. Must be provided to enable speed tracking loop */
+    ReadFunctor<RWAvailabilityMsgPayload> rwAvailInMsg;       /*!< [-] The name of the RWs availability message*/
 
     RWArrayConfigMsgPayload rwConfigParams;         /*!< [-] struct to store message containing RW config parameters in body B frame */
 
-    BSKLogger *bskLogger;                             //!< BSK Logging
+    BSKLogger bskLogger={};                             //!< BSK Logging
 
-}rwMotorVoltageConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_rwMotorVoltage(rwMotorVoltageConfig *configData, int64_t moduleID);
-    void Update_rwMotorVoltage(rwMotorVoltageConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Reset_rwMotorVoltage(rwMotorVoltageConfig *configData, uint64_t callTime, int64_t moduleID);
-    
-#ifdef __cplusplus
-}
-#endif
-
+};
 
 #endif

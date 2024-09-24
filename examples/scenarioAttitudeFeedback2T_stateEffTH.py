@@ -436,18 +436,18 @@ def run(show_plots, useDVThrusters):
     #
 
     # setup inertial3D guidance module
-    inertial3DObj = inertial3D.inertial3D()
+    inertial3DObj = inertial3D.Inertial3D()
     inertial3DObj.ModelTag = "inertial3D"
     inertial3DObj.sigma_R0N = [0., 0., 0.]  # set the desired inertial orientation
     scSim.AddModelToTask(fswTaskName, inertial3DObj)
 
     # setup the attitude tracking error evaluation module
-    attError = attTrackingError.attTrackingError()
+    attError = attTrackingError.AttTrackingError()
     attError.ModelTag = "attErrorInertial3D"
     scSim.AddModelToTask(fswTaskName, attError)
 
     # setup the MRP Feedback control module
-    mrpControl = mrpFeedback.mrpFeedback()
+    mrpControl = mrpFeedback.MrpFeedback()
     mrpControl.ModelTag = "mrpFeedback"
     scSim.AddModelToTask(fswTaskName, mrpControl)
     mrpControl.K = 3.5 * 10.0
@@ -456,7 +456,7 @@ def run(show_plots, useDVThrusters):
     mrpControl.integralLimit = 2. / mrpControl.Ki * 0.1
 
     # setup the thruster force mapping module
-    thrForceMappingObj = thrForceMapping.thrForceMapping()
+    thrForceMappingObj = thrForceMapping.ThrForceMapping()
     thrForceMappingObj.ModelTag = "thrForceMapping"
     scSim.AddModelToTask(fswTaskName, thrForceMappingObj)
 
@@ -472,7 +472,7 @@ def run(show_plots, useDVThrusters):
     thrForceMappingObj.controlAxes_B = controlAxes_B
 
     # setup the Schmitt trigger thruster firing logic module
-    thrFiringSchmittObj = thrFiringSchmitt.thrFiringSchmitt()
+    thrFiringSchmittObj = thrFiringSchmitt.ThrFiringSchmitt()
     thrFiringSchmittObj.ModelTag = "thrFiringSchmitt"
     scSim.AddModelToTask(fswTaskName, thrFiringSchmittObj)
     thrFiringSchmittObj.thrMinFireTime = 0.002

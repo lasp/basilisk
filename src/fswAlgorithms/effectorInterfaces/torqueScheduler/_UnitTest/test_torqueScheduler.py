@@ -53,7 +53,7 @@ def test_torqueScheduler(lockFlag, tSwitch, accuracy):
     **Validation Test Description**
 
     This unit test verifies the correctness of the output motor torque :ref:`torqueScheduler`.
-    The inputs provided are the lock flag and the time at which thr control is switched from 
+    The inputs provided are the lock flag and the time at which thr control is switched from
     one degree of freedom to the other.
 
     **Test Parameters**
@@ -94,7 +94,7 @@ def torqueSchedulerTestFunction(lockFlag, tSwitch, accuracy):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C container
-    scheduler = torqueScheduler.torqueScheduler()
+    scheduler = torqueScheduler.TorqueScheduler()
     scheduler.ModelTag = "torqueScheduler"
     scheduler.lockFlag = lockFlag
     scheduler.tSwitch = tSwitch
@@ -196,7 +196,7 @@ def torqueSchedulerTestFunction(lockFlag, tSwitch, accuracy):
 # stand-along python script
 #
 if __name__ == "__main__":
-    test_torqueScheduler( 
+    test_torqueScheduler(
                  1,
                  5,
                  1e-12

@@ -34,7 +34,7 @@ from Basilisk.architecture.swig_common_model import *
 %include "encoder.h"
 
 %include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
-struct RWSpeedMsg_C;
+
 
 %pythoncode %{
 import sys

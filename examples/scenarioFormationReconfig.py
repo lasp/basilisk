@@ -20,15 +20,15 @@
 r"""
 Overview
 --------
-This script sets up a formation flying scenario with two spacecraft. 
+This script sets up a formation flying scenario with two spacecraft.
 The deputy spacecraft reconfigures its relative orbit in one orbit from one initial orbital element difference to
 target orbital element difference.
 This script is found in the folder ``basilisk/examples`` and executed by using::
 
       python3 scenarioFormationReconfig.py
 
-The simulation layout is shown in the following illustration. 
-Two spacecraft are orbiting the earth at close distance. No perturbation in assumed. 
+The simulation layout is shown in the following illustration.
+Two spacecraft are orbiting the earth at close distance. No perturbation in assumed.
 Each spacecraft sends a :ref:`simpleNav` output message of type :ref:`NavAttMsgPayload` message at a certain period
 to :ref:`spacecraftReconfig`,
 where burn scheduling is executed to achieve reconfiguration.
@@ -180,7 +180,7 @@ def run(show_plots, useRefAttitude):
     vcMsg = messaging.VehicleConfigMsg().write(vehicleConfigOut2)
 
     # inertial 3D target attitude
-    inertial3DObj = inertial3D.inertial3D()
+    inertial3DObj = inertial3D.Inertial3D()
     inertial3DObj.ModelTag = "inertial_3D2"
     inertial3DObj.sigma_R0N = [1.0, 0.0, 0.0]
     scSim.AddModelToTask(fswTaskName, inertial3DObj, 11)
@@ -194,7 +194,7 @@ def run(show_plots, useRefAttitude):
     fswThrConfMsg = fswSetupThrusters.writeConfigMessage()
 
     # spacecraftReconfig
-    spacecraftReconfigModule = spacecraftReconfig.spacecraftReconfig()
+    spacecraftReconfigModule = spacecraftReconfig.SpacecraftReconfig()
     spacecraftReconfigModule.ModelTag = "spacecraftReconfig"
     spacecraftReconfigModule.chiefTransInMsg.subscribeTo(simpleNavObject.transOutMsg)
     spacecraftReconfigModule.deputyTransInMsg.subscribeTo(simpleNavObject2.transOutMsg)
@@ -209,14 +209,14 @@ def run(show_plots, useRefAttitude):
     scSim.AddModelToTask(fswTaskName, spacecraftReconfigModule, 10)
 
     # att_Error
-    attError = attTrackingError.attTrackingError()
+    attError = attTrackingError.AttTrackingError()
     attError.ModelTag = "attError"
     scSim.AddModelToTask(fswTaskName, attError, 9)
     attError.attRefInMsg.subscribeTo(spacecraftReconfigModule.attRefOutMsg)
     attError.attNavInMsg.subscribeTo(simpleNavObject2.attOutMsg)
 
     # MRP_FeedBack
-    mrpControl = mrpFeedback.mrpFeedback()
+    mrpControl = mrpFeedback.MrpFeedback()
     mrpControl.ModelTag = "mrpFeedback"
     scSim.AddModelToTask(fswTaskName, mrpControl, 8)
     mrpControl.guidInMsg.subscribeTo(attError.attGuidOutMsg)

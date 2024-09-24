@@ -32,11 +32,11 @@ from Basilisk.architecture.swig_common_model import *
 %include "std_vector.i"
 
 %include "architecture/msgPayloadDefC/EclipseMsgPayload.h"
-struct EclipseMsg_C;
+
 %include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-struct SCStatesMsg_C;
+
 %include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-struct SpicePlanetStateMsg_C;
+
 
 %pythoncode %{
 import sys

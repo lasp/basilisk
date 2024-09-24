@@ -105,7 +105,7 @@ def PrescribedRot2DOFTestFunction(show_plots, thetaInit, thetaRef1a, thetaRef2a,
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Create an instance of the =module that is being tested
-    prescribedRot2DOFObj = prescribedRot2DOF.prescribedRot2DOF()
+    prescribedRot2DOFObj = prescribedRot2DOF.PrescribedRot2DOF()
     prescribedRot2DOFObj.ModelTag = "PrescribedRot2DOF"
 
     # Initialize the test module configuration data

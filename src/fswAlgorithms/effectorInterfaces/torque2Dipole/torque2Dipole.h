@@ -23,33 +23,27 @@
 
 #include <stdint.h>
 #include "architecture/utilities/bskLogging.h"
-#include "cMsgCInterface/TAMSensorBodyMsg_C.h"
-#include "cMsgCInterface/DipoleRequestBodyMsg_C.h"
-#include "cMsgCInterface/CmdTorqueBodyMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/TAMSensorBodyMsgPayload.h"
+#include "architecture/msgPayloadDefC/DipoleRequestBodyMsgPayload.h"
+#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
 
 /*! @brief Top level structure for the sub-module routines. */
-typedef struct {
+class Torque2Dipole : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
 
     /* Inputs.*/
-    TAMSensorBodyMsg_C tamSensorBodyInMsg;          //!< [Tesla] input message for magnetic field sensor data in the Body frame
-    CmdTorqueBodyMsg_C tauRequestInMsg;             //!< [N-m] input message containing control torque in the Body frame
-    
+    ReadFunctor<TAMSensorBodyMsgPayload> tamSensorBodyInMsg;          //!< [Tesla] input message for magnetic field sensor data in the Body frame
+    ReadFunctor<CmdTorqueBodyMsgPayload> tauRequestInMsg;             //!< [N-m] input message containing control torque in the Body frame
+
     /* Outputs.*/
-    DipoleRequestBodyMsg_C dipoleRequestOutMsg;     //!< [A-m2] output message containing dipole request in the Body frame
-    
+    Message<DipoleRequestBodyMsgPayload> dipoleRequestOutMsg;     //!< [A-m2] output message containing dipole request in the Body frame
+
     /* Other. */
-    BSKLogger *bskLogger;                           //!< BSK Logging
-}torque2DipoleConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    void SelfInit_torque2Dipole(torque2DipoleConfig *configData, int64_t moduleID);
-    void Update_torque2Dipole(torque2DipoleConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Reset_torque2Dipole(torque2DipoleConfig *configData, uint64_t callTime, int64_t moduleID);
-
-#ifdef __cplusplus
-}
-#endif
+    BSKLogger bskLogger={};                           //!< BSK Logging
+};
 
 #endif

@@ -56,6 +56,7 @@ public:
         if (!this->initialized) {
             messageType var;
             bskLogger.bskLog(BSK_ERROR, "In C++ read functor, you are trying to read an un-connected message of type %s\nThis program is about to self destruct.",  typeid(var).name());
+            abort();
         }
         return *this->payloadPointer;
 

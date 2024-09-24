@@ -19,7 +19,7 @@
 import sys
 
 import matplotlib.pyplot as plt
-from Basilisk.moduleTemplates import cModuleTemplate
+from Basilisk.moduleTemplates import cppModuleTemplate
 from Basilisk.utilities import SimulationBaseClass
 from Basilisk.utilities import macros
 from Basilisk.utilities import unitTestSupport
@@ -40,8 +40,8 @@ def run():
     dynProcess.addTask(scSim.CreateNewTask("dynamicsTask", macros.sec2nano(1.)))
 
     # create modules
-    mod1 = cModuleTemplate.cModuleTemplate()
-    mod1.ModelTag = "cModule1"
+    mod1 = cppModuleTemplate.CppModuleTemplate()
+    mod1.ModelTag = "module1"
     scSim.AddModelToTask("dynamicsTask", mod1)
     mod1.dataInMsg.subscribeTo(mod1.dataOutMsg)
 

@@ -20,12 +20,14 @@
 #ifndef _THRUST_RW_DESAT_H_
 #define _THRUST_RW_DESAT_H_
 
-#include "cMsgCInterface/VehicleConfigMsg_C.h"
-#include "cMsgCInterface/THRArrayConfigMsg_C.h"
-#include "cMsgCInterface/RWConstellationMsg_C.h"
-#include "cMsgCInterface/THRArrayOnTimeCmdMsg_C.h"
-#include "cMsgCInterface/VehicleConfigMsg_C.h"
-#include "cMsgCInterface/RWSpeedMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/THRArrayConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/RWConstellationMsgPayload.h"
+#include "architecture/msgPayloadDefC/THRArrayOnTimeCmdMsgPayload.h"
+#include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 #include <stdint.h>
@@ -35,12 +37,15 @@
 
 
 /*! @brief module configuration message */
-typedef struct {
-    RWSpeedMsg_C rwSpeedInMsg; /*!< (-) The name of the input RW speeds message*/
-    RWConstellationMsg_C rwConfigInMsg; /*!< [-] The name of the RWA configuration message*/
-    THRArrayConfigMsg_C thrConfigInMsg; /*!< [-] The name of the thruster configuration message*/
-    VehicleConfigMsg_C vecConfigInMsg; /*!< [-] The name of the input spacecraft mass properties message*/
-	THRArrayOnTimeCmdMsg_C thrCmdOutMsg;  /*!< (-) The name of the output thrust command block*/
+class ThrustRWDesat : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+    ReadFunctor<RWSpeedMsgPayload> rwSpeedInMsg; /*!< (-) The name of the input RW speeds message*/
+    ReadFunctor<RWConstellationMsgPayload> rwConfigInMsg; /*!< [-] The name of the RWA configuration message*/
+    ReadFunctor<THRArrayConfigMsgPayload> thrConfigInMsg; /*!< [-] The name of the thruster configuration message*/
+    ReadFunctor<VehicleConfigMsgPayload> vecConfigInMsg; /*!< [-] The name of the input spacecraft mass properties message*/
+	Message<THRArrayOnTimeCmdMsgPayload> thrCmdOutMsg;  /*!< (-) The name of the output thrust command block*/
 
 	double rwAlignMap[3 * MAX_EFF_CNT]; /*!< (-) Alignment of the reaction wheel spin axes*/
 	double thrAlignMap[3 * MAX_EFF_CNT]; /*!< (-) Alignment of the vehicle thrusters*/
@@ -55,21 +60,7 @@ typedef struct {
 	double DMThresh;           /*!< (r/s) The point at which to stop decrementing momentum*/
 	uint64_t previousFiring;   /*!< (ns) Time that the last firing command was given*/
 
-    BSKLogger *bskLogger;                             //!< BSK Logging
-}thrustRWDesatConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_thrustRWDesat(thrustRWDesatConfig *configData, int64_t moduleID);
-    void Reset_thrustRWDesat(thrustRWDesatConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Update_thrustRWDesat(thrustRWDesatConfig *configData, uint64_t callTime,
-        int64_t moduleID);
-    
-#ifdef __cplusplus
-}
-#endif
-
+    BSKLogger bskLogger={};                             //!< BSK Logging
+};
 
 #endif

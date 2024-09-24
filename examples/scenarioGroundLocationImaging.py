@@ -322,7 +322,7 @@ def run(show_plots):
     #
 
     # setup Boulder pointing guidance module
-    locPoint = locationPointing.locationPointing()
+    locPoint = locationPointing.LocationPointing()
     locPoint.ModelTag = "locPoint"
     scSim.AddModelToTask(simTaskName, locPoint, 99)
     locPoint.pHat_B = [0, 0, 1]
@@ -331,7 +331,7 @@ def run(show_plots):
     locPoint.locationInMsg.subscribeTo(imagingTarget.currentGroundStateOutMsg)
 
     # setup the MRP Feedback control module
-    mrpControl = mrpFeedback.mrpFeedback()
+    mrpControl = mrpFeedback.MrpFeedback()
     mrpControl.ModelTag = "mrpFeedback"
     scSim.AddModelToTask(simTaskName, mrpControl, ModelPriority=98)
     mrpControl.guidInMsg.subscribeTo(locPoint.attGuidOutMsg)
@@ -344,7 +344,7 @@ def run(show_plots):
     extFTObject.cmdTorqueInMsg.subscribeTo(mrpControl.cmdTorqueOutMsg)
 
     # setup the simpleInstrumentController module
-    simpleInsControl = simpleInstrumentController.simpleInstrumentController()
+    simpleInsControl = simpleInstrumentController.SimpleInstrumentController()
     simpleInsControl.attErrTolerance = 0.1
     simpleInsControl.ModelTag = "instrumentController"
     simpleInsControl.attGuidInMsg.subscribeTo(locPoint.attGuidOutMsg)

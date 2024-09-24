@@ -47,12 +47,11 @@ void setDefaultLogLevel(logLevel_t logLevel);
 logLevel_t getDefaultLogLevel();
 
 /*! BSK logging class */
-class BSKLogger
+class BSKLogger final
 {
     public:
         BSKLogger();
         BSKLogger(logLevel_t logLevel);
-        virtual ~BSKLogger() = default;
         void setLogLevel(logLevel_t logLevel);
         void printLogLevel();
         int getLogLevel();
@@ -60,14 +59,7 @@ class BSKLogger
 
     //Provides a mapping from log level enum to str
     public:
-        std::map<int, const char*> logLevelMap
-        {
-            {0, "BSK_DEBUG"},
-            {1, "\033[92mBSK_INFORMATION\033[0m"},
-            {2, "\033[93mBSK_WARNING\033[0m"},
-            {3, "\033[91mBSK_ERROR\033[0m"},
-            {4, "BSK_SILENT"}
-        };
+        static std::map<int, const char*> logLevelMap;
 
     private:
         logLevel_t _logLevel;
@@ -93,4 +85,3 @@ EXTERN void _bskLog(BSKLogger*, logLevel_t, const char*);
 /// \endcond
 
 #endif
-

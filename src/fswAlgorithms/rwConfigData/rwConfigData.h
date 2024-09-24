@@ -20,8 +20,10 @@
 #ifndef _RW_CONFIG_DATA_H_
 #define _RW_CONFIG_DATA_H_
 
-#include "cMsgCInterface/RWArrayConfigMsg_C.h"
-#include "cMsgCInterface/RWConstellationMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/RWConstellationMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 #include <stdint.h>
@@ -29,29 +31,16 @@
 
 
 /*! @brief Top level structure for the sub-module routines. */
-typedef struct {
-    /* declare module private variables */
-    RWConstellationMsgPayload rwConstellation; /*!< struct to populate input RW config parameters in structural S frame */
-    RWArrayConfigMsgPayload  rwConfigParamsOut; /*!< struct to populate ouput RW config parameters in body B frame */
+class RwConfig : public SysModel  {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override {/* Not Implemented */}
+
     /* declare module IO interfaces */
-    RWConstellationMsg_C rwConstellationInMsg;          /*!< RW array input message */
-    RWArrayConfigMsg_C rwParamsOutMsg;                  /*!< RW array output message */
+    ReadFunctor<RWConstellationMsgPayload> rwConstellationInMsg;          /*!< RW array input message */
+    Message<RWArrayConfigMsgPayload> rwParamsOutMsg;                  /*!< RW array output message */
 
-    BSKLogger *bskLogger;   //!< BSK Logging
-
-}rwConfigData_Config;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_rwConfigData(rwConfigData_Config*configData, int64_t moduleID);
-    void Update_rwConfigData(rwConfigData_Config *configData, uint64_t callTime, int64_t moduleID);
-    void Reset_rwConfigData(rwConfigData_Config *configData, uint64_t callTime, int64_t moduleID);
-    
-#ifdef __cplusplus
-}
-#endif
-
+    BSKLogger bskLogger={};   //!< BSK Logging
+};
 
 #endif

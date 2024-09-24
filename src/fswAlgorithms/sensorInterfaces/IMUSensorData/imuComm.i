@@ -21,13 +21,17 @@
    #include "imuComm.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap_3(imuComm, IMUConfigData, imuProcessTelem);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "imuComm.h"
 
 %include "architecture/msgPayloadDefC/IMUSensorBodyMsgPayload.h"
-struct IMUSensorBodyMsg_C;
 %include "architecture/msgPayloadDefC/IMUSensorMsgPayload.h"
-struct IMUSensorMsg_C;
 
 %pythoncode %{
 import sys

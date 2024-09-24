@@ -20,9 +20,11 @@
 #ifndef _RW_NULL_SPACE_H_
 #define _RW_NULL_SPACE_H_
 
-#include "cMsgCInterface/ArrayMotorTorqueMsg_C.h"
-#include "cMsgCInterface/RWSpeedMsg_C.h"
-#include "cMsgCInterface/RWConstellationMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/ArrayMotorTorqueMsgPayload.h"
+#include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
+#include "architecture/msgPayloadDefC/RWConstellationMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 #include <stdint.h>
@@ -30,33 +32,21 @@
 
 
 /*! @brief The configuration structure for the rwNullSpace module.  */
-typedef struct {
-    ArrayMotorTorqueMsg_C rwMotorTorqueInMsg;       //!< [-] The name of the Input message
-    RWSpeedMsg_C rwSpeedsInMsg;                     //!< [-] The name of the input RW speeds
-    RWSpeedMsg_C rwDesiredSpeedsInMsg;              //!< [-] (optional) The name of the desired RW speeds
-    RWConstellationMsg_C rwConfigInMsg;             //!< [-] The name of the RWA configuration message
-    ArrayMotorTorqueMsg_C rwMotorTorqueOutMsg;      //!< [-] The name of the output message
+class RwNullSpace : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+    ReadFunctor<ArrayMotorTorqueMsgPayload> rwMotorTorqueInMsg;       //!< [-] The name of the Input message
+    ReadFunctor<RWSpeedMsgPayload> rwSpeedsInMsg;                     //!< [-] The name of the input RW speeds
+    ReadFunctor<RWSpeedMsgPayload> rwDesiredSpeedsInMsg;              //!< [-] (optional) The name of the desired RW speeds
+    ReadFunctor<RWConstellationMsgPayload> rwConfigInMsg;             //!< [-] The name of the RWA configuration message
+    Message<ArrayMotorTorqueMsgPayload> rwMotorTorqueOutMsg;      //!< [-] The name of the output message
 
 	double tau[MAX_EFF_CNT * MAX_EFF_CNT];          //!< [-] RW nullspace project matrix
 	double OmegaGain;                               //!< [-] The gain factor applied to the RW speeds
 	uint32_t numWheels;                             //!< [-] The number of reaction wheels we have
 
-    BSKLogger *bskLogger;                             //!< BSK Logging
-}rwNullSpaceConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_rwNullSpace(rwNullSpaceConfig *configData, int64_t moduleID);
-    void Update_rwNullSpace(rwNullSpaceConfig *configData, uint64_t callTime,
-        int64_t moduleID);
-    void Reset_rwNullSpace(rwNullSpaceConfig *configData, uint64_t callTime,
-                            int64_t moduleID);
-    
-#ifdef __cplusplus
-}
-#endif
-
+    BSKLogger bskLogger={};                             //!< BSK Logging
+};
 
 #endif

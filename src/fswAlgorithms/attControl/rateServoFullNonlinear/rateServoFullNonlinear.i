@@ -21,23 +21,22 @@
    #include "rateServoFullNonlinear.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(rateServoFullNonlinear);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "rateServoFullNonlinear.h"
 
 %include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
-struct AttGuidMsg_C;
 %include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-struct VehicleConfigMsg_C;
 %include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
-struct CmdTorqueBodyMsg_C;
 %include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
-struct RWArrayConfigMsg_C;
 %include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
-struct RWSpeedMsg_C;
 %include "architecture/msgPayloadDefC/RWAvailabilityMsgPayload.h"
-struct RWAvailabilityMsg_C;
 %include "architecture/msgPayloadDefC/RateCmdMsgPayload.h"
-struct RateCmdMsg_C;
 
 %pythoncode %{
 import sys

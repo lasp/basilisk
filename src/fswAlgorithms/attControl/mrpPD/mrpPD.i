@@ -21,15 +21,18 @@
    #include "mrpPD.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap_2(mrpPD, MrpPDConfig);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "mrpPD.h"
 
 %include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
-struct AttGuidMsg_C;
 %include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-struct VehicleConfigMsg_C;
 %include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
-struct CmdTorqueBodyMsg_C;
 
 %pythoncode %{
 import sys

@@ -21,13 +21,17 @@
    #include "sunSafePoint.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(sunSafePoint);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "sunSafePoint.h"
 
 %include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-struct NavAttMsg_C;
 %include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
-struct AttGuidMsg_C;
 
 %pythoncode %{
 import sys

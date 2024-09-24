@@ -591,7 +591,7 @@ def StatePropStatic():
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = sunlineSEKF.sunlineSEKF()
+    module = sunlineSEKF.SunlineSEKF()
     module.ModelTag = "sunlineSEKF"
 
     # Add test module to runtime call list
@@ -652,7 +652,7 @@ def StatePropVariable(show_plots):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = sunlineSEKF.sunlineSEKF()
+    module = sunlineSEKF.SunlineSEKF()
     module.ModelTag = "sunlineSEKF"
 
     # Add test module to runtime call list
@@ -802,7 +802,7 @@ def StateUpdateSunLine(show_plots, SimHalfLength, AddMeasNoise, testVector1, tes
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = sunlineSEKF.sunlineSEKF()
+    module = sunlineSEKF.SunlineSEKF()
     module.ModelTag = "sunlineSEKF"
 
     # Add test module to runtime call list

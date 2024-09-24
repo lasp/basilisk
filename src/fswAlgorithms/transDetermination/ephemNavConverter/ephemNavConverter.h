@@ -1,7 +1,7 @@
 /*
  ISC License
 
- Copyright (c) 2016, Autonomous Vehicle Systems Lab, University of Colorado at Boulder
+ Copyright (c) 2024, Laboratory for Atmospheric Space Physics, University of Colorado at Boulder
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -17,36 +17,25 @@
 
  */
 
-#ifndef _EPHEM_NAV_CONVERTER_H_
-#define _EPHEM_NAV_CONVERTER_H_
+#ifndef EPHEM_NAV_CONVERTER_H
+#define EPHEM_NAV_CONVERTER_H
 
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
+#include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
 #include "architecture/utilities/bskLogging.h"
 
-#include "cMsgCInterface/EphemerisMsg_C.h"
-#include "cMsgCInterface/NavTransMsg_C.h"
+/*! @brief The ephemNavConverter class.*/
+class EphemNavConverter : public SysModel {
+public:
+    void UpdateState(uint64_t callTime) override;
+    void Reset(uint64_t callTime) override;
 
+    Message<NavTransMsgPayload> stateOutMsg; //!< [-] output navigation message for pos/vel
+    ReadFunctor<EphemerisMsgPayload> ephInMsg; //!< ephemeris input message
 
-/*! @brief The configuration structure for the ephemNavConverter module.*/
-typedef struct {
-    NavTransMsg_C stateOutMsg; //!< [-] output navigation message for pos/vel
-    EphemerisMsg_C ephInMsg; //!< ephemeris input message
-
-    BSKLogger *bskLogger;   //!< BSK Logging
-}EphemNavConverterData;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_ephemNavConverter(EphemNavConverterData *configData, int64_t moduleID);
-    void Update_ephemNavConverter(EphemNavConverterData *configData, uint64_t callTime,
-        int64_t moduleID);
-    void Reset_ephemNavConverter(EphemNavConverterData *configData, uint64_t callTime,
-                              int64_t moduleID);
-    
-#ifdef __cplusplus
-}
-#endif
-
+    BSKLogger bskLogger{};   //!< BSK Logging
+};
 
 #endif

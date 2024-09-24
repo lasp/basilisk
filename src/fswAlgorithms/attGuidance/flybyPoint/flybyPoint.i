@@ -32,15 +32,11 @@ from Basilisk.architecture.swig_common_model import *
 %include "flybyPoint.h"
 
 %include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-struct NavTransMsg_C;
 %include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-struct EphemerisMsg_C;
 %include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
-struct AttRefMsg_C;
 
 
 %pythoncode %{
 import sys
 protectAllClasses(sys.modules[__name__])
 %}
-

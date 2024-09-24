@@ -171,7 +171,7 @@ def cssWlsEstTestFunction(show_plots):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, int(1E8)))
 
     # Construct algorithm and associated C++ container
-    CSSWlsEstFSW = cssWlsEst.cssWlsEst()
+    CSSWlsEstFSW = cssWlsEst.CssWlsEst()
     CSSWlsEstFSW.ModelTag = "CSSWlsEst"
 
     # Add module to runtime call list
@@ -260,7 +260,7 @@ def cssWlsEstTestFunction(show_plots):
         # Pull logged data out into workspace for analysis
         sHatEst = navData.vehSunPntBdy
 
-        numActive = unitTestSupport.addTimeColumn(numActiveData.times(), numActiveData.numActiveCss) 
+        numActive = unitTestSupport.addTimeColumn(numActiveData.times(), numActiveData.numActiveCss)
         sHatEstUse = sHatEst[logLengthPrev:, :]  # Only data for this subtest
         numActiveUse = numActive[logLengthPrev + 1:, :]  # Only data for this subtest
 
@@ -432,7 +432,7 @@ def cssRateTestFunction(show_plots):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = cssWlsEst.cssWlsEst()
+    module = cssWlsEst.CssWlsEst()
     module.ModelTag = "CSSWlsEst"
 
     # Add module to runtime call list

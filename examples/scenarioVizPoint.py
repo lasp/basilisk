@@ -275,20 +275,20 @@ def run(show_plots, missionType, saveVizardFile):
     vcMsg = messaging.VehicleConfigMsg().write(vehicleConfigOut)
 
     # setup inertial3D guidance module
-    inertial3DObj = inertial3D.inertial3D()
+    inertial3DObj = inertial3D.Inertial3D()
     inertial3DObj.ModelTag = "inertial3D"
     scSim.AddModelToTask(simTaskName, inertial3DObj)
     inertial3DObj.sigma_R0N = earthPoint.tolist()  # set the desired inertial orientation
 
     # setup the attitude tracking error evaluation module
-    attError = attTrackingError.attTrackingError()
+    attError = attTrackingError.AttTrackingError()
     attError.ModelTag = "attErrorInertial3D"
     scSim.AddModelToTask(simTaskName, attError)
     attError.attRefInMsg.subscribeTo(inertial3DObj.attRefOutMsg)
     attError.attNavInMsg.subscribeTo(sNavObject.attOutMsg)
 
     # setup the MRP Feedback control module
-    mrpControl = mrpFeedback.mrpFeedback()
+    mrpControl = mrpFeedback.MrpFeedback()
     mrpControl.ModelTag = "mrpFeedback"
     scSim.AddModelToTask(simTaskName, mrpControl)
     mrpControl.guidInMsg.subscribeTo(attError.attGuidOutMsg)

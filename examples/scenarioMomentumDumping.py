@@ -21,29 +21,29 @@ Overview
 --------
 
 This script shows how to perform momentum dumping when the momentum accumulated on the reaction wheels
-is above a user-defined threshold. In this case, such threshold is set at 80 Nms. The dumping is performed 
-by a set of 8 thrusters that can provide control about the three principal axes of the spacecraft. 
+is above a user-defined threshold. In this case, such threshold is set at 80 Nms. The dumping is performed
+by a set of 8 thrusters that can provide control about the three principal axes of the spacecraft.
 To perform the momentum dumping, three concatenated modules are used:
 
-- :ref:`thrMomentumManagement`: computes the amount of momentum to be dumped, based on current stored momentum 
+- :ref:`thrMomentumManagement`: computes the amount of momentum to be dumped, based on current stored momentum
   and the user-defined threshold. It is important to notice that, for the three concatenated modules to work
-  correctly, this first module cannot be run at simulation time :math:`t = 0`. In this script, the method 
-  ``Reset`` is called on :ref:`thrMomentumManagement` at :math:`t = 10` s, which coincides to the time at which 
+  correctly, this first module cannot be run at simulation time :math:`t = 0`. In this script, the method
+  ``Reset`` is called on :ref:`thrMomentumManagement` at :math:`t = 10` s, which coincides to the time at which
   the first desaturating impulse is fired.
 - :ref:`thrForceMapping`: maps the amout of momentum to be dumped into impulses that must be delivered by each
   thruster. This module is originally implemented to map a requested torque into forces imparted by the thrusters,
   but it can be applied in this case as well, because the math is the same. The only caveat is that, in this case,
   the output should not be scaled by the thruster maximum torque capability, since the desired output is an impulse
-  and not a torque. To deactivate the output scaling, the ``angErrThresh`` input variable for this module must be 
+  and not a torque. To deactivate the output scaling, the ``angErrThresh`` input variable for this module must be
   set to a value larger than :math:`\pi`, as specified in the module documentation.
-- :ref:`thrMomentumDumping`: computes the thruster on-times required to deliver the desired impulse. A 
+- :ref:`thrMomentumDumping`: computes the thruster on-times required to deliver the desired impulse. A
   ``maxCounterValue`` of 100 is used in this example to allow the spacecraft to maneuver back to the desired attitude
-  after each time the thrusters fire. 
+  after each time the thrusters fire.
 
-For this script to work as intended, it is necessary to run the flight software and the dynamics at two different 
+For this script to work as intended, it is necessary to run the flight software and the dynamics at two different
 frequencies. In this example, the simulation time step for the flight software is 1 second, whereas for the dynamics
-it is 0.1 seconds. This is necessary because the :ref:`thrMomentumDumping` automatically uses the task time step as 
-control period for the firing. However, if the dynamics is integrated at the same frequency, this does not give 
+it is 0.1 seconds. This is necessary because the :ref:`thrMomentumDumping` automatically uses the task time step as
+control period for the firing. However, if the dynamics is integrated at the same frequency, this does not give
 enough time resolution to appreciate the variation in the momentum.
 
 The script is found in the folder ``basilisk/examples`` and executed by using::
@@ -56,7 +56,7 @@ Illustration of Simulation Results
 In this examples, the spacecraft is already at the desired attitude, but the four reaction wheels are saturated (the total
 angular momentum exceeds the threshold). The desaturation happens at :math:`t = 10` when the :ref:`thrMomentumManagement` is
 reset. Three firings are sufficient to dump the momentum below the set threshold. The following figures illustrate the change
-in momentum for the four wheels :math:`H_i` for :math:`i = 1,...,4` and the total angular momentum :math:`\|H\|`, and the 
+in momentum for the four wheels :math:`H_i` for :math:`i = 1,...,4` and the total angular momentum :math:`\|H\|`, and the
 attitude errors, as functions of time, with respect to the desired target attitude.
 
 .. image:: /_images/Scenarios/scenarioMomentumDumping3.svg
@@ -69,8 +69,8 @@ The plots show that the momentum is dumped below the threshold. Also, the desire
 second firing, and after the third, but between the second and the third there is not enough time for the spacecraft to slew
 back to that attitude.
 
-The next two plots show the amount of impulse [Ns] requested for each thruster, and the times during which each thruster is 
-operational. As expected, 100 control times pass between each firing: because the control time coincides with the flight 
+The next two plots show the amount of impulse [Ns] requested for each thruster, and the times during which each thruster is
+operational. As expected, 100 control times pass between each firing: because the control time coincides with the flight
 software simulation time step of 1 s, this means that firings are 100 seconds apart.
 
 .. image:: /_images/Scenarios/scenarioMomentumDumping5.svg
@@ -120,10 +120,10 @@ def run(show_plots):
     simulationTimeStepDyn = macros.sec2nano(0.1)
     dynProcess.addTask(scSim.CreateNewTask(dynTask, simulationTimeStepDyn))
     dynProcess.addTask(scSim.CreateNewTask(fswTask, simulationTimeStepFsw))
-    
+
     #
     # setup the simulation tasks/objects
-    # 
+    #
 
     # initialize spacecraft object and set properties
     scObject = spacecraft.Spacecraft()
@@ -174,7 +174,7 @@ def run(show_plots):
     scObject.hub.v_CN_NInit = vN                          # m/s - v_BN_N
     scObject.hub.sigma_BNInit = [0, 0., 0.]              # MRP set to customize initial inertial attitude
     scObject.hub.omega_BN_BInit = [[0.], [0.], [0.]]      # rad/s - omega_CN_B
-    
+
     # define the simulation inertia
     I = [1700,  0.,    0.,
          0.,    1700,  0.,
@@ -272,18 +272,18 @@ def run(show_plots):
     #
 
     # setup inertial3D guidance module
-    inertial3DObj = inertial3D.inertial3D()
+    inertial3DObj = inertial3D.Inertial3D()
     inertial3DObj.ModelTag = "inertial3D"
     scSim.AddModelToTask(fswTask, inertial3DObj)
     inertial3DObj.sigma_R0N = [0., 0., 0.]  # set the desired inertial orientation
 
     # setup the attitude tracking error evaluation module
-    attError = attTrackingError.attTrackingError()
+    attError = attTrackingError.AttTrackingError()
     attError.ModelTag = "attErrorInertial3D"
     scSim.AddModelToTask(fswTask, attError)
 
     # setup the MRP Feedback control module
-    mrpControl = mrpFeedback.mrpFeedback()
+    mrpControl = mrpFeedback.MrpFeedback()
     mrpControl.ModelTag = "mrpFeedback"
     scSim.AddModelToTask(fswTask, mrpControl)
     decayTime = 10.0
@@ -296,20 +296,20 @@ def run(show_plots):
     controlAxes_B = [1, 0, 0, 0, 1, 0, 0, 0, 1]
 
     # add module that maps the Lr control torque into the RW motor torques
-    rwMotorTorqueObj = rwMotorTorque.rwMotorTorque()
+    rwMotorTorqueObj = rwMotorTorque.RwMotorTorque()
     rwMotorTorqueObj.ModelTag = "rwMotorTorque"
     scSim.AddModelToTask(fswTask, rwMotorTorqueObj)
     # Make the RW control all three body axes
     rwMotorTorqueObj.controlAxes_B = controlAxes_B
 
     # Momentum dumping configuration
-    thrDesatControl = thrMomentumManagement.thrMomentumManagement()
+    thrDesatControl = thrMomentumManagement.ThrMomentumManagement()
     thrDesatControl.ModelTag = "thrMomentumManagement"
     scSim.AddModelToTask(fswTask, thrDesatControl)
-    thrDesatControl.hs_min = 80   # Nms  :  maximum wheel momentum 
+    thrDesatControl.hs_min = 80   # Nms  :  maximum wheel momentum
 
     # setup the thruster force mapping module
-    thrForceMappingObj = thrForceMapping.thrForceMapping()
+    thrForceMappingObj = thrForceMapping.ThrForceMapping()
     thrForceMappingObj.ModelTag = "thrForceMapping"
     scSim.AddModelToTask(fswTask, thrForceMappingObj)
     thrForceMappingObj.controlAxes_B = controlAxes_B
@@ -317,7 +317,7 @@ def run(show_plots):
     thrForceMappingObj.angErrThresh = 3.15    # this needs to be larger than pi (180 deg) for the module to work in the momentum dumping scenario
 
     # setup the thruster momentum dumping module
-    thrDump = thrMomentumDumping.thrMomentumDumping()
+    thrDump = thrMomentumDumping.ThrMomentumDumping()
     thrDump.ModelTag = "thrDump"
     scSim.AddModelToTask(fswTask, thrDump)
     thrDump.maxCounterValue = 100          # number of control periods (simulationTimeStepFsw) to wait between two subsequent on-times
@@ -441,8 +441,8 @@ def run(show_plots):
     np.set_printoptions(precision=16)
 
 
-    # Displays the plots relative to the S/C attitude and rates errors, wheel momenta, thruster impulses, on times, and thruster firing intervals  
-    
+    # Displays the plots relative to the S/C attitude and rates errors, wheel momenta, thruster impulses, on times, and thruster firing intervals
+
     timeData = rwMotorLog.times() * macros.NANO2SEC
 
     plot_attitude_error(timeData, dataSigmaBR)
@@ -451,7 +451,7 @@ def run(show_plots):
     figureList[pltName] = plt.figure(1)
 
     plot_rate_error(timeData, dataOmegaBR)
-    pltName = fileName + "2"    
+    pltName = fileName + "2"
     figureList[pltName] = plt.figure(2)
 
     plot_rw_momenta(timeData, dataOmegaRW, RW, numRW)
@@ -474,7 +474,7 @@ def run(show_plots):
     pltName = fileName + "7"
     figureList[pltName] = plt.figure(7)
 
-    if show_plots:  
+    if show_plots:
         plt.show()
 
     # close the plots being saved off to avoid over-writing old and new figures

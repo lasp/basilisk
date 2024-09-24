@@ -21,13 +21,17 @@
    #include "tamComm.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap_3(tamComm, tamConfigData, tamProcessTelem);
+%pythoncode %{
+from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "tamComm.h"
 
 %include "architecture/msgPayloadDefC/TAMSensorBodyMsgPayload.h"
-struct TAMSensorBodyMsg_C;
 %include "architecture/msgPayloadDefC/TAMSensorMsgPayload.h"
-struct TAMSensorMsg_C;
 
 %pythoncode %{
 import sys

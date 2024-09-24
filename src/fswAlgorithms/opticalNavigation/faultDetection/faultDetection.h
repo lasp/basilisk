@@ -20,9 +20,11 @@
 #ifndef _FAULT_DETECTION_H_
 #define _FAULT_DETECTION_H_
 
-#include "cMsgCInterface/OpNavMsg_C.h"
-#include "cMsgCInterface/CameraConfigMsg_C.h"
-#include "cMsgCInterface/NavAttMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/OpNavMsgPayload.h"
+#include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
 
 #include "architecture/utilities/macroDefinitions.h"
 #include "architecture/utilities/linearAlgebra.h"
@@ -30,34 +32,25 @@
 #include "architecture/utilities/rigidBodyKinematics.h"
 
 /*! @brief Module data structure */
-typedef struct {
-    OpNavMsg_C opNavOutMsg; //!< [-] output navigation message for relative position
-    NavAttMsg_C attInMsg; //!< attitude input message
-    OpNavMsg_C navMeasPrimaryInMsg; //!< first measurement input message
-    OpNavMsg_C navMeasSecondaryInMsg; //!< second measurement input message
-    CameraConfigMsg_C cameraConfigInMsg; //!< camera config inut message
+class FaultDetection : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+
+    Message<OpNavMsgPayload> opNavOutMsg; //!< [-] output navigation message for relative position
+    ReadFunctor<NavAttMsgPayload> attInMsg; //!< attitude input message
+    ReadFunctor<OpNavMsgPayload> navMeasPrimaryInMsg; //!< first measurement input message
+    ReadFunctor<OpNavMsgPayload> navMeasSecondaryInMsg; //!< second measurement input message
+    ReadFunctor<CameraConfigMsgPayload> cameraConfigInMsg; //!< camera config inut message
 
     int32_t planetTarget; //!< The planet targeted (None = 0, Earth = 1, Mars = 2, Jupiter = 3 are allowed)
-    double faultMode; //!< What fault mode to go in: 0 is dissimilar (use the primary measurement and compare with secondary), 1 merges the measurements if they are both valid and similar. 
+    double faultMode; //!< What fault mode to go in: 0 is dissimilar (use the primary measurement and compare with secondary), 1 merges the measurements if they are both valid and similar.
     double sigmaFault; //!< What is the sigma multiplication factor when comparing measurements
-    
+
     // added for bsk
-    BSKLogger* bskLogger;                               //!< BSK Logging
+    BSKLogger bskLogger={};                               //!< BSK Logging
 
-}FaultDetectionData;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_faultDetection(FaultDetectionData *configData, int64_t moduleID);
-    void Update_faultDetection(FaultDetectionData *configData, uint64_t callTime,
-        int64_t moduleID);
-    void Reset_faultDetection(FaultDetectionData *configData, uint64_t callTime, int64_t moduleID);
-    
-#ifdef __cplusplus
-}
-#endif
+};
 
 
 #endif

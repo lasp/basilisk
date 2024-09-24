@@ -24,20 +24,18 @@
 #include <vector>
 
 #include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-#include "cMsgCInterface/NavTransMsg_C.h"
+#include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/messaging/messaging.h"
 
-/*! @brief This module computes the barycenter of a swarm of satellites, either using cartesian coordinates or orbital elements. 
+/*! @brief This module computes the barycenter of a swarm of satellites, either using cartesian coordinates or orbital elements.
  */
 class FormationBarycenter: public SysModel {
 public:
     FormationBarycenter();
-    ~FormationBarycenter();
 
-    void SelfInit();
     void Reset(uint64_t CurrentSimNanos);
     void UpdateState(uint64_t CurrentSimNanos);
     void ReadInputMessages();
@@ -49,8 +47,7 @@ public:
     std::vector<ReadFunctor<NavTransMsgPayload>> scNavInMsgs;  //!< spacecraft navigation input msg
     std::vector<ReadFunctor<VehicleConfigMsgPayload>> scPayloadInMsgs;  //!< spacecraft payload input msg
 
-    Message<NavTransMsgPayload> transOutMsg;    //!< translation navigation output msg   
-    NavTransMsg_C transOutMsgC = {};        //!< C-wrapped translation navigation output msg, zeroed
+    Message<NavTransMsgPayload> transOutMsg;    //!< translation navigation output msg
 
     bool useOrbitalElements;        //!< flag that determines whether to use cartesian or orbital elementd weighted averaging
     double mu;      //!< gravitational parameter to be used with orbital elements averaging

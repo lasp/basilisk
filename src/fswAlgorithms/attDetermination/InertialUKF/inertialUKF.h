@@ -20,16 +20,17 @@
 #ifndef _INERTIAL_UKF_H_
 #define _INERTIAL_UKF_H_
 
-#include "cMsgCInterface/RWSpeedMsg_C.h"
-#include "cMsgCInterface/NavAttMsg_C.h"
-#include "cMsgCInterface/InertialFilterMsg_C.h"
-#include "cMsgCInterface/STAttMsg_C.h"
-#include "cMsgCInterface/VehicleConfigMsg_C.h"
-#include "cMsgCInterface/RWArrayConfigMsg_C.h"
-#include "cMsgCInterface/AccDataMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
+#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
+#include "architecture/msgPayloadDefC/InertialFilterMsgPayload.h"
+#include "architecture/msgPayloadDefC/STAttMsgPayload.h"
+#include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/AccDataMsgPayload.h"
 
 #include "architecture/utilities/signalCondition.h"
-#include "architecture/utilities/bskLogging.h"
 #include <stdint.h>
 #include <string.h>
 
@@ -38,7 +39,7 @@
 /*! @brief Star Tracker (ST) sensor container structure.  Contains the msg input name and Id and sensor noise value.
  */
 typedef struct {
-    STAttMsg_C stInMsg;                       //!< star tracker input message 
+    ReadFunctor<STAttMsgPayload> stInMsg;     //!< star tracker input message
     double noise[3*3];                        //!< [-] Per axis noise on the ST
 }STMessage;
 
@@ -51,14 +52,18 @@ typedef struct {
 /*! @brief Top level structure for the Inertial unscented kalman filter.
  Used to estimate the spacecraft's inertial attitude. Measurements are StarTracker data and gyro data.
  */
-typedef struct {
-    NavAttMsg_C navStateOutMsg;                     //!< The name of the output message
-    InertialFilterMsg_C filtDataOutMsg;             //!< The name of the output filter data message
-    VehicleConfigMsg_C massPropsInMsg;              //!< [-] The name of the mass props message
-    RWArrayConfigMsg_C rwParamsInMsg;               //!< The name of the RWConfigParams input message
-    RWSpeedMsg_C rwSpeedsInMsg;                     //!< [-] The name of the input RW speeds message
-    AccDataMsg_C gyrBuffInMsg;                      //!< [-] Input message buffer from MIRU
-    
+class InertialUKF : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+
+    Message<NavAttMsgPayload> navStateOutMsg;                     //!< The name of the output message
+    Message<InertialFilterMsgPayload> filtDataOutMsg;             //!< The name of the output filter data message
+    ReadFunctor<VehicleConfigMsgPayload> massPropsInMsg;              //!< [-] The name of the mass props message
+    ReadFunctor<RWArrayConfigMsgPayload> rwParamsInMsg;               //!< The name of the RWConfigParams input message
+    ReadFunctor<RWSpeedMsgPayload> rwSpeedsInMsg;                     //!< [-] The name of the input RW speeds message
+    ReadFunctor<AccDataMsgPayload> gyrBuffInMsg;                      //!< [-] Input message buffer from MIRU
+
 
 	size_t numStates;             //!< [-] Number of states for this filter
 	size_t countHalfSPs;          //!< [-] Number of sigma points over 2
@@ -119,31 +124,17 @@ typedef struct {
 
     STDataParsing STDatasStruct;  //!< [-] Id of the input message buffer
 
-    BSKLogger *bskLogger;   //!< BSK Logging
-}InertialUKFConfig;
+    BSKLogger bskLogger = {};   //!< BSK Logging
+};
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_inertialUKF(InertialUKFConfig *configData, int64_t moduleId);
-    void Read_STMessages(InertialUKFConfig *configData);
-    void Update_inertialUKF(InertialUKFConfig *configData, uint64_t callTime,
-        int64_t moduleId);
-	void Reset_inertialUKF(InertialUKFConfig *configData, uint64_t callTime,
-		int64_t moduleId);
-    void inertialUKFAggGyrData(InertialUKFConfig *configData, double prevTime,
-                          double propTime, AccDataMsgPayload *gyrData);
-	int inertialUKFTimeUpdate(InertialUKFConfig *configData, double updateTime);
-    int inertialUKFMeasUpdate(InertialUKFConfig *configData, int currentST);
-    void inertialUKFCleanUpdate(InertialUKFConfig *configData);
-	void inertialStateProp(InertialUKFConfig *configData, double *stateInOut, double dt);
-    void inertialUKFMeasModel(InertialUKFConfig *configData, int currentST);
-    
-#ifdef __cplusplus
-}
-#endif
-
+void Read_STMessages(InertialUKF *configData);
+void inertialUKFAggGyrData(InertialUKF *configData, double prevTime,
+                      double propTime, AccDataMsgPayload *gyrData);
+int inertialUKFTimeUpdate(InertialUKF *configData, double updateTime);
+int inertialUKFMeasUpdate(InertialUKF *configData, int currentST);
+void inertialUKFCleanUpdate(InertialUKF *configData);
+void inertialStateProp(InertialUKF *configData, double *stateInOut, double dt);
+void inertialUKFMeasModel(InertialUKF *configData, int currentST);
 
 #endif

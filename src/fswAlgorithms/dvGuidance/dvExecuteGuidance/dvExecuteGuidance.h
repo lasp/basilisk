@@ -20,10 +20,12 @@
 #ifndef _DV_EXECUTE_GUIDANCE_H_
 #define _DV_EXECUTE_GUIDANCE_H_
 
-#include "cMsgCInterface/NavTransMsg_C.h"
-#include "cMsgCInterface/THRArrayOnTimeCmdMsg_C.h"
-#include "cMsgCInterface/DvBurnCmdMsg_C.h"
-#include "cMsgCInterface/DvExecutionDataMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
+#include "architecture/msgPayloadDefC/THRArrayOnTimeCmdMsgPayload.h"
+#include "architecture/msgPayloadDefC/DvBurnCmdMsgPayload.h"
+#include "architecture/msgPayloadDefC/DvExecutionDataMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 #include <stdint.h>
@@ -31,11 +33,14 @@
 
 
 /*! @brief Top level structure for the execution of a Delta-V maneuver */
-typedef struct {
-    NavTransMsg_C navDataInMsg; /*!< [-] navigation input message that includes dv accumulation info */
-    DvBurnCmdMsg_C burnDataInMsg;/*!< [-] commanded burn input message */
-    THRArrayOnTimeCmdMsg_C thrCmdOutMsg; /*!< [-] thruster command on time output message */
-    DvExecutionDataMsg_C burnExecOutMsg; /*!< [-] burn execution output message */
+class DvExecuteGuidance : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+    ReadFunctor<NavTransMsgPayload> navDataInMsg; /*!< [-] navigation input message that includes dv accumulation info */
+    ReadFunctor<DvBurnCmdMsgPayload> burnDataInMsg;/*!< [-] commanded burn input message */
+    Message<THRArrayOnTimeCmdMsgPayload> thrCmdOutMsg; /*!< [-] thruster command on time output message */
+    Message<DvExecutionDataMsgPayload> burnExecOutMsg; /*!< [-] burn execution output message */
     double dvInit[3];        /*!< [m/s] DV reading off the accelerometers at burn start*/
     uint32_t burnExecuting;  /*!< [-] Flag indicating whether the burn is in progress or not*/
     uint32_t burnComplete;   /*!< [-] Flag indicating that burn has completed successfully*/
@@ -45,23 +50,7 @@ typedef struct {
     double maxTime;           /*!< [s] Maximum count of burn time allowed to elapse*/
     double defaultControlPeriod; /*!< [s] Default control period used for first call*/
 
-    BSKLogger *bskLogger;   //!< BSK Logging
-}dvExecuteGuidanceConfig;
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_dvExecuteGuidance(dvExecuteGuidanceConfig *configData, int64_t moduleID);
-    void Update_dvExecuteGuidance(dvExecuteGuidanceConfig *configData, uint64_t callTime,
-        int64_t moduleID);
-    void Reset_dvExecuteGuidance(dvExecuteGuidanceConfig *configData, uint64_t callTime,
-                       int64_t moduleID);
-
-#ifdef __cplusplus
-}
-#endif
-
+    BSKLogger bskLogger={};   //!< BSK Logging
+};
 
 #endif

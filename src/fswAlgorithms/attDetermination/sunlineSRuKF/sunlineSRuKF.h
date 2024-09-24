@@ -31,18 +31,14 @@
 #include "architecture/msgPayloadDefC/CSSArraySensorMsgPayload.h"
 #include "architecture/msgPayloadDefCpp/FilterMsgPayload.h"
 #include "architecture/msgPayloadDefCpp/FilterResidualsMsgPayload.h"
-#include "cMsgCInterface/NavAttMsg_C.h"
 
 #include "fswAlgorithms/_GeneralModuleFiles/srukfInterface.h"
 #include "fswAlgorithms/_GeneralModuleFiles/measurementModels.h"
 
 class SunlineSRuKF: public SRukfInterface {
 public:
-    SunlineSRuKF() = default;
-    ~SunlineSRuKF() = default;
 
 private:
-    void SelfInit() final;
     void customReset() final;
     void readCssMeasurements();
     void readGyroMeasurements();
@@ -63,7 +59,6 @@ public:
     ReadFunctor<CSSArraySensorMsgPayload> cssDataInMsg;
     ReadFunctor<CSSConfigMsgPayload>      cssConfigInMsg;
     Message<NavAttMsgPayload>             navAttOutMsg;
-    NavAttMsg_C                           navAttOutMsgC = {};
     Message<FilterMsgPayload>             filterOutMsg;
     Message<FilterResidualsMsgPayload>    filterGyroResOutMsg;
     Message<FilterResidualsMsgPayload>    filterCssResOutMsg;

@@ -22,13 +22,18 @@
 
 #include <stdint.h>
 #include "architecture/utilities/bskLogging.h"
-#include "cMsgCInterface/CmdTorqueBodyMsg_C.h"
-#include "cMsgCInterface/HingedRigidBodyMsg_C.h"
-#include "cMsgCInterface/THRConfigMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
+#include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
+#include "architecture/msgPayloadDefC/THRConfigMsgPayload.h"
 
 
 /*! @brief Top level structure for the sub-module routines. */
-typedef struct {
+class ThrusterPlatformState : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
 
     /* declare these user-defined quantities */
     double sigma_MB[3];                                   //!< orientation of the M frame w.r.t. the B frame
@@ -38,26 +43,13 @@ typedef struct {
     double K;                                             //!< momentum dumping time constant [1/s]
 
     /* declare module IO interfaces */
-    THRConfigMsg_C            thrusterConfigFInMsg;       //!< input thruster configuration msg
-    HingedRigidBodyMsg_C      hingedRigidBody1InMsg;      //!< output msg containing theta1 reference and thetaDot1 reference
-    HingedRigidBodyMsg_C      hingedRigidBody2InMsg;      //!< output msg containing theta2 reference and thetaDot2 reference
-    THRConfigMsg_C            thrusterConfigBOutMsg;      //!< output msg containing the thruster configuration infor in B-frame
+    ReadFunctor<THRConfigMsgPayload>            thrusterConfigFInMsg;       //!< input thruster configuration msg
+    ReadFunctor<HingedRigidBodyMsgPayload>      hingedRigidBody1InMsg;      //!< output msg containing theta1 reference and thetaDot1 reference
+    ReadFunctor<HingedRigidBodyMsgPayload>      hingedRigidBody2InMsg;      //!< output msg containing theta2 reference and thetaDot2 reference
+    Message<THRConfigMsgPayload>            thrusterConfigBOutMsg;      //!< output msg containing the thruster configuration infor in B-frame
 
-    BSKLogger *bskLogger;                                 //!< BSK Logging
+    BSKLogger bskLogger={};                                 //!< BSK Logging
 
-}thrusterPlatformStateConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-    void SelfInit_thrusterPlatformState(thrusterPlatformStateConfig *configData, int64_t moduleID);
-    void Reset_thrusterPlatformState(thrusterPlatformStateConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Update_thrusterPlatformState(thrusterPlatformStateConfig *configData, uint64_t callTime, int64_t moduleID);
-
-#ifdef __cplusplus
-}
-#endif
-
+};
 
 #endif

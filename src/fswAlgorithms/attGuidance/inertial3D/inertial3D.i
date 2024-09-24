@@ -21,10 +21,15 @@
    #include "inertial3D.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(inertial3D);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
 
-struct AttRefMsg_C;
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "inertial3D.h"
+
 %include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
 
 %pythoncode %{

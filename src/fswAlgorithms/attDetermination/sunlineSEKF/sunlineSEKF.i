@@ -22,20 +22,21 @@
    #include "architecture/utilities/ukfUtilities.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(sunlineSEKF);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
 
-%include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-struct NavAttMsg_C;
-%include "architecture/msgPayloadDefC/CSSArraySensorMsgPayload.h"
-struct CSSArraySensorMsg_C;
-%include "architecture/msgPayloadDefC/SunlineFilterMsgPayload.h"
-struct SunlineFilterMsg_C;
-%include "architecture/msgPayloadDefC/CSSConfigMsgPayload.h"
-struct CSSConfigMsg_C;
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "sunlineSEKF.h"
+
+%include "architecture/msgPayloadDefC/NavAttMsgPayload.h";
+%include "architecture/msgPayloadDefC/CSSArraySensorMsgPayload.h";
+%include "architecture/msgPayloadDefC/SunlineFilterMsgPayload.h";
+%include "architecture/msgPayloadDefC/CSSConfigMsgPayload.h";
 
 %pythoncode %{
 import sys
 protectAllClasses(sys.modules[__name__])
 %}
-

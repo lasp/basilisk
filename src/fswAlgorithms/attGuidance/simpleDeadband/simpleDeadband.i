@@ -21,11 +21,16 @@
    #include "simpleDeadband.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(simpleDeadband);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "simpleDeadband.h"
 
 %include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
-struct AttGuidMsg_C;
 
 %pythoncode %{
     import sys

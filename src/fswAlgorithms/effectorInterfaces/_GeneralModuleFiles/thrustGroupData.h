@@ -21,12 +21,12 @@
 #define _THRUST_GROUP_DATA_
 
 #include "architecture/utilities/macroDefinitions.h"
-#include "cMsgCInterface/THRArrayOnTimeCmdMsg_C.h"
+#include "architecture/msgPayloadDefC/THRArrayOnTimeCmdMsgPayload.h"
 
 
 
 /*! @brief Sub structure that contains all of the configuration data and output
-    information for a single thruster group.  There can be several thruster 
+    information for a single thruster group.  There can be several thruster
     groups available in a single control scheme.
 */
 typedef struct {
@@ -35,7 +35,7 @@ typedef struct {
     uint32_t numEffectors;       /*!< - The number of effectors we have access to*/
     double minThrustRequest;     /*!< - The minimum allowable on-time for a thruster*/
     double thrOnMap[3*MAX_EFF_CNT]; /*!< - Mapping between on-times and torque requests*/
-    THRArrayOnTimeCmdMsg_C thrOnTimeOutMsg; /*!< - The name of the output message*/
+    Message<THRArrayOnTimeCmdMsgPayload> thrOnTimeOutMsg; /*!< - The name of the output message*/
     THRArrayOnTimeCmdMsgPayload cmdRequests; /*!< - The array of on-time command requests sent to thrusters*/
 }ThrustGroupData;
 

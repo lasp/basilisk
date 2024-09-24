@@ -40,7 +40,7 @@ from Basilisk.architecture.swig_common_model import *
 %include "GravityGradientEffector.h"
 
 %include "architecture/msgPayloadDefC/GravityGradientMsgPayload.h"
-struct GravityGradientMsg_C;
+
 
 %pythoncode %{
 import sys

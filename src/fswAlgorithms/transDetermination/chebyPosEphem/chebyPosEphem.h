@@ -20,8 +20,10 @@
 #ifndef _CHEBY_POS_EPHEM_H_
 #define _CHEBY_POS_EPHEM_H_
 
-#include "cMsgCInterface/TDBVehicleClockCorrelationMsg_C.h"
-#include "cMsgCInterface/EphemerisMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/TDBVehicleClockCorrelationMsgPayload.h"
+#include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 
@@ -41,34 +43,23 @@ typedef struct {
     double velChebyCoeff[3*MAX_CHEB_COEFF];   /*!< [-] Set of coefficients for the velocity estimate*/
 }ChebyEphemRecord;
 
-/*! @brief Top level structure for the Chebyshev position ephemeris 
+/*! @brief Top level structure for the Chebyshev position ephemeris
            fit system. e
 */
-typedef struct {
-    EphemerisMsg_C posFitOutMsg; /*!< [-] output navigation message for pos/vel*/
-    TDBVehicleClockCorrelationMsg_C clockCorrInMsg; /*!< clock correlation input message*/
+class ChebyPosEphem : public SysModel {
+public:
+    void UpdateState(uint64_t callTime) override;
+    void Reset(uint64_t callTime) override;
+
+    Message<EphemerisMsgPayload> posFitOutMsg; /*!< [-] output navigation message for pos/vel*/
+    ReadFunctor<TDBVehicleClockCorrelationMsgPayload> clockCorrInMsg; /*!< clock correlation input message*/
     ChebyEphemRecord ephArray[MAX_CHEB_RECORDS]; /*!< [-] Array of Chebyshev records for ephemeris*/
 
     uint32_t coeffSelector;    /*!< [-] Index in the ephArray that we are currently using*/
 
     EphemerisMsgPayload outputState; /*!< [-] The local storage of the outgoing message data*/
 
-    BSKLogger *bskLogger;   //!< BSK Logging
-}ChebyPosEphemData;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_chebyPosEphem(ChebyPosEphemData *configData, int64_t moduleID);
-    void Update_chebyPosEphem(ChebyPosEphemData *configData, uint64_t callTime,
-        int64_t moduleID);
-    void Reset_chebyPosEphem(ChebyPosEphemData *configData, uint64_t callTime,
-                             int64_t moduleID);
-    
-#ifdef __cplusplus
-}
-#endif
-
+    BSKLogger bskLogger{};   //!< BSK Logging
+};
 
 #endif

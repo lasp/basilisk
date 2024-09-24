@@ -21,13 +21,17 @@
    #include "hillStateConverter.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap_2(hillStateConverter, HillStateConverterConfig);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "hillStateConverter.h"
 
 %include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-struct NavTransMsg_C;
 %include "architecture/msgPayloadDefC/HillRelStateMsgPayload.h"
-struct HillRelStateMsg_C;
 
 %pythoncode %{
 import sys

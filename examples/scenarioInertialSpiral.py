@@ -177,7 +177,7 @@ def run(show_plots):
     #
 
     # set up inertial3D guidance module
-    inertial3DObj = inertial3D.inertial3D()
+    inertial3DObj = inertial3D.Inertial3D()
     inertial3DObj.ModelTag = "inertial3D"
     scSim.AddModelToTask(simTaskName, inertial3DObj)
     inertial3DObj.sigma_R0N = [0., 0., 0.]  # set the desired inertial orientation
@@ -185,27 +185,27 @@ def run(show_plots):
     # we create 2 dynamic attitude reference modules as we want to do a 1-2 Euler angle rotation
     # and the modules provide a 3-2-1 sequence.  Thus, we do a 0-0-1 321-rotation and then a 0-1-0 321-rotation
     # get a 1-2 result.
-    attGuidanceEuler1 = eulerRotation.eulerRotation()
+    attGuidanceEuler1 = eulerRotation.EulerRotation()
     attGuidanceEuler1.ModelTag = "eulerRotation1"
     attGuidanceEuler1.attRefInMsg.subscribeTo(inertial3DObj.attRefOutMsg)
     scSim.AddModelToTask(simTaskName, attGuidanceEuler1)
     # Make rotation 1 be 0.02 rad/s about 1 axis
     attGuidanceEuler1.angleRates = [0.0, 0.0, 0.02]
 
-    attGuidanceEuler2 = eulerRotation.eulerRotation()
+    attGuidanceEuler2 = eulerRotation.EulerRotation()
     attGuidanceEuler2.ModelTag = "eulerRotation2"
     attGuidanceEuler2.attRefInMsg.subscribeTo(attGuidanceEuler1.attRefOutMsg)
     scSim.AddModelToTask(simTaskName, attGuidanceEuler2)
     # Make rotation 2 be 0.0001 rad/s about 2 axis
     attGuidanceEuler2.angleRates = [0.0, 0.0001, 0.0]
-    
+
     # set up the attitude tracking error evaluation module
-    attError = attTrackingError.attTrackingError()
+    attError = attTrackingError.AttTrackingError()
     attError.ModelTag = "attError"
     scSim.AddModelToTask(simTaskName, attError)
 
     # set up the MRP Feedback control module
-    mrpControl = mrpFeedback.mrpFeedback()
+    mrpControl = mrpFeedback.MrpFeedback()
     mrpControl.ModelTag = "mrpFeedback"
     scSim.AddModelToTask(simTaskName, mrpControl)
     mrpControl.K = 3.5
@@ -273,7 +273,7 @@ def run(show_plots):
     scSim.ExecuteSimulation()
 
     dataSigmaBN = snAttLog.sigma_BN
-    
+
     dataEulerAnglesPitch = list()
     dataEulerAnglesYaw = list()
     dataEulerAnglesRoll = list()
@@ -282,7 +282,7 @@ def run(show_plots):
         dataEulerAnglesPitch.append(eulerAngle[0])
         dataEulerAnglesYaw.append(eulerAngle[1])
         dataEulerAnglesRoll.append(eulerAngle[2])
-        
+
     timeLineSet = attErrorLog.times() * macros.NANO2MIN
     #
     #   plot the results

@@ -27,16 +27,12 @@
 #include "architecture/msgPayloadDefC/BodyHeadingMsgPayload.h"
 #include "architecture/msgPayloadDefC/InertialHeadingMsgPayload.h"
 #include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
-#include "cMsgCInterface/AttRefMsg_C.h"
 #include "fswAlgorithms/attGuidance/_GeneralModuleFiles/constrainedAxisPointingLibrary.h"
 
 
 /*! @brief A class to perform EMA SEP pointing */
 class SepPoint: public SysModel {
 public:
-    SepPoint();
-    ~SepPoint();
-    void SelfInit();                                               //!< Self initialization for C-wrapped messages
     void Reset(uint64_t CurrentSimNanos);
     void UpdateState(uint64_t CurrentSimNanos);
 
@@ -49,7 +45,6 @@ public:
     ReadFunctor<BodyHeadingMsgPayload>     bodyHeadingInMsg;       //!< input body heading msg
     ReadFunctor<InertialHeadingMsgPayload> inertialHeadingInMsg;   //!< input inertial heading msg
     Message<AttRefMsgPayload>              attRefOutMsg;           //!< Attitude reference output message
-    AttRefMsg_C                            attRefOutMsgC = {};     //!< C-wrapped attitude reference output message
 
 private:
     int               callCount;                                   //!< count variable used in the finite difference logic

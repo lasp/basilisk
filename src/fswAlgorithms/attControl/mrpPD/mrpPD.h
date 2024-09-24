@@ -20,16 +20,21 @@
 #ifndef _MRP_PD_CONTROL_H_
 #define _MRP_PD_CONTROL_H_
 
-#include "cMsgCInterface/AttGuidMsg_C.h"
-#include "cMsgCInterface/VehicleConfigMsg_C.h"
-#include "cMsgCInterface/CmdTorqueBodyMsg_C.h"
-#include "architecture/utilities/bskLogging.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
+#include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
 #include <stdint.h>
 
 
 
 /*! @brief Module configuration message definition. */
-typedef struct {
+class MrpPD : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+
     /* declare public module variables */
     double K;                           //!< [rad/sec] Proportional gain applied to MRP errors
     double P;                           //!< [N*m*s]   Rate error feedback gain applied
@@ -39,25 +44,12 @@ typedef struct {
     double ISCPntB_B[9];                //!< [kg m^2] Spacecraft Inertia
 
     /* declare module IO interfaces */
-    CmdTorqueBodyMsg_C cmdTorqueOutMsg;                 //!< commanded torque output message
-    AttGuidMsg_C guidInMsg;                             //!< attitude guidance input message
-    VehicleConfigMsg_C vehConfigInMsg;                  //!< vehicle configuration input message
+    Message<CmdTorqueBodyMsgPayload> cmdTorqueOutMsg;                 //!< commanded torque output message
+    ReadFunctor<AttGuidMsgPayload> guidInMsg;                             //!< attitude guidance input message
+    ReadFunctor<VehicleConfigMsgPayload> vehConfigInMsg;                  //!< vehicle configuration input message
 
-    BSKLogger *bskLogger;                               //!< BSK Logging
+    BSKLogger bskLogger = {};                               //!< BSK Logging
 
-}MrpPDConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_mrpPD(MrpPDConfig *configData, int64_t moduleID);
-    void Update_mrpPD(MrpPDConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Reset_mrpPD(MrpPDConfig *configData, uint64_t callTime, int64_t moduleID);
-    
-#ifdef __cplusplus
-}
-#endif
-
+};
 
 #endif

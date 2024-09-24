@@ -95,7 +95,7 @@ def faultdetection(show_plots, r_c1, r_c2, valid1, valid2, faultMode):
 
     # Construct the ephemNavConverter module
     # Set the names for the input messages
-    faults = faultDetection.faultDetection()
+    faults = faultDetection.FaultDetection()
     faults.sigmaFault = 3
     faults.faultMode = faultMode
     # ephemNavConfig.outputState = simFswInterfaceMessages.NavTransIntMsg()

@@ -199,19 +199,19 @@ def run(show_plots):
     #
 
     # setup hillPoint guidance module
-    attGuidance = hillPoint.hillPoint()
+    attGuidance = hillPoint.HillPoint()
     attGuidance.ModelTag = "hillPoint"
     scSim.AddModelToTask(simTaskName, attGuidance)
 
     # setup the attitude tracking error evaluation module
-    attError = attTrackingError.attTrackingError()
+    attError = attTrackingError.AttTrackingError()
     attError.ModelTag = "attErrorInertial3D"
     scSim.AddModelToTask(simTaskName, attError)
 
     attError.sigma_R0R = [0, 0.2, 0]
 
     # setup the MRP Feedback control module
-    mrpControl = mrpFeedback.mrpFeedback()
+    mrpControl = mrpFeedback.MrpFeedback()
     mrpControl.ModelTag = "mrpFeedback"
     scSim.AddModelToTask(simTaskName, mrpControl)
     mrpControl.K = 3.5

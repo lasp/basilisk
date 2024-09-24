@@ -21,38 +21,33 @@
 #define SCANNINGINSTRUMENTCONTROLLER_H
 
 #include <stdint.h>
-#include "cMsgCInterface/AccessMsg_C.h"
-#include "cMsgCInterface/AttGuidMsg_C.h"
-#include "cMsgCInterface/DeviceStatusMsg_C.h"
-#include "cMsgCInterface/DeviceCmdMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/AccessMsgPayload.h"
+#include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
+#include "architecture/msgPayloadDefC/DeviceStatusMsgPayload.h"
+#include "architecture/msgPayloadDefC/DeviceCmdMsgPayload.h"
 #include "architecture/utilities/bskLogging.h"
 
 /*! @brief Module to perform continuous instrument control
  */
-typedef struct {
+class ScanningInstrumentController : public SysModel {
+public:
+    void UpdateState(uint64_t callTime) override;
+    void Reset(uint64_t callTime) override;
+
     double attErrTolerance; //!< Normalized MRP attitude error tolerance
     unsigned int useRateTolerance; //!< Flag to enable rate error tolerance
     double rateErrTolerance; //!< Rate error tolerance in rad/s
     unsigned int controllerStatus;  //!< dictates whether or not the controller should be running
 
     /* declare module IO interfaces */
-    AccessMsg_C accessInMsg;  //!< Ground location access
-    AttGuidMsg_C attGuidInMsg;  //!< Attitude guidance input message
-    DeviceStatusMsg_C deviceStatusInMsg;  //!< Device status input message
-    DeviceCmdMsg_C deviceCmdOutMsg;  //!< Device status output message
+    ReadFunctor<AccessMsgPayload> accessInMsg;  //!< Ground location access
+    ReadFunctor<AttGuidMsgPayload> attGuidInMsg;  //!< Attitude guidance input message
+    ReadFunctor<DeviceStatusMsgPayload> deviceStatusInMsg;  //!< Device status input message
+    Message<DeviceCmdMsgPayload> deviceCmdOutMsg;  //!< Device status output message
 
-    BSKLogger *bskLogger;  //!< BSK Logging
-}scanningInstrumentControllerConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    void SelfInit_scanningInstrumentController(scanningInstrumentControllerConfig *configData, int64_t moduleID);
-    void Update_scanningInstrumentController(scanningInstrumentControllerConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Reset_scanningInstrumentController(scanningInstrumentControllerConfig *configData, uint64_t callTime, int64_t moduleID);
-
-#ifdef __cplusplus
-}
-#endif
+    BSKLogger bskLogger={};  //!< BSK Logging
+};
 
 #endif

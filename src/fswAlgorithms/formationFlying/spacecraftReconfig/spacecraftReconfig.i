@@ -21,21 +21,21 @@
    #include "spacecraftReconfig.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(spacecraftReconfig);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "spacecraftReconfig.h"
 
 %include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-struct NavTransMsg_C;
 %include "architecture/msgPayloadDefC/THRArrayConfigMsgPayload.h"
-struct THRArrayConfigMsg_C;
 %include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
-struct AttRefMsg_C;
 %include "architecture/msgPayloadDefC/THRArrayOnTimeCmdMsgPayload.h"
-struct THRArrayOnTimeCmdMsg_C;
 %include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-struct VehicleConfigMsg_C;
 %include "architecture/msgPayloadDefC/ReconfigBurnArrayInfoMsgPayload.h"
-struct ReconfigBurnArrayInfoMsg_C;
 
 %pythoncode %{
 import sys

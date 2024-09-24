@@ -25,6 +25,14 @@
 
 logLevel_t LogLevel = BSK_DEBUG;
 
+std::map<int, const char*> BSKLogger::logLevelMap = {
+    {0, "BSK_DEBUG"},
+    {1, "\033[92mBSK_INFORMATION\033[0m"},
+    {2, "\033[93mBSK_WARNING\033[0m"},
+    {3, "\033[91mBSK_ERROR\033[0m"},
+    {4, "BSK_SILENT"}
+};
+
 /*! This method sets the default logging verbosity
     @param logLevel
  */
@@ -101,9 +109,10 @@ void BSKLogger::bskLog(logLevel_t targetLevel, const char* info, ...)
         const char* targetLevelStr = this->logLevelMap[targetLevel];
         char formatMessage[MAX_LOGGING_LENGTH];
         va_list args;
-        va_start (args, info);
+        va_start(args, info);
         vsnprintf(formatMessage, sizeof(formatMessage), info, args);
         printf("%s: %s\n", targetLevelStr, formatMessage);
+        va_end(args);
     }
 }
 

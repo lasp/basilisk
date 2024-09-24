@@ -113,7 +113,7 @@ def filterMethods():
 
     accuracy = 1E-10
     # Construct algorithm and associated C++ container
-    module = inertialUKF.inertialUKF()
+    module = inertialUKF.InertialUKF()
     module.ModelTag = "inertialUKF"
 
     # Add test module to runtime call list
@@ -144,7 +144,7 @@ def filterMethods():
     angAccel = -0.5 * (wheelAccel[0] + wheelAccel[1]) * numpy.array([1., 0., 0])
     expectedRate = numpy.array(stateInput[3:]) + angAccel
 
-    inertialUKF.inertialStateProp(module.getConfig(), state, 0.5)
+    inertialUKF.inertialStateProp(module, state, 0.5)
     stateOut = []
     for j in range(6):
         stateOut.append(inertialUKF.doubleArray_getitem(state, j))
@@ -231,7 +231,7 @@ def stateUpdateInertialAttitude(show_plots):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = inertialUKF.inertialUKF()
+    module = inertialUKF.InertialUKF()
     module.ModelTag = "InertialUKF"
 
     # Add test module to runtime call list
@@ -380,7 +380,7 @@ def statePropInertialAttitude(show_plots):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = inertialUKF.inertialUKF()
+    module = inertialUKF.InertialUKF()
     module.ModelTag = "InertialUKF"
 
     # Add test module to runtime call list
@@ -471,7 +471,7 @@ def stateUpdateRWInertialAttitude(show_plots):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = inertialUKF.inertialUKF()
+    module = inertialUKF.InertialUKF()
     module.ModelTag = "InertialUKF"
 
     # Add test module to runtime call list
@@ -629,7 +629,7 @@ def statePropRateInertialAttitude(show_plots):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = inertialUKF.inertialUKF()
+    module = inertialUKF.InertialUKF()
     module.ModelTag = "InertialUKF"
 
     # Add test module to runtime call list

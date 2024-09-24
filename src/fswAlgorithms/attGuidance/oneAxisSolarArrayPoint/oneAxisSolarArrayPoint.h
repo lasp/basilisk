@@ -22,12 +22,14 @@
 
 #include <stdint.h>
 #include "architecture/utilities/bskLogging.h"
-#include "cMsgCInterface/AttRefMsg_C.h"
-#include "cMsgCInterface/BodyHeadingMsg_C.h"
-#include "cMsgCInterface/InertialHeadingMsg_C.h"
-#include "cMsgCInterface/NavTransMsg_C.h"
-#include "cMsgCInterface/EphemerisMsg_C.h"
-#include "cMsgCInterface/NavAttMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
+#include "architecture/msgPayloadDefC/BodyHeadingMsgPayload.h"
+#include "architecture/msgPayloadDefC/InertialHeadingMsgPayload.h"
+#include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
+#include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
+#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
 
 typedef enum celestialBody{
     notSun = 0,
@@ -56,7 +58,10 @@ typedef enum refFrameSolution{
 } RefFrameSolution;
 
 /*! @brief Top level structure for the sub-module routines. */
-typedef struct {
+class OneAxisSolarArrayPoint : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
 
     /*! declare these quantities that always must be specified as flight software parameters */
     double a1Hat_B[3];                           //!< arrays axis direction in B frame
@@ -77,33 +82,15 @@ typedef struct {
     uint64_t T2NanoSeconds;                      //!< callTime two update steps prior
     double   sigma_RN_1[3];                      //!< reference attitude one update step prior
     double   sigma_RN_2[3];                      //!< reference attitude two update steps prior
-    NavAttMsg_C          attNavInMsg;             //!< input msg measured attitude
-    BodyHeadingMsg_C     bodyHeadingInMsg;        //!< input body heading msg
-    InertialHeadingMsg_C inertialHeadingInMsg;    //!< input inertial heading msg
-    NavTransMsg_C        transNavInMsg;           //!< input msg measured position
-    EphemerisMsg_C       ephemerisInMsg;          //!< input ephemeris msg
-    AttRefMsg_C          attRefOutMsg;            //!< output attitude reference message
+    ReadFunctor<NavAttMsgPayload>          attNavInMsg;             //!< input msg measured attitude
+    ReadFunctor<BodyHeadingMsgPayload>     bodyHeadingInMsg;        //!< input body heading msg
+    ReadFunctor<InertialHeadingMsgPayload> inertialHeadingInMsg;    //!< input inertial heading msg
+    ReadFunctor<NavTransMsgPayload>        transNavInMsg;           //!< input msg measured position
+    ReadFunctor<EphemerisMsgPayload>       ephemerisInMsg;          //!< input ephemeris msg
+    Message<AttRefMsgPayload>          attRefOutMsg;            //!< output attitude reference message
 
-    BSKLogger *bskLogger;                         //!< BSK Logging
+    BSKLogger bskLogger{};                         //!< BSK Logging
 
-}OneAxisSolarArrayPointConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-    void SelfInit_oneAxisSolarArrayPoint(OneAxisSolarArrayPointConfig *configData, int64_t moduleID);
-    void Reset_oneAxisSolarArrayPoint(OneAxisSolarArrayPointConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Update_oneAxisSolarArrayPoint(OneAxisSolarArrayPointConfig *configData, uint64_t callTime, int64_t moduleID);
-
-    void oasapComputeFirstRotation(double hRefHat_B[3], double hReqHat_B[3], double R1B[3][3]);
-    void oasapComputeSecondRotation(double hRefHat_B[3], double rHat_SB_R1[3], double a1Hat_B[3], double a2Hat_B[3], double R2R1[3][3], RefFrameSolution *refFrameSolution);
-    void oasapComputeThirdRotation(int alignmentPriority, double hRefHat_B[3], double rHat_SB_R2[3], double a1Hat_B[3], double R3R2[3][3]);
-    void oasapComputeFinalRotation(CelestialBody celestialBody, AlignmentPriority alignmentPriority, double BN[3][3], double rHat_SB_B[3], double hRefHat_B[3], double hReqHat_B[3], double a1Hat_B[3], double a2Hat_B[3], double RN[3][3]);
-
-#ifdef __cplusplus
-}
-#endif
-
+};
 
 #endif

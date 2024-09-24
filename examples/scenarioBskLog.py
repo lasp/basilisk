@@ -27,13 +27,6 @@ can be found in :ref:`bskLogging`.
 
 """
 
-#
-#   Unit Test Script
-#   Module Name:        cModuleTemplateParametrized
-#   Author:             (First Name) (Last Name)
-#   Creation Date:      Month Day, Year
-#
-
 import inspect
 import os
 
@@ -44,7 +37,7 @@ splitPath = path.split(bskName)
 
 # Import all of the modules that we are going to be called in this simulation
 from Basilisk.utilities import SimulationBaseClass
-from Basilisk.moduleTemplates import cModuleTemplate
+from Basilisk.moduleTemplates import cppModuleTemplate
 from Basilisk.utilities import macros
 from Basilisk.architecture import bskLogging
 from Basilisk.architecture import messaging
@@ -89,8 +82,8 @@ def run(case):
     dataMsg = messaging.CModuleTemplateMsg().write(inputMessageData)
 
     # Construct algorithm and associated C++ container
-    module = cModuleTemplate.cModuleTemplate()
-    module.ModelTag = "cModuleTemplate"
+    module = cppModuleTemplate.CppModuleTemplate()
+    module.ModelTag = "cppModuleTemplate"
 
     # Add test module to runtime call list
     unitTestSim.AddModelToTask(unitTaskName, module)

@@ -1,12 +1,12 @@
 /*
  ISC License
- 
+
  Copyright (c) 2023, Laboratory  for Atmospheric and Space Physics, University of Colorado at Boulder
- 
+
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
  copyright notice and this permission notice appear in all copies.
- 
+
  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -14,7 +14,7 @@
  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- 
+
  */
 
 
@@ -37,16 +37,13 @@
 #include "architecture/utilities/avsEigenSupport.h"
 #include "architecture/utilities/macroDefinitions.h"
 #include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "cMsgCInterface/VehicleConfigMsg_C.h"
+#include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
 #include <string.h>
 #include <array>
 #include <math.h>
 
 class ThrustCMEstimation: public SysModel {
 public:
-    ThrustCMEstimation();
-    ~ThrustCMEstimation() override;
-    void SelfInit() override;
     void Reset(uint64_t CurrentSimNanos) override;
     void UpdateState(uint64_t CurrentSimNanos) override;
 
@@ -59,7 +56,6 @@ public:
     ReadFunctor<VehicleConfigMsgPayload>    vehConfigInMsg;           //!< (optional) vehicle configuration input msg
     Message<CMEstDataMsgPayload>            cmEstDataOutMsg;          //!< estimated CM output msg
     Message<VehicleConfigMsgPayload>        vehConfigOutMsg;          //!< output C++ vehicle configuration msg
-    VehicleConfigMsg_C                      vehConfigOutMsgC = {};    //!< output C vehicle configuration msg
 
     Eigen::Vector3d r_CB_B;                 //!< initial CM estimate
     Eigen::Vector3d P0;                     //!< initial CM state covariance
@@ -73,7 +69,7 @@ private:
 
     bool cmKnowledge;                       //!< boolean to assess if vehConfigInMsg is connected
 
-    BSKLogger bskLogger; //!< -- BSK Logging
+    BSKLogger bskLogger{}; //!< -- BSK Logging
 };
 
 #endif

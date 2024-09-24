@@ -40,7 +40,7 @@ namespace std {
 
 
 %include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-struct SpicePlanetStateMsg_C;
+
 
 
 %pythoncode %{

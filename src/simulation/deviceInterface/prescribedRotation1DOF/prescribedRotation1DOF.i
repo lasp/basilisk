@@ -32,9 +32,7 @@ from Basilisk.architecture.swig_common_model import *
 %include "prescribedRotation1DOF.h"
 
 %include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
-struct HingedRigidBodyMsg_C;
 %include "architecture/msgPayloadDefC/PrescribedRotationMsgPayload.h"
-struct PrescribedRotationMsg_C;
 
 %pythoncode %{
 import sys

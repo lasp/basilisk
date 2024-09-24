@@ -22,38 +22,31 @@
 #define MTBFEEDFORWARD_H
 
 #include <stdint.h>
-#include "architecture/utilities/bskLogging.h"
-#include "cMsgCInterface/CmdTorqueBodyMsg_C.h"
-#include "cMsgCInterface/MTBCmdMsg_C.h"
-#include "cMsgCInterface/TAMSensorBodyMsg_C.h"
-#include "cMsgCInterface/MTBArrayConfigMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
+#include "architecture/msgPayloadDefC/MTBCmdMsgPayload.h"
+#include "architecture/msgPayloadDefC/TAMSensorBodyMsgPayload.h"
+#include "architecture/msgPayloadDefC/MTBArrayConfigMsgPayload.h"
 
 /*! @brief Top level structure for the sub-module routines. */
-typedef struct {
-    
+class MtbFeedforward : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+
     /* Inputs. */
-    CmdTorqueBodyMsg_C vehControlInMsg;                 //!< input message containing the current control torque in the Body frame
-    MTBCmdMsg_C dipoleRequestMtbInMsg;                  //!< input message containing the individual dipole requests for each torque bar on the vehicle
-    TAMSensorBodyMsg_C tamSensorBodyInMsg;              //!< [Tesla] input message for magnetic field sensor data in the Body frame
-    MTBArrayConfigMsg_C mtbArrayConfigParamsInMsg;      //!< input message containing configuration parameters for all the torque bars on the vehicle
-    
+    ReadFunctor<CmdTorqueBodyMsgPayload> vehControlInMsg;                 //!< input message containing the current control torque in the Body frame
+    ReadFunctor<MTBCmdMsgPayload> dipoleRequestMtbInMsg;                  //!< input message containing the individual dipole requests for each torque bar on the vehicle
+    ReadFunctor<TAMSensorBodyMsgPayload> tamSensorBodyInMsg;              //!< [Tesla] input message for magnetic field sensor data in the Body frame
+    ReadFunctor<MTBArrayConfigMsgPayload> mtbArrayConfigParamsInMsg;      //!< input message containing configuration parameters for all the torque bars on the vehicle
+
     /* Outputs. */
-    CmdTorqueBodyMsg_C vehControlOutMsg;                //!< output message containing the current control torque in the Body frame
-    
+    Message<CmdTorqueBodyMsgPayload> vehControlOutMsg;                //!< output message containing the current control torque in the Body frame
+
     /* Other. */
     MTBArrayConfigMsgPayload mtbArrayConfigParams;      //!< configuration for MTB layout
-    BSKLogger *bskLogger;                               //!< BSK Logging
-}mtbFeedforwardConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    void SelfInit_mtbFeedforward(mtbFeedforwardConfig *configData, int64_t moduleID);
-    void Update_mtbFeedforward(mtbFeedforwardConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Reset_mtbFeedforward(mtbFeedforwardConfig *configData, uint64_t callTime, int64_t moduleID);
-
-#ifdef __cplusplus
-}
-#endif
+    BSKLogger bskLogger = {};                           //!< BSK Logging
+};
 
 #endif

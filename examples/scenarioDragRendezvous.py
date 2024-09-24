@@ -36,7 +36,7 @@ output message of type :ref:`NavAttMsgPayload` continuously to a :ref:`hillState
 which is assumed to be a part of the deputy (maneuvering)
 spacecraft's flight software stack. The :ref:`hillStateConverter` module then writes
 a :ref:`hillRelStateMsgPayload`, which is read by the :ref:`hillToAttRef` module implementing
-the differential drag attitude guidance law. 
+the differential drag attitude guidance law.
 
 .. image:: /_images/static/scenarioDragRendezvousDiagram.png
    :align: center
@@ -237,7 +237,7 @@ def drag_simulator(altOffset, trueAnomOffset, densMultiplier, ctrlType='lqr', us
     #   Connect s/c to environment (gravity, density)
     gravFactory.addBodiesTo(chiefSc)
     gravFactory.addBodiesTo(depSc)
-    
+
     atmosphere.addSpacecraftToModel(depSc.scStateOutMsg)
     depDrag.atmoDensInMsg.subscribeTo(atmosphere.envOutMsgs[-1])
     atmosphere.addSpacecraftToModel(chiefSc.scStateOutMsg)
@@ -257,26 +257,26 @@ def drag_simulator(altOffset, trueAnomOffset, densMultiplier, ctrlType='lqr', us
     ##  FSW setup
     #   Chief S/C
     #   hillPoint - set such that the chief attitude follows its hill frame.
-    chiefAttRef = hillPoint.hillPoint()
+    chiefAttRef = hillPoint.HillPoint()
     chiefAttRef.ModelTag = 'chief_att_ref'
     chiefAttRef.transNavInMsg.subscribeTo(chiefNav.transOutMsg)
     # chiefAttRefData.celBodyInMsg.subscribeTo(ephemConverter.ephemOutMsgs[-1]) #   We shouldn't need this because the planet is the origin
     chiefSc.attRefInMsg.subscribeTo(chiefAttRef.attRefOutMsg) #  Force the chief spacecraft to follow the hill direction
 
-    depHillRef = hillPoint.hillPoint()
+    depHillRef = hillPoint.HillPoint()
     depHillRef.ModelTag = 'dep_hill_ref'
     depHillRef.transNavInMsg.subscribeTo(depNav.transOutMsg)
     # chiefAttRefData.celBodyInMsg.subscribeTo(ephemConverter.ephemOutMsgs[-1]) #   We shouldn't need this because the planet is the origin
     #chiefSc.attRefInMsg.subscribeTo(chiefAttRefData.attRefOutMsg) #  Force the chief spacecraft to follow the hill direction
 
     # hillStateConverter
-    hillStateNavObj = hillStateConverter.hillStateConverter()
+    hillStateNavObj = hillStateConverter.HillStateConverter()
     hillStateNavObj.ModelTag = "dep_hillStateNav"
     hillStateNavObj.depStateInMsg.subscribeTo(depNav.transOutMsg)
     hillStateNavObj.chiefStateInMsg.subscribeTo(chiefNav.transOutMsg)
 
     # hillToAtt guidance law w/ static gain
-    depAttRef = hillToAttRef.hillToAttRef()
+    depAttRef = hillToAttRef.HillToAttRef()
     depAttRef.ModelTag = 'dep_att_ref'
     depAttRef.gainMatrix = hillToAttRef.MultiArray(lqr_gain_set)
     #   Configure parameters common to relative attitude guidance modules
@@ -295,7 +295,7 @@ def drag_simulator(altOffset, trueAnomOffset, densMultiplier, ctrlType='lqr', us
     scSim.AddModelToTask(dynTaskName, depAttRef, 700)
     # ----- log ----- #
     orbit_period = 2*np.pi/np.sqrt(mu/chief_oe.a**3)
-    simulationTime = 40*orbit_period#106920.14366466808 
+    simulationTime = 40*orbit_period#106920.14366466808
     simulationTime = macros.sec2nano(simulationTime)
     numDataPoints = 21384
     samplingTime = simulationTime // (numDataPoints - 1)
@@ -320,7 +320,7 @@ def drag_simulator(altOffset, trueAnomOffset, densMultiplier, ctrlType='lqr', us
     scSim.AddModelToTask(dynTaskName, chiefAttRec, 704)
     scSim.AddModelToTask(dynTaskName, chiefDragForceLog, 705)
     scSim.AddModelToTask(dynTaskName, depDragForceLog, 706)
-    
+
     for ind,rec in enumerate(atmoRecs):
         scSim.AddModelToTask(dynTaskName, rec, 707+ind)
 
@@ -329,7 +329,7 @@ def drag_simulator(altOffset, trueAnomOffset, densMultiplier, ctrlType='lqr', us
     viz = vizSupport.enableUnityVisualization(scSim, dynTaskName, [chiefSc, depSc],
                                               # saveFile=fileName,
                                               )
-    
+
     # ----- execute sim ----- #
     scSim.InitializeSimulation()
     scSim.ConfigureStopTime(simulationTime)
@@ -348,13 +348,13 @@ def drag_simulator(altOffset, trueAnomOffset, densMultiplier, ctrlType='lqr', us
     results_dict['depDrag_B'] = depDragForceLog.forceExternal_B
     results_dict['dynTimeData'] = chiefStateRec.times()
     results_dict['fswTimeData'] = depAttRec.times()
-    results_dict['wiggum.r_BN_N'] = chiefStateRec.r_BN_N 
+    results_dict['wiggum.r_BN_N'] = chiefStateRec.r_BN_N
     results_dict['wiggum.v_BN_N'] = chiefStateRec.v_BN_N
     results_dict['lou.r_BN_N'] = depStateRec.r_BN_N
     results_dict['lou.v_BN_N'] = depStateRec.v_BN_N
     results_dict['relState.r_DC_H'] = hillStateRec.r_DC_H
     results_dict['relState.v_DC_H'] = hillStateRec.v_DC_H
-    results_dict['wiggum.sigma_BN'] = chiefStateRec.sigma_BN 
+    results_dict['wiggum.sigma_BN'] = chiefStateRec.sigma_BN
     results_dict['lou.sigma_BN'] = depStateRec.sigma_BN
     results_dict['depDensity'] = atmoRecs[0].neutralDensity
     results_dict['chiefDensity'] = atmoRecs[1].neutralDensity
@@ -393,28 +393,28 @@ def run(show_plots, altOffset, trueAnomOffset, densMultiplier, ctrlType='lqr', u
         rel_mrp_hist[ind,:] = rbk.subMRP(depAtt[ind,:], chiefAtt[ind,:])
 
     figureList = {}
-    
+
     #   Plots for general consumption
-    plt.figure() 
+    plt.figure()
     plt.plot(timeData[1:], hillPos[1:,0],label="r_1")
     plt.grid()
-    plt.xlabel('Time')   
+    plt.xlabel('Time')
     plt.ylabel('Hill X Position (m)')
     pltName = fileName + "_hillX"
     figureList[pltName] = plt.figure(1)
     plt.figure()
     plt.plot(timeData[1:], hillPos[1:,1],label="r_2")
     plt.grid()
-    plt.xlabel('Time')   
+    plt.xlabel('Time')
     plt.ylabel('Hill Y Position (m)')
     pltName = fileName + "_hillY"
     figureList[pltName] = plt.figure(2)
-    
+
 
     plt.figure()
     plt.plot(timeData[1:], hillVel[1:,0],label="v_1")
     plt.grid()
-    plt.xlabel('Time')   
+    plt.xlabel('Time')
     plt.ylabel('Hill X Velocity (m/s)')
     pltName = fileName + "_hilldX"
     figureList[pltName] = plt.figure(3)
@@ -457,7 +457,7 @@ def run(show_plots, altOffset, trueAnomOffset, densMultiplier, ctrlType='lqr', u
     plt.plot(timeData[1:], depDrag[1:,2]-chiefDrag[1:,2],label="delta a_3")
     plt.grid()
     plt.legend()
-    plt.xlabel('Time')   
+    plt.xlabel('Time')
     plt.ylabel('Relative acceleration due to drag, body frame (m/s)')
 
     plt.figure()
@@ -466,7 +466,7 @@ def run(show_plots, altOffset, trueAnomOffset, densMultiplier, ctrlType='lqr', u
     plt.plot(timeData[1:], chiefDrag[1:,2],label="chief a_3")
     plt.grid()
     plt.legend()
-    plt.xlabel('Time')   
+    plt.xlabel('Time')
     plt.ylabel('Relative acceleration due to drag, body frame (m/s)')
 
     plt.figure()
@@ -475,9 +475,9 @@ def run(show_plots, altOffset, trueAnomOffset, densMultiplier, ctrlType='lqr', u
     plt.plot(timeData[1:], depDrag[1:,2],label="dep a_3")
     plt.grid()
     plt.legend()
-    plt.xlabel('Time')   
+    plt.xlabel('Time')
     plt.ylabel('Relative acceleration due to drag, body frame (m/s)')
-    
+
 
     if(show_plots):
         plt.show()

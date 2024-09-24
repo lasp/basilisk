@@ -82,7 +82,7 @@ def thrMomentumManagementTestFunction(show_plots, hsMinCheck):
 
 
     # Construct algorithm and associated C++ container
-    module = thrMomentumManagement.thrMomentumManagement()
+    module = thrMomentumManagement.ThrMomentumManagement()
     module.ModelTag = "thrMomentumManagement"
 
     # Add test module to runtime call list

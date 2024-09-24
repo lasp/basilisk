@@ -22,15 +22,6 @@
 #include "architecture/utilities/avsEigenSupport.h"
 #include "architecture/utilities/macroDefinitions.h"
 
-FlybyPoint::FlybyPoint() = default;
-
-FlybyPoint::~FlybyPoint() = default;
-
-/*! Initialize C-wrapped output messages */
-void FlybyPoint::SelfInit(){
-    AttRefMsg_C_init(&this->attRefOutMsgC);
-}
-
 /*! This method is used to reset the module.
  @return void
  */
@@ -133,8 +124,6 @@ void FlybyPoint::UpdateState(uint64_t CurrentSimNanos)
 
     /*! Write the output messages */
     this->attRefOutMsg.write(&attMsgBuffer, this->moduleID, CurrentSimNanos);
-    /*! Write the C-wrapped output messages */
-    AttRefMsg_C_write(&attMsgBuffer, &this->attRefOutMsgC, this->moduleID, CurrentSimNanos);
 }
 
 double FlybyPoint::getTimeBetweenFilterData() const {

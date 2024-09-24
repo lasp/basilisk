@@ -26,21 +26,17 @@
 #include "architecture/messaging/messaging.h"
 #include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
 #include "architecture/msgPayloadDefC/CmdForceBodyMsgPayload.h"
-#include "cMsgCInterface/CmdTorqueBodyMsg_C.h"
+#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
 
 
 /*! @brief A class to compute rate damping control */
 class RateDamp: public SysModel {
 public:
-    RateDamp();
-    ~RateDamp();
-    void SelfInit();                                              //!< Self initialization for C-wrapped messages
     void Reset(uint64_t CurrentSimNanos);
     void UpdateState(uint64_t CurrentSimNanos);
 
     ReadFunctor<NavAttMsgPayload>          attNavInMsg;           //!< input msg measured attitude
     Message<CmdTorqueBodyMsgPayload>       cmdTorqueOutMsg;       //!< commanded torque output message
-    CmdTorqueBodyMsg_C                     cmdTorqueOutMsgC = {}; //!< C-wrapped commanded torque output message
 
     void setRateGain(double const p);
     double getRateGain() const;

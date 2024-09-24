@@ -21,22 +21,20 @@
    #include "hillToAttRef.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap_2(hillToAttRef, HillToAttRefConfig);
-
 %pythoncode %{
-from Basilisk.architecture.swig_common_model import *
+    from Basilisk.architecture.swig_common_model import *
 %}
 
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "hillToAttRef.h"
+
 %include "architecture/msgPayloadDefC/HillRelStateMsgPayload.h"
-struct HillRelStateMsg_C;
 %include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
-struct AttRefMsg_C;
 %include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-struct NavAttMsg_C;
 
 %pythoncode %{
 import sys
 protectAllClasses(sys.modules[__name__])
 %}
-

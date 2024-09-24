@@ -20,8 +20,10 @@
 #ifndef _SUN_SAFE_POINT_H_
 #define _SUN_SAFE_POINT_H_
 
-#include "cMsgCInterface/NavAttMsg_C.h"
-#include "cMsgCInterface/AttGuidMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
+#include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 #include <stdint.h>
@@ -29,10 +31,13 @@
 
 
 /*! @brief Top level structure for the sun-safe attitude guidance routine.*/
-typedef struct {
-    AttGuidMsg_C attGuidanceOutMsg; /*!< The name of the output message*/
-    NavAttMsg_C sunDirectionInMsg; /*!< The name of the Input message*/
-    NavAttMsg_C imuInMsg;    /*!< The name of the incoming IMU message*/
+class SunSafePoint : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+    Message<AttGuidMsgPayload> attGuidanceOutMsg; /*!< The name of the output message*/
+    ReadFunctor<NavAttMsgPayload> sunDirectionInMsg; /*!< The name of the Input message*/
+    ReadFunctor<NavAttMsgPayload> imuInMsg;    /*!< The name of the incoming IMU message*/
     double minUnitMag;       /*!< -- The minimally acceptable norm of sun body vector*/
     double sunAngleErr;      /*!< rad The current error between cmd and obs sun angle*/
     double smallAngle;       /*!< rad An angle value that specifies what is near 0 or 180 degrees */
@@ -43,21 +48,7 @@ typedef struct {
     double sunAxisSpinRate;  /*!< r/s Desired constant spin rate about sun heading vector */
 
     AttGuidMsgPayload attGuidanceOutBuffer;   /*!< -- The output data that we compute*/
-    BSKLogger *bskLogger;                             //!< BSK Logging
-}sunSafePointConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_sunSafePoint(sunSafePointConfig *configData, int64_t moduleID);
-    void Update_sunSafePoint(sunSafePointConfig *configData, uint64_t callTime,
-        int64_t moduleID);
-    void Reset_sunSafePoint(sunSafePointConfig *configData, uint64_t callTime, int64_t moduleID);
-
-#ifdef __cplusplus
-}
-#endif
-
+    BSKLogger bskLogger={};                             //!< BSK Logging
+};
 
 #endif

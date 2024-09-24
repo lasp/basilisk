@@ -76,7 +76,7 @@ def thrMomentumDumpingTestFunction(show_plots, resetCheck, largeMinFireTime):
 
 
     # Construct algorithm and associated C++ container
-    module = thrMomentumDumping.thrMomentumDumping()
+    module = thrMomentumDumping.ThrMomentumDumping()
     module.ModelTag = "thrMomentumDumping"
 
     # Add test module to runtime call list

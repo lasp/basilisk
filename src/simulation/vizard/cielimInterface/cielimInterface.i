@@ -54,19 +54,12 @@ namespace std {
 %include "simulation/vizard/_GeneralModuleFiles/vizStructures.h"
 
 %include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
-struct CameraConfigMsg_C;
 %include "architecture/msgPayloadDefC/RWConfigLogMsgPayload.h"
-struct RWConfigLogMsg_C;
 %include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-struct SCStatesMsg_C;
 %include "architecture/msgPayloadDefC/CameraImageMsgPayload.h"
-struct CameraImageMsg_C;
 %include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-struct SpicePlanetStateMsg_C;
 %include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
-struct RWSpeedMsg_C;
 %include "architecture/msgPayloadDefC/EpochMsgPayload.h"
-struct EpochMsg_C;
 
 %include "architecture/msgPayloadDefCpp/CSSConfigLogMsgPayload.h"
 %include "architecture/msgPayloadDefCpp/THROutputMsgPayload.h"

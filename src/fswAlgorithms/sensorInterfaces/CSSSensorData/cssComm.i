@@ -21,11 +21,16 @@
    #include "cssComm.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap_3(cssComm, CSSConfigData, cssProcessTelem);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "cssComm.h"
 
 %include "architecture/msgPayloadDefC/CSSArraySensorMsgPayload.h"
-struct CSSArraySensorMsg_C;
 
 %pythoncode %{
 import sys

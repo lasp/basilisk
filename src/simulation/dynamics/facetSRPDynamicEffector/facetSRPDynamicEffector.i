@@ -38,7 +38,7 @@ from Basilisk.architecture.swig_common_model import *
 %include "facetSRPDynamicEffector.h"
 
 %include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-struct SpicePlanetStateMsg_C;
+
 
 %pythoncode %{
 import sys

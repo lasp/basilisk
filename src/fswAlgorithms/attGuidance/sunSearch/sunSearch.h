@@ -26,7 +26,6 @@
 #include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
 #include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
 #include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
-#include "cMsgCInterface/AttGuidMsg_C.h"
 
 struct SlewProperties {
     // user-requested properties
@@ -44,9 +43,6 @@ struct SlewProperties {
 /*! @brief A class to perform EMA SEP pointing */
 class SunSearch: public SysModel {
 public:
-    SunSearch();
-    ~SunSearch();
-    void SelfInit();                                             //!< Self initialization for C-wrapped messages
     void Reset(uint64_t CurrentSimNanos);
     void UpdateState(uint64_t CurrentSimNanos);
 
@@ -59,7 +55,6 @@ public:
     ReadFunctor<NavAttMsgPayload>          attNavInMsg;          //!< input msg measured attitude
     ReadFunctor<VehicleConfigMsgPayload>   vehConfigInMsg;       //!< input veh config msg
     Message<AttGuidMsgPayload>             attGuidOutMsg;        //!< Attitude reference output message
-    AttGuidMsg_C                           attGuidOutMsgC = {};  //!< C-wrapped attitude guidance output message
 
 private:
     SlewProperties slewProperties[3];

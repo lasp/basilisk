@@ -34,13 +34,13 @@
 %include "msmForceTorque.h"
 
 %include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-struct SCStatesMsg_C;
+
 %include "architecture/msgPayloadDefC/VoltMsgPayload.h"
-struct VoltMsg_C;
+
 %include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
-struct CmdTorqueBodyMsg_C;
+
 %include "architecture/msgPayloadDefC/CmdForceInertialMsgPayload.h"
-struct CmdForceInertialMsg_C;
+
 %include "architecture/msgPayloadDefCpp/ChargeMsmMsgPayload.h"
 
 

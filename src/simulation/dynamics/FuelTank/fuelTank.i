@@ -36,7 +36,7 @@ from Basilisk.architecture.swig_common_model import *
 %include "fuelTank.h"
 
 %include "architecture/msgPayloadDefC/FuelTankMsgPayload.h"
-struct FuelTankMsg_C;
+
 
 %pythoncode %{
 import sys

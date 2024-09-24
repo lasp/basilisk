@@ -32,17 +32,17 @@ from Basilisk.architecture.swig_common_model import *
 %include "simpleNav.h"
 
 %include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-struct SCStatesMsg_C;
+
 %include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-struct NavAttMsg_C;
+
 %include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-struct NavTransMsg_C;
+
 %include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-struct SpicePlanetStateMsg_C;
+
 %include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-struct EphemerisMsg_C;
+
 %include "architecture/msgPayloadDefC/AccDataMsgPayload.h"
-struct AccDataMsg_C;
+
 
 %pythoncode %{
 import sys

@@ -85,7 +85,7 @@ def run(show_plots, cmdStateFlag, testReset):
 
 
     # Construct algorithm and associated C++ container
-    module = mrpRotation.mrpRotation()
+    module = mrpRotation.MrpRotation()
     module.ModelTag = "mrpRotation"
 
     # Add test module to runtime call list

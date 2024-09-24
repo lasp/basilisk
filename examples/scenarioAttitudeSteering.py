@@ -361,17 +361,17 @@ def run(show_plots, simCase):
     #
 
     # setup guidance module
-    attGuidance = hillPoint.hillPoint()
+    attGuidance = hillPoint.HillPoint()
     attGuidance.ModelTag = "hillPoint"
     scSim.AddModelToTask(simTaskName, attGuidance)
 
     # setup the attitude tracking error evaluation module
-    attError = attTrackingError.attTrackingError()
+    attError = attTrackingError.AttTrackingError()
     attError.ModelTag = "attErrorInertial3D"
     scSim.AddModelToTask(simTaskName, attError)
 
     # setup the MRP steering control module
-    mrpControl = mrpSteering.mrpSteering()
+    mrpControl = mrpSteering.MrpSteering()
     mrpControl.ModelTag = "MRP_Steering"
 
     scSim.AddModelToTask(simTaskName, mrpControl)
@@ -389,7 +389,7 @@ def run(show_plots, simCase):
     mrpControl.omega_max = 1. * macros.D2R
 
     # setup Rate servo module
-    servo = rateServoFullNonlinear.rateServoFullNonlinear()
+    servo = rateServoFullNonlinear.RateServoFullNonlinear()
     servo.ModelTag = "rate_servo"
 
     if simCase == 1:
@@ -403,7 +403,7 @@ def run(show_plots, simCase):
     scSim.AddModelToTask(simTaskName, servo)
 
     # add module that maps the Lr control torque into the RW motor torques
-    rwMotorTorqueObj = rwMotorTorque.rwMotorTorque()
+    rwMotorTorqueObj = rwMotorTorque.RwMotorTorque()
     rwMotorTorqueObj.ModelTag = "rwMotorTorque"
     scSim.AddModelToTask(simTaskName, rwMotorTorqueObj)
 

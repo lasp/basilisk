@@ -272,18 +272,18 @@ def run(show_plots, useUnmodeledTorque, useIntGain, useKnownTorque, useCMsg):
     #
 
     # setup inertial3D guidance module
-    inertial3DObj = inertial3D.inertial3D()
+    inertial3DObj = inertial3D.Inertial3D()
     inertial3DObj.ModelTag = "inertial3D"
     scSim.AddModelToTask(simTaskName, inertial3DObj)
     inertial3DObj.sigma_R0N = [0., 0., 0.]  # set the desired inertial orientation
 
     # setup the attitude tracking error evaluation module
-    attError = attTrackingError.attTrackingError()
+    attError = attTrackingError.AttTrackingError()
     attError.ModelTag = "attErrorInertial3D"
     scSim.AddModelToTask(simTaskName, attError)
 
     # setup the MRP Feedback control module
-    mrpControl = mrpFeedback.mrpFeedback()
+    mrpControl = mrpFeedback.MrpFeedback()
     mrpControl.ModelTag = "mrpFeedback"
     scSim.AddModelToTask(simTaskName, mrpControl)
     mrpControl.K = 3.5
@@ -304,16 +304,7 @@ def run(show_plots, useUnmodeledTorque, useIntGain, useKnownTorque, useCMsg):
     # B origin and the center of mass (defaulted to zero).  The message payload is created through
     configData = messaging.VehicleConfigMsgPayload()
     configData.ISCPntB_B = I
-    # Two methods are shown to create either a C++ or C wrapped msg object in python.  The
-    # preferred method is to just create C++ wrapped messages.
-    if not useCMsg:
-        # create standard C++ wrapped C-msg copy
-        configDataMsg = messaging.VehicleConfigMsg()
-    else:
-        # example of how to create a C-wrapped C-msg in Python, have it init and write the data
-        configDataMsg = messaging.VehicleConfigMsg_C().init(configData)
-        # example of how to create a C-wrapped C-msg in Python that is initialized
-        configDataMsg = messaging.VehicleConfigMsg_C().init()
+    configDataMsg = messaging.VehicleConfigMsg()
     configDataMsg.write(configData)
 
     #
@@ -325,9 +316,9 @@ def run(show_plots, useUnmodeledTorque, useIntGain, useKnownTorque, useCMsg):
     mrpControl.guidInMsg.subscribeTo(attError.attGuidOutMsg)
     mrpControl.vehConfigInMsg.subscribeTo(configDataMsg)
     if useCMsg:
-        cmdTorqueMsg = messaging.CmdTorqueBodyMsg_C()
+        cmdTorqueMsg = messaging.CmdTorqueBodyMsg()
         # connect to external commanded torque msg
-        messaging.CmdTorqueBodyMsg_C_addAuthor(mrpControl.cmdTorqueOutMsg, cmdTorqueMsg)
+        mrpControl.cmdTorqueOutMsg = cmdTorqueMsg
         extFTObject.cmdTorqueInMsg.subscribeTo(cmdTorqueMsg)
     else:
         # connect to module-internal commanded torque msg

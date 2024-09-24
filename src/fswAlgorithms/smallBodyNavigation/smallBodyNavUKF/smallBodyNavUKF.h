@@ -22,9 +22,9 @@
 #define SMALLBODYNAVUKF_H
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "cMsgCInterface/EphemerisMsg_C.h"
-#include "cMsgCInterface/NavTransMsg_C.h"
-#include "cMsgCInterface/SmallBodyNavUKFMsg_C.h"
+#include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
+#include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
+#include "architecture/msgPayloadDefC/SmallBodyNavUKFMsgPayload.h"
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/messaging/messaging.h"
 #include "architecture/utilities/orbitalMotion.h"
@@ -37,9 +37,7 @@
 class SmallBodyNavUKF: public SysModel {
 public:
     SmallBodyNavUKF();
-    ~SmallBodyNavUKF();
 
-    void SelfInit();  //!< Self initialization for C-wrapped messages
     void Reset(uint64_t CurrentSimNanos);  //!< Resets module
     void UpdateState(uint64_t CurrentSimNanos);  //!< Updates state
 
@@ -54,7 +52,6 @@ public:
     ReadFunctor<NavTransMsgPayload> navTransInMsg;  //!< Translational nav input message
     ReadFunctor<EphemerisMsgPayload> asteroidEphemerisInMsg;  //!< Small body ephemeris input message
     Message<SmallBodyNavUKFMsgPayload> smallBodyNavUKFOutMsg;  //!< Small body nav UKF output msg - states and covariances
-    SmallBodyNavUKFMsg_C smallBodyNavUKFOutMsgC = {};  //!< C-wrapped Small body nav UKF output msg - states and covariances
 
     BSKLogger bskLogger;  //!< -- BSK Logging
 
@@ -63,11 +60,11 @@ public:
     Eigen::MatrixXd R_meas;  //!< Measurement noise covariance
     Eigen::VectorXd x_hat_k;  //!< Current state estimate
     Eigen::MatrixXd P_k;  //!< Current state estimation covariance
-    
+
     double alpha;  //!< UKF hyper-parameter
     double beta;  //!< UKF hyper-parameter
     double kappa;  //!< UKF hyper-parameter
-    
+
     Eigen::Matrix3d dcm_AN;  //!< Small body dcm
     Eigen::Vector3d omega_AN_A;  //!< Small body angular velocity
 

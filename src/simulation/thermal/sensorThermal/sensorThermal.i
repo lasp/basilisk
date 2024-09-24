@@ -35,13 +35,13 @@ from Basilisk.architecture.swig_common_model import *
 %include "sensorThermal.h"
 
 %include "architecture/msgPayloadDefC/TemperatureMsgPayload.h"
-struct TemperatureMsg_C;
+
 %include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-struct SCStatesMsg_C;
+
 %include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-struct SpicePlanetStateMsg_C;
+
 %include "architecture/msgPayloadDefC/EclipseMsgPayload.h"
-struct EclipseMsg_C;
+
 %include "architecture/msgPayloadDefC/DeviceStatusMsgPayload.h"
 
 %pythoncode %{

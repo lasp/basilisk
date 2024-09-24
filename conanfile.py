@@ -214,7 +214,7 @@ class BasiliskConan(ConanFile):
             if self.settings.os == "Macos":
                 self.generator = "Xcode"
             elif self.settings.os == "Windows":
-                self.generator = "Visual Studio 16 2019"
+                self.generator = "Visual Studio 17 2022"
                 self.options["*"].shared = True
             else:
                 print("Creating a make file for project. ")
@@ -237,21 +237,7 @@ class BasiliskConan(ConanFile):
             self.keep_imports = True
             self.copy("*.dll", "../Basilisk", "bin")
 
-    def generateMessageModules(self, originalWorkingDirectory):
-        cmdString = [sys.executable, "GenCMessages.py"]
-        if self.options.pathToExternalModules:
-            cmdString.extend(["--pathToExternalModules", str(self.options.pathToExternalModules)])
-        subprocess.check_call(cmdString)
-        os.chdir(originalWorkingDirectory)
-        print("Done")
-
     def build(self):
-        # auto-generate C message definition files
-        print(statusColor + "Auto-generating message definitions:" + endColor, end=" ")
-        bskPath = os.getcwd()
-        os.chdir(os.path.join(bskPath, "src/architecture/messaging/msgAutoSource"))
-        self.generateMessageModules(bskPath)
-
         if self.options.pathToExternalModules:
             print(statusColor + "Including External Folder: " + endColor + str(self.options.pathToExternalModules))
 
@@ -334,8 +320,6 @@ if __name__ == "__main__":
     genMod.verbose = False
     makeDraftModule.fillCppInfo(genMod)
     genMod.createCppModule()
-    makeDraftModule.fillCInfo(genMod)
-    genMod.createCModule()
     print("Done")
 
     # run conan install

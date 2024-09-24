@@ -23,7 +23,9 @@
 
 #include <stdint.h>
 
-#include "cMsgCInterface/AttStateMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/AttStateMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 
@@ -35,7 +37,10 @@
 
 
 /*! @brief Top level structure for the sub-module routines. */
-typedef struct {
+class RasterManager : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
     /* Declare module private variables */
     double scanningAngles[3 * MAX_RASTER_SET];      /*!< array of scanning angles */
     double scanningRates[3 * MAX_RASTER_SET];       /*!< array of scanning rates */
@@ -47,25 +52,12 @@ typedef struct {
     //uint64_t currentMnvrTime;
     uint64_t mnvrStartTime;                         /*!< maneuver start time */
     /* Declare module IO interfaces */
-    AttStateMsg_C attStateOutMsg;                   /*!< The name of the output message containing the
+    Message<AttStateMsgPayload> attStateOutMsg;                   /*!< The name of the output message containing the
                                                          commanded attitude references states  */
 
     /* Output attitude reference data to send */
     AttStateMsgPayload attOutSet;                   //!< output message copy
-    BSKLogger *bskLogger;                             //!< BSK Logging
-}rasterManagerConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_rasterManager(rasterManagerConfig *configData, int64_t moduleID);
-    void Reset_rasterManager(rasterManagerConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Update_rasterManager(rasterManagerConfig *configData, uint64_t callTime, int64_t moduleID);
-    
-#ifdef __cplusplus
-}
-#endif
-
+    BSKLogger bskLogger={};                             //!< BSK Logging
+};
 
 #endif

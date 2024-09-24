@@ -22,24 +22,25 @@
    #include "architecture/utilities/ukfUtilities.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap_2(pixelLineBiasUKF, PixelLineBiasUKFConfig);
+
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "pixelLineBiasUKF.h"
 
 %include "architecture/utilities/ukfUtilities.h"
 
 %include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
-struct CameraConfigMsg_C;
 %include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-struct NavAttMsg_C;
 %include "architecture/msgPayloadDefC/PixelLineFilterMsgPayload.h"
-struct PixelLineFilterMsg_C;
 %include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-struct NavTransMsg_C;
 %include "architecture/msgPayloadDefC/OpNavCirclesMsgPayload.h"
-struct OpNavCirclesMsg_C;
 
 %pythoncode %{
 import sys
 protectAllClasses(sys.modules[__name__])
 %}
-

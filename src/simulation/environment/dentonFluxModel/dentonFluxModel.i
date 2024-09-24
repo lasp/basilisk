@@ -32,11 +32,11 @@
 %include "dentonFluxModel.h"
 
 %include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-struct SCStatesMsg_C;
+
 %include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-struct SpicePlanetStateMsg_C;
+
 %include "architecture/msgPayloadDefC/PlasmaFluxMsgPayload.h"
-struct PlasmaFluxMsg_C;
+
 
 %pythoncode %{
 import sys

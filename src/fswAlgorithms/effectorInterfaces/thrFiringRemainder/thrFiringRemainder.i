@@ -21,15 +21,18 @@
    #include "thrFiringRemainder.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(thrFiringRemainder);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "thrFiringRemainder.h"
 
 %include "architecture/msgPayloadDefC/THRArrayConfigMsgPayload.h"
-struct THRArrayConfigMsg_C;
 %include "architecture/msgPayloadDefC/THRArrayCmdForceMsgPayload.h"
-struct THRArrayCmdForceMsg_C;
 %include "architecture/msgPayloadDefC/THRArrayOnTimeCmdMsgPayload.h"
-struct THRArrayOnTimeCmdMsg_C;
 
 %pythoncode %{
 import sys

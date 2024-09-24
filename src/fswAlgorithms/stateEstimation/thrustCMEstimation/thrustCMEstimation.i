@@ -34,15 +34,10 @@ from Basilisk.architecture.swig_common_model import *
 %include "thrustCMEstimation.h"
 
 %include "architecture/msgPayloadDefC/THRConfigMsgPayload.h"
-struct THRConfigMsg_C;
 %include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
-struct CmdTorqueBodyMsg_C;
 %include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
-struct AttGuidMsg_C;
 %include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-struct VehicleConfigMsg_C;
 %include "architecture/msgPayloadDefC/CMEstDataMsgPayload.h"
-struct ErrorDataMsg_C;
 
 %pythoncode %{
 import sys

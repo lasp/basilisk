@@ -42,7 +42,7 @@ def run():
 
     # create modules
     mod1 = cppModuleTemplate.CppModuleTemplate()
-    mod1.ModelTag = "cppModule1"
+    mod1.ModelTag = "module1"
     scSim.AddModelToTask("dynamicsTask", mod1)
 
     # create stand-alone input message

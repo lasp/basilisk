@@ -62,7 +62,7 @@ def subModuleTestFunction(show_plots):
 
 
     #   Construct algorithm and associated C++ container
-    module = lowPassFilterTorqueCommand.lowPassFilterTorqueCommand()
+    module = lowPassFilterTorqueCommand.LowPassFilterTorqueCommand()
     module.ModelTag = "lowPassFilterTorqueCommand"      # python name of test module.
 
     #   Add test module to runtime call list

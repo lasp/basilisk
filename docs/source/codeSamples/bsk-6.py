@@ -16,7 +16,6 @@
 #  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-from Basilisk.moduleTemplates import cModuleTemplate
 from Basilisk.moduleTemplates import cppModuleTemplate
 from Basilisk.utilities import SimulationBaseClass
 from Basilisk.utilities import macros
@@ -37,12 +36,12 @@ def run():
     dynProcess.addTask(scSim.CreateNewTask("dynamicsTask", macros.sec2nano(1.)))
 
     # create modules
-    mod1 = cModuleTemplate.cModuleTemplate()
-    mod1.ModelTag = "cModule1"
+    mod1 = cppModuleTemplate.CppModuleTemplate()
+    mod1.ModelTag = "module1"
     scSim.AddModelToTask("dynamicsTask", mod1)
 
     mod2 = cppModuleTemplate.CppModuleTemplate()
-    mod2.ModelTag = "cppModule2"
+    mod2.ModelTag = "module2"
     scSim.AddModelToTask("dynamicsTask", mod2)
 
     # set module variables
@@ -51,7 +50,7 @@ def run():
     mod2.dummy = 1
     mod2.dumVector = [1., 2., 3.]
 
-    # request these module variables to be recorded    
+    # request these module variables to be recorded
     mod1Logger = mod1.logger("dummy", macros.sec2nano(1.))
     scSim.AddModelToTask("dynamicsTask", mod1Logger)
     mod2WrapLogger = mod2.logger(["dummy", "dumVector"], macros.sec2nano(1.))

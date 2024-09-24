@@ -23,7 +23,9 @@
 
 #define MAX_NUM_CHEBY_POLYS 32
 
-#include "cMsgCInterface/CSSArraySensorMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/CSSArraySensorMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 
@@ -31,29 +33,19 @@
 
 /*! @brief Top level structure for the CSS sensor interface system.  Contains all parameters for the
  CSS interface*/
-typedef struct {
-    uint32_t  numSensors;   //!< The number of sensors we are processing
-    CSSArraySensorMsg_C sensorListInMsg; //!< input message that contains CSS data
-    CSSArraySensorMsg_C cssArrayOutMsg; //!< output message of corrected CSS data
+class CSSComm : public SysModel {
+public:
+    void UpdateState(uint64_t callTime) override;
+    void Reset(uint64_t callTime) override;
 
-    CSSArraySensorMsgPayload inputValues; //!< Input values we took off the messaging system
+    uint32_t  numSensors;   //!< The number of sensors we are processing
+    ReadFunctor<CSSArraySensorMsgPayload> sensorListInMsg; //!< input message that contains CSS data
+    Message<CSSArraySensorMsgPayload> cssArrayOutMsg; //!< output message of corrected CSS data
+
     double maxSensorValue; //!< Scale factor to go from sensor values to cosine
     uint32_t chebyCount; //!< Count on the number of chebyshev polynominals we have
     double kellyCheby[MAX_NUM_CHEBY_POLYS]; //!< Chebyshev polynominals to fit output to cosine
-    BSKLogger *bskLogger;                             //!< BSK Logging
-}CSSConfigData;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_cssProcessTelem(CSSConfigData *configData, int64_t moduleID);
-    void Update_cssProcessTelem(CSSConfigData *configData, uint64_t callTime, int64_t moduleID);
-    void Reset_cssProcessTelem(CSSConfigData *configData, uint64_t callTime, int64_t moduleID);
-    
-#ifdef __cplusplus
-}
-#endif
-
+    BSKLogger bskLogger={};                             //!< BSK Logging
+};
 
 #endif

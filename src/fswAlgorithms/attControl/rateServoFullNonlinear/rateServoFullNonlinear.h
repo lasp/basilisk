@@ -21,21 +21,26 @@
 #define _RATE_SERVO_FULL_NONLINEAR_
 
 
-#include "cMsgCInterface/AttGuidMsg_C.h"
-#include "cMsgCInterface/VehicleConfigMsg_C.h"
-#include "cMsgCInterface/RWArrayConfigMsg_C.h"
-#include "cMsgCInterface/RWAvailabilityMsg_C.h"
-#include "cMsgCInterface/RateCmdMsg_C.h"
-#include "cMsgCInterface/RWSpeedMsg_C.h"
-#include "cMsgCInterface/CmdTorqueBodyMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
+#include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/RWAvailabilityMsgPayload.h"
+#include "architecture/msgPayloadDefC/RateCmdMsgPayload.h"
+#include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
+#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
 
-#include "architecture/utilities/bskLogging.h"
 #include <stdint.h>
 
 
 
 /*! @brief The configuration structure for the rateServoFullNonlinear module.  */
-typedef struct {
+class RateServoFullNonlinear : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+
     /* declare module public variables */
     double P;                           //!< [N*m*s]   Rate error feedback gain applied
     double Ki;                          //!< [N*m]     Integration feedback error on rate error
@@ -49,30 +54,16 @@ typedef struct {
     RWArrayConfigMsgPayload rwConfigParams; //!< [-] struct to store message containing RW config parameters in body B frame
 
     /* declare module IO interfaces */
-    CmdTorqueBodyMsg_C cmdTorqueOutMsg;             //!< commanded torque output message
-    AttGuidMsg_C guidInMsg;                         //!< attitude guidance input message
-    VehicleConfigMsg_C vehConfigInMsg;              //!< vehicle configuration input message
-    RWSpeedMsg_C rwSpeedsInMsg;                     //!< (optional) RW speed input message
-    RWAvailabilityMsg_C rwAvailInMsg;               //!< (optional) RW availability input message
-    RWArrayConfigMsg_C rwParamsInMsg;               //!< (optional) RW configuration parameter input message
-    RateCmdMsg_C rateSteeringInMsg;                 //!< commanded rate input message
+    Message<CmdTorqueBodyMsgPayload> cmdTorqueOutMsg;             //!< commanded torque output message
+    ReadFunctor<AttGuidMsgPayload> guidInMsg;                         //!< attitude guidance input message
+    ReadFunctor<VehicleConfigMsgPayload> vehConfigInMsg;              //!< vehicle configuration input message
+    ReadFunctor<RWSpeedMsgPayload> rwSpeedsInMsg;                     //!< (optional) RW speed input message
+    ReadFunctor<RWAvailabilityMsgPayload> rwAvailInMsg;               //!< (optional) RW availability input message
+    ReadFunctor<RWArrayConfigMsgPayload> rwParamsInMsg;               //!< (optional) RW configuration parameter input message
+    ReadFunctor<RateCmdMsgPayload> rateSteeringInMsg;                 //!< commanded rate input message
 
-    BSKLogger *bskLogger;                           //!< BSK Logging
+    BSKLogger bskLogger = {};                           //!< BSK Logging
 
-}rateServoFullNonlinearConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_rateServoFullNonlinear(rateServoFullNonlinearConfig *configData, int64_t moduleID);
-    void Update_rateServoFullNonlinear(rateServoFullNonlinearConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Reset_rateServoFullNonlinear(rateServoFullNonlinearConfig *configData, uint64_t callTime, int64_t moduleID);
-
-    
-#ifdef __cplusplus
-}
-#endif
-
+};
 
 #endif

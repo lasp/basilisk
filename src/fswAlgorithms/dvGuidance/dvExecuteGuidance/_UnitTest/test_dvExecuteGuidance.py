@@ -75,7 +75,7 @@ def test_dvExecuteGuidance(show_plots, p1_dv, p2_tmin, p3_tmax, p4_tstart):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = dvExecuteGuidance.dvExecuteGuidance()
+    module = dvExecuteGuidance.DvExecuteGuidance()
     module.ModelTag = "dvExecuteGuidance"
 
     # Add test module to runtime call list
@@ -102,13 +102,13 @@ def test_dvExecuteGuidance(show_plots, p1_dv, p2_tmin, p3_tmax, p4_tstart):
 
     # Create thruster on time message and add the module as author. This allows us to write an initial message that does
     # not come from the module
-    onTimeCmdMsg = messaging.THRArrayOnTimeCmdMsg_C()
+    onTimeCmdMsg = messaging.THRArrayOnTimeCmdMsg()
     onTimeCmdMsgData = messaging.THRArrayOnTimeCmdMsgPayload()
     # set on time to some non-zero values to simulate that DV burn is executed. Needs to be stopped/zeroed by module
     defaultOnTime = np.ones(numThrusters)
     onTimeCmdMsgData.OnTimeRequest = defaultOnTime
     onTimeCmdMsg.write(onTimeCmdMsgData)
-    messaging.THRArrayOnTimeCmdMsg_C_addAuthor(module.thrCmdOutMsg, onTimeCmdMsg)
+    module.thrCmdOutMsg = onTimeCmdMsg
 
     # connect messages
     module.navDataInMsg.subscribeTo(navTransMsg)

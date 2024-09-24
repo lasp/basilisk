@@ -74,19 +74,19 @@ class BSKFswModels():
         self.processTasksTimeStep = macros.sec2nano(fswRate)
 
         # Create module data and module wraps
-        self.hillPoint = hillPoint.hillPoint()
+        self.hillPoint = hillPoint.HillPoint()
         self.hillPoint.ModelTag = "hillPoint"
 
-        self.opNavPoint = opNavPoint.opNavPoint()
+        self.opNavPoint = opNavPoint.OpNavPoint()
         self.opNavPoint.ModelTag = "opNavPoint"
 
-        self.trackingErrorCam = attTrackingError.attTrackingError()
+        self.trackingErrorCam = attTrackingError.AttTrackingError()
         self.trackingErrorCam.ModelTag = "trackingErrorCam"
 
-        self.mrpFeedbackRWs = mrpFeedback.mrpFeedback()
+        self.mrpFeedbackRWs = mrpFeedback.MrpFeedback()
         self.mrpFeedbackRWs.ModelTag = "mrpFeedbackRWs"
 
-        self.rwMotorTorque = rwMotorTorque.rwMotorTorque()
+        self.rwMotorTorque = rwMotorTorque.RwMotorTorque()
         self.rwMotorTorque.ModelTag = "rwMotorTorque"
 
         self.imageProcessing = houghCircles.HoughCircles()
@@ -96,25 +96,25 @@ class BSKFswModels():
             self.opNavCNN = centerRadiusCNN.CenterRadiusCNN()
             self.opNavCNN.ModelTag = "opNavCNN"
 
-        self.pixelLine = pixelLineConverter.pixelLineConverter()
+        self.pixelLine = pixelLineConverter.PixelLineConverter()
         self.pixelLine.ModelTag = "pixelLine"
 
-        self.opNavFault = faultDetection.faultDetection()
+        self.opNavFault = faultDetection.FaultDetection()
         self.opNavFault.ModelTag = "OpNav_Fault"
 
         self.limbFinding = limbFinding.LimbFinding()
         self.limbFinding.ModelTag = "limbFind"
 
-        self.horizonNav = horizonOpNav.horizonOpNav()
+        self.horizonNav = horizonOpNav.HorizonOpNav()
         self.horizonNav.ModelTag = "limbNav"
 
-        self.relativeOD = relativeODuKF.relativeODuKF()
+        self.relativeOD = relativeODuKF.RelODuKF()
         self.relativeOD.ModelTag = "relativeOD"
 
-        self.pixelLineFilter = pixelLineBiasUKF.pixelLineBiasUKF()
+        self.pixelLineFilter = pixelLineBiasUKF.PixelLineBiasUKF()
         self.pixelLineFilter.ModelTag = "pixelLineFilter"
 
-        self.headingUKF = headingSuKF.headingSuKF()
+        self.headingUKF = headingSuKF.HeadingSuKF()
         self.headingUKF.ModelTag = "headingUKF"
 
         # create the FSW module gateway messages
@@ -331,7 +331,7 @@ class BSKFswModels():
         self.hillPoint.celBodyInMsg.subscribeTo(SimBase.DynModels.ephemObject.ephemOutMsgs[0])
 
     def SetOpNavPointGuidance(self, SimBase):
-        messaging.AttGuidMsg_C_addAuthor(self.opNavPoint.attGuidanceOutMsg, self.attGuidMsg)
+        self.opNavPoint.attGuidanceOutMsg = self.attGuidMsg
         self.opNavPoint.imuInMsg.subscribeTo(SimBase.DynModels.SimpleNavObject.attOutMsg)
         self.opNavPoint.cameraConfigInMsg.subscribeTo(SimBase.DynModels.cameraMod.cameraConfigOutMsg)
         self.opNavPoint.opnavDataInMsg.subscribeTo(self.opnavMsg)
@@ -366,7 +366,7 @@ class BSKFswModels():
     def SetAttTrackingErrorCam(self, SimBase):
         self.trackingErrorCam.attRefInMsg.subscribeTo(self.hillPoint.attRefOutMsg)
         self.trackingErrorCam.attNavInMsg.subscribeTo(SimBase.DynModels.SimpleNavObject.attOutMsg)
-        messaging.AttGuidMsg_C_addAuthor(self.trackingErrorCam.attGuidOutMsg, self.attGuidMsg)
+        self.trackingErrorCam.attGuidOutMsg = self.attGuidMsg
 
         M2 =  rbk.euler2(90 * macros.D2R) #rbk.euler2(-90 * macros.D2R) #
         M3 =  rbk.euler1(90 * macros.D2R) #rbk.euler3(90 * macros.D2R) #
@@ -446,7 +446,7 @@ class BSKFswModels():
         self.pixelLine.cameraConfigInMsg.subscribeTo(SimBase.DynModels.cameraMod.cameraConfigOutMsg)
         self.pixelLine.attInMsg.subscribeTo(SimBase.DynModels.SimpleNavObject.attOutMsg)
         self.pixelLine.planetTarget = 2
-        messaging.OpNavMsg_C_addAuthor(self.pixelLine.opNavOutMsg, self.opnavMsg)
+        self.pixelLine.opNavOutMsg = self.opnavMsg
 
     def SetLimbFinding(self, SimBase):
         self.limbFinding.imageInMsg.subscribeTo(SimBase.DynModels.cameraMod.imageOutMsg)
@@ -463,7 +463,7 @@ class BSKFswModels():
         self.horizonNav.attInMsg.subscribeTo(SimBase.DynModels.SimpleNavObject.attOutMsg)
         self.horizonNav.planetTarget = 2
         self.horizonNav.noiseSF = 1  # 2 should work though
-        messaging.OpNavMsg_C_addAuthor(self.horizonNav.opNavOutMsg, self.opnavMsg)
+        self.horizonNav.opNavOutMsg = self.opnavMsg
 
     def SetRelativeODFilter(self):
         self.relativeOD.opNavInMsg.subscribeTo(self.opnavMsg)
@@ -502,7 +502,7 @@ class BSKFswModels():
         self.opNavFault.navMeasSecondaryInMsg.subscribeTo(self.opnavSecondaryMsg)
         self.opNavFault.cameraConfigInMsg.subscribeTo(SimBase.DynModels.cameraMod.cameraConfigOutMsg)
         self.opNavFault.attInMsg.subscribeTo(SimBase.DynModels.SimpleNavObject.attOutMsg)
-        messaging.OpNavMsg_C_addAuthor(self.opNavFault.opNavOutMsg, self.opnavMsg)
+        self.opNavFault.opNavOutMsg = self.opnavMsg
         self.opNavFault.sigmaFault = 0.3
         self.opNavFault.faultMode = 0
 
@@ -573,10 +573,10 @@ class BSKFswModels():
         """create gateway messages such that different modules can write to this message
         and provide a common input msg for down-stream modules"""
         # C wrapped gateway messages
-        self.attGuidMsg = messaging.AttGuidMsg_C()
-        self.opnavMsg = messaging.OpNavMsg_C()
-        self.opnavPrimaryMsg = messaging.OpNavMsg_C()
-        self.opnavSecondaryMsg = messaging.OpNavMsg_C()
+        self.attGuidMsg = messaging.AttGuidMsg()
+        self.opnavMsg = messaging.OpNavMsg()
+        self.opnavPrimaryMsg = messaging.OpNavMsg()
+        self.opnavSecondaryMsg = messaging.OpNavMsg()
 
         # C++ wrapped gateway messages
         self.opnavCirclesMsg = messaging.OpNavCirclesMsg()

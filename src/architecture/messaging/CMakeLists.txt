@@ -4,7 +4,7 @@ include(${SWIG_USE_FILE})
 find_package(PythonLibs 3 REQUIRED)
 find_package(PythonInterp 3 REQUIRED)
 
-function(generate_messages searchDir generateCCode)
+function(generate_messages searchDir)
   file(
     GLOB_RECURSE message_files
     RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/"
@@ -17,7 +17,6 @@ function(generate_messages searchDir generateCCode)
     add_custom_command(
       OUTPUT ${COMP_OUT_NAME}
       COMMAND ${PYTHON_EXECUTABLE} generateSWIGModules.py ${COMP_OUT_NAME} ${msgFile} ${TARGET_NAME} ${searchDir}
-              ${generateCCode}
       DEPENDS ${msgFile}
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/msgAutoSource/)
     set_property(SOURCE ${COMP_OUT_NAME} PROPERTY CPLUSPLUS ON)
@@ -58,6 +57,7 @@ function(generate_messages searchDir generateCCode)
       ${SWIG_MODULE_${TARGET_NAME}_REAL_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY_RELEASE
                                                          "${CMAKE_BINARY_DIR}/Basilisk/architecture/messaging")
     target_link_libraries(${SWIG_MODULE_${TARGET_NAME}_REAL_NAME} PUBLIC architectureLib)
+    target_link_libraries(${SWIG_MODULE_${TARGET_NAME}_REAL_NAME} PRIVATE ${PYTHON_LIBRARIES})
   endforeach()
 endfunction(generate_messages)
 
@@ -83,6 +83,8 @@ add_custom_command(
 # Custom target for establishing dependency
 add_custom_target(swigtrick DEPENDS ${CMAKE_BINARY_DIR}/Basilisk/architecture/messaging/__init__.py)
 
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../../dist3/autoSource")
+
 # Dependency
-generate_messages(msgPayloadDefCpp "False")
-generate_messages(msgPayloadDefC "True")
+generate_messages(msgPayloadDefCpp)
+generate_messages(msgPayloadDefC)

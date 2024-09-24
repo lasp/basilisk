@@ -21,8 +21,9 @@
 #define _LOW_PASS_FILTER_TORQUE_COMMAND_
 
 #include <stdint.h>
-#include "cMsgCInterface/CmdTorqueBodyMsg_C.h"
-#include "architecture/utilities/bskLogging.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
 
 
 
@@ -33,7 +34,11 @@
 
 
 /*! @brief module configuration message. */
-typedef struct {
+class LowPassFilterTorqueCommand : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+
     /* declare module private variables */
     double   h;                                     /*!< [s]      filter time step (assumed to be fixed */
     double   wc;                                    /*!< [rad/s]  continuous filter cut-off frequency */
@@ -45,24 +50,11 @@ typedef struct {
     int      reset;                                 /*!<          flag indicating the filter being started up */
 
     /* declare module IO interfaces */
-    CmdTorqueBodyMsg_C cmdTorqueOutMsg;             //!< commanded torque output message
-    CmdTorqueBodyMsg_C cmdTorqueInMsg;              //!< commanded torque input message
+    Message<CmdTorqueBodyMsgPayload> cmdTorqueOutMsg;             //!< commanded torque output message
+    ReadFunctor<CmdTorqueBodyMsgPayload> cmdTorqueInMsg;              //!< commanded torque input message
 
-    BSKLogger *bskLogger;                             //!< BSK Logging
-
-}lowPassFilterTorqueCommandConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_lowPassFilterTorqueCommand(lowPassFilterTorqueCommandConfig *configData, int64_t moduleID);
-    void Update_lowPassFilterTorqueCommand(lowPassFilterTorqueCommandConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Reset_lowPassFilterTorqueCommand(lowPassFilterTorqueCommandConfig *configData, uint64_t callTime, int64_t moduleID);
-    
-#ifdef __cplusplus
-}
-#endif
+    BSKLogger bskLogger = {};                             //!< BSK Logging
+};
 
 
 #endif

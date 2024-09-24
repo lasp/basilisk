@@ -238,13 +238,13 @@ def run(show_plots, useJitterSimple, useRWVoltageIO):
     inertial3DConfig.sigma_R0N = [0., 0., 0.]  # set the desired inertial orientation
 
     # setup the attitude tracking error evaluation module
-    attErrorConfig = attTrackingError.attTrackingErrorConfig()
+    attErrorConfig = attTrackingError.AttTrackingError()
     attErrorWrap = scSim.setModelDataWrap(attErrorConfig)
     attErrorWrap.ModelTag = "attErrorInertial3D"
     scSim.AddModelToTask(simTaskName, attErrorWrap, attErrorConfig)
 
     # setup the MRP Feedback control module
-    mrpControlConfig = mrpFeedback.mrpFeedbackConfig()
+    mrpControlConfig = mrpFeedback.MrpFeedback()
     mrpControlWrap = scSim.setModelDataWrap(mrpControlConfig)
     mrpControlWrap.ModelTag = "mrpFeedback"
     scSim.AddModelToTask(simTaskName, mrpControlWrap, mrpControlConfig)
@@ -254,7 +254,7 @@ def run(show_plots, useJitterSimple, useRWVoltageIO):
     mrpControlConfig.integralLimit = 2. / mrpControlConfig.Ki * 0.1
 
     # add module that maps the Lr control torque into the RW motor torques
-    rwMotorTorqueConfig = rwMotorTorque.rwMotorTorqueConfig()
+    rwMotorTorqueConfig = rwMotorTorque.RwMotorTorque()
     rwMotorTorqueWrap = scSim.setModelDataWrap(rwMotorTorqueConfig)
     rwMotorTorqueWrap.ModelTag = "rwMotorTorque"
     scSim.AddModelToTask(simTaskName, rwMotorTorqueWrap, rwMotorTorqueConfig)

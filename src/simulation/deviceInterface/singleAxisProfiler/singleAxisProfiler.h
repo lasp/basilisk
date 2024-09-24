@@ -22,17 +22,14 @@
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
 #include "architecture/utilities/bskLogging.h"
-#include "cMsgCInterface/StepperMotorMsg_C.h"
-#include "cMsgCInterface/PrescribedRotationMsg_C.h"
+#include "architecture/msgPayloadDefC/StepperMotorMsgPayload.h"
+#include "architecture/msgPayloadDefC/PrescribedRotationMsgPayload.h"
 #include <Eigen/Dense>
 #include <cstdint>
 
 /*! @brief Single Axis Profiler Class */
 class SingleAxisProfiler: public SysModel {
 public:
-    SingleAxisProfiler() = default;                                    //!< Constructor
-    ~SingleAxisProfiler() = default;                                   //!< Destructor
-
     void Reset(uint64_t CurrentSimNanos) override;                     //!< Reset member function
     void UpdateState(uint64_t CurrentSimNanos) override;               //!< Update member function
     void setRotHat_M(const Eigen::Vector3d &rotHat_M);                 //!< Setter for the spinning body rotation axis

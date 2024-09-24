@@ -32,7 +32,7 @@
 %include "tempMeasurement.h"
 
 %include "architecture/msgPayloadDefC/TemperatureMsgPayload.h"
-struct TemperatureMsgPayload_C;
+
 
 %pythoncode %{
 import sys

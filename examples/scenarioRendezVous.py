@@ -308,14 +308,14 @@ def run(show_plots):
     #
 
     # setup hillPoint guidance module
-    hillPointing = hillPoint.hillPoint()
+    hillPointing = hillPoint.HillPoint()
     hillPointing.ModelTag = "hillPoint"
     hillPointing.transNavInMsg.subscribeTo(sNavObject.transOutMsg)
     hillPointing.celBodyInMsg.subscribeTo(ephemObject.ephemOutMsgs[earthIdx])
     scSim.AddModelToTask(simTaskName, hillPointing)
 
     # setup spacecraftPointing guidance module
-    scPointing = locationPointing.locationPointing()
+    scPointing = locationPointing.LocationPointing()
     scPointing.ModelTag = "scPointing"
     scPointing.pHat_B = [1, 0, 0]
     scPointing.useBoresightRateDamping = 1
@@ -325,7 +325,7 @@ def run(show_plots):
     scSim.AddModelToTask(simTaskName, scPointing)
 
     # setup sunPointing guidance module
-    sunPointing = locationPointing.locationPointing()
+    sunPointing = locationPointing.LocationPointing()
     sunPointing.ModelTag = "scPointing"
     sunPointing.pHat_B = [0, 0, 1]
     sunPointing.useBoresightRateDamping = 1
@@ -335,7 +335,7 @@ def run(show_plots):
     scSim.AddModelToTask(simTaskName, sunPointing)
 
     # setup the attitude tracking error evaluation module
-    attError = attTrackingError.attTrackingError()
+    attError = attTrackingError.AttTrackingError()
     attError.ModelTag = "attErrorInertial3D"
     scSim.AddModelToTask(simTaskName, attError)
     attError.attRefInMsg.subscribeTo(scPointing.attRefOutMsg)
@@ -350,7 +350,7 @@ def run(show_plots):
     fswRwMsg = rwFactory.getConfigMessage()
 
     # setup the MRP Feedback control module
-    mrpControl = mrpFeedback.mrpFeedback()
+    mrpControl = mrpFeedback.MrpFeedback()
     mrpControl.ModelTag = "mrpFeedback"
     scSim.AddModelToTask(simTaskName, mrpControl)
     mrpControl.guidInMsg.subscribeTo(attError.attGuidOutMsg)
@@ -363,7 +363,7 @@ def run(show_plots):
     mrpControl.integralLimit = 2. / mrpControl.Ki * 0.1
 
     # add module that maps the Lr control torque into the RW motor torques
-    rwMotorTorqueObj = rwMotorTorque.rwMotorTorque()
+    rwMotorTorqueObj = rwMotorTorque.RwMotorTorque()
     rwMotorTorqueObj.ModelTag = "rwMotorTorque"
     scSim.AddModelToTask(simTaskName, rwMotorTorqueObj)
     # Initialize the test module msg names

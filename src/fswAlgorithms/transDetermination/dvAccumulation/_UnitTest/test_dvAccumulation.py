@@ -82,7 +82,7 @@ def dvAccumulationTestFunction():
 
     # Construct the dvAccumulation module
     # Set the names for the input messages
-    module = dvAccumulation.dvAccumulation()
+    module = dvAccumulation.DVAccumulation()
 
     # This calls the algContain to setup the selfInit, update, and reset
     module.ModelTag = "dvAccumulation"

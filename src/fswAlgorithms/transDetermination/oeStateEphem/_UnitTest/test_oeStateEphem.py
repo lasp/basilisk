@@ -143,7 +143,7 @@ def chebyPosFitAllTest(show_plots, validChebyCurveTime, anomFlag):
     # create the dynamics task and specify the integration update time
     FSWUnitTestProc.addTask(sim.CreateNewTask(unitTaskName, macros.sec2nano(logPeriod)))
 
-    oeStateModel = oeStateEphem.oeStateEphem()
+    oeStateModel = oeStateEphem.OEStateEphem()
     oeStateModel.ModelTag = "oeStateModel"
     sim.AddModelToTask(unitTaskName, oeStateModel)
 

@@ -75,7 +75,7 @@ def thrFiringRemainderTestFunction(show_plots, resetCheck, dvOn):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = thrFiringRemainder.thrFiringRemainder()
+    module = thrFiringRemainder.ThrFiringRemainder()
     module.ModelTag = "thrFiringRemainder"
 
     # Add test module to runtime call list

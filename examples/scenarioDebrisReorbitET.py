@@ -228,7 +228,7 @@ def run(show_plots):
     fswProcess.addTask(scSim.CreateNewTask(fswTaskName, fswTimeStep))
 
     # setup ET Relative Motion Control module
-    etSphericalControlObj = etSphericalControl.etSphericalControl()
+    etSphericalControlObj = etSphericalControl.EtSphericalControl()
     etSphericalControlObj.ModelTag = "ETcontrol"
 
     # connect required messages

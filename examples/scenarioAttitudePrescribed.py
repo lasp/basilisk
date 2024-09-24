@@ -194,7 +194,7 @@ def run(show_plots, useAltBodyFrame):
     #
 
     # setup hillPoint guidance module
-    attGuidance = hillPoint.hillPoint()
+    attGuidance = hillPoint.HillPoint()
     attGuidance.ModelTag = "hillPoint"
     attGuidance.transNavInMsg.subscribeTo(sNavObject.transOutMsg)
     # if you want to connect attGuidance.celBodyInMsg, then you need a planet ephemeris message of
@@ -204,7 +204,7 @@ def run(show_plots, useAltBodyFrame):
 
     # connect torque command to external torque effector
     if useAltBodyFrame:
-        attRefCor = attRefCorrection.attRefCorrection()
+        attRefCor = attRefCorrection.AttRefCorrection()
         attRefCor.ModelTag = "attRefCor"
         scSim.AddModelToTask(simTaskName, attRefCor)
         attRefCor.sigma_BcB = [0.0, 0.0, math.tan(math.pi/8)]

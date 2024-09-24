@@ -303,7 +303,7 @@ def run(show_plots, useAltBodyFrame):
     #
 
     # setup velocityPoint guidance module
-    attGuidance = velocityPoint.velocityPoint()
+    attGuidance = velocityPoint.VelocityPoint()
     attGuidance.ModelTag = "velocityPoint"
     attGuidance.transNavInMsg.subscribeTo(sNavObject.transOutMsg)
     # No celestial body input message is connect.  Thus, the default behavior is to create an empty planet
@@ -313,7 +313,7 @@ def run(show_plots, useAltBodyFrame):
     scSim.AddModelToTask(simTaskName, attGuidance)
 
     # setup the attitude tracking error evaluation module
-    attError = attTrackingError.attTrackingError()
+    attError = attTrackingError.AttTrackingError()
     attError.ModelTag = "attErrorInertial3D"
     scSim.AddModelToTask(simTaskName, attError)
     if useAltBodyFrame:
@@ -327,7 +327,7 @@ def run(show_plots, useAltBodyFrame):
     vcMsg = messaging.VehicleConfigMsg().write(vehicleConfigOut)
 
     # setup the MRP Feedback control module
-    mrpControl = mrpFeedback.mrpFeedback()
+    mrpControl = mrpFeedback.MrpFeedback()
     mrpControl.ModelTag = "mrpFeedback"
     scSim.AddModelToTask(simTaskName, mrpControl)
     mrpControl.guidInMsg.subscribeTo(attError.attGuidOutMsg)

@@ -20,9 +20,11 @@
 #ifndef _SUNLINE_EPHEM_FSW_MSG_H_
 #define _SUNLINE_EPHEM_FSW_MSG_H_
 
-#include "cMsgCInterface/NavAttMsg_C.h"
-#include "cMsgCInterface/NavTransMsg_C.h"
-#include "cMsgCInterface/EphemerisMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
+#include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
+#include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 #include <stdint.h>
@@ -30,29 +32,18 @@
 
 
 /*! @brief Top level structure for the sub-module routines. */
-typedef struct {
+class SunlineEphem : public SysModel {
+public:
+    void UpdateState(uint64_t callTime) override;
 
     /* declare module IO interfaces */
-    NavAttMsg_C navStateOutMsg;                     /*!< The name of the output message*/
-    EphemerisMsg_C sunPositionInMsg;           //!< The name of the sun ephemeris input message
-    NavTransMsg_C scPositionInMsg;             //!< The name of the spacecraft ephemeris input message
-    NavAttMsg_C scAttitudeInMsg;               //!< The name of the spacecraft attitude input message
-    
-    BSKLogger *bskLogger; //!< BSK Logging
+    Message<NavAttMsgPayload> navStateOutMsg;                     /*!< The name of the output message*/
+    ReadFunctor<EphemerisMsgPayload> sunPositionInMsg;           //!< The name of the sun ephemeris input message
+    ReadFunctor<NavTransMsgPayload> scPositionInMsg;             //!< The name of the spacecraft ephemeris input message
+    ReadFunctor<NavAttMsgPayload> scAttitudeInMsg;               //!< The name of the spacecraft attitude input message
 
-}sunlineEphemConfig;
+    BSKLogger bskLogger={}; //!< BSK Logging
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_sunlineEphem(sunlineEphemConfig *configData, int64_t moduleID);
-    void Update_sunlineEphem(sunlineEphemConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Reset_sunlineEphem(sunlineEphemConfig *configData, uint64_t callTime, int64_t moduleID);
-    
-#ifdef __cplusplus
-}
-#endif
-
+};
 
 #endif

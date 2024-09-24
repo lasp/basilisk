@@ -20,11 +20,6 @@
 
 #include "sunlineSRuKF.h"
 
-/*! Initialize C-wrapped output messages */
-void SunlineSRuKF::SelfInit(){
-    NavAttMsg_C_init(&this->navAttOutMsgC);
-}
-
 /*! Reset the sunline filter to an initial state and
  initializes the internal estimation matrices.
  @return void
@@ -99,7 +94,6 @@ void SunlineSRuKF::writeOutputMessages(uint64_t CurrentSimNanos) {
 
 
     this->navAttOutMsg.write(&navAttOutMsgBuffer, this->moduleID, CurrentSimNanos);
-    NavAttMsg_C_write(&navAttOutMsgBuffer, &this->navAttOutMsgC, this->moduleID, CurrentSimNanos);
     this->filterOutMsg.write(&filterMsgBuffer, this->moduleID, CurrentSimNanos);
     this->filterCssResOutMsg.write(&filterCssResMsgBuffer, this->moduleID, CurrentSimNanos);
     this->filterGyroResOutMsg.write(&filterGyroResMsgBuffer, this->moduleID, CurrentSimNanos);

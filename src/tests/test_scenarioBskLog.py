@@ -15,18 +15,6 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-
-
-
-#
-# Basilisk Scenario Script and Integrated Test
-#
-# Purpose:  Integrated test of the spacecraft() and gravity modules.  Illustrates
-#           a 3-DOV spacecraft on a range of orbit types.
-# Author:   Hanspeter Schaub
-# Creation Date:  Nov. 26, 2016
-#
-
 import inspect
 import os
 import sys
@@ -93,4 +81,3 @@ def test_scenarioBskLog(show_plots, case):
     # this check below just makes sure no sub-test failures were found
 
     assert testFailCount < 1, testMessages
-

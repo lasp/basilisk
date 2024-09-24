@@ -100,7 +100,7 @@ Both modules are added to the simulation task::
 Next the ``velocityPoint`` module is configured for each planet case. This module fixes the spacecraft attitude in the
 orbit velocity frame. See :ref:`velocityPoint` for a more detailed description of this module. The Mars velocity-pointing case is shown below::
 
-    velMarsGuidance = velocityPoint.velocityPoint()
+    velMarsGuidance = velocityPoint.VelocityPoint()
     velMarsGuidance.ModelTag = "velocityPointMars"
     velMarsGuidance.mu = marsMu
 
@@ -122,7 +122,7 @@ message. The module's ``pHat_B`` vector is set according to which body-fixed vec
 of interest. See :ref:`locationPointing` for a more detailed description of this module.
 The Earth-pointing guidance module setup is shown below::
 
-    earthPointGuidance = locationPointing.locationPointing()
+    earthPointGuidance = locationPointing.LocationPointing()
     earthPointGuidance.ModelTag = "antennaEarthPoint"
     earthPointGuidance.scTransInMsg.subscribeTo(sNavObject.transOutMsg)
     earthPointGuidance.celBodyInMsg.subscribeTo(ephemObject.ephemOutMsgs[earthIdx])
@@ -137,7 +137,7 @@ on the spacecraft designated as a camera towards the flyby planet of interest. S
 detailed description of this module::
 
     cameraLocation = [0.0, 1.5, 0.0]
-    sciencePointGuidance = hillPoint.hillPoint()
+    sciencePointGuidance = hillPoint.HillPoint()
     sciencePointGuidance.ModelTag = "sciencePointAsteroid"
     sciencePointGuidance.transNavInMsg.subscribeTo(sNavObject.transOutMsg)
     sciencePointGuidance.celBodyInMsg.subscribeTo(ephemObject.ephemOutMsgs[planetIdx])
@@ -145,7 +145,7 @@ detailed description of this module::
 
 Next, the attitude tracking error module must be configured with the initial flight mode::
 
-    attError = attTrackingError.attTrackingError()
+    attError = attTrackingError.AttTrackingError()
     attError.ModelTag = "attErrorInertial3D"
     scSim.AddModelToTask(simTaskName, attError)
     attError.attRefInMsg.subscribeTo(velEarthGuidance.attRefOutMsg)  # initial flight mode
@@ -159,7 +159,7 @@ Then, the flight software vehicle configuration message is configured::
 
 The MRP Feedback control module is configured next for attitude control::
 
-    mrpControl = mrpFeedback.mrpFeedback()
+    mrpControl = mrpFeedback.MrpFeedback()
     mrpControl.ModelTag = "mrpFeedback"
     scSim.AddModelToTask(simTaskName, mrpControl)
     mrpControl.guidInMsg.subscribeTo(attError.attGuidOutMsg)
@@ -383,7 +383,7 @@ def run(planetCase):
     #
 
     # Set up Venus relative velocityPoint guidance module
-    velVenusGuidance = velocityPoint.velocityPoint()
+    velVenusGuidance = velocityPoint.VelocityPoint()
     velVenusGuidance.ModelTag = "velocityPointVenus"
     velVenusGuidance.transNavInMsg.subscribeTo(sNavObject.transOutMsg)
     velVenusGuidance.celBodyInMsg.subscribeTo(ephemObject.ephemOutMsgs[venusIdx])
@@ -391,7 +391,7 @@ def run(planetCase):
     scSim.AddModelToTask(simTaskName, velVenusGuidance)
 
     # Set up Earth relative velocityPoint guidance module
-    velEarthGuidance = velocityPoint.velocityPoint()
+    velEarthGuidance = velocityPoint.VelocityPoint()
     velEarthGuidance.ModelTag = "velocityPointEarth"
     velEarthGuidance.transNavInMsg.subscribeTo(sNavObject.transOutMsg)
     velEarthGuidance.celBodyInMsg.subscribeTo(ephemObject.ephemOutMsgs[earthIdx])
@@ -399,7 +399,7 @@ def run(planetCase):
     scSim.AddModelToTask(simTaskName, velEarthGuidance)
 
     # Set up Mars relative velocityPoint guidance module
-    velMarsGuidance = velocityPoint.velocityPoint()
+    velMarsGuidance = velocityPoint.VelocityPoint()
     velMarsGuidance.ModelTag = "velocityPointMars"
     velMarsGuidance.transNavInMsg.subscribeTo(sNavObject.transOutMsg)
     velMarsGuidance.celBodyInMsg.subscribeTo(ephemObject.ephemOutMsgs[marsIdx])
@@ -420,7 +420,7 @@ def run(planetCase):
         exit(1)
 
     # Set up the Earth antenna-pointing guidance module
-    earthPointGuidance = locationPointing.locationPointing()
+    earthPointGuidance = locationPointing.LocationPointing()
     earthPointGuidance.ModelTag = "antennaEarthPoint"
     earthPointGuidance.scTransInMsg.subscribeTo(sNavObject.transOutMsg)
     earthPointGuidance.celBodyInMsg.subscribeTo(ephemObject.ephemOutMsgs[earthIdx])
@@ -431,7 +431,7 @@ def run(planetCase):
     scSim.AddModelToTask(simTaskName, earthPointGuidance)
 
     # Set up the solar panel Sun-pointing guidance module
-    sunPointGuidance = locationPointing.locationPointing()
+    sunPointGuidance = locationPointing.LocationPointing()
     sunPointGuidance.ModelTag = "panelSunPoint"
     sunPointGuidance.celBodyInMsg.subscribeTo(ephemObject.ephemOutMsgs[sunIdx])
     sunPointGuidance.scTransInMsg.subscribeTo(sNavObject.transOutMsg)
@@ -442,14 +442,14 @@ def run(planetCase):
 
     # Set up the sensor science-pointing guidance module
     cameraLocation = [0.0, 1.5, 0.0]
-    sciencePointGuidance = hillPoint.hillPoint()
+    sciencePointGuidance = hillPoint.HillPoint()
     sciencePointGuidance.ModelTag = "sciencePointAsteroid"
     sciencePointGuidance.transNavInMsg.subscribeTo(sNavObject.transOutMsg)
     sciencePointGuidance.celBodyInMsg.subscribeTo(ephemObject.ephemOutMsgs[planetIdx])
     scSim.AddModelToTask(simTaskName, sciencePointGuidance)
 
     # Set up the attitude tracking error evaluation module
-    attError = attTrackingError.attTrackingError()
+    attError = attTrackingError.AttTrackingError()
     attError.ModelTag = "attErrorInertial3D"
     scSim.AddModelToTask(simTaskName, attError)
     attError.attRefInMsg.subscribeTo(velEarthGuidance.attRefOutMsg)  # initial flight mode
@@ -461,7 +461,7 @@ def run(planetCase):
     vcMsg = messaging.VehicleConfigMsg().write(vehicleConfigOut)
 
     # Set up the MRP Feedback control module
-    mrpControl = mrpFeedback.mrpFeedback()
+    mrpControl = mrpFeedback.MrpFeedback()
     mrpControl.ModelTag = "mrpFeedback"
     scSim.AddModelToTask(simTaskName, mrpControl)
     mrpControl.guidInMsg.subscribeTo(attError.attGuidOutMsg)
@@ -566,9 +566,8 @@ def run(planetCase):
 
     return
 
-    
+
 if __name__ == "__main__":
     run(
         "mars"   # venus, earth, mars
     )
-

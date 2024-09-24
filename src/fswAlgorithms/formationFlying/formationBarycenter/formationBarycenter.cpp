@@ -30,19 +30,6 @@ FormationBarycenter::FormationBarycenter() {
     this->mu = 0;
 }
 
-/*! Module Destructor */
-FormationBarycenter::~FormationBarycenter() {
-}
-
-/*! This method self initializes the C-wrapped output message.
-*/
-void FormationBarycenter::SelfInit()
-{
-    NavTransMsg_C_init(&this->transOutMsgC);
-}
-
-
-
 /*! This method is used to reset the module and checks that required input messages are connected.
 */
 void FormationBarycenter::Reset(uint64_t CurrentSimNanos) {
@@ -162,9 +149,6 @@ void FormationBarycenter::computeBaricenter() {
 void FormationBarycenter::WriteOutputMessage(uint64_t CurrentClock) {
     // write C++ output message
     this->transOutMsg.write(&this->transOutBuffer, this->moduleID, CurrentClock);
-
-    // write C output message
-    NavTransMsg_C_write(&this->transOutBuffer, &this->transOutMsgC, this->moduleID, CurrentClock);
 }
 
 /*! This is the main method that gets called every time the module is updated.

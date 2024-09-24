@@ -37,11 +37,11 @@ from Basilisk.architecture.swig_common_model import *
 %include "vscmgStateEffector.h"
 
 %include "architecture/msgPayloadDefC/VSCMGCmdMsgPayload.h"
-struct VSCMGCmdMsg_C;
+
 %include "architecture/msgPayloadDefC/VSCMGSpeedMsgPayload.h"
-struct VSCMGSpeedMsg_C;
+
 %include "architecture/msgPayloadDefC/VSCMGArrayTorqueMsgPayload.h"
-struct VSCMGArrayTorqueMsg_C;
+
 %include "architecture/msgPayloadDefCpp/VSCMGConfigMsgPayload.h"
 
 %include "architecture/utilities/macroDefinitions.h"

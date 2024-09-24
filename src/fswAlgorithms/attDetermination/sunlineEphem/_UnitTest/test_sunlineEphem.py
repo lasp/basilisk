@@ -94,7 +94,7 @@ def sunlineEphemTestFunction(show_plots):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    sunlineEphemObj = sunlineEphem.sunlineEphem()
+    sunlineEphemObj = sunlineEphem.SunlineEphem()
     sunlineEphemObj.ModelTag = "sunlineEphem"           # update python name of test module
 
     # Add test module to runtime call list

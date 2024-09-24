@@ -36,15 +36,15 @@ from Basilisk.architecture.swig_common_model import *
 #include "nrlmsise-00.h"
 
 %include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-struct SpicePlanetStateMsg_C;
+
 %include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-struct SCStatesMsg_C;
+
 %include "architecture/msgPayloadDefC/AtmoPropsMsgPayload.h"
-struct AtmoPropsMsg_C;
+
 %include "architecture/msgPayloadDefC/SwDataMsgPayload.h"
-struct SwDataMsg_C;
+
 %include "architecture/msgPayloadDefC/EpochMsgPayload.h"
-struct EpochMsg_C;
+
 
 %include "swig_conly_data.i"
 

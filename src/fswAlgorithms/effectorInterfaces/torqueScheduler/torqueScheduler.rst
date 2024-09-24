@@ -1,8 +1,8 @@
 Executive Summary
 -----------------
 
-This module schedules two control torques such that they can be applied simultaneously, one at the time, or neither is applied, and combines them into one output msg. 
-This is useful in the case of a system with two coupled degrees of freedom, where the changes in one controlled variable can affect the other controlled variable and thus cause the system to not converge. 
+This module schedules two control torques such that they can be applied simultaneously, one at the time, or neither is applied, and combines them into one output msg.
+This is useful in the case of a system with two coupled degrees of freedom, where the changes in one controlled variable can affect the other controlled variable and thus cause the system to not converge.
 
 
 Message Connection Descriptions
@@ -29,7 +29,7 @@ provides information on what this message is used for.
       - #1 Input Array Motor Torque Message.
     * - motorTorque2InMsg
       - :ref:`ArrayMotorTorqueMsgPayload`
-      - #2 Input Array Motor Torque Message. 
+      - #2 Input Array Motor Torque Message.
 
 
 Module Assumptions and Limitations
@@ -44,19 +44,19 @@ This module receives a ``lockFlag`` and a a ``tSwitch`` parameter from the user.
   - ``lockFlag = 0``: both motor torques are applied simultaneously;
   - ``lockFlag = 1``: first motor torque is applied for ``t < tSwitch``, second motor torque is applied for ``t > tSwitch``;
   - ``lockFlag = 2``: second motor torque is applied for ``t < tSwitch``, first motor torque is applied for ``t > tSwitch``;
-  - ``lockFlag = 3``: neither of the motor torques are applied. 
+  - ``lockFlag = 3``: neither of the motor torques are applied.
 
 
 User Guide
 ----------
 The required module configuration is::
 
-    scheduler = torqueScheduler.torqueScheduler()
+    scheduler = torqueScheduler.TorqueScheduler()
     scheduler.ModelTag = "torqueScheduler"
     scheduler.lockFlag = lockFlag
     scheduler.tSwitch = tSwitch
     unitTestSim.AddModelToTask(unitTaskName, scheduler)
-	
+
 The module is configurable with the following parameters:
 
 .. list-table:: Module Parameters

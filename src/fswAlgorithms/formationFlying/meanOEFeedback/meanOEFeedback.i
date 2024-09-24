@@ -21,13 +21,17 @@
    #include "meanOEFeedback.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(meanOEFeedback);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "meanOEFeedback.h"
 
 %include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-struct NavTransMsg_C;
 %include "architecture/msgPayloadDefC/CmdForceInertialMsgPayload.h"
-struct CmdForceInertialMsg_C;
 
 %pythoncode %{
 import sys

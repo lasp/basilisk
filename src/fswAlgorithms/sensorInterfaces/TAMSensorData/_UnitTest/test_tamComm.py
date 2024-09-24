@@ -84,7 +84,7 @@ def tamCommTestFunction(show_plots):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = tamComm.tamComm()
+    module = tamComm.TamComm()
     module.ModelTag = "tamComm"
 
     # Add test module to runtime call list

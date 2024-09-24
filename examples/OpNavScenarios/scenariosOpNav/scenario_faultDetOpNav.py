@@ -98,8 +98,8 @@ class scenario_OpNav(BSKScenario):
 
         # primary_opnav, secondary_opnav
         FswModel = self.masterSim.get_FswModel()
-        messaging.OpNavMsg_C_addAuthor(FswModel.horizonNav.opNavOutMsg, FswModel.opnavPrimaryMsg)
-        messaging.OpNavMsg_C_addAuthor(FswModel.pixelLine.opNavOutMsg, FswModel.opnavSecondaryMsg)
+        FswModel.horizonNav.opNavOutMsg = FswModel.opnavPrimaryMsg
+        FswModel.pixelLine.opNavOutMsg = FswModel.opnavSecondaryMsg
 
         # Filter noise param
         self.masterSim.get_FswModel().relativeOD.noiseSF = 5

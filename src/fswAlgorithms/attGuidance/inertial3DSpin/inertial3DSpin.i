@@ -21,11 +21,16 @@
    #include "inertial3DSpin.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(inertial3DSpin);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "inertial3DSpin.h"
 
 %include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
-struct AttRefMsg_C;
 
 %pythoncode %{
 import sys

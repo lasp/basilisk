@@ -1,7 +1,7 @@
 /*
  ISC License
 
- Copyright (c) 2016, Autonomous Vehicle Systems Lab, University of Colorado at Boulder
+ Copyright (c) 2024, Laboratory for Atmospheric Space Physics, University of Colorado at Boulder
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -21,20 +21,20 @@
    #include "navAggregate.h"
 %}
 
+%pythoncode %{
+from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
 %include "swig_conly_data.i"
+
 STRUCTASLIST(AggregateAttInput)
 STRUCTASLIST(AggregateTransInput)
-
-%include "swig_c_wrap.i"
-%c_wrap_3(navAggregate, NavAggregateData, aggregateNav);
-
+%include "navAggregate.h"
 %include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-struct NavAttMsg_C;
 %include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-struct NavTransMsg_C;
 
 %pythoncode %{
 import sys
 protectAllClasses(sys.modules[__name__])
 %}
-

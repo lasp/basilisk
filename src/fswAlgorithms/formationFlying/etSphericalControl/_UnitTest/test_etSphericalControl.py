@@ -87,7 +87,7 @@ def etSphericalControlTestFunction(show_plots, accuracy):
 
 
     # Construct algorithm and associated C++ container
-    module = etSphericalControl.etSphericalControl()
+    module = etSphericalControl.EtSphericalControl()
     module.ModelTag = "ETcontrol"           # update python name of test module
 
     # Add test module to runtime call list

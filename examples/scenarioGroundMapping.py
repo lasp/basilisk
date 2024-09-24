@@ -320,7 +320,7 @@ def run(show_plots, useCentral):
     scSim.AddModelToTask(simTaskName, ephemConverter)
 
     # Setup nadir pointing guidance module
-    locPoint = locationPointing.locationPointing()
+    locPoint = locationPointing.LocationPointing()
     locPoint.ModelTag = "locPoint"
     scSim.AddModelToTask(simTaskName, locPoint, ModelPriority=97)
     locPoint.pHat_B = [0, 0, 1]
@@ -329,7 +329,7 @@ def run(show_plots, useCentral):
     locPoint.celBodyInMsg.subscribeTo(ephemConverter.ephemOutMsgs[0])
 
     # Setup the MRP Feedback control module
-    mrpControl = mrpFeedback.mrpFeedback()
+    mrpControl = mrpFeedback.MrpFeedback()
     mrpControl.ModelTag = "MRP_Feedback"
     scSim.AddModelToTask(
         simTaskName, mrpControl, ModelPriority=96

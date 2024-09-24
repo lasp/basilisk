@@ -96,7 +96,7 @@ def sineCosine(show_plots):
     # create the dynamics task and specify the integration update time
     FSWUnitTestProc.addTask(TotalSim.CreateNewTask(unitTaskName, macros.sec2nano(8640.0)))
 
-    chebyFitModel = chebyPosEphem.chebyPosEphem()
+    chebyFitModel = chebyPosEphem.ChebyPosEphem()
     chebyFitModel.ModelTag = "chebyFitModel"
     TotalSim.AddModelToTask(unitTaskName, chebyFitModel)
 
@@ -200,7 +200,7 @@ def earthOrbitFit(show_plots):
     # create the dynamics task and specify the integration update time
     FSWUnitTestProc.addTask(TotalSim.CreateNewTask(unitTaskName, macros.sec2nano(curveDurationSeconds/(numCurvePoints-1))))
 
-    chebyFitModel = chebyPosEphem.chebyPosEphem()
+    chebyFitModel = chebyPosEphem.ChebyPosEphem()
     chebyFitModel.ModelTag = "chebyFitModel"
     TotalSim.AddModelToTask(unitTaskName, chebyFitModel)
 

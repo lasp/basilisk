@@ -22,13 +22,15 @@
 
 #include <stdint.h>
 #include "architecture/utilities/bskLogging.h"
-#include "cMsgCInterface/VehicleConfigMsg_C.h"
-#include "cMsgCInterface/RWArrayConfigMsg_C.h"
-#include "cMsgCInterface/RWSpeedMsg_C.h"
-#include "cMsgCInterface/CmdTorqueBodyMsg_C.h"
-#include "cMsgCInterface/HingedRigidBodyMsg_C.h"
-#include "cMsgCInterface/BodyHeadingMsg_C.h"
-#include "cMsgCInterface/THRConfigMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
+#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
+#include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
+#include "architecture/msgPayloadDefC/BodyHeadingMsgPayload.h"
+#include "architecture/msgPayloadDefC/THRConfigMsgPayload.h"
 
 
 enum momentumDumping{
@@ -37,7 +39,10 @@ enum momentumDumping{
 };
 
 /*! @brief Top level structure for the sub-module routines. */
-typedef struct {
+class ThrusterPlatformReference : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
 
     /*! declare these user-defined quantities */
     double sigma_MB[3];                                   //!< orientation of the M frame w.r.t. the B frame
@@ -58,36 +63,18 @@ typedef struct {
     uint64_t                  priorTime;                  //!< prior call time
 
     /*! declare module IO interfaces */
-    VehicleConfigMsg_C        vehConfigInMsg;             //!< input msg vehicle configuration msg (needed for CM location)
-    THRConfigMsg_C            thrusterConfigFInMsg;       //!< input thruster configuration msg
-    RWSpeedMsg_C              rwSpeedsInMsg;              //!< input reaction wheel speeds message
-    RWArrayConfigMsg_C        rwConfigDataInMsg;          //!< input RWA configuration message
-    HingedRigidBodyMsg_C      hingedRigidBodyRef1OutMsg;  //!< output msg containing theta1 reference and thetaDot1 reference
-    HingedRigidBodyMsg_C      hingedRigidBodyRef2OutMsg;  //!< output msg containing theta2 reference and thetaDot2 reference
-    BodyHeadingMsg_C          bodyHeadingOutMsg;          //!< output msg containing the thrust heading in body frame coordinates
-    CmdTorqueBodyMsg_C        thrusterTorqueOutMsg;       //!< output msg containing the opposite of the thruster torque to be compensated by RW's
-    THRConfigMsg_C            thrusterConfigBOutMsg;      //!< output msg containing the thruster configuration infor in B-frame
+    ReadFunctor<VehicleConfigMsgPayload>        vehConfigInMsg;             //!< input msg vehicle configuration msg (needed for CM location)
+    ReadFunctor<THRConfigMsgPayload>            thrusterConfigFInMsg;       //!< input thruster configuration msg
+    ReadFunctor<RWSpeedMsgPayload>              rwSpeedsInMsg;              //!< input reaction wheel speeds message
+    ReadFunctor<RWArrayConfigMsgPayload>        rwConfigDataInMsg;          //!< input RWA configuration message
+    Message<HingedRigidBodyMsgPayload>      hingedRigidBodyRef1OutMsg;  //!< output msg containing theta1 reference and thetaDot1 reference
+    Message<HingedRigidBodyMsgPayload>      hingedRigidBodyRef2OutMsg;  //!< output msg containing theta2 reference and thetaDot2 reference
+    Message<BodyHeadingMsgPayload>          bodyHeadingOutMsg;          //!< output msg containing the thrust heading in body frame coordinates
+    Message<CmdTorqueBodyMsgPayload>        thrusterTorqueOutMsg;       //!< output msg containing the opposite of the thruster torque to be compensated by RW's
+    Message<THRConfigMsgPayload>            thrusterConfigBOutMsg;      //!< output msg containing the thruster configuration infor in B-frame
 
-    BSKLogger *bskLogger;                                 //!< BSK Logging
+    BSKLogger bskLogger={};                                 //!< BSK Logging
 
-}ThrusterPlatformReferenceConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-    void SelfInit_thrusterPlatformReference(ThrusterPlatformReferenceConfig *configData, int64_t moduleID);
-    void Reset_thrusterPlatformReference(ThrusterPlatformReferenceConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Update_thrusterPlatformReference(ThrusterPlatformReferenceConfig *configData, uint64_t callTime, int64_t moduleID);
-
-    void tprComputeFirstRotation(double THat_F[3], double rHat_CM_F[3], double F1M[3][3]);
-    void tprComputeSecondRotation(double r_CM_F[3], double r_TM_F[3], double r_CT_F[3], double T_F_hat[3], double FF1[3][3]);
-    void tprComputeThirdRotation(double e_theta[3], double F2M[3][3], double F3F2[3][3]);
-    void tprComputeFinalRotation(double r_CM_M[3], double r_TM_F[3], double T_F[3], double FM[3][3]);
-
-#ifdef __cplusplus
-}
-#endif
-
+};
 
 #endif

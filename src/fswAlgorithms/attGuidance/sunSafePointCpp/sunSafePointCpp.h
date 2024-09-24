@@ -32,7 +32,6 @@
 /*! @brief Sun safe point attitude guidance class. */
 class SunSafePointCpp: public SysModel {
 public:
-
     SunSafePointCpp() = default;                                //!< Constructor
     ~SunSafePointCpp() = default;                               //!< Destructor
 

@@ -45,7 +45,7 @@ def test_torque2Dipole_module():     # update "module" in this function name to 
     r"""
     **Validation Test Description**
 
-    This script tests that the 3x1 Body frame dipole vector, 
+    This script tests that the 3x1 Body frame dipole vector,
     dipole_B, is computed correctly and that the algorithm doesn't fail when
     the inputs are given zero values.
 
@@ -59,7 +59,7 @@ def test_torque2Dipole_module():     # update "module" in this function name to 
     # pass on the testPlotFixture so that the main test function may set the DataStore attributes
     [testResults, testMessage] = torque2DipoleModuleTestFunction()
     assert testResults < 1, testMessage
-    
+
 def torque2DipoleModuleTestFunction():
     testFailCount = 0                       # zero unit test result counter
     testMessages = []                       # create empty array to store test log messages
@@ -76,34 +76,34 @@ def torque2DipoleModuleTestFunction():
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Initialize module under test's config message and add module to runtime call list
-    module = torque2Dipole.torque2Dipole()
+    module = torque2Dipole.Torque2Dipole()
     module.ModelTag = "mtbMomentumManagement"           # update python name of test module
     unitTestSim.AddModelToTask(unitTaskName, module)
-    
+
     # Initialize TAMSensorBodyMsg
     tamSensorBodyInMsgContainer = messaging.TAMSensorBodyMsgPayload()
     tamSensorBodyInMsgContainer.tam_B = [1E-5, 0.0, 0.0]
     tamSensorBodyInMsg = messaging.TAMSensorBodyMsg().write(tamSensorBodyInMsgContainer)
-    
+
     # Initialize CmdTorqueBodyMsg
     tauRequestInMsgContainer = messaging.CmdTorqueBodyMsgPayload()
     tauRequestInMsgContainer.torqueRequestBody = [10.* 1E-3, 20. * 1E-3, 30 * 1E-3]
     tauRequestInMsg = messaging.CmdTorqueBodyMsg().write(tauRequestInMsgContainer)
-    
+
     # Setup logging on the test module output message so that we get all the writes to it
     resultDipoleRequestOutMsg = module.dipoleRequestOutMsg.recorder()
     unitTestSim.AddModelToTask(unitTaskName, resultDipoleRequestOutMsg)
-    
+
     # connect the message interfaces
     module.tamSensorBodyInMsg.subscribeTo(tamSensorBodyInMsg)
     module.tauRequestInMsg.subscribeTo(tauRequestInMsg)
-    
+
     # Set the simulation time.
     unitTestSim.ConfigureStopTime(macros.sec2nano(0.0))        # seconds to stop simulation
     unitTestSim.InitializeSimulation()
-    
+
     '''
-        TEST 1: 
+        TEST 1:
             Check that dipole_B is non-zero expected value.
     '''
     unitTestSim.ExecuteSimulation()
@@ -115,48 +115,48 @@ def torque2DipoleModuleTestFunction():
                                                                 accuracy,
                                                                 "dipole_B",
                                                                 testFailCount, testMessages)
-    
+
     '''
-        TEST 2: 
+        TEST 2:
             Check that dipole_B is zero when tam_B is zero.
     '''
     tamSensorBodyInMsgContainer.tam_B = [0., 0., 0.]
     tamSensorBodyInMsg = messaging.TAMSensorBodyMsg().write(tamSensorBodyInMsgContainer)
     module.tamSensorBodyInMsg.subscribeTo(tamSensorBodyInMsg)
-    
+
     unitTestSim.InitializeSimulation()
     unitTestSim.ExecuteSimulation()
-    
+
     expectedDipole = [0., 0., 0.]
     testFailCount, testMessages = unitTestSupport.compareVector(expectedDipole,
                                                                 resultDipoleRequestOutMsg.dipole_B[0],
                                                                 accuracy,
                                                                 "dipole_B",
                                                                 testFailCount, testMessages)
-    
+
     '''
-        TEST 3: 
+        TEST 3:
             Check that dipole_B is zero when torqueRequestBody is zero.
     '''
     tamSensorBodyInMsgContainer.tam_B = [1E-5, 0.0, 0.0]
     tamSensorBodyInMsg = messaging.TAMSensorBodyMsg().write(tamSensorBodyInMsgContainer)
     module.tamSensorBodyInMsg.subscribeTo(tamSensorBodyInMsg)
-    
+
     tauRequestInMsgContainer.torqueRequestBody = [0., 0., 0.]
     tauRequestInMsg = messaging.CmdTorqueBodyMsg().write(tauRequestInMsgContainer)
     module.tauRequestInMsg.subscribeTo(tauRequestInMsg)
-    
+
     unitTestSim.InitializeSimulation()
     unitTestSim.ExecuteSimulation()
-    
+
     expectedDipole = [0., 0., 0.]
     testFailCount, testMessages = unitTestSupport.compareVector(expectedDipole,
                                                                 resultDipoleRequestOutMsg.dipole_B[0],
                                                                 accuracy,
                                                                 "dipole_B",
                                                                 testFailCount, testMessages)
-    
-    
+
+
     print("Accuracy used: " + str(accuracy))
     if testFailCount == 0:
         print("PASSED: torque2Dipole unit test")
@@ -171,4 +171,3 @@ def torque2DipoleModuleTestFunction():
 #
 if __name__ == "__main__":
     test_torque2Dipole_module()
-    

@@ -22,16 +22,21 @@
 #define FORCETORQUETHRFORCEMAPPING_H
 
 #include <stdint.h>
-#include "cMsgCInterface/CmdTorqueBodyMsg_C.h"
-#include "cMsgCInterface/CmdForceBodyMsg_C.h"
-#include "cMsgCInterface/THRArrayConfigMsg_C.h"
-#include "cMsgCInterface/VehicleConfigMsg_C.h"
-#include "cMsgCInterface/THRArrayCmdForceMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
+#include "architecture/msgPayloadDefC/CmdForceBodyMsgPayload.h"
+#include "architecture/msgPayloadDefC/THRArrayConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/THRArrayCmdForceMsgPayload.h"
 #include "architecture/utilities/bskLogging.h"
 
 /*! @brief This module maps thruster forces for arbitrary forces and torques
  */
-typedef struct {
+class ForceTorqueThrForceMapping : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
     /* declare module public variables */
     double   rThruster_B[MAX_EFF_CNT][3];           //!< [m]     local copy of the thruster locations
     double   gtThruster_B[MAX_EFF_CNT][3];          //!< []      local copy of the thruster force unit direction vectors
@@ -41,24 +46,13 @@ typedef struct {
     double CoM_B[3];                                //!< [m]     CoM of the s/c
 
     /* declare module IO interfaces */
-    CmdTorqueBodyMsg_C cmdTorqueInMsg;  //!< (optional) vehicle control (Lr) input message
-    CmdForceBodyMsg_C cmdForceInMsg;  //!< (optional) vehicle control force input message
-    THRArrayConfigMsg_C thrConfigInMsg;  //!< thruster cluster configuration input message
-    VehicleConfigMsg_C vehConfigInMsg;  //!< vehicle config input message
-    THRArrayCmdForceMsg_C thrForceCmdOutMsg;  //!< thruster force command output message
+    ReadFunctor<CmdTorqueBodyMsgPayload> cmdTorqueInMsg;  //!< (optional) vehicle control (Lr) input message
+    ReadFunctor<CmdForceBodyMsgPayload> cmdForceInMsg;  //!< (optional) vehicle control force input message
+    ReadFunctor<THRArrayConfigMsgPayload> thrConfigInMsg;  //!< thruster cluster configuration input message
+    ReadFunctor<VehicleConfigMsgPayload> vehConfigInMsg;  //!< vehicle config input message
+    Message<THRArrayCmdForceMsgPayload> thrForceCmdOutMsg;  //!< thruster force command output message
 
-    BSKLogger *bskLogger;  //!< BSK Logging
-}forceTorqueThrForceMappingConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    void SelfInit_forceTorqueThrForceMapping(forceTorqueThrForceMappingConfig *configData, int64_t moduleID);
-    void Update_forceTorqueThrForceMapping(forceTorqueThrForceMappingConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Reset_forceTorqueThrForceMapping(forceTorqueThrForceMappingConfig *configData, uint64_t callTime, int64_t moduleID);
-
-#ifdef __cplusplus
-}
-#endif
+    BSKLogger bskLogger={};  //!< BSK Logging
+};
 
 #endif

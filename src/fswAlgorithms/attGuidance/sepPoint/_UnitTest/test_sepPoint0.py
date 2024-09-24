@@ -48,7 +48,7 @@ def computeGamma(alpha, delta):
             gamma = 0
     else:
         if delta < alpha - np.pi/2:
-            gamma = - np.pi/2 + alpha - delta 
+            gamma = - np.pi/2 + alpha - delta
         elif delta > 3/2*np.pi - alpha:
             gamma = alpha + delta - 3/2*np.pi
         else:
@@ -115,10 +115,10 @@ def test_(show_plots, alpha, delta, alignmentPriority, accuracy):
 
     a = np.cross(rHat_SB_N, [4, 5, -6])
     a = a / np.linalg.norm(a)
-    
+
     d = np.cross(a1Hat_B, [6, -5, 4])
     d = d / np.linalg.norm(d)
-    
+
     DCM1 = rbk.PRV2C(a * alpha)
     DCM2 = rbk.PRV2C(d * delta)
 
@@ -153,7 +153,7 @@ def test_(show_plots, alpha, delta, alignmentPriority, accuracy):
     sigma_BN = np.array([0, 0, 0])
     BN = rbk.MRP2C(sigma_BN)
     rS_B = np.matmul(BN, rHat_SB_N)
-    NavAttMessageData = messaging.NavAttMsgPayload()     
+    NavAttMessageData = messaging.NavAttMsgPayload()
     NavAttMessageData.sigma_BN = sigma_BN
     NavAttMessageData.vehSunPntBdy = rS_B
     NavAttMsg = messaging.NavAttMsg().write(NavAttMessageData)
@@ -174,8 +174,6 @@ def test_(show_plots, alpha, delta, alignmentPriority, accuracy):
     # Setup logging on the test module output message so that we get all the writes to it
     dataLog = attGuid.attRefOutMsg.recorder()
     unitTestSim.AddModelToTask(unitTaskName, dataLog)
-    dataLogC = attGuid.attRefOutMsgC.recorder()
-    unitTestSim.AddModelToTask(unitTaskName, dataLogC)
 
     # Need to call the self-init and cross-init methods
     unitTestSim.InitializeSimulation()

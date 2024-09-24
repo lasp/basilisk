@@ -360,20 +360,20 @@ def run(show_plots, useBatch):
     sNavObject.scStateInMsg.subscribeTo(scObject.scStateOutMsg)
 
     # Set hillPoint guidance module
-    attGuidance = hillPoint.hillPoint()
+    attGuidance = hillPoint.HillPoint()
     attGuidance.ModelTag = "hillPoint"
     attGuidance.transNavInMsg.subscribeTo(sNavObject.transOutMsg)
     attGuidance.celBodyInMsg.subscribeTo(ephemConverter.ephemOutMsgs[0])
 
     # Set the attitude tracking error evaluation module
-    attError = attTrackingError.attTrackingError()
+    attError = attTrackingError.AttTrackingError()
     attError.ModelTag = "attErrorInertial3D"
     attError.sigma_R0R = [0, 1, 0]
     attError.attRefInMsg.subscribeTo(attGuidance.attRefOutMsg)
     attError.attNavInMsg.subscribeTo(sNavObject.attOutMsg)
 
     # Set the MRP Feedback control module
-    mrpControl = mrpFeedback.mrpFeedback()
+    mrpControl = mrpFeedback.MrpFeedback()
     mrpControl.ModelTag = "mrpFeedback"
     mrpControl.guidInMsg.subscribeTo(attError.attGuidOutMsg)
     mrpControl.K = 3.5

@@ -20,8 +20,10 @@
 #ifndef _DV_GUIDANCE_POINT_H_
 #define _DV_GUIDANCE_POINT_H_
 
-#include "cMsgCInterface/AttRefMsg_C.h"
-#include "cMsgCInterface/DvBurnCmdMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
+#include "architecture/msgPayloadDefC/DvBurnCmdMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 #include <stdint.h>
@@ -31,26 +33,14 @@
 
 /*! @brief Top level structure for the nominal delta-V guidance
  */
-typedef struct {
-    AttRefMsg_C attRefOutMsg;           //!< The name of the output message
-    DvBurnCmdMsg_C burnDataInMsg;       //!< Input message that configures the vehicle burn
+class DvGuidance : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+    Message<AttRefMsgPayload> attRefOutMsg;           //!< The name of the output message
+    ReadFunctor<DvBurnCmdMsgPayload> burnDataInMsg;       //!< Input message that configures the vehicle burn
 
-    BSKLogger *bskLogger;   //!< BSK Logging
-}dvGuidanceConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-    void SelfInit_dvGuidance(dvGuidanceConfig *configData, int64_t moduleID);
-    void Update_dvGuidance(dvGuidanceConfig *configData, uint64_t callTime,
-        int64_t moduleID);
-    void Reset_dvGuidance(dvGuidanceConfig *configData, uint64_t callTime,
-                           int64_t moduleID);
-
-#ifdef __cplusplus
-}
-#endif
-
+    BSKLogger bskLogger={};   //!< BSK Logging
+};
 
 #endif

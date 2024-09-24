@@ -21,17 +21,19 @@
    #include "rwMotorTorque.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(rwMotorTorque);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "rwMotorTorque.h"
 
 %include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
-struct CmdTorqueBodyMsg_C;
 %include "architecture/msgPayloadDefC/ArrayMotorTorqueMsgPayload.h"
-struct ArrayMotorTorqueMsg_C;
 %include "architecture/msgPayloadDefC/RWAvailabilityMsgPayload.h"
-struct RWAvailabilityMsg_C;
 %include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
-struct RWArrayConfigMsg_C;
 
 %include "fswAlgorithms/fswUtilities/fswDefinitions.h"
 

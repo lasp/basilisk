@@ -21,22 +21,22 @@
    #include "thrustRWDesat.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(thrustRWDesat);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "thrustRWDesat.h"
 
 %include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
-struct RWSpeedMsg_C;
 %include "architecture/msgPayloadDefC/RWConstellationMsgPayload.h"
-struct RWConstellationMsg_C;
 %include "architecture/msgPayloadDefC/THRArrayConfigMsgPayload.h"
-struct THRArrayConfigMsg_C;
 %include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-struct VehicleConfigMsg_C;
 %include "architecture/msgPayloadDefC/THRArrayOnTimeCmdMsgPayload.h"
-struct THRArrayOnTimeCmdMsg_C;
 
 %pythoncode %{
 import sys
 protectAllClasses(sys.modules[__name__])
 %}
-

@@ -33,9 +33,9 @@ from Basilisk.architecture.swig_common_model import *
 %include "starTracker.h"
 
 %include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-struct SCStatesMsg_C;
+
 %include "architecture/msgPayloadDefC/STSensorMsgPayload.h"
-struct STSensorMsgMsg_C;
+
 
 %pythoncode %{
 import sys

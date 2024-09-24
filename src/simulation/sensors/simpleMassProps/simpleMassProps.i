@@ -31,9 +31,9 @@ from Basilisk.architecture.swig_common_model import *
 %include "simpleMassProps.h"
 
 %include "architecture/msgPayloadDefC/SCMassPropsMsgPayload.h"
-struct SCMassPropsMsg_C;
+
 %include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-struct VehicleConfigMsg_C;
+
 
 %pythoncode %{
 import sys

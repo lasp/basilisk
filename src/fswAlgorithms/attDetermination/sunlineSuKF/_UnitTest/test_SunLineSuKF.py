@@ -242,7 +242,7 @@ def StateUpdateSunLine(show_plots, kellyOn):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = sunlineSuKF.sunlineSuKF()
+    module = sunlineSuKF.SunlineSuKF()
     module.ModelTag = "sunlineSuKF"
 
     # Add test module to runtime call list
@@ -413,7 +413,7 @@ def StatePropSunLine(show_plots):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = sunlineSuKF.sunlineSuKF()
+    module = sunlineSuKF.SunlineSuKF()
     module.ModelTag = "sunlineSuKF"
 
     # Add test module to runtime call list
@@ -479,7 +479,7 @@ def FaultScenarios():
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Clean methods for Measurement and Time Updates
-    moduleClean1 = sunlineSuKF.SunlineSuKFConfig()
+    moduleClean1 = sunlineSuKF.SunlineSuKF()
     moduleClean1.numStates = 6
     moduleClean1.countHalfSPs = moduleClean1.numStates
     moduleClean1.state = [0., 0., 0., 0., 0., 0.]

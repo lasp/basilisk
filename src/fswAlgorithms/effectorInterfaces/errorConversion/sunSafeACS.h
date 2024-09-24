@@ -25,32 +25,24 @@
 #include "fswAlgorithms/effectorInterfaces/errorConversion/dvAttEffect.h"
 #include "fswAlgorithms/effectorInterfaces/_GeneralModuleFiles/thrustGroupData.h"
 
-#include "cMsgCInterface/CmdTorqueBodyMsg_C.h"
-#include "cMsgCInterface/THRArrayOnTimeCmdMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
+#include "architecture/msgPayloadDefC/THRArrayOnTimeCmdMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 
 
 /*! @brief module configuration message */
-typedef struct {
+class SunSafeACS : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+
     ThrustGroupData thrData;  /*!< Collection of thruster configuration data*/
-    CmdTorqueBodyMsg_C cmdTorqueBodyInMsg; /*!< -- The name of the Input message*/
+    ReadFunctor<CmdTorqueBodyMsgPayload> cmdTorqueBodyInMsg; /*!< -- The name of the Input message*/
 
-    BSKLogger *bskLogger;                             //!< BSK Logging
-}sunSafeACSConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_sunSafeACS(sunSafeACSConfig *configData, int64_t moduleID);
-    void Update_sunSafeACS(sunSafeACSConfig *configData, uint64_t callTime,
-        int64_t moduleID);
-    void Reset_sunSafeACS(sunSafeACSConfig *configData, uint64_t callTime, int64_t moduleID);
-
-#ifdef __cplusplus
-}
-#endif
-
+    BSKLogger bskLogger={};                             //!< BSK Logging
+};
 
 #endif

@@ -21,15 +21,18 @@
    #include "solarArrayReference.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(solarArrayReference);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "solarArrayReference.h"
 
 %include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-struct NavAttMsg_C;
 %include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
-struct AttRefMsg_C;
 %include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
-struct HingedRigidBodyMsg_C;
 
 %pythoncode %{
 import sys

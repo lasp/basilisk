@@ -29,12 +29,12 @@
 %include "spaceToGroundTransmitter.h"
 
 %include "architecture/msgPayloadDefC/DataNodeUsageMsgPayload.h"
-struct DataNodeUsageMsg_C;
+
 %include "architecture/msgPayloadDefC/DeviceCmdMsgPayload.h"
-struct DeviceCmdMsg_C;
+
 %include "architecture/msgPayloadDefCpp/DataStorageStatusMsgPayload.h"
 %include "architecture/msgPayloadDefC/AccessMsgPayload.h"
-struct AccessMsg_C;
+
 
 %pythoncode %{
 import sys

@@ -21,15 +21,17 @@
    #include "sunSafeACS.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(sunSafeACS);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
 
 %include "dvAttEffect.h"
 
 %include "architecture/msgPayloadDefC/THRArrayOnTimeCmdMsgPayload.h"
-struct THRArrayOnTimeCmdMsg_C;
 %include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
-struct CmdTorqueBodyMsg_C;
 
 struct ThrustGroupData;
 
@@ -37,4 +39,3 @@ struct ThrustGroupData;
 import sys
 protectAllClasses(sys.modules[__name__])
 %}
-

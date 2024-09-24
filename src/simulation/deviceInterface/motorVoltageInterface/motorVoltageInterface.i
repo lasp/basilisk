@@ -32,9 +32,9 @@ from Basilisk.architecture.swig_common_model import *
 %include "motorVoltageInterface.h"
 
 %include "architecture/msgPayloadDefC/ArrayMotorVoltageMsgPayload.h"
-struct ArrayMotorVoltageMsg_C;
+
 %include "architecture/msgPayloadDefC/ArrayMotorTorqueMsgPayload.h"
-struct ArrayMotorTorqueMsg_C;
+
 
 %include "architecture/utilities/macroDefinitions.h"
 

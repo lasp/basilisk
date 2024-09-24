@@ -1,7 +1,7 @@
 /*
  ISC License
 
- Copyright (c) 2016, Autonomous Vehicle Systems Lab, University of Colorado at Boulder
+ Copyright (c) 2024, Laboratory for Atmospheric Space Physics, University of Colorado at Boulder
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -21,19 +21,20 @@
    #include "oeStateEphem.h"
 %}
 
-%include "swig_conly_data.i"
-STRUCTASLIST(ChebyOERecord)
+%pythoncode %{
+from Basilisk.architecture.swig_common_model import *
+%}
 
-%include "swig_c_wrap.i"
-%c_wrap_2(oeStateEphem, OEStateEphemData);
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+STRUCTASLIST(ChebyOERecord)
+%include "oeStateEphem.h"
 
 %include "architecture/msgPayloadDefC/TDBVehicleClockCorrelationMsgPayload.h"
-struct TDBVehicleClockCorrelationMsg_C;
 %include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-struct EphemerisMsg_C;
 
 %pythoncode %{
 import sys
 protectAllClasses(sys.modules[__name__])
 %}
-

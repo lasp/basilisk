@@ -20,19 +20,24 @@
 #ifndef _MRP_FEEDBACK_CONTROL_H_
 #define _MRP_FEEDBACK_CONTROL_H_
 
-#include "architecture/utilities/bskLogging.h"
 #include <stdint.h>
 
-#include "cMsgCInterface/RWSpeedMsg_C.h"
-#include "cMsgCInterface/RWAvailabilityMsg_C.h"
-#include "cMsgCInterface/RWArrayConfigMsg_C.h"
-#include "cMsgCInterface/VehicleConfigMsg_C.h"
-#include "cMsgCInterface/AttGuidMsg_C.h"
-#include "cMsgCInterface/CmdTorqueBodyMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
+#include "architecture/msgPayloadDefC/RWAvailabilityMsgPayload.h"
+#include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
+#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
 
 
 /*! @brief Data configuration structure for the MRP feedback attitude control routine. */
-typedef struct {
+class MrpFeedback : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+
     double K;                           //!< [rad/sec] Proportional gain applied to MRP errors
     double P;                           //!< [N*m*s]   Rate error feedback gain applied
     double Ki;                          //!< [N*m]     Integration feedback error on rate error
@@ -47,29 +52,15 @@ typedef struct {
     RWArrayConfigMsgPayload rwConfigParams; //!< [-] struct to store message containing RW config parameters in body B frame
 
     /* declare module IO interfaces */
-    RWSpeedMsg_C rwSpeedsInMsg;                         //!< RW speed input message (Optional)
-    RWAvailabilityMsg_C rwAvailInMsg;                   //!< RW availability input message (Optional)
-    RWArrayConfigMsg_C rwParamsInMsg;                   //!< RW parameter input message.  (Optional)
-    CmdTorqueBodyMsg_C cmdTorqueOutMsg;                 //!< commanded spacecraft external control torque output message
-    CmdTorqueBodyMsg_C intFeedbackTorqueOutMsg;         //!< commanded integral feedback control torque output message
-    AttGuidMsg_C guidInMsg;                             //!< attitude guidance input message
-    VehicleConfigMsg_C vehConfigInMsg;                  //!< vehicle configuration input message
+    ReadFunctor<RWSpeedMsgPayload> rwSpeedsInMsg;                         //!< RW speed input message (Optional)
+    ReadFunctor<RWAvailabilityMsgPayload> rwAvailInMsg;                   //!< RW availability input message (Optional)
+    ReadFunctor<RWArrayConfigMsgPayload> rwParamsInMsg;                   //!< RW parameter input message.  (Optional)
+    Message<CmdTorqueBodyMsgPayload> cmdTorqueOutMsg;                 //!< commanded spacecraft external control torque output message
+    Message<CmdTorqueBodyMsgPayload> intFeedbackTorqueOutMsg;         //!< commanded integral feedback control torque output message
+    ReadFunctor<AttGuidMsgPayload> guidInMsg;                             //!< attitude guidance input message
+    ReadFunctor<VehicleConfigMsgPayload> vehConfigInMsg;                  //!< vehicle configuration input message
 
-    BSKLogger *bskLogger;                               //!< BSK Logging
-}mrpFeedbackConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-    void SelfInit_mrpFeedback(mrpFeedbackConfig *configData, int64_t moduleID);
-    void Update_mrpFeedback(mrpFeedbackConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Reset_mrpFeedback(mrpFeedbackConfig *configData, uint64_t callTime, int64_t moduleID);
-
-
-#ifdef __cplusplus
-}
-#endif
-
+    BSKLogger bskLogger = {};                               //!< BSK Logging
+};
 
 #endif

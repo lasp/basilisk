@@ -32,9 +32,9 @@
 %include "hingedRigidBodyMotor.h"
 
 %include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
-struct HingedRigidBodyMsg_C;
+
 %include "architecture/msgPayloadDefC/ArrayMotorTorqueMsgPayload.h"
-struct ArrayMotorTorqueMsg_C;
+
 
 %pythoncode %{
 import sys

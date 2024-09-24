@@ -114,7 +114,7 @@ def relOD_method_test(show_plots):
     dt = 10
     mu = 42828.314
     # Measurement Model Test
-    data = relativeODuKF.RelODuKFConfig()
+    data = relativeODuKF.RelODuKF()
     msg = messaging.OpNavMsgPayload()
     msg.r_BN_N = [300, 200, 100]
     data.planetId = 2
@@ -131,7 +131,7 @@ def relOD_method_test(show_plots):
 
 
     data.SP =  np.transpose(SPexp).flatten().tolist()
-    relativeODuKF.relODuKFMeasModel(data)
+    data.relODuKFMeasModel()
 
     measurements = data.yMeas
 
@@ -146,7 +146,7 @@ def relOD_method_test(show_plots):
     for i in range(len(state)):
         relativeODuKF.doubleArray_setitem(stateIn, i, state[i])
 
-    relativeODuKF.relODStateProp(data, stateIn, dt)
+    data.relODStateProp(stateIn, dt)
 
     propedState = []
     for i in range(6):
@@ -189,7 +189,7 @@ def StateUpdateRelOD(show_plots):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm
-    module = relativeODuKF.relativeODuKF()
+    module = relativeODuKF.RelODuKF()
     module.ModelTag = "relodSuKF"
 
     # Add test module to runtime call list
@@ -312,7 +312,7 @@ def StatePropRelOD(show_plots, dt):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = relativeODuKF.relativeODuKF()
+    module = relativeODuKF.RelODuKF()
     module.ModelTag = "relodSuKF"
 
     # Add test module to runtime call list

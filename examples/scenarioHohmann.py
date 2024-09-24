@@ -238,56 +238,56 @@ def run(show_plots, rFirst, rSecond):
     scSim.AddModelToTask(simTaskName, sNavObject)
 
     # Create guidance message to connect 3 flight modes to attitude error
-    attRefMsg = messaging.AttRefMsg_C()
+    attRefMsg = messaging.AttRefMsg()
     attRefMsg.write(messaging.AttRefMsgPayload())
 
     # Set up velocity-point guidance module for first burn
-    firstBurn = velocityPoint.velocityPoint()
+    firstBurn = velocityPoint.VelocityPoint()
     firstBurn.ModelTag = "velocityPoint"
     firstBurn.mu = mu
     scSim.fswProcess.addTask(scSim.CreateNewTask("firstBurnTask", simulationTimeStep), 5)
     scSim.AddModelToTask("firstBurnTask", firstBurn)
 
-    firstBurnMRPRotation = mrpRotation.mrpRotation()
+    firstBurnMRPRotation = mrpRotation.MrpRotation()
     firstBurnMRPRotation.ModelTag = "mrpRotation"
     sigma_RR0 = np.array([np.tan(- np.pi / 8), 0, 0])
     firstBurnMRPRotation.mrpSet = sigma_RR0
     scSim.AddModelToTask("firstBurnTask", firstBurnMRPRotation)
-    messaging.AttRefMsg_C_addAuthor(firstBurnMRPRotation.attRefOutMsg, attRefMsg)
+    firstBurnMRPRotation.attRefOutMsg = attRefMsg
 
     # setup velocity-point guidance module for second burn
-    secondBurn = velocityPoint.velocityPoint()
+    secondBurn = velocityPoint.VelocityPoint()
     secondBurn.ModelTag = "velocityPoint"
     secondBurn.mu = mu
     scSim.fswProcess.addTask(scSim.CreateNewTask("secondBurnTask", simulationTimeStep), 5)
     scSim.AddModelToTask("secondBurnTask", secondBurn)
 
     # Need to get this reference attitude to rotate 180
-    secondBurnMRPRotation = mrpRotation.mrpRotation()
+    secondBurnMRPRotation = mrpRotation.MrpRotation()
     secondBurnMRPRotation.ModelTag = "mrpRotation"
     sigma_RR0 = np.array([np.tan(np.pi / 8), 0, 0])
     secondBurnMRPRotation.mrpSet = sigma_RR0
     scSim.AddModelToTask("secondBurnTask", secondBurnMRPRotation)
-    messaging.AttRefMsg_C_addAuthor(secondBurnMRPRotation.attRefOutMsg, attRefMsg)
+    secondBurnMRPRotation.attRefOutMsg = attRefMsg
 
     # Set up hill point guidance module
-    attGuidanceHillPoint = hillPoint.hillPoint()
+    attGuidanceHillPoint = hillPoint.HillPoint()
     attGuidanceHillPoint.ModelTag = "hillPoint"
     scSim.fswProcess.addTask(scSim.CreateNewTask("hillPointTask", simulationTimeStep), 5)
     scSim.AddModelToTask("hillPointTask", attGuidanceHillPoint)
-    messaging.AttRefMsg_C_addAuthor(attGuidanceHillPoint.attRefOutMsg, attRefMsg)
+    attGuidanceHillPoint.attRefOutMsg = attRefMsg
 
     # Create flight software task to hold the remaining modules
     fswTaskName = "fswTask"
     scSim.fswProcess.addTask(scSim.CreateNewTask(fswTaskName, simulationTimeStep), 0)
 
     # Set up the attitude tracking error evaluation module
-    attError = attTrackingError.attTrackingError()
+    attError = attTrackingError.AttTrackingError()
     attError.ModelTag = "attError"
     scSim.AddModelToTask(fswTaskName, attError)
 
     # Set up the MRP Feedback control module
-    mrpControl = mrpFeedback.mrpFeedback()
+    mrpControl = mrpFeedback.MrpFeedback()
     mrpControl.ModelTag = "mrpFeedback"
     scSim.AddModelToTask(fswTaskName, mrpControl)
     mrpControl.K = 3.5
@@ -296,7 +296,7 @@ def run(show_plots, rFirst, rSecond):
     mrpControl.integralLimit = -1
 
     # Add module that maps the Lr control torque into the RW motor torques
-    rwMotorTorqueObj = rwMotorTorque.rwMotorTorque()
+    rwMotorTorqueObj = rwMotorTorque.RwMotorTorque()
     rwMotorTorqueObj.ModelTag = "rwMotorTorque"
     controlAxes_B = [1, 0, 0, 0, 1, 0, 0, 0, 1]
     rwMotorTorqueObj.controlAxes_B = controlAxes_B

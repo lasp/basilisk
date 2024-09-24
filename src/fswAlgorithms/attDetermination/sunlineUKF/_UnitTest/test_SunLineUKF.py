@@ -352,7 +352,7 @@ def checkStateUpdateSunLine(show_plots):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = sunlineUKF.sunlineUKF()
+    module = sunlineUKF.SunlineUKF()
     module.ModelTag = "SunlineUKF"
 
     # Add test module to runtime call list
@@ -488,7 +488,7 @@ def checkStatePropSunLine(show_plots):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = sunlineUKF.sunlineUKF()
+    module = sunlineUKF.SunlineUKF()
     module.ModelTag = "SunlineUKF"
 
     # Add test module to runtime call list

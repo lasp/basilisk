@@ -51,16 +51,6 @@ SmallBodyNavUKF::SmallBodyNavUKF()
     return;
 }
 
-/*! Module Destructor */
-SmallBodyNavUKF::~SmallBodyNavUKF()
-{
-}
-
-/*! Initialize C-wrapped output messages */
-void SmallBodyNavUKF::SelfInit(){
-    SmallBodyNavUKFMsg_C_init(&this->smallBodyNavUKFOutMsgC);
-}
-
 /*! This method is used to reset the module, check that required input messages are connect and compute weigths.
     @return void
 */
@@ -280,9 +270,6 @@ void SmallBodyNavUKF::writeMessages(uint64_t CurrentSimNanos){
 
     /* Write to the C++-wrapped output messages */
     this->smallBodyNavUKFOutMsg.write(&smallBodyNavUKFOutMsgBuffer, this->moduleID, CurrentSimNanos);
-
-    /* Write to the C-wrapped output messages */
-    SmallBodyNavUKFMsg_C_write(&smallBodyNavUKFOutMsgBuffer, &this->smallBodyNavUKFOutMsgC, this->moduleID, CurrentSimNanos);
 }
 
 /*! This is the main method that gets called every time the module is updated.

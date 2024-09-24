@@ -22,28 +22,23 @@
     #include "locationPointing.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(locationPointing);
-
 %pythoncode %{
     from Basilisk.architecture.swig_common_model import *
 %}
 
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "locationPointing.h"
+
 %include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-struct NavTransMsg_C;
-%include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-struct NavAttMsg_C;
+%include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
 %include "architecture/msgPayloadDefC/GroundStateMsgPayload.h"
-struct GroundStateMsg_C;
 %include "architecture/msgPayloadDefC/AttGuidMsgPayload.h"
-struct AttGuidMsg_C;
 %include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
-struct AttRefMsg_C;
 %include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-struct EphemerisMsg_C;
 
 %pythoncode %{
 import sys
 protectAllClasses(sys.modules[__name__])
 %}
-

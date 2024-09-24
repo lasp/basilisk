@@ -21,14 +21,18 @@
    #include "prescribedRot2DOF.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap_2(prescribedRot2DOF, PrescribedRot2DOFConfig);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "prescribedRot2DOF.h"
 
 %include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
-struct HingedRigidBodyMsg_C;
 
 %include "architecture/msgPayloadDefC/PrescribedRotationMsgPayload.h"
-struct PrescribedRotationMsg_C;
 
 %pythoncode %{
 import sys

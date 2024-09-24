@@ -70,8 +70,6 @@ def test_rateDamp(show_plots, P, accuracy):
     # Setup logging on the test module output message so that we get all the writes to it
     dataLog = attControl.cmdTorqueOutMsg.recorder()
     unitTestSim.AddModelToTask(unitTaskName, dataLog)
-    dataLogC = attControl.cmdTorqueOutMsgC.recorder()
-    unitTestSim.AddModelToTask(unitTaskName, dataLogC)
 
     # Need to call the self-init and cross-init methods
     unitTestSim.InitializeSimulation()
@@ -83,13 +81,11 @@ def test_rateDamp(show_plots, P, accuracy):
     unitTestSim.ExecuteSimulation()
 
     moduleOutput = dataLog.torqueRequestBody[0]
-    moduleOutputC = dataLogC.torqueRequestBody[0]
 
     truth = -attControl.getRateGain() * omega_BN_B
 
     # set the filtered output truth states
     np.testing.assert_allclose(moduleOutput, truth, rtol=0, atol=accuracy, verbose=True)
-    np.testing.assert_allclose(moduleOutputC, truth, rtol=0, atol=accuracy, verbose=True)
 
     return
 

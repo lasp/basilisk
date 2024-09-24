@@ -21,15 +21,18 @@
    #include "thrMomentumManagement.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(thrMomentumManagement);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "thrMomentumManagement.h"
 
 %include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
-struct RWArrayConfigMsg_C;
 %include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
-struct CmdTorqueBodyMsg_C;
 %include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
-struct RWSpeedMsg_C;
 
 %pythoncode %{
 import sys

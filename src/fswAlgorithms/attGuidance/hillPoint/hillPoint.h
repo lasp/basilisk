@@ -23,9 +23,11 @@
 #include <stdint.h>
 
 /* Required module input messages */
-#include "cMsgCInterface/EphemerisMsg_C.h"
-#include "cMsgCInterface/NavTransMsg_C.h"
-#include "cMsgCInterface/AttRefMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
+#include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
+#include "architecture/msgPayloadDefC/AttRefMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 
@@ -34,37 +36,20 @@
 
 /*!@brief Data structure for module to compute the Hill-frame pointing navigation solution.
  */
-typedef struct {
-    
+class HillPoint : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
+
     /* declare module IO interfaces */
-    AttRefMsg_C attRefOutMsg;               //!<        The name of the output message
-    NavTransMsg_C transNavInMsg;            //!<        The name of the incoming attitude command
-    EphemerisMsg_C celBodyInMsg;            //!<        The name of the celestial body message
+    Message<AttRefMsgPayload> attRefOutMsg;               //!<        The name of the output message
+    ReadFunctor<NavTransMsgPayload> transNavInMsg;            //!<        The name of the incoming attitude command
+    ReadFunctor<EphemerisMsgPayload> celBodyInMsg;            //!<        The name of the celestial body message
 
     int planetMsgIsLinked;                  //!<        flag if the planet message is linked
 
-    BSKLogger *bskLogger;                             //!< BSK Logging
+    BSKLogger bskLogger={};                             //!< BSK Logging
 
-}hillPointConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_hillPoint(hillPointConfig *configData, int64_t moduleID);
-    void Update_hillPoint(hillPointConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Reset_hillPoint(hillPointConfig *configData, uint64_t callTime, int64_t moduleID);
-
-    void computeHillPointingReference(hillPointConfig *configData,
-                                      double r_BN_N[3],
-                                      double v_BN_N[3],
-                                      double celBdyPositonVector[3],
-                                      double celBdyVelocityVector[3],
-                                      AttRefMsgPayload *attRefOut);
-
-#ifdef __cplusplus
-}
-#endif
-
+};
 
 #endif

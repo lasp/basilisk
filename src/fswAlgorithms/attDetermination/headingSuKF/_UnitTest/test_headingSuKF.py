@@ -381,7 +381,7 @@ def StateUpdateSunLine(show_plots):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = headingSuKF.headingSuKF()
+    module = headingSuKF.HeadingSuKF()
     module.ModelTag = "headingSuKF"
 
     # Add test module to runtime call list
@@ -493,7 +493,7 @@ def StatePropSunLine(show_plots):
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # Construct algorithm and associated C++ container
-    module = headingSuKF.headingSuKF()
+    module = headingSuKF.HeadingSuKF()
     module.ModelTag = "headingSuKF"
 
     # Add test module to runtime call list

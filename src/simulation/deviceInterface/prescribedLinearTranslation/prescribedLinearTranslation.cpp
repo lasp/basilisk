@@ -23,22 +23,13 @@
 #include "architecture/utilities/macroDefinitions.h"
 #include <cmath>
 
-/*! This method self initializes the C-wrapped output message.
- @return void
-*/
-void PrescribedLinearTranslation::SelfInit() {
-    PrescribedTranslationMsg_C_init(&this->prescribedTranslationOutMsgC);
-}
-
 /*! This method resets required module variables and checks the input messages to ensure they are linked.
  @return void
  @param callTime [ns] Time the method is called
 */
 void PrescribedLinearTranslation::Reset(uint64_t callTime) {
     if (!this->linearTranslationRigidBodyInMsg.isLinked()) {
-        _bskLog(this->bskLogger,
-                BSK_ERROR,
-                "prescribedLinearTranslation.linearTranslationRigidBodyInMsg wasn't connected.");
+        this->bskLogger->bskLog(BSK_ERROR, "prescribedLinearTranslation.linearTranslationRigidBodyInMsg wasn't connected.");
     }
 
     this->tInit = 0.0;
@@ -58,7 +49,6 @@ void PrescribedLinearTranslation::UpdateState(uint64_t callTime) {
     // Read the input message
     LinearTranslationRigidBodyMsgPayload linearTranslationRigidBodyIn;
     if (this->linearTranslationRigidBodyInMsg.isWritten()) {
-        linearTranslationRigidBodyIn = LinearTranslationRigidBodyMsgPayload();
         linearTranslationRigidBodyIn = this->linearTranslationRigidBodyInMsg();
     }
 
@@ -638,10 +628,7 @@ void PrescribedLinearTranslation::computeTranslationComplete() {
 */
 void PrescribedLinearTranslation::writeOutputMessages(uint64_t callTime) {
     // Create the output buffer message
-    PrescribedTranslationMsgPayload prescribedTranslationMsgOut;
-
-    // Zero the output messages
-    prescribedTranslationMsgOut = PrescribedTranslationMsgPayload();
+    PrescribedTranslationMsgPayload prescribedTranslationMsgOut{};
 
     // Compute the translational body position relative to the mount frame M expressed in M frame components
     Eigen::Vector3d r_FM_M = this->transPos * this->transHat_M;  // [m]
@@ -659,8 +646,6 @@ void PrescribedLinearTranslation::writeOutputMessages(uint64_t callTime) {
 
     // Write the output messages
     this->prescribedTranslationOutMsg.write(&prescribedTranslationMsgOut, this->moduleID, callTime);
-    PrescribedTranslationMsg_C_write(&prescribedTranslationMsgOut,
-                                     &prescribedTranslationOutMsgC, this->moduleID, callTime);
 }
 
 /*! Setter method for the coast option bang duration.

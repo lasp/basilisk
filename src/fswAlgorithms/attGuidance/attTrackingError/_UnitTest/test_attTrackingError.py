@@ -75,7 +75,7 @@ def subModuleTestFunction(show_plots):
 
 
     # Construct algorithm and associated C++ container
-    module = attTrackingError.attTrackingError()
+    module = attTrackingError.AttTrackingError()
     module.ModelTag = "attTrackingError"
 
     # Add test module to runtime call list

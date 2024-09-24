@@ -22,10 +22,12 @@
 
 #include <stdint.h>
 
-#include "cMsgCInterface/THRArrayConfigMsg_C.h"
-#include "cMsgCInterface/THRArrayCmdForceMsg_C.h"
-#include "cMsgCInterface/THRArrayOnTimeCmdMsg_C.h"
-#include "cMsgCInterface/CmdTorqueBodyMsg_C.h"
+#include "architecture/_GeneralModuleFiles/sys_model.h"
+#include "architecture/messaging/messaging.h"
+#include "architecture/msgPayloadDefC/THRArrayConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/THRArrayCmdForceMsgPayload.h"
+#include "architecture/msgPayloadDefC/THRArrayOnTimeCmdMsgPayload.h"
+#include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
 
 #include "architecture/utilities/bskLogging.h"
 
@@ -33,11 +35,14 @@
 
 /*! @brief thruster force momentum dumping module configuration message
  */
-typedef struct {
+class ThrMomentumDumping : public SysModel {
+public:
+    void Reset(uint64_t callTime) override;
+    void UpdateState(uint64_t callTime) override;
     /* declare module private variables */
     int32_t     thrDumpingCounter;                      //!<        counter to specify after how many contro period a thruster firing should occur.
     double      Delta_p[MAX_EFF_CNT];                   //!<        vector of desired total thruster impulses
-    uint64_t    lastDeltaHInMsgTime;                    //!<        time tag of the last momentum change input message 
+    uint64_t    lastDeltaHInMsgTime;                    //!<        time tag of the last momentum change input message
     double      thrOnTimeRemaining[MAX_EFF_CNT];        //!<        vector of remaining thruster on times
     uint64_t    priorTime;                              //!< [ns]   Last time the attitude control is called
     int         numThrusters;                           //!<        number of thrusters installed
@@ -48,25 +53,12 @@ typedef struct {
     double      thrMinFireTime;                         //!< [s]    smallest thruster firing time
 
     /* declare module IO interfaces */
-    THRArrayOnTimeCmdMsg_C thrusterOnTimeOutMsg;        //!< thruster on time output message name
-    THRArrayCmdForceMsg_C thrusterImpulseInMsg;         //!< desired thruster impulse input message name
-    THRArrayConfigMsg_C thrusterConfInMsg;              //!< The name of the thruster configuration Input message
-    CmdTorqueBodyMsg_C deltaHInMsg;                     //!< The name of the requested momentum change input message
+    Message<THRArrayOnTimeCmdMsgPayload> thrusterOnTimeOutMsg;        //!< thruster on time output message name
+    ReadFunctor<THRArrayCmdForceMsgPayload> thrusterImpulseInMsg;         //!< desired thruster impulse input message name
+    ReadFunctor<THRArrayConfigMsgPayload> thrusterConfInMsg;              //!< The name of the thruster configuration Input message
+    ReadFunctor<CmdTorqueBodyMsgPayload> deltaHInMsg;                     //!< The name of the requested momentum change input message
 
-    BSKLogger *bskLogger;                             //!< BSK Logging
-}thrMomentumDumpingConfig;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    void SelfInit_thrMomentumDumping(thrMomentumDumpingConfig *configData, int64_t moduleID);
-    void Update_thrMomentumDumping(thrMomentumDumpingConfig *configData, uint64_t callTime, int64_t moduleID);
-    void Reset_thrMomentumDumping(thrMomentumDumpingConfig *configData, uint64_t callTime, int64_t moduleID);
-    
-#ifdef __cplusplus
-}
-#endif
-
+    BSKLogger bskLogger={};                             //!< BSK Logging
+};
 
 #endif

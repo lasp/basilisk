@@ -56,55 +56,55 @@ class BSKFswModels:
         self.processTasksTimeStep = mc.sec2nano(fswRate)
 
         # Create module data and module wraps
-        self.inertial3D = inertial3D.inertial3D()
+        self.inertial3D = inertial3D.Inertial3D()
         self.inertial3D.ModelTag = "inertial3D"
 
-        self.hillPoint = hillPoint.hillPoint()
+        self.hillPoint = hillPoint.HillPoint()
         self.hillPoint.ModelTag = "hillPoint"
 
-        self.sunSafePoint = sunSafePoint.sunSafePoint()
+        self.sunSafePoint = sunSafePoint.SunSafePoint()
         self.sunSafePoint.ModelTag = "sunSafePoint"
 
-        self.velocityPoint = velocityPoint.velocityPoint()
+        self.velocityPoint = velocityPoint.VelocityPoint()
         self.velocityPoint.ModelTag  = "velocityPoint"
 
-        self.dvPoint = dvGuidance.dvGuidance()
+        self.dvPoint = dvGuidance.DvGuidance()
         self.dvPoint.ModelTag = "dvPoint"
 
-        self.cssWlsEst = cssWlsEst.cssWlsEst()
+        self.cssWlsEst = cssWlsEst.CssWlsEst()
         self.cssWlsEst.ModelTag = "cssWlsEst"
 
-        self.attRefCorrection = attRefCorrection.attRefCorrection()
+        self.attRefCorrection = attRefCorrection.AttRefCorrection()
         self.attRefCorrection.ModelTag = "attRefCorrection"
 
-        self.trackingError = attTrackingError.attTrackingError()
+        self.trackingError = attTrackingError.AttTrackingError()
         self.trackingError.ModelTag = "trackingError"
 
-        self.mrpFeedbackControl = mrpFeedback.mrpFeedback()
+        self.mrpFeedbackControl = mrpFeedback.MrpFeedback()
         self.mrpFeedbackControl.ModelTag = "mrpFeedbackControl"
 
-        self.mrpFeedbackRWs = mrpFeedback.mrpFeedback()
+        self.mrpFeedbackRWs = mrpFeedback.MrpFeedback()
         self.mrpFeedbackRWs.ModelTag = "mrpFeedbackRWs"
 
-        self.mrpFeedbackTHs = mrpFeedback.mrpFeedback()
+        self.mrpFeedbackTHs = mrpFeedback.MrpFeedback()
         self.mrpFeedbackTHs.ModelTag = "mrpFeedbackTHs"
 
-        self.mrpSteering = mrpSteering.mrpSteering()
+        self.mrpSteering = mrpSteering.MrpSteering()
         self.mrpSteering.ModelTag = "MRP_Steering"
 
-        self.rateServo = rateServoFullNonlinear.rateServoFullNonlinear()
+        self.rateServo = rateServoFullNonlinear.RateServoFullNonlinear()
         self.rateServo.ModelTag = "rate_servo"
 
-        self.rwMotorTorque = rwMotorTorque.rwMotorTorque()
+        self.rwMotorTorque = rwMotorTorque.RwMotorTorque()
         self.rwMotorTorque.ModelTag = "rwMotorTorque"
 
-        self.thrForceMapping = thrForceMapping.thrForceMapping()
+        self.thrForceMapping = thrForceMapping.ThrForceMapping()
         self.thrForceMapping.ModelTag = "thrForceMapping"
 
-        self.thrFiringRemainder = thrFiringRemainder.thrFiringRemainder()
+        self.thrFiringRemainder = thrFiringRemainder.ThrFiringRemainder()
         self.thrFiringRemainder.ModelTag = "thrFiringRemainder"
 
-        self.dvManeuver = dvExecuteGuidance.dvExecuteGuidance()
+        self.dvManeuver = dvExecuteGuidance.DvExecuteGuidance()
         self.dvManeuver.ModelTag = "dvManeuver"
 
         self.lambertPlannerObject = lambertPlanner.LambertPlanner()
@@ -285,44 +285,44 @@ class BSKFswModels:
     def SetInertial3DPointGuidance(self):
         """Define the inertial 3D guidance module"""
         self.inertial3D.sigma_R0N = [0.2, 0.4, 0.6]
-        messaging.AttRefMsg_C_addAuthor(self.inertial3D.attRefOutMsg, self.attRefMsg)
+        self.inertial3D.attRefOutMsg = self.attRefMsg
 
     def SetHillPointGuidance(self, SimBase):
         """Define the Hill pointing guidance module"""
         self.hillPoint.transNavInMsg.subscribeTo(SimBase.DynModels.simpleNavObject.transOutMsg)
         self.hillPoint.celBodyInMsg.subscribeTo(SimBase.DynModels.EarthEphemObject.ephemOutMsgs[0])  # earth
-        messaging.AttRefMsg_C_addAuthor(self.hillPoint.attRefOutMsg, self.attRefMsg)
+        self.hillPoint.attRefOutMsg = self.attRefMsg
 
     def SetSunSafePointGuidance(self, SimBase):
         """Define the sun safe pointing guidance module"""
         self.sunSafePoint.imuInMsg.subscribeTo(SimBase.DynModels.simpleNavObject.attOutMsg)
         self.sunSafePoint.sunDirectionInMsg.subscribeTo(self.cssWlsEst.navStateOutMsg)
         self.sunSafePoint.sHatBdyCmd = [0.0, 0.0, 1.0]
-        messaging.AttGuidMsg_C_addAuthor(self.sunSafePoint.attGuidanceOutMsg, self.attGuidMsg)
+        self.sunSafePoint.attGuidanceOutMsg = self.attGuidMsg
 
     def SetVelocityPointGuidance(self, SimBase):
         """Define the velocity pointing guidance module"""
         self.velocityPoint.transNavInMsg.subscribeTo(SimBase.DynModels.simpleNavObject.transOutMsg)
         self.velocityPoint.celBodyInMsg.subscribeTo(SimBase.DynModels.EarthEphemObject.ephemOutMsgs[0])
         self.velocityPoint.mu = SimBase.DynModels.gravFactory.gravBodies['earth'].mu
-        messaging.AttRefMsg_C_addAuthor(self.velocityPoint.attRefOutMsg, self.attRefMsg)
+        self.velocityPoint.attRefOutMsg = self.attRefMsg
 
     def SetDvPointGuidance(self):
         """Define the Delta-V pointing guidance module"""
         self.dvPoint.burnDataInMsg.subscribeTo(self.dvBurnCmdMsg)
-        messaging.AttRefMsg_C_addAuthor(self.dvPoint.attRefOutMsg, self.attRefMsg)
+        self.dvPoint.attRefOutMsg = self.attRefMsg
 
     def SetAttRefCorrection(self):
         """Define the attitude reference correction module"""
         self.attRefCorrection.sigma_BcB = [0., 0., 0.]
         self.attRefCorrection.attRefInMsg.subscribeTo(self.attRefMsg)
-        messaging.AttRefMsg_C_addAuthor(self.attRefCorrection.attRefOutMsg, self.attRefMsg)
+        self.attRefCorrection.attRefOutMsg = self.attRefMsg
 
     def SetAttitudeTrackingError(self, SimBase):
         """Define the attitude tracking error module"""
         self.trackingError.attNavInMsg.subscribeTo(SimBase.DynModels.simpleNavObject.attOutMsg)
         self.trackingError.attRefInMsg.subscribeTo(self.attRefMsg)
-        messaging.AttGuidMsg_C_addAuthor(self.trackingError.attGuidOutMsg, self.attGuidMsg)
+        self.trackingError.attGuidOutMsg = self.attGuidMsg
 
     def SetCSSWlsEst(self, SimBase):
         """Set the FSW CSS configuration information """
@@ -355,7 +355,7 @@ class BSKFswModels:
         """Set the MRP feedback module configuration"""
         self.mrpFeedbackControl.guidInMsg.subscribeTo(self.attGuidMsg)
         self.mrpFeedbackControl.vehConfigInMsg.subscribeTo(self.vcMsg)
-        messaging.CmdTorqueBodyMsg_C_addAuthor(self.mrpFeedbackControl.cmdTorqueOutMsg, self.cmdTorqueDirectMsg)
+        self.mrpFeedbackControl.cmdTorqueOutMsg = self.cmdTorqueDirectMsg
 
         self.mrpFeedbackControl.K = 3.5
         self.mrpFeedbackControl.Ki = -1.0  # Note: make value negative to turn off integral feedback
@@ -373,7 +373,7 @@ class BSKFswModels:
         self.mrpFeedbackRWs.rwSpeedsInMsg.subscribeTo(SimBase.DynModels.rwStateEffector.rwSpeedOutMsg)
         self.mrpFeedbackRWs.rwParamsInMsg.subscribeTo(self.fswRwConfigMsg)
         self.mrpFeedbackRWs.guidInMsg.subscribeTo(self.attGuidMsg)
-        messaging.CmdTorqueBodyMsg_C_addAuthor(self.mrpFeedbackRWs.cmdTorqueOutMsg, self.cmdTorqueMsg)
+        self.mrpFeedbackRWs.cmdTorqueOutMsg = self.cmdTorqueMsg
 
     def SetMRPFeedbackTH(self, SimBase):
         """Set the MRP feedback information if Thrusters are considered"""
@@ -384,7 +384,7 @@ class BSKFswModels:
 
         self.mrpFeedbackTHs.vehConfigInMsg.subscribeTo(self.vcMsg)
         self.mrpFeedbackTHs.guidInMsg.subscribeTo(self.attGuidMsg)
-        messaging.CmdTorqueBodyMsg_C_addAuthor(self.mrpFeedbackTHs.cmdTorqueOutMsg, self.cmdTorqueMsg)
+        self.mrpFeedbackTHs.cmdTorqueOutMsg = self.cmdTorqueMsg
 
     def SetMRPSteering(self):
         """Set the MRP Steering module"""
@@ -401,7 +401,7 @@ class BSKFswModels:
         self.rateServo.rwParamsInMsg.subscribeTo(self.fswRwConfigMsg)
         self.rateServo.rwSpeedsInMsg.subscribeTo(SimBase.DynModels.rwStateEffector.rwSpeedOutMsg)
         self.rateServo.rateSteeringInMsg.subscribeTo(self.mrpSteering.rateCmdOutMsg)
-        messaging.CmdTorqueBodyMsg_C_addAuthor(self.rateServo.cmdTorqueOutMsg, self.cmdTorqueMsg)
+        self.rateServo.cmdTorqueOutMsg = self.cmdTorqueMsg
 
         self.rateServo.Ki = 5.0
         self.rateServo.P = 150.0
@@ -440,7 +440,7 @@ class BSKFswModels:
         ]
         self.rwMotorTorque.controlAxes_B = controlAxes_B
         self.rwMotorTorque.vehControlInMsg.subscribeTo(self.cmdTorqueMsg)
-        messaging.ArrayMotorTorqueMsg_C_addAuthor(self.rwMotorTorque.rwMotorTorqueOutMsg, self.cmdRwMotorMsg)
+        self.rwMotorTorque.rwMotorTorqueOutMsg = self.cmdRwMotorMsg
         self.rwMotorTorque.rwParamsInMsg.subscribeTo(self.fswRwConfigMsg)
 
     def SetThrConfigMsg(self):
@@ -515,15 +515,15 @@ class BSKFswModels:
         self.thrFiringRemainder.thrConfInMsg.subscribeTo(self.fswThrConfigMsg)
         self.thrFiringRemainder.thrForceInMsg.subscribeTo(self.thrForceMapping.thrForceCmdOutMsg)
         if self.useDvThrusters:
-            messaging.THRArrayOnTimeCmdMsg_C_addAuthor(self.thrFiringRemainder.onTimeOutMsg, self.dvOnTimeCmdMsg)
+            self.thrFiringRemainder.onTimeOutMsg = self.dvOnTimeCmdMsg
         else:
-            messaging.THRArrayOnTimeCmdMsg_C_addAuthor(self.thrFiringRemainder.onTimeOutMsg, self.acsOnTimeCmdMsg)
+            self.thrFiringRemainder.onTimeOutMsg = self.acsOnTimeCmdMsg
 
     def SetDvManeuver(self, SimBase):
         """Set the Dv Burn Maneuver information"""
         self.dvManeuver.navDataInMsg.subscribeTo(SimBase.DynModels.simpleNavObject.transOutMsg)
         self.dvManeuver.burnDataInMsg.subscribeTo(self.dvBurnCmdMsg)
-        messaging.THRArrayOnTimeCmdMsg_C_addAuthor(self.dvManeuver.thrCmdOutMsg, self.dvOnTimeCmdMsg)
+        self.dvManeuver.thrCmdOutMsg = self.dvOnTimeCmdMsg
 
     def SetLambertPlannerObject(self, SimBase):
         """Set the lambert planner object."""
@@ -595,13 +595,13 @@ class BSKFswModels:
     def setupGatewayMsgs(self, SimBase):
         """create C-wrapped gateway messages such that different modules can write to this message
         and provide a common input msg for down-stream modules"""
-        self.cmdTorqueMsg = messaging.CmdTorqueBodyMsg_C()
-        self.cmdTorqueDirectMsg = messaging.CmdTorqueBodyMsg_C()
-        self.attRefMsg = messaging.AttRefMsg_C()
-        self.attGuidMsg = messaging.AttGuidMsg_C()
-        self.cmdRwMotorMsg = messaging.ArrayMotorTorqueMsg_C()
-        self.acsOnTimeCmdMsg = messaging.THRArrayOnTimeCmdMsg_C()
-        self.dvOnTimeCmdMsg = messaging.THRArrayOnTimeCmdMsg_C()
+        self.cmdTorqueMsg = messaging.CmdTorqueBodyMsg()
+        self.cmdTorqueDirectMsg = messaging.CmdTorqueBodyMsg()
+        self.attRefMsg = messaging.AttRefMsg()
+        self.attGuidMsg = messaging.AttGuidMsg()
+        self.cmdRwMotorMsg = messaging.ArrayMotorTorqueMsg()
+        self.acsOnTimeCmdMsg = messaging.THRArrayOnTimeCmdMsg()
+        self.dvOnTimeCmdMsg = messaging.THRArrayOnTimeCmdMsg()
 
         # C++ wrapped gateway messages
         self.dvBurnCmdMsg = messaging.DvBurnCmdMsg()

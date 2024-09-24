@@ -54,9 +54,9 @@ from Basilisk.architecture.swig_common_model import *
 %include "swig_conly_data.i"
 
 %include "architecture/msgPayloadDefC/PowerNodeUsageMsgPayload.h"
-struct PowerNodeUsageMsg_C;
+
 %include "architecture/msgPayloadDefC/PowerStorageStatusMsgPayload.h"
-struct PowerStorageStatusMsg_C;
+
 
 %pythoncode %{
 import sys

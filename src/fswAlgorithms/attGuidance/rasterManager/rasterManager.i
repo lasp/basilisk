@@ -21,11 +21,16 @@
    #include "rasterManager.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap(rasterManager);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "rasterManager.h"
 
 %include "architecture/msgPayloadDefC/AttStateMsgPayload.h"
-struct AttStateMsg_C;
 
 %pythoncode %{
 import sys

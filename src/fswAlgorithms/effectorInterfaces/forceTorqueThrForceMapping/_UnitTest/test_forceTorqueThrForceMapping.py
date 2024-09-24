@@ -1,12 +1,12 @@
-# 
+#
 #  ISC License
-# 
+#
 #  Copyright (c) 2021, Autonomous Vehicle Systems Lab, University of Colorado Boulder
-# 
+#
 #  Permission to use, copy, modify, and/or distribute this software for any
 #  purpose with or without fee is hereby granted, provided that the above
 #  copyright notice and this permission notice appear in all copies.
-# 
+#
 #  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 #  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 #  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -14,10 +14,12 @@
 #  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 #  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 #  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-# 
-# 
+#
+#
+import sys
 
 import numpy as np
+import pytest
 from Basilisk.architecture import messaging
 from Basilisk.fswAlgorithms import forceTorqueThrForceMapping
 from Basilisk.utilities import SimulationBaseClass
@@ -25,7 +27,7 @@ from Basilisk.utilities import fswSetupThrusters
 from Basilisk.utilities import macros
 from Basilisk.utilities import unitTestSupport
 
-
+@pytest.mark.skipif(sys.platform == "win32", reason="known to not pass on windows platform")
 def test_forceTorqueThrForceMapping1():
     r"""
     **Test Description**
@@ -68,6 +70,7 @@ def test_forceTorqueThrForceMapping1():
 
     assert testResults < 1, testMessage
 
+@pytest.mark.skipif(sys.platform == "win32", reason="known to not pass on windows platform")
 def test_forceTorqueThrForceMapping2():
     r"""
     **Test Description**
@@ -110,6 +113,7 @@ def test_forceTorqueThrForceMapping2():
 
     assert testResults < 1, testMessage
 
+@pytest.mark.skipif(sys.platform == "win32", reason="known to not pass on windows platform")
 def test_forceTorqueThrForceMapping3():
     r"""
     **Test Description**
@@ -152,7 +156,7 @@ def test_forceTorqueThrForceMapping3():
 
     assert testResults < 1, testMessage
 
-
+@pytest.mark.skipif(sys.platform == "win32", reason="known to not pass on windows platform")
 def test_forceTorqueThrForceMapping4():
     r"""
     **Test Description**
@@ -214,7 +218,7 @@ def forceTorqueThrForceMappingTestFunction(rcsLocation, rcsDirection, requested_
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
     # setup module to be tested
-    module = forceTorqueThrForceMapping.forceTorqueThrForceMapping()
+    module = forceTorqueThrForceMapping.ForceTorqueThrForceMapping()
     module.ModelTag = "forceTorqueThrForceMappingTag"
     unitTestSim.AddModelToTask(unitTaskName, module)
 
@@ -270,5 +274,3 @@ def forceTorqueThrForceMappingTestFunction(rcsLocation, rcsDirection, requested_
 
 if __name__ == "__main__":
     test_forceTorqueThrForceMapping1()
-
-

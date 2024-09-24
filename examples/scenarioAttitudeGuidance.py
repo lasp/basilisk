@@ -321,7 +321,7 @@ def run(show_plots, useAltBodyFrame):
     #
 
     # setup hillPoint guidance module
-    attGuidance = hillPoint.hillPoint()
+    attGuidance = hillPoint.HillPoint()
     attGuidance.ModelTag = "hillPoint"
     attGuidance.transNavInMsg.subscribeTo(sNavObject.transOutMsg)
     # if you want to connect attGuidance.celBodyInMsg, then you need a planet ephemeris message of
@@ -333,7 +333,7 @@ def run(show_plots, useAltBodyFrame):
     scSim.AddModelToTask(simTaskName, attGuidance)
 
     # setup the attitude tracking error evaluation module
-    attError = attTrackingError.attTrackingError()
+    attError = attTrackingError.AttTrackingError()
     attError.ModelTag = "attErrorInertial3D"
     scSim.AddModelToTask(simTaskName, attError)
     if useAltBodyFrame:
@@ -342,7 +342,7 @@ def run(show_plots, useAltBodyFrame):
     attError.attNavInMsg.subscribeTo(sNavObject.attOutMsg)
 
     # setup the MRP Feedback control module
-    mrpControl = mrpFeedback.mrpFeedback()
+    mrpControl = mrpFeedback.MrpFeedback()
     mrpControl.ModelTag = "mrpFeedback"
     scSim.AddModelToTask(simTaskName, mrpControl)
     mrpControl.guidInMsg.subscribeTo(attError.attGuidOutMsg)

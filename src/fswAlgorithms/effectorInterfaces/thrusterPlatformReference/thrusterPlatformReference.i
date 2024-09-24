@@ -21,23 +21,22 @@
    #include "thrusterPlatformReference.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap_2(thrusterPlatformReference, ThrusterPlatformReferenceConfig);
+%pythoncode %{
+    from Basilisk.architecture.swig_common_model import *
+%}
+
+%include "sys_model.i"
+%include "swig_conly_data.i"
+
+%include "thrusterPlatformReference.h"
 
 %include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-struct VehicleConfigMsg_C;
 %include "architecture/msgPayloadDefC/THRConfigMsgPayload.h"
-struct THRConfigMsg_C;
 %include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
-struct RWArrayConfigMsg_C;
 %include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
-struct RWSpeedMsg_C;
 %include "architecture/msgPayloadDefC/CmdTorqueBodyMsgPayload.h"
-struct CmdTorqueBodyMsg_C;
 %include "architecture/msgPayloadDefC/HingedRigidBodyMsgPayload.h"
-struct HingedRigidBodyMsg_C;
 %include "architecture/msgPayloadDefC/BodyHeadingMsgPayload.h"
-struct BodyHeadingMsg_C;
 
 %pythoncode %{
 import sys

@@ -32,11 +32,7 @@
 %include "formationBarycenter.h"
 
 %include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
-struct VehicleConfigMsg_C;
-
 %include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-struct NavTransMsg_C;
-
 
 %pythoncode %{
 import sys

@@ -18,19 +18,20 @@
  */
 %module ephemNavConverter
 %{
-   #include "ephemNavConverter.h"   
+   #include "ephemNavConverter.h"
 %}
 
-%include "swig_c_wrap.i"
-%c_wrap_2(ephemNavConverter, EphemNavConverterData);
+%pythoncode %{
+from Basilisk.architecture.swig_common_model import *
+%}
 
+%include "sys_model.i"
+%include "swig_conly_data.i"
+%include "ephemNavConverter.h"
 %include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-struct NavTransMsg_C;
 %include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-struct EphemerisMsg_C;
 
 %pythoncode %{
 import sys
 protectAllClasses(sys.modules[__name__])
 %}
-
