@@ -17,6 +17,7 @@
 #
 import inspect  # Don't worry about this, standard stuff plus file discovery
 import os
+import tempfile
 
 filename = inspect.getframeinfo(inspect.currentframe()).filename
 path = os.path.dirname(os.path.abspath(filename))
@@ -141,7 +142,9 @@ def myDataCallback(monteCarloData, retentionPolicy):
 @pytest.mark.slowtest
 def test_MonteCarloSimulation(show_plots):
     # Test a montecarlo simulation
-    dirName = os.path.abspath(os.path.dirname(__file__)) + "/tmp_montecarlo_test"
+    tempDirectory = tempfile.TemporaryDirectory()
+    dirName = tempDirectory.name
+
     monteCarlo = Controller()
     monteCarlo.setShouldDisperseSeeds(True)
     monteCarlo.setExecutionFunction(myExecutionFunction)
@@ -224,8 +227,8 @@ def test_MonteCarloSimulation(show_plots):
     if show_plots:
         plt.show()
 
-    shutil.rmtree(dirName)
-    assert not os.path.exists(dirName), "No leftover data should exist after the test"
+    # shutil.rmtree(dirName)
+    tempDirectory.cleanup()
 
 
 if __name__ == "__main__":
