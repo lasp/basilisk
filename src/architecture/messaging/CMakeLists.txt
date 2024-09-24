@@ -49,6 +49,7 @@ function(generate_messages searchDir)
               OUTPUT_DIR "${CMAKE_BINARY_DIR}/Basilisk/architecture/messaging/")
 
     add_dependencies(${TARGET_NAME} swigtrick)
+    set_target_properties(${TARGET_NAME} PROPERTIES SWIG_USE_TARGET_INCLUDE_DIRECTORIES TRUE)
     set_target_properties(${TARGET_NAME} PROPERTIES FOLDER "architecture/messaging/derivedCode")
     set_target_properties(${SWIG_MODULE_${TARGET_NAME}_REAL_NAME}
                           PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Basilisk/architecture/messaging")
