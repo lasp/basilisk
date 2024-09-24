@@ -15,6 +15,8 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import numpy as np
+import os
+import tempfile
 
 from Basilisk.simulation import spacecraft
 from Basilisk.utilities import SimulationBaseClass, macros, pyswice_ck_utilities, simIncludeGravBody, RigidBodyKinematics as rbk
@@ -60,10 +62,13 @@ def test_ck_read_write(show_plots):
     timeWrite = scObjectLogger.times()
     sigmaWrite = scObjectLogger.sigma_BN
     omegaWrite = scObjectLogger.omega_BN_B
-    pyswice_ck_utilities.ckWrite("test.bc", timeWrite, sigmaWrite, omegaWrite, timeInit, spacecraft_id=-202)
+
+    tempDirectory = tempfile.TemporaryDirectory()
+    tempFileName = os.path.join(tempDirectory.name, "test.bc")
+    pyswice_ck_utilities.ckWrite(tempFileName, timeWrite, sigmaWrite, omegaWrite, timeInit, spacecraft_id=-202)
 
     # Read the same CK file to check if the values are identical
-    pyswice_ck_utilities.ckInitialize("test.bc")
+    pyswice_ck_utilities.ckInitialize(tempFileName)
     sigmaRead = np.empty_like(sigmaWrite)
     omegaRead = np.empty_like(omegaWrite)
     for idx in range(len(timeWrite)):
