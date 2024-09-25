@@ -115,8 +115,7 @@ public:
     char parentName[MAX_STRING_LENGTH]{};  //!< [-] Name of the parent body to which the camera should be attached
     int cameraIsOn{}; //!< [-] Is the camera currently taking images
     int cameraID{1}; //!< [-] Is the camera currently taking images
-    int resolution[2]{512, 512};         //!< [-] Camera resolution, width/height in pixels (pixelWidth/pixelHeight in Unity) in pixels
-    uint64_t renderRate{};       //!< [ns] Frame time interval at which to capture images in units of nanosecond
+    uint64_t renderRate{static_cast<uint64_t>(60*1E9)};       //!< [ns] Frame time interval at which to capture images in units of nanosecond
     double fieldOfView{0.7};       //!< [r] camera y-axis field of view edge-to-edge
     double cameraPos_B[3]{};     //!< [m] Camera position in body frame
     double sigma_CB[3]{};        //!< [-] MRP defining the orientation of the camera frame relative to the body frame

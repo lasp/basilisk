@@ -36,7 +36,6 @@
 /*! The constructor for the Camera module. It also sets some default values at its creation.  */
 Camera::Camera()
 {
-    this->renderRate = (uint64_t) (60*1E9);
     v3SetZero(this->cameraPos_B);
     v3SetZero(this->sigma_CB);
 }
