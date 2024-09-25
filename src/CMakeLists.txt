@@ -142,7 +142,7 @@ function(generate_package_libraries INIT_DIRECTORY AllLibs)
     # Link all necessary libraries
     target_link_libraries(${LIB_NAME} PUBLIC ArchitectureUtilities)
     target_link_libraries(${LIB_NAME} PRIVATE ModuleIdGenerator)
-    target_link_libraries(${LIB_NAME} PRIVATE Python3::SABIModule)
+    target_link_libraries(${LIB_NAME} PRIVATE Python3::Module)
     target_link_libraries(${LIB_NAME} PRIVATE Eigen3::Eigen3)
 
     # define build location, IDE generation specifications
@@ -269,7 +269,7 @@ function(generate_package_targets TARGET_LIST LIB_DEP_LIST MODULE_DIR)
     foreach(LIB ${LIB_DEP_LIST})
       target_link_libraries(${TARGET_NAME} PRIVATE ${LIB})
     endforeach()
-    target_link_libraries(${TARGET_NAME} PRIVATE Python3::SABIModule)
+    target_link_libraries(${TARGET_NAME} PRIVATE Python3::Module)
 
     if(${MODULE_DIR} STREQUAL "ExternalModules")
       set_target_properties(${TARGET_NAME} PROPERTIES FOLDER ${MODULE_DIR})
@@ -307,7 +307,7 @@ endfunction(generate_package_targets)
 include_directories("${CMAKE_SOURCE_DIR}")
 
 # Start of main projection configuration
-find_package(Python3 REQUIRED COMPONENTS Interpreter Development.SABIModule)
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 
 # Hack the Python3 module link options to *not* use `-undefined dynamic_lookup`.
 # Instead, pass an explicit allowlist of symbols that may be left undefined.
@@ -316,7 +316,7 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter Development.SABIModule)
 # The allowlist is obtained from:
 #    https://github.com/python/cpython/issues/97524#issuecomment-1460492751
 if(APPLE)
-  set_target_properties(Python3::SABIModule PROPERTIES
+  set_target_properties(Python3::Module PROPERTIES
     INTERFACE_LINK_OPTIONS
       "-Wl,@${CMAKE_CURRENT_SOURCE_DIR}/cmake/cpython-exported-symbols"
   )

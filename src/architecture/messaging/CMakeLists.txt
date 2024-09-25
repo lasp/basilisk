@@ -59,7 +59,7 @@ function(generate_messages searchDir)
       ${SWIG_MODULE_${TARGET_NAME}_REAL_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY_RELEASE
                                                          "${CMAKE_BINARY_DIR}/Basilisk/architecture/messaging")
     target_link_libraries(${SWIG_MODULE_${TARGET_NAME}_REAL_NAME} PUBLIC architectureLib)
-    target_link_libraries(${SWIG_MODULE_${TARGET_NAME}_REAL_NAME} PRIVATE Python3::SABIModule)
+    target_link_libraries(${SWIG_MODULE_${TARGET_NAME}_REAL_NAME} PRIVATE Python3::Module)
   endforeach()
 endfunction(generate_messages)
 
