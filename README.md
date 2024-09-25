@@ -2,46 +2,35 @@
 
 ### Basilisk
 
-* [Summary of Basilisk](http://hanspeterschaub.info/basilisk/index.html)
-* [Versions](http://hanspeterschaub.info/basilisk/Support/bskReleaseNotes.html)
+* [Summary of Basilisk](docs/source/index.rst)
 
 ### How do I get set up?
 The following links contain installation instructions for the supported platforms:
 
-- [Setup a macOS Development Environment](http://hanspeterschaub.info/basilisk/Install/installOnMacOS.html)
+- [Setup a macOS Development Environment](docs/source/Install/installOnMacOS.rst)
 
-- [Setup a Linux Development Environment](http://hanspeterschaub.info/basilisk/Install/installOnLinux.html)
+- [Setup a Linux Development Environment](docs/source/Install/installOnLinux.rst)
 
-- [Setup a Windows Development Environment](http://hanspeterschaub.info/basilisk/Install/installOnWindows.html)
+- [Setup a Windows Development Environment](docs/source/Install/installOnWindows.rst)
 
 
 
 ### Basilisk Development guidelines
-
-* [Coding Guidelines](http://hanspeterschaub.info/basilisk/Support/Developer/CodingGuidlines.html)
+* [Contributing](CONTRIBUTING.md)
+* [Coding Guidelines](docs/source/Support/Developer/CodingGuidlines.rst)
 
 
 ### Getting Started
-To get started with Basilisk (BSK), several tutorial python files are provided in the installed package.  Within this 
-web page documentation site, they are listed and discussed in the <a href="modules.html">Manual</a> tab.  The 
-documentation lists the scenarios in an order that facilitates learning basic BSK features. In the source code they 
+To get started with Basilisk, several tutorials are provided. The 
+documentation lists the scenarios in an order that facilitates learning basic Basilisk features. In the source code they 
 are stored under `src\examples\`. A good start would be to run `scenarioBasicOrbit.py`.
 
-To play with the tutorials, it is suggested the user makes a copy of these tutorial files, and use the copies in order 
-to learn, test and experiment. To copy them, first find the location of the Basilisk installation. After installing, 
-you can find the installed location of Basilisk by opening a python interpreter and running:
+To run with the tutorials, it is suggested the user makes a copy of these tutorial files, and use the copies in order 
+to learn, test and experiment. Copy the folder `{basiliskPath}/src/examples` into a new folder, and change to that 
+directory.
 
-```
-import Basilisk
-basiliskPath = Basilisk.__path__[0]
-print(basiliskPath)
-```
-
-Now copy the folder `{basiliskPath}/src/examples` into a new folder, and change to that directory.
-
-To run the default scenario 1 of scenarioBasicOrbit, in the directory of the copied tutorials, call the python 
+To run the default scenario of `scenarioBasicOrbit`, in the directory of the copied tutorials, execute the python 
 script: `python3 scenarioBasicOrbit.py`
-
 
 Now, when you want to use a tutorial, navigate inside that folder, and edit and execute the *copied* integrated tests.
 
@@ -58,4 +47,4 @@ This is in development, but does provide a 3D view of many of the simulation sta
 
 ### Who do I talk to?
 
-Questions and answers are fielded in the project's [Github Discussions](https://github.com/AVSLab/basilisk/discussions).
+Questions and answers are fielded in the project's [Github Discussions](https://github.com/lasp/basilisk/discussions).
