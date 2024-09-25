@@ -27,11 +27,12 @@
  */
 
 /* modify the path to reflect the new module names */
-#include <string.h>
 #include "camera.h"
-#include "architecture/utilities/rigidBodyKinematics.h"
-#include "architecture/utilities/linearAlgebra.h"
 #include "architecture/utilities/astroConstants.h"
+#include "architecture/utilities/avsEigenSupport.h"
+#include "architecture/utilities/linearAlgebra.h"
+#include "architecture/utilities/rigidBodyKinematics.h"
+#include <string.h>
 
 /*! The constructor for the Camera module. It also sets some default values at its creation.  */
 Camera::Camera()
