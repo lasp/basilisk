@@ -548,6 +548,8 @@ void fillPyObjList<Eigen::Quaterniond>(PyObject *input, const Eigen::Quaterniond
 //      foo(MatrixXi)
 //      foo(MatrixXd)
 
+EIGEN_MAT_WRAP(Eigen::Vector2i, 157)
+EIGEN_MAT_WRAP(Eigen::Vector2d, 157)
 EIGEN_MAT_WRAP(Eigen::Vector3i, 158)
 EIGEN_MAT_WRAP(Eigen::Vector3d, 159)
 EIGEN_MAT_WRAP(Eigen::Matrix3d, 159)
