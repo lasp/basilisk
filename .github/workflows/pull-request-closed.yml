@@ -1,6 +1,6 @@
 name: "Rebuild default Conan cache"
 on:
-  pull_request:
+  pull_request_target:
     types:
       - closed
     branches:
