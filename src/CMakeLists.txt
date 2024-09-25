@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.24)
 
 project("basilisk")
 
@@ -9,12 +9,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif(NOT CMAKE_BUILD_TYPE)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}/conan")
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
-
-list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/conan")
 
 include(bskTargetExcludeBuildOptions)
 
@@ -71,9 +66,9 @@ function(create_symlinks destinationPath)
 endfunction(create_symlinks)
 
 function(add_message_headers)
-  file(GLOB CMESSAGE_HEADER_FILES "${CMAKE_SOURCE_DIR}/architecture/msgPayloadDefC/*.h"
+  file(GLOB CMESSAGE_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/architecture/msgPayloadDefC/*.h"
        "${EXTERNAL_MODULES_PATH}/msgPayloadDefC/*.h")
-  file(GLOB CPPMESSAGE_HEADER_FILES "${CMAKE_SOURCE_DIR}/architecture/msgPayloadDefCpp/*.h"
+  file(GLOB CPPMESSAGE_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/architecture/msgPayloadDefCpp/*.h"
        "${EXTERNAL_MODULES_PATH}/msgPayloadDefCpp/*.h")
   add_custom_target(msgPayloadDefC SOURCES ${CMESSAGE_HEADER_FILES})
   add_custom_target(msgPayloadDefCpp SOURCES ${CPPMESSAGE_HEADER_FILES})
@@ -124,14 +119,14 @@ function(generate_package_libraries INIT_DIRECTORY AllLibs)
     # Added to build ExternalModulesLib
     file(
       GLOB LIB_DIR
-      RELATIVE ${CMAKE_SOURCE_DIR}
+      RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
       "${INIT_DIRECTORY}/${LIB_DIR}")
     # Grab the library source files
     file(GLOB C_FILES "${LIB_DIR}/*.cpp" "${LIB_DIR}/*.c" "${LIB_DIR}/*.h")
     # Grab the framework source files
-    file(GLOB BSK_FWK_FILES "${CMAKE_SOURCE_DIR}/architecture/_GeneralModuleFiles/*.cpp" # Might not be needed
-         "${CMAKE_SOURCE_DIR}/architecture/_GeneralModuleFiles/*.h"
-         "${CMAKE_SOURCE_DIR}/architecture/_GeneralModuleFiles/*.c")
+    file(GLOB BSK_FWK_FILES "${CMAKE_CURRENT_SOURCE_DIR}/architecture/_GeneralModuleFiles/*.cpp" # Might not be needed
+         "${CMAKE_CURRENT_SOURCE_DIR}/architecture/_GeneralModuleFiles/*.h"
+         "${CMAKE_CURRENT_SOURCE_DIR}/architecture/_GeneralModuleFiles/*.c")
 
     # Add Target
     add_library(${LIB_NAME} SHARED ${C_FILES} ${BSK_FWK_FILES})
@@ -143,7 +138,7 @@ function(generate_package_libraries INIT_DIRECTORY AllLibs)
     target_link_libraries(${LIB_NAME} PUBLIC ArchitectureUtilities)
     target_link_libraries(${LIB_NAME} PRIVATE ModuleIdGenerator)
     target_link_libraries(${LIB_NAME} PRIVATE Python3::Module)
-    target_link_libraries(${LIB_NAME} PRIVATE Eigen3::Eigen3)
+    target_link_libraries(${LIB_NAME} PRIVATE Eigen3::Eigen)
 
     # define build location, IDE generation specifications
     set_target_properties(${LIB_NAME} PROPERTIES FOLDER ${PARENT_DIR})
@@ -170,7 +165,7 @@ endfunction(generate_package_libraries)
 function(find_package_targets PKG_DIR ALL_TARGET_LIST)
   file(
     GLOB_RECURSE SWIG_TARGETS
-    RELATIVE ${CMAKE_SOURCE_DIR}
+    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     "${PKG_DIR}/*.i")
   set(${ALL_TARGET_LIST}
       ${SWIG_TARGETS}
@@ -187,10 +182,10 @@ function(generate_package_targets TARGET_LIST LIB_DEP_LIST MODULE_DIR)
     file(
       GLOB
       GEN_FILES
-      "${CMAKE_SOURCE_DIR}/architecture/_GeneralModuleFiles/*.c"
-      "${CMAKE_SOURCE_DIR}/architecture/_GeneralModuleFiles/*.cpp"
-      "${CMAKE_SOURCE_DIR}/architecture/_GeneralModuleFiles/*.h"
-      "${CMAKE_SOURCE_DIR}/architecture/_GeneralModuleFiles/*.i")
+      "${CMAKE_CURRENT_SOURCE_DIR}/architecture/_GeneralModuleFiles/*.c"
+      "${CMAKE_CURRENT_SOURCE_DIR}/architecture/_GeneralModuleFiles/*.cpp"
+      "${CMAKE_CURRENT_SOURCE_DIR}/architecture/_GeneralModuleFiles/*.h"
+      "${CMAKE_CURRENT_SOURCE_DIR}/architecture/_GeneralModuleFiles/*.i")
 
     if(${MODULE_DIR} STREQUAL "ExternalModules")
       file(
@@ -250,19 +245,19 @@ function(generate_package_targets TARGET_LIST LIB_DEP_LIST MODULE_DIR)
               "${CMAKE_BINARY_DIR}/Basilisk/${MODULE_DIR}") # generated .py file
 
     # Collect any external dependencies
-    if(EXISTS "${CMAKE_SOURCE_DIR}/${PARENT_DIR}/Custom.cmake")
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${PARENT_DIR}/Custom.cmake")
       message(STATUS "Including custom Custom.cmake for: ${TARGET_FILE}")
       include("${PARENT_DIR}/Custom.cmake")
     endif()
 
     target_include_directories(
-      ${TARGET_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/${PARENT_DIR}) # Exposes module .h files to the PYTHON_wrap.c(xx) file
+      ${TARGET_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/${PARENT_DIR}) # Exposes module .h files to the PYTHON_wrap.c(xx) file
                                                                 # (not located in src)
-    target_include_directories(${TARGET_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/fswAlgorithms/_GeneralModuleFiles")
+    target_include_directories(${TARGET_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/fswAlgorithms/_GeneralModuleFiles")
 
-    target_include_directories(${TARGET_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/architecture/_GeneralModuleFiles"
+    target_include_directories(${TARGET_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/architecture/_GeneralModuleFiles"
     )# Exposes framework files for easy includes
-    target_include_directories(${TARGET_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/../libs") # Exposes third party library
+    target_include_directories(${TARGET_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../libs") # Exposes third party library
                                                                                      # include folders
 
     # Link all necessary libraries
@@ -304,7 +299,7 @@ function(generate_package_targets TARGET_LIST LIB_DEP_LIST MODULE_DIR)
 endfunction(generate_package_targets)
 
 # add header search directories
-include_directories("${CMAKE_SOURCE_DIR}")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
 # Start of main projection configuration
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
@@ -339,7 +334,7 @@ include(GoogleTest)
 enable_testing()
 
 # Check if the large Spice files are present.  If not, download from JPL site directly
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/../supportData/EphemerisData/de430.bsp")
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../supportData/EphemerisData/de430.bsp")
   message(STATUS "File de430.bsp not found, downloading file:")
   file(DOWNLOAD
           "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de430.bsp"
@@ -354,7 +349,7 @@ if(NOT EXISTS "${CMAKE_SOURCE_DIR}/../supportData/EphemerisData/de430.bsp")
     message(FATAL_ERROR "Failed downloading de430.bsp with error code: ${RESULT_CODE} : ${RESULT_MESSAGE}.")
   endif()
   # Move the SPICE file into the appropriate directory.
-  file(RENAME "${CMAKE_BINARY_DIR}/data/de430.bsp" "${CMAKE_SOURCE_DIR}/../supportData/EphemerisData/de430.bsp")
+  file(RENAME "${CMAKE_BINARY_DIR}/data/de430.bsp" "${CMAKE_CURRENT_SOURCE_DIR}/../supportData/EphemerisData/de430.bsp")
 else()
   message(STATUS "Found Spice files.")
 endif ()
@@ -373,8 +368,8 @@ else()
       "$<$<CONFIG:RelWithDebInfo>:${Eigen3_INCLUDE_DIRS_RELEASE}>"
       "$<$<CONFIG:MinSizeRel>:${Eigen3_INCLUDE_DIRS_RELEASE}>")
 endif()
-set_property(TARGET Eigen3::Eigen3 PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${DIRECTORIES})
-link_libraries(Eigen3::Eigen3)
+# set_property(TARGET Eigen3::Eigen PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${DIRECTORIES})
+link_libraries(Eigen3::Eigen)
 
 # Add general compiler flags
 set(CMAKE_MACOSX_RPATH 1)
@@ -458,16 +453,16 @@ endif()
 if(WIN32)
   set(CMAKE_MSVCIDE_RUN_PATH "${CMAKE_BINARY_DIR}/Basilisk")
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS YES)
-  set(library_dependencies ${CMAKE_SOURCE_DIR}/../libs/cspice/lib/cspice_win${_arch_suffix}.lib)
+  set(library_dependencies ${CMAKE_CURRENT_SOURCE_DIR}/../libs/cspice/lib/cspice_win${_arch_suffix}.lib)
   # fix for opencv not finding conan gflags for opencv sfm lib on windows when the finding is fixed, the following line
   # should be removed https://github.com/conan-community/community/issues/210
   list(REMOVE_ITEM CONAN_LIBS opencv_sfm411d multiview)
 
 elseif(APPLE)
   if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm64")
-    set(library_dependencies ${CMAKE_SOURCE_DIR}/../libs/cspice/lib/cspice_osx_arm64.a)
+    set(library_dependencies ${CMAKE_CURRENT_SOURCE_DIR}/../libs/cspice/lib/cspice_osx_arm64.a)
   else()
-    set(library_dependencies ${CMAKE_SOURCE_DIR}/../libs/cspice/lib/cspice_osx.a)
+    set(library_dependencies ${CMAKE_CURRENT_SOURCE_DIR}/../libs/cspice/lib/cspice_osx.a)
   endif()
 
   set(CMAKE_SKIP_BUILD_RPATH FALSE) # use, i.e. don't skip the full RPATH for the build tree
@@ -480,9 +475,9 @@ elseif(APPLE)
   set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 else()
   if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "^(arm64|aarch64)$")
-    set(library_dependencies ${CMAKE_SOURCE_DIR}/../libs/cspice/lib/cspice_arm64.a)
+    set(library_dependencies ${CMAKE_CURRENT_SOURCE_DIR}/../libs/cspice/lib/cspice_arm64.a)
   else()
-    set(library_dependencies ${CMAKE_SOURCE_DIR}/../libs/cspice/lib/cspice.a)
+    set(library_dependencies ${CMAKE_CURRENT_SOURCE_DIR}/../libs/cspice/lib/cspice.a)
   endif()
   set(CMAKE_SKIP_BUILD_RPATH FALSE)
   set(CMAKE_INSTALL_RPATH "\$ORIGIN/../../")
@@ -501,7 +496,7 @@ add_subdirectory("architecture/messaging/")
 # to use target_link_libraries() in a cross platform way to support this (needs full path and custom extensions
 # --.dylib, .lib, .a, etc -- which gets messy in CMake).
 set(AllLibs "")
-generate_package_libraries("${CMAKE_SOURCE_DIR}" "${AllLibs}") # This finds GeneralModuleFiles and generates a library
+generate_package_libraries("${CMAKE_CURRENT_SOURCE_DIR}" "${AllLibs}") # This finds GeneralModuleFiles and generates a library
                                                                # of the parentDirectory name
 
 set(ARCHITECTURE_LIBS architectureLib ArchitectureUtilities ModuleIdGenerator)
@@ -513,16 +508,16 @@ set(ARCHITECTURE_LIBS architectureLib ArchitectureUtilities ModuleIdGenerator)
 # (dynamicsLib), 3) Look for custom CMakeLists.txt to link additional libraries.
 
 # Finds relative path of all .i files within the directory
-find_package_targets("${CMAKE_SOURCE_DIR}/simulation/dynamics" DYN_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/simulation/environment" ENV_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/simulation/onboardDataHandling" DATA_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/simulation/deviceInterface" DEVICE_INTERFACE_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/simulation/power" POWER_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/simulation/navigation" NAV_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/simulation/sensors" SENSORS_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/simulation/simSynch" SIM_SYNCH_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/simulation/vizard" VIZ_INTERFACE_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/simulation/thermal" THERMAL_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/simulation/dynamics" DYN_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/simulation/environment" ENV_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/simulation/onboardDataHandling" DATA_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/simulation/deviceInterface" DEVICE_INTERFACE_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/simulation/power" POWER_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/simulation/navigation" NAV_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/simulation/sensors" SENSORS_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/simulation/simSynch" SIM_SYNCH_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/simulation/vizard" VIZ_INTERFACE_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/simulation/thermal" THERMAL_TARGETS)
 
 if(NOT "${EXTERNAL_MODULES_PATH}" STREQUAL "")
   string(REPLACE "\\" "/" EXTERNAL_MODULES_PATH "${EXTERNAL_MODULES_PATH}")
@@ -547,24 +542,24 @@ generate_package_targets("${VIZ_INTERFACE_TARGETS}" "${ARCHITECTURE_LIBS};" "sim
 generate_package_targets("${THERMAL_TARGETS}" "${ARCHITECTURE_LIBS};" "simulation")
 
 # FSW ALGORITHMS
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/_GeneralModuleFiles" GENERAL_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/attControl" ATT_CONTROL_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/attDetermination" ATT_DET_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/attGuidance" ATT_GUID_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/dvGuidance" DV_GUID_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/effectorInterfaces" EFF_INTERFACES_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/formationFlying" FORM_FLYING_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/fswUtilities" FSW_UTIL_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/imageProcessing" IMAGE_PROC_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/opticalNavigation" OPT_NAV_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/pointCloudProcessing" PNT_CLOUD_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/rwConfigData" RW_CONFIG_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/sensorInterfaces" SENSOR_INTERFACE_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/smallBodyNavigation" SMALLBODY_NAV_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/stateEstimation" STATE_EST_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/orbitControl" ORBIT_CONTROL_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/transDetermination" TRANS_DET_TARGETS)
-find_package_targets("${CMAKE_SOURCE_DIR}/fswAlgorithms/vehicleConfigData" VEH_CONFIG_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/fswAlgorithms/_GeneralModuleFiles" GENERAL_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/fswAlgorithms/attControl" ATT_CONTROL_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/fswAlgorithms/attDetermination" ATT_DET_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/fswAlgorithms/attGuidance" ATT_GUID_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/fswAlgorithms/dvGuidance" DV_GUID_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/fswAlgorithms/effectorInterfaces" EFF_INTERFACES_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/fswAlgorithms/formationFlying" FORM_FLYING_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/fswAlgorithms/fswUtilities" FSW_UTIL_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/fswAlgorithms/imageProcessing" IMAGE_PROC_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/fswAlgorithms/opticalNavigation" OPT_NAV_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/fswAlgorithms/pointCloudProcessing" PNT_CLOUD_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/fswAlgorithms/rwConfigData" RW_CONFIG_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/fswAlgorithms/sensorInterfaces" SENSOR_INTERFACE_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/fswAlgorithms/smallBodyNavigation" SMALLBODY_NAV_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/fswAlgorithms/stateEstimation" STATE_EST_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/fswAlgorithms/orbitControl" ORBIT_CONTROL_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/fswAlgorithms/transDetermination" TRANS_DET_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/fswAlgorithms/vehicleConfigData" VEH_CONFIG_TARGETS)
 
 generate_package_targets("${GENERAL_TARGETS}" "${ARCHITECTURE_LIBS};" "fswAlgorithms")
 generate_package_targets("${ATT_CONTROL_TARGETS}" "${ARCHITECTURE_LIBS};" "fswAlgorithms")
@@ -586,7 +581,7 @@ generate_package_targets("${TRANS_DET_TARGETS}" "transDeterminationLib;${ARCHITE
 generate_package_targets("${VEH_CONFIG_TARGETS}" "${ARCHITECTURE_LIBS};" "fswAlgorithms")
 
 # TEMPLATE MODULES
-find_package_targets("${CMAKE_SOURCE_DIR}/moduleTemplates" TEMPLATE_MODULES_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/moduleTemplates" TEMPLATE_MODULES_TARGETS)
 
 generate_package_targets("${TEMPLATE_MODULES_TARGETS}" "${ARCHITECTURE_LIBS};" "moduleTemplates")
 
@@ -594,11 +589,11 @@ generate_package_targets("${TEMPLATE_MODULES_TARGETS}" "${ARCHITECTURE_LIBS};" "
 add_message_headers()
 
 # ARCHITECTURE
-find_package_targets("${CMAKE_SOURCE_DIR}/architecture" ARCHITECTURE_TARGETS)
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/architecture" ARCHITECTURE_TARGETS)
 generate_package_targets("${ARCHITECTURE_TARGETS}" "${ARCHITECTURE_LIBS};" "architecture")
 
 # Pyswice
-find_package_targets("${CMAKE_SOURCE_DIR}/topLevelModules/pyswice" PYSWICE_TARGETS) # Finds relative path of all .i
+find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/topLevelModules/pyswice" PYSWICE_TARGETS) # Finds relative path of all .i
                                                                                     # files within the directory
 generate_package_targets("${PYSWICE_TARGETS}" "${ARCHITECTURE_LIBS};${library_dependencies}" "topLevelModules")
 
@@ -643,12 +638,12 @@ endforeach()
 
 # symlink utilities into the dist directory TODO: consider making the utilities directory it's own module with
 # associated .i file and many `%pythoncode` directives.
-file(GLOB pythonModules "${CMAKE_SOURCE_DIR}/utilities/*.py" "${CMAKE_SOURCE_DIR}/utilities/**")
+file(GLOB pythonModules "${CMAKE_CURRENT_SOURCE_DIR}/utilities/*.py" "${CMAKE_CURRENT_SOURCE_DIR}/utilities/**")
 create_symlinks("${CMAKE_BINARY_DIR}/Basilisk/utilities" ${pythonModules})
 
 # symlink into package the supportData files to keep
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/Basilisk/supportData")
-file(GLOB dataFiles "${CMAKE_SOURCE_DIR}/../supportData/*")
+file(GLOB dataFiles "${CMAKE_CURRENT_SOURCE_DIR}/../supportData/*")
 create_symlinks("${CMAKE_BINARY_DIR}/Basilisk/supportData" ${dataFiles})
 
 # Tests targets

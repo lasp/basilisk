@@ -38,7 +38,7 @@ foreach(PROTO_DEF ${PROTO_DEFS})
 
   target_link_libraries(${PROTO_TARGET}
     PUBLIC
-      protobuf::protobuf
+      protobuf::libprotobuf
   )
 
   set_target_properties(${PROTO_TARGET} PROPERTIES
