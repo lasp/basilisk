@@ -644,5 +644,3 @@ void Camera::setEnableStrayLight(const bool cameraEnableStrayLight) {
 bool Camera::getEnableStrayLight() const {
     return this->enableStrayLight;
 }
-
-
