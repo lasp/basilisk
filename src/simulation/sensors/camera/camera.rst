@@ -34,6 +34,9 @@ provides information on what this message is used for.
     * - cameraConfigOutMsg
       - :ref:`CameraConfigMsgPayload`
       - camera parameters output message
+    * - cameraConfigOutMsg
+      - :ref:`CameraModelMsgPayload`
+      - updated camera parameters output message
     * - imageOutMsg
       - :ref:`CameraImageMsgPayload`
       - camera output message
