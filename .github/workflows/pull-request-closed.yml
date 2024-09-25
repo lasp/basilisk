@@ -1,26 +1,45 @@
+name: "Rebuild default Conan cache"
 on:
-    pull_request:
-        types:
-            - closed
-        branches:
-            - develop
-
+  pull_request:
+    types:
+      - closed
+    branches:
+      - develop
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
-    if_merged:
-        if: github.event.pull_request.merged == true
-        runs-on: ubuntu-latest
-        steps:
-        - name: Pull repo
-          uses: actions/checkout@v3
-          with:
-            ref: develop
-            fetch-depth: 0 
-            token: ${{ secrets.BOT_ACCESS_TOKEN }}
-        - name: Bump version
-          run: ./.github/workflows/version-bumper.sh ./docs/source/bskVersion.txt
-        - name: Commit and push
-          run: |
-              git config user.name "AVSlabBot"
-              git config user.email "cuavslab@gmail.com"
-              git commit -a -m "[AUTO] Bump version number"
-              git push
+  load-linux-conan-cache:
+    name: "Refresh Conan cache on Linux"
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Prepare Conan cache
+        id: cache-conan
+        uses: actions/cache@v4
+        with:
+          path: ~/.conan
+          key: conan-packages-${{ runner.os }}-hash-${{ hashFiles('conanfile.py') }}
+
+      - name: Install GTK2
+        if: ${{ steps.cache-conan.outputs.cache-hit != 'true' }}
+        run: sudo apt-get update && sudo apt-get install gtk2.0 libgtk2.0-dev -y
+
+      - name: Install pip dependencies
+        if: ${{ steps.cache-conan.outputs.cache-hit != 'true' }}
+        run: pip install -r requirements.txt
+
+      - name: Build Conan dependencies
+        if: ${{ steps.cache-conan.outputs.cache-hit != 'true' }}
+        run: |
+          conan install . \
+            --build=missing \
+            -s build_type=Release \
+            -if dist3/conan \
+            -o opNav=True \
+            -o vizInterface=True \
+            -o generator="Ninja" \
+            --update
