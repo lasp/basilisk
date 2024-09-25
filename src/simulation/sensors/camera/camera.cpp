@@ -316,7 +316,7 @@ void Camera::UpdateState(uint64_t currentSimNanos)
     cameraMsg = this->cameraConfigOutMsg.zeroMsgPayload;
     cameraModelMsg = this->cameraModelOutMsg.zeroMsgPayload;
 
-    /*! - Populate the camera message */
+    /*! - Populate the camera config message */
     cameraMsg.cameraID = this->cameraID;
     strcpy(cameraMsg.parentName, this->parentName);
     cameraMsg.resolution[0] = this->resolution[0];
