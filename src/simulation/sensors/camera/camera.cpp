@@ -309,10 +309,12 @@ void Camera::UpdateState(uint64_t currentSimNanos)
     CameraImageMsgPayload imageBuffer = {};
     CameraImageMsgPayload imageOut;
     CameraConfigMsgPayload cameraMsg;
+    CameraModelMsgPayload cameraModelMsg;
 
     /* zero output messages */
     imageOut = this->imageOutMsg.zeroMsgPayload;
     cameraMsg = this->cameraConfigOutMsg.zeroMsgPayload;
+    cameraModelMsg = this->cameraModelOutMsg.zeroMsgPayload;
 
     /*! - Populate the camera message */
     cameraMsg.cameraID = this->cameraID;
@@ -331,8 +333,29 @@ void Camera::UpdateState(uint64_t currentSimNanos)
     cameraMsg.ppFocusDistance = this->ppFocusDistance;
     cameraMsg.ppMaxBlurSize = this->ppMaxBlurSize;
 
+    /*! - Populate the camera model message */
+    cameraModelMsg.cameraID = this->cameraIdentification;
+    strcpy(cameraModelMsg.parentName, this->parentSpacecraftName.c_str());
+    cameraModelMsg.resolution[0] = this->resolution[0];
+    cameraModelMsg.resolution[1] = this->resolution[1];
+    cameraModelMsg.renderRate = this->imageCadence;
+    cameraModelMsg.fieldOfView[0] = this->cameraFieldOfView[0];
+    cameraModelMsg.fieldOfView[1] = this->cameraFieldOfView[1];
+    cameraModelMsg.isOn = this->cameraIsImaging;
+    eigenVector3d2CArray(this->cameraBodyFramePosition, cameraModelMsg.cameraBodyFramePosition);
+    eigenVector3d2CArray(this->bodyToCameraMrp, cameraModelMsg.bodyToCameraMrp);
+    cameraModelMsg.focalLength = this->focalLength;
+    cameraModelMsg.gaussianPointSpreadFunction = this->gaussianPointSpreadFunction;
+    cameraModelMsg.cosmicRayFrequency = this->cosmicRayFrequency;
+    cameraModelMsg.readNoise = this->readNoise;
+    cameraModelMsg.systemGain = this->systemGain;
+    cameraModelMsg.enableStrayLight = this->enableStrayLight;
+
     /*! - Update the camera config data no matter if an image is present*/
     this->cameraConfigOutMsg.write(&cameraMsg, this->moduleID, currentSimNanos);
+
+    /*! - Update the camera model data no matter if an image is present*/
+    this->cameraModelOutMsg.write(&cameraModelMsg, this->moduleID, currentSimNanos);
 
     cv::Mat imageCV;
     cv::Mat blurred;
