@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "configurePresets": [
+    {
+      "name": "default",
+      "inherits": "vcpkg",
+      "environment": {
+      },
+      "cacheVariables": {
+        "BUILD_OPNAV":
+          "ON"
+      }
+    }
+  ]
+}

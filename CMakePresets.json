@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "configurePresets": [
+    {
+      "name": "vcpkg",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE":
+          "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+        "CMAKE_MODULE_PATH":
+          "${sourceDir}/src/cmake/",
+        "CMAKE_PREFIX_PATH":
+          "${sourceDir}/src/cmake/",
+        "CMAKE_BUILD_TYPE":
+          "Debug",
+        "BUILD_VIZINTERFACE":
+          "ON",
+        "BUILD_OPNAV":
+          "OFF"
+      }
+    }
+  ]
+}

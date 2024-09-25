@@ -1,0 +1,10 @@
+{
+  "name": "basilisk",
+  "version": "2.3.4",
+  "dependencies": [
+    "cppzmq",
+    "eigen3",
+    "protobuf",
+    "opencv"
+  ]
+}
