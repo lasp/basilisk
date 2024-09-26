@@ -39,6 +39,9 @@ void CobConverter::Reset(uint64_t CurrentSimNanos)
     if (!this->opnavCOBInMsg.isLinked()) {
         bskLogger.bskLog(BSK_ERROR, "CobConverter.opnavCOBInMsg wasn't connected.");
     }
+    if (this->performOutlierDetection && !this->opnavFilterInMsg.isLinked()) {
+        bskLogger.bskLog(BSK_ERROR, "CobConverter.opnavFilterInMsg wasn't connected.");
+    }
     if (!this->cameraConfigInMsg.isLinked()) {
         bskLogger.bskLog(BSK_ERROR, "CobConverter.cameraConfigInMsg wasn't connected.");
     }

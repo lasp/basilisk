@@ -31,6 +31,7 @@
 #include "architecture/msgPayloadDefCpp/OpNavCOBMsgPayload.h"
 #include "architecture/msgPayloadDefCpp/OpNavCOMMsgPayload.h"
 #include "architecture/msgPayloadDefCpp/OpNavUnitVecMsgPayload.h"
+#include "architecture/msgPayloadDefCpp/FilterMsgPayload.h"
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/rigidBodyKinematics.h"
@@ -67,6 +68,7 @@ public:
     Message<OpNavUnitVecMsgPayload> opnavUnitVecCOMOutMsg;
     Message<OpNavCOMMsgPayload> opnavCOMOutMsg;
     ReadFunctor<OpNavCOBMsgPayload> opnavCOBInMsg;
+    ReadFunctor<FilterMsgPayload> opnavFilterInMsg;
     ReadFunctor<CameraConfigMsgPayload> cameraConfigInMsg;
     ReadFunctor<NavAttMsgPayload> navAttInMsg;
     ReadFunctor<EphemerisMsgPayload> ephemInMsg;
