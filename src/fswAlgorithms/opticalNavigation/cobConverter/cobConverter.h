@@ -63,6 +63,15 @@ public:
     void disableOutlierDetection();
     bool isOutlierDetectionEnabled() const;
 
+private:
+    bool cobOutlierDetection(Eigen::Vector3d& rhatCOB_C,
+                             const Eigen::Vector3d& rhatNav_N,
+                             const Eigen::Matrix3d& covarNav_N,
+                             const Eigen::Matrix3d& covarCob_C,
+                             const Eigen::Matrix3d& dcm_CN,
+                             const Eigen::Matrix3d& dcm_CB,
+                             const Eigen::Matrix3d& cameraCalibrationMatrix) const;
+
 public:
     Message<OpNavUnitVecMsgPayload> opnavUnitVecCOBOutMsg;
     Message<OpNavUnitVecMsgPayload> opnavUnitVecCOMOutMsg;
