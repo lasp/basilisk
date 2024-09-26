@@ -53,6 +53,14 @@ public:
     double getRadius() const;
     void setAttitudeCovariance(const Eigen::Matrix3d covAtt_BN_B);
     Eigen::Matrix3d getAttitudeCovariance() const;
+    void setNumStandardDeviations(const double num);
+    double getNumStandardDeviations() const;
+    void setStandardDeviation(const double num);
+    double getStandardDeviation() const;
+    bool isStandardDeviationSpecified() const;
+    void enableOutlierDetection();
+    void disableOutlierDetection();
+    bool isOutlierDetectionEnabled() const;
 
 public:
     Message<OpNavUnitVecMsgPayload> opnavUnitVecCOBOutMsg;
@@ -70,6 +78,10 @@ private:
     PhaseAngleCorrectionMethod phaseAngleCorrectionMethod;
     double objectRadius{};
     Eigen::Matrix3d covarAtt_BN_B{};
+    double numStandardDeviations = 3;
+    double standardDeviation{};
+    bool specifiedStandardDeviation{};
+    bool performOutlierDetection{};
 };
 
 #endif

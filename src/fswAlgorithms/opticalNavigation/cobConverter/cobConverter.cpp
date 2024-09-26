@@ -237,3 +237,63 @@ Eigen::Matrix3d CobConverter::getAttitudeCovariance() const
 {
     return this->covarAtt_BN_B;
 }
+
+/*! Set the number of standard deviations that are acceptable for the expected COB error
+    @param double numStandardDeviations
+    @return void
+    */
+void CobConverter::setNumStandardDeviations(const double num){
+    assert(num > 0.0);
+    this->numStandardDeviations = num;
+}
+
+/*! Get the number of standard deviations that are acceptable for the expected COB error
+    @return double numStandardDeviations
+    */
+double CobConverter::getNumStandardDeviations() const {
+    return this->numStandardDeviations;
+}
+
+/*! Set the accepted standard deviation for the expected COB error
+    @return void
+    */
+void CobConverter::setStandardDeviation(const double num){
+    assert(num > 0.0);
+    this->standardDeviation = num;
+    this->specifiedStandardDeviation = true;
+}
+
+/*! Get the accepted standard deviation for the expected COB error
+    @return double numStandardDeviations
+    */
+double CobConverter::getStandardDeviation() const {
+    return this->standardDeviation;
+}
+
+/*! Get whether or not a standard deviation is set
+    @return bool specifiedStandardDeviation
+    */
+bool CobConverter::isStandardDeviationSpecified() const {
+    return this->specifiedStandardDeviation;
+}
+
+/*! Enable the COB outlier detection
+    @return void
+    */
+void CobConverter::enableOutlierDetection(){
+    this->performOutlierDetection = true;
+}
+
+/*! Disable the COB outlier detection
+    @return void
+    */
+void CobConverter::disableOutlierDetection(){
+    this->performOutlierDetection = false;
+}
+
+/*! Get whether or not the COB outlier detection is performed
+    @return bool performOutlierDetection
+    */
+bool CobConverter::isOutlierDetectionEnabled() const {
+    return this->performOutlierDetection;
+}
