@@ -170,43 +170,16 @@ void InertialAttitudeUkf::readStarTrackerData(){
 * @return void
 * */
 void InertialAttitudeUkf::readGyroData(){
-    int smallestFutureIndex = 0;
-    int numberOfValidGyroMeasurements = 0;
-    double firstFutureTime = -1;
-    double meanMeasurementTime = 0;
-    AccDataMsgPayload gyrBuffer = this->accelDataMsg();
-    for (int index = 0; index < MAX_ACC_BUF_PKT; index++) {
-        double gyroMeasuredTime = gyrBuffer.accPkts[index].measTime*NANO2SEC;
-        if (gyroMeasuredTime > this->previousFilterTimeTag) {
-            if (gyroMeasuredTime < firstFutureTime || firstFutureTime<0){
-                smallestFutureIndex = index;
-                firstFutureTime = gyroMeasuredTime;
-            }
-            meanMeasurementTime += gyroMeasuredTime;
-            numberOfValidGyroMeasurements += 1;
-        }
-    }
-    auto lowPass = LowPassFilter();
-    lowPass.setFilterCutoff(this->cutOffFrequency);
-    lowPass.setFilterStep(this->hStep);
-    if (numberOfValidGyroMeasurements > 0){
-        meanMeasurementTime /= numberOfValidGyroMeasurements;
-        /*! - Loop through buffer for all future measurements since the previous time to filter omega_BN_B*/
-        for (int index = 0; index < MAX_ACC_BUF_PKT; index++) {
-            int shiftedIndex = (index + smallestFutureIndex) % MAX_ACC_BUF_PKT;
-            auto omega_BN_B = Eigen::Map<Eigen::Vector3d>(gyrBuffer.accPkts[shiftedIndex].gyro_B);
-            /*! - Apply low-pass filter to gyro measurements to get smoothed body rate*/
-            lowPass.processMeasurement(omega_BN_B);
-        }
-
+    IMUSensorMsgPayload gyroBuffer = this->imuSensorDataInMsg();
+    if (gyroBuffer.timeTag*NANO2SEC > this->previousFilterTimeTag) {
         auto gyroMeasurement = MeasurementModel();
         gyroMeasurement.setMeasurementName("gyro");
-        gyroMeasurement.setTimeTag(meanMeasurementTime);
+        gyroMeasurement.setTimeTag(gyroBuffer.timeTag);
         gyroMeasurement.setValidity(true);
 
         gyroMeasurement.setMeasurementNoise(
-                this->measNoiseScaling * this->gyroNoise/std::sqrt(numberOfValidGyroMeasurements));
-        gyroMeasurement.setObservation(lowPass.getCurrentState());
+                this->measNoiseScaling * this->gyroNoise/std::sqrt(gyroBuffer.numberOfValidGyroMeasurements));
+        gyroMeasurement.setObservation(cArray2EigenVector3d(gyroBuffer.AngVelPlatform));
         gyroMeasurement.setMeasurementModel(MeasurementModel::velocityStates);
         this->measurements[this->measurementIndex] = gyroMeasurement;
         this->measurementIndex += 1;
@@ -249,7 +222,7 @@ void InertialAttitudeUkf::setGyroNoise(const Eigen::Matrix3d &gyroNoiseInput) {
     this->gyroNoise = gyroNoiseInput;
 }
 
-/*! Get he gyro measurement noise matrix
+/*! Get the gyro measurement noise matrix
     @return Eigen::Matrix3d gyroNoise
     */
 Eigen::Matrix3d InertialAttitudeUkf::getGyroNoise() const {

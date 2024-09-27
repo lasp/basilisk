@@ -41,10 +41,8 @@ struct VehicleConfigMsg_C;
 struct RWArrayConfigMsg_C;
 %include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
 struct RWSpeedMsg_C;
-%include "architecture/msgPayloadDefC/AccDataMsgPayload.h"
-struct AccDataMsg_C;
-%include "architecture/msgPayloadDefC/AccPktDataMsgPayload.h"
-struct AccPktDataMsg_C;
+%include "architecture/msgPayloadDefC/IMUSensorMsgPayload.h"
+struct IMUSensorMsg_C;
 %include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
 struct NavAttMsg_C;
 
