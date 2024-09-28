@@ -97,6 +97,20 @@ bool FlybyPoint::checkValidity(Eigen::Vector3d &r_BN_N, Eigen::Vector3d &v_BN_N)
     if (std::abs(1 - ur_N.dot(uv_N)) < this->toleranceForCollinearity) {
          valid = false;
     }
+    Eigen::Vector3d uh_N = ur_N.cross(uv_N).normalized();
+    Eigen::Vector3d ut_N = uh_N.cross(ur_N).normalized();
+    double gamma0 = std::atan(v_BN_N.dot(ur_N) / v_BN_N.dot(ut_N));
+    double distanceClosestApproach = -r_BN_N.norm()*std::sin(gamma0);
+
+    double maxPredictedRate = v_BN_N.norm()/distanceClosestApproach*180/M_PI;
+    if (maxPredictedRate > this->maxRate && this->maxRate > 0) {
+        valid = false;
+    }
+    double maxPredictedAcceleration = 3*std::sqrt(3)/8*pow(v_BN_N.norm()/distanceClosestApproach, 2)*180/M_PI;
+    if (maxPredictedAcceleration > this->maxAcceleration && this->maxAcceleration > 0) {
+        valid = false;
+    }
+
     return valid;
 }
 
