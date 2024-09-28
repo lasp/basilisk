@@ -317,7 +317,7 @@ void Camera::UpdateState(uint64_t currentSimNanos)
     cameraModelMsg = this->cameraModelOutMsg.zeroMsgPayload;
 
     /*! - Populate the camera config message */
-    cameraMsg.cameraID = this->cameraID;
+    cameraMsg.cameraID = this->cameraId;
     strcpy(cameraMsg.parentName, this->parentName);
     cameraMsg.resolution[0] = this->resolution[0];
     cameraMsg.resolution[1] = this->resolution[1];
@@ -334,7 +334,7 @@ void Camera::UpdateState(uint64_t currentSimNanos)
     cameraMsg.ppMaxBlurSize = this->ppMaxBlurSize;
 
     /*! - Populate the camera model message */
-    cameraModelMsg.cameraID = this->cameraIdentification;
+    cameraModelMsg.cameraId = this->cameraIdentification;
     strcpy(cameraModelMsg.parentName, this->parentSpacecraftName.c_str());
     cameraModelMsg.resolution[0] = this->resolution[0];
     cameraModelMsg.resolution[1] = this->resolution[1];

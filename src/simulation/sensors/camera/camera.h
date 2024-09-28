@@ -114,7 +114,7 @@ public:
     /*! Camera parameters */
     char parentName[MAX_STRING_LENGTH]{};  //!< [-] Name of the parent body to which the camera should be attached
     int cameraIsOn{}; //!< [-] Is the camera currently taking images
-    int cameraID{1}; //!< [-] Is the camera currently taking images
+    int cameraId{1}; //!< [-] Is the camera currently taking images
     uint64_t renderRate{static_cast<uint64_t>(60*1E9)};       //!< [ns] Frame time interval at which to capture images in units of nanosecond
     double fieldOfView{0.7};       //!< [r] camera y-axis field of view edge-to-edge
     double cameraPos_B[3]{};     //!< [m] Camera position in body frame
