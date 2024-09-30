@@ -154,17 +154,21 @@ void CobConverter::UpdateState(uint64_t CurrentSimNanos)
         Eigen::Vector3d rhat_COM_N = dcm_NC * rhat_COM_C;
         Eigen::Vector3d rhat_COM_B = dcm_CB.transpose() * rhat_COM_C;
 
-        /*! - Define diagonal terms of the covariance */
-        Eigen::Matrix3d covar_C;
-        covar_C.setZero();
-        covar_C(0,0) = pow(X,2);
-        covar_C(1,1) = pow(Y,2);
-        covar_C(2,2) = 1;
-        /*! - define and rotate covariance using number of pixels found */
+        /*! - define diagonal terms of the COB covariance */
+        Eigen::Matrix3d covarCob_C;
+        covarCob_C.setZero();
+        covarCob_C(0,0) = pow(X,2);
+        covarCob_C(1,1) = pow(Y,2);
+        covarCob_C(2,2) = 1;
+        /*! - scale covariance using number of pixels found and rotate into B frame */
         double scaleFactor = sqrt(cobMsgBuffer.pixelsFound / (4 * M_PI)) / pow(rhatCOBNorm, 2);
-        covar_C *= scaleFactor;
-        Eigen::Matrix3d covar_N = dcm_NC * covar_C * dcm_NC.transpose();
-        Eigen::Matrix3d covar_B = dcm_CB.transpose() * covar_C * dcm_CB;
+        covarCob_C *= scaleFactor;
+        Eigen::Matrix3d covarCob_B = dcm_CB.transpose() * covarCob_C * dcm_CB;
+        /*! - add attitude error covariance in B frame to get total covariance of unit vector measurements */
+        Eigen::Matrix3d covar_B = covarCob_B + this->covarAtt_BN_B;
+        /*! - rotate total covariance into all remaining frames */
+        Eigen::Matrix3d covar_N = dcm_BN.transpose() * covar_B * dcm_BN;
+        Eigen::Matrix3d covar_C = dcm_CB.transpose() * covar_B * dcm_CB;
 
         /*! - output messages */
         eigenMatrix3d2CArray(covar_N, uVecCOBMsgBuffer.covar_N);
