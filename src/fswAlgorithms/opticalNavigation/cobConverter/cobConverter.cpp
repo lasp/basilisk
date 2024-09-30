@@ -143,6 +143,7 @@ void CobConverter::UpdateState(uint64_t CurrentSimNanos)
 
         /*! - Retrieve the vector from target to camera and normalize */
         rhat_COB_C *= - 1;
+        double rhatCOBNorm = rhat_COB_C.norm();
         rhat_COB_C.normalize();
         rhat_COM_C *= - 1;
         rhat_COM_C.normalize();
@@ -160,8 +161,8 @@ void CobConverter::UpdateState(uint64_t CurrentSimNanos)
         covar_C(1,1) = pow(Y,2);
         covar_C(2,2) = 1;
         /*! - define and rotate covariance using number of pixels found */
-        double scaleFactor = sqrt(cobMsgBuffer.pixelsFound)/(2*M_PI);
-        covar_C *= 1./scaleFactor;
+        double scaleFactor = sqrt(cobMsgBuffer.pixelsFound / (4 * M_PI)) / pow(rhatCOBNorm, 2);
+        covar_C *= scaleFactor;
         Eigen::Matrix3d covar_N = dcm_NC * covar_C * dcm_NC.transpose();
         Eigen::Matrix3d covar_B = dcm_CB.transpose() * covar_C * dcm_CB;
 
