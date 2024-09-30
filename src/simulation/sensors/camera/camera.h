@@ -1,7 +1,7 @@
 /*
  ISC License
 
- Copyright (c) 2016, Autonomous Vehicle Systems Lab, University of Colorado at Boulder
+ Copyright (c) 2024, Laboratory for Atmospheric and Space Physics, University of Colorado at Boulder
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -23,6 +23,8 @@
 #include <stdint.h>
 #include <math.h>
 #include <Eigen/Dense>
+#include <Eigen/Core>
+#include <string_view>
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui.hpp"
 #include "opencv2/core/mat.hpp"
@@ -30,6 +32,7 @@
 
 #include "architecture/msgPayloadDefC/CameraImageMsgPayload.h"
 #include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
+#include "architecture/msgPayloadDefCpp/CameraModelMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
@@ -41,7 +44,7 @@ class Camera: public SysModel {
 public:
     Camera();
     ~Camera();
-    
+
     void UpdateState(uint64_t currentSimNanos) override;
     void Reset(uint64_t currentSimNanos) override;
     void hsvAdjust(const cv::Mat&, cv::Mat &mDst);
@@ -52,21 +55,67 @@ public:
     void addCosmicRayBurst(const cv::Mat&, cv::Mat &mDst, double);
     void applyFilters(cv::Mat &mSource, cv::Mat &mDst);
 
+    void setParentName(const std::string& cameraParentName);
+    std::string getParentName() const;
+    void setCameraOn();
+    void setCameraOff();
+    bool isCameraOn() const;
+    void setCameraId(int cameraId);
+    int getCameraId() const;
+    void setResolution(const Eigen::Vector2i& cameraResolution);
+    Eigen::Vector2i getResolution() const;
+    void setImageCadence(const uint64_t& cameraRenderRate);
+    uint64_t getImageCadence() const;
+    void setFieldOfView(const Eigen::Vector2d& fov);
+    Eigen::Vector2d getFieldOfView() const;
+    void setCameraBodyFramePosition(const Eigen::Vector3d& cameraPosition_B);
+    Eigen::Vector3d getCameraBodyFramePosition() const;
+    void setBodyToCameraMrp(const Eigen::Vector3d& cameraMrp_CB);
+    Eigen::Vector3d getBodyToCameraMrp() const;
+    void setFocalLength (double cameraFocalLength);
+    double getFocalLength() const;
+    void setGaussianPointSpreadFunction(int cameraGaussianPointSpreadFunction);
+    int getGaussianPointSpreadFunction() const;
+    void setCosmicRayFrequency(double cameraCosmicRayFrequency);
+    double getCosmicRayFrequency() const;
+    void setReadNoise(double cameraReadNoise);
+    double getReadNoise() const;
+    void setSystemGain(double cameraGain);
+    double getSystemGain() const;
+    void setEnableStrayLight(bool cameraEnablesStrayLight);
+    bool getEnableStrayLight() const;
+
+private:
+    std::string parentSpacecraftName{};  //!< [-] Name of the parent body to which the camera should be attached
+    bool cameraIsImaging{}; //!< [-] Is the camera currently taking images
+    int cameraIdentification{1}; //!< [-] Camera identification
+    Eigen::Vector2i resolution{512, 512}; //!< [-] Camera resolution, width/height in pixels (pixelWidth/pixelHeight in Unity) in pixels
+    uint64_t imageCadence{static_cast<uint64_t>(60*1E9)};       //!< [ns] Frame time interval at which to capture images in units of nanosecond
+    Eigen::Vector2d cameraFieldOfView{0.7, 0.7};       //!< [r] camera y-axis field of view edge-to-edge
+    Eigen::Vector3d cameraBodyFramePosition{};     //!< [m] Camera position in body frame
+    Eigen::Vector3d bodyToCameraMrp{};        //!< [-] MRP defining the orientation of the camera frame relative to the body frame
+    double focalLength{};   //!< Camera focal length
+    int gaussianPointSpreadFunction{};  //!< Size of square Gaussian kernel to model point spread function, must be odd
+    double cosmicRayFrequency{};  //!< Frequency at which cosmic rays can strike the camera
+    double readNoise{};  //!< Read noise standard deviation
+    double systemGain{};  //!< Mapping from current to pixel intensity
+    bool enableStrayLight{};  //!< Add basic stray light modelling to images
+
 public:
     std::string filename{};                //!< Filename for module to read an image directly
     ReadFunctor<CameraImageMsgPayload> imageInMsg;      //!< camera image input message
     Message<CameraImageMsgPayload> imageOutMsg;         //!< camera image output message
     Message<CameraConfigMsgPayload> cameraConfigOutMsg; //!< The name of the CameraConfigMsg output message
+    Message<CameraModelMsgPayload> cameraModelOutMsg; //!< The name of the CameraModelMsg output message
     std::string saveDir{};                 //!< The name of the directory to save images
     uint64_t sensorTimeTag{};              //!< [ns] Current time tag for sensor out
     int32_t saveImages{};                  //!< [-] 1 to save images to file for debugging
-    
+
     /*! Camera parameters */
     char parentName[MAX_STRING_LENGTH]{};  //!< [-] Name of the parent body to which the camera should be attached
     int cameraIsOn{}; //!< [-] Is the camera currently taking images
-    int cameraID{1}; //!< [-] Is the camera currently taking images
-    int resolution[2]{512, 512};         //!< [-] Camera resolution, width/height in pixels (pixelWidth/pixelHeight in Unity) in pixels
-    uint64_t renderRate{};       //!< [ns] Frame time interval at which to capture images in units of nanosecond
+    int cameraId{1}; //!< [-] Is the camera currently taking images
+    uint64_t renderRate{static_cast<uint64_t>(60*1E9)};       //!< [ns] Frame time interval at which to capture images in units of nanosecond
     double fieldOfView{0.7};       //!< [r] camera y-axis field of view edge-to-edge
     double cameraPos_B[3]{};     //!< [m] Camera position in body frame
     double sigma_CB[3]{};        //!< [-] MRP defining the orientation of the camera frame relative to the body frame

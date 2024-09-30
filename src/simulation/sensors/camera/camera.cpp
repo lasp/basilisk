@@ -1,7 +1,7 @@
 /*
  ISC License
 
- Copyright (c) 2016, Autonomous Vehicle Systems Lab, University of Colorado at Boulder
+ Copyright (c) 2024, Laboratory for Atmospheric and Space Physics, University of Colorado at Boulder
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -27,16 +27,16 @@
  */
 
 /* modify the path to reflect the new module names */
-#include <string.h>
 #include "camera.h"
-#include "architecture/utilities/rigidBodyKinematics.h"
-#include "architecture/utilities/linearAlgebra.h"
 #include "architecture/utilities/astroConstants.h"
+#include "architecture/utilities/avsEigenSupport.h"
+#include "architecture/utilities/linearAlgebra.h"
+#include "architecture/utilities/rigidBodyKinematics.h"
+#include <string.h>
 
 /*! The constructor for the Camera module. It also sets some default values at its creation.  */
 Camera::Camera()
 {
-    this->renderRate = (uint64_t) (60*1E9);
     v3SetZero(this->cameraPos_B);
     v3SetZero(this->sigma_CB);
 }
@@ -309,13 +309,15 @@ void Camera::UpdateState(uint64_t currentSimNanos)
     CameraImageMsgPayload imageBuffer = {};
     CameraImageMsgPayload imageOut;
     CameraConfigMsgPayload cameraMsg;
+    CameraModelMsgPayload cameraModelMsg;
 
     /* zero output messages */
     imageOut = this->imageOutMsg.zeroMsgPayload;
     cameraMsg = this->cameraConfigOutMsg.zeroMsgPayload;
+    cameraModelMsg = this->cameraModelOutMsg.zeroMsgPayload;
 
-    /*! - Populate the camera message */
-    cameraMsg.cameraID = this->cameraID;
+    /*! - Populate the camera config message */
+    cameraMsg.cameraID = this->cameraId;
     strcpy(cameraMsg.parentName, this->parentName);
     cameraMsg.resolution[0] = this->resolution[0];
     cameraMsg.resolution[1] = this->resolution[1];
@@ -331,8 +333,29 @@ void Camera::UpdateState(uint64_t currentSimNanos)
     cameraMsg.ppFocusDistance = this->ppFocusDistance;
     cameraMsg.ppMaxBlurSize = this->ppMaxBlurSize;
 
+    /*! - Populate the camera model message */
+    cameraModelMsg.cameraId = this->cameraIdentification;
+    strcpy(cameraModelMsg.parentName, this->parentSpacecraftName.c_str());
+    cameraModelMsg.resolution[0] = this->resolution[0];
+    cameraModelMsg.resolution[1] = this->resolution[1];
+    cameraModelMsg.renderRate = this->imageCadence;
+    cameraModelMsg.fieldOfView[0] = this->cameraFieldOfView[0];
+    cameraModelMsg.fieldOfView[1] = this->cameraFieldOfView[1];
+    cameraModelMsg.isOn = this->cameraIsImaging;
+    eigenVector3d2CArray(this->cameraBodyFramePosition, cameraModelMsg.cameraBodyFramePosition);
+    eigenVector3d2CArray(this->bodyToCameraMrp, cameraModelMsg.bodyToCameraMrp);
+    cameraModelMsg.focalLength = this->focalLength;
+    cameraModelMsg.gaussianPointSpreadFunction = this->gaussianPointSpreadFunction;
+    cameraModelMsg.cosmicRayFrequency = this->cosmicRayFrequency;
+    cameraModelMsg.readNoise = this->readNoise;
+    cameraModelMsg.systemGain = this->systemGain;
+    cameraModelMsg.enableStrayLight = this->enableStrayLight;
+
     /*! - Update the camera config data no matter if an image is present*/
     this->cameraConfigOutMsg.write(&cameraMsg, this->moduleID, currentSimNanos);
+
+    /*! - Update the camera model data no matter if an image is present*/
+    this->cameraModelOutMsg.write(&cameraModelMsg, this->moduleID, currentSimNanos);
 
     cv::Mat imageCV;
     cv::Mat blurred;
@@ -393,4 +416,231 @@ void Camera::UpdateState(uint64_t currentSimNanos)
         /*! - If no image is present, write zeros in message */
         this->imageOutMsg.write(&imageOut, this->moduleID, currentSimNanos);
     }
+}
+
+/*! Set the name of the parent body to which the camera should be attached
+    @param cameraParentName
+    @return void
+    */
+void Camera::setParentName(const std::string& cameraParentName) {
+    this->parentSpacecraftName = cameraParentName;
+}
+
+/*! Get the name of the parent body to which the camera should be attached
+    @return std::string parentSpacecraftName
+    */
+std::string Camera::getParentName() const {
+    return this->parentSpacecraftName;
+}
+
+/*! Set the camera to on, allowing it to take images
+    @return void
+    */
+void Camera::setCameraOn() {
+    this->cameraIsImaging = true;
+}
+
+/*! Set the camera to off, not allowing it to take images
+    @return void
+    */
+void Camera::setCameraOff() {
+    this->cameraIsImaging = false;
+}
+
+/*! Get if the camera is currently taking images
+    @return int cameraIsImaging
+    */
+bool Camera::isCameraOn() const {
+    return this->cameraIsImaging;
+}
+
+/*! Set the camera Id
+    @param cameraId int
+    @return void
+    */
+void Camera::setCameraId(const int cameraId) {
+    this->cameraIdentification = cameraId;
+}
+
+/*! Get the camera Id
+    @return int cameraIdentification
+    */
+int Camera::getCameraId() const {
+    return this->cameraIdentification;
+}
+
+/*! Set camera resolution, width/height in pixels (pixelWidth/pixelHeight in Unity) in pixels
+    @param cameraResolution Eigen::Vector2i
+    @return void
+    */
+void Camera::setResolution(const Eigen::Vector2i& cameraResolution) {
+    this->resolution = cameraResolution;
+}
+
+/*! Get camera resolution, width/height in pixels (pixelWidth/pixelHeight in Unity) in pixels
+    @return Eigen::Vector2i resolution
+    */
+Eigen::Vector2i Camera::getResolution() const {
+    return this->resolution;
+}
+
+/*! Set the frame time interval at which to capture images in units of nanosecond
+    @param cameraImageCadence uint64_t
+    @return void
+    */
+void Camera::setImageCadence(const uint64_t& cameraImageCadence) {
+    this->renderRate = cameraImageCadence;
+}
+
+/*! Get the frame time interval at which to capture images in units of nanosecond
+    @return uint64_t imageCadence
+    */
+uint64_t Camera::getImageCadence() const {
+    return this->imageCadence;
+}
+
+/*! Set the camera y-axis field of view edge-to-edge
+    @param fov Eigen::Vector2d
+    @return void
+    */
+void Camera::setFieldOfView(const Eigen::Vector2d& fov) {
+    this->cameraFieldOfView = fov;
+}
+
+/*! Get the camera y-axis field of view edge-to-edge
+    @return Eigen::Vector2d fieldOfView
+    */
+Eigen::Vector2d Camera::getFieldOfView() const {
+    return this->cameraFieldOfView;
+}
+
+/*! Set the camera position in body frame
+    @param cameraPosition_B Eigen::Vector3d
+    @return void
+    */
+void Camera::setCameraBodyFramePosition(const Eigen::Vector3d& cameraPosition_B) {
+    this->cameraBodyFramePosition = cameraPosition_B;
+}
+
+/*! Get the camera position in body frame
+    @return Eigen::Vector3d cameraPos_B
+    */
+Eigen::Vector3d Camera::getCameraBodyFramePosition() const {
+    return this->cameraBodyFramePosition;
+}
+
+/*! Set the orientation of the camera frame relative to the body frame
+    @param cameraMrp_CB Eigen::Vector3d
+    @return void
+    */
+void Camera::setBodyToCameraMrp(const Eigen::Vector3d& cameraMrp_CB) {
+    this->bodyToCameraMrp = cameraMrp_CB;
+}
+
+/*! Get the orientation of the camera frame relative to the body frame
+    @return Eigen::Vector3d sigma_CB
+    */
+Eigen::Vector3d Camera::getBodyToCameraMrp() const {
+    return this->bodyToCameraMrp;
+}
+
+/*! Set the camera focal length
+    @param cameraFocalLength double
+    @return void
+    */
+void Camera::setFocalLength(const double cameraFocalLength) {
+    this->focalLength = cameraFocalLength;
+}
+
+/*! Get the camera focal length
+    @return double focalLength
+    */
+double Camera::getFocalLength() const {
+    return this->focalLength;
+}
+
+
+/*! Set the size of square Gaussian kernel to model point spread function
+    @param cameraGaussianPointSpreadFunction int
+    @return void
+    */
+void Camera::setGaussianPointSpreadFunction(const int cameraGaussianPointSpreadFunction){
+    // asserts the value of cameraGaussianPointSpreadFunction must be odd
+    assert(cameraGaussianPointSpreadFunction % 2 == 1 && "Gaussian point spread function should be odd");
+    this->gaussianPointSpreadFunction = cameraGaussianPointSpreadFunction;
+}
+
+/*! Get the size of square Gaussian kernel to model point spread function
+    @return int gaussianPointSpreadFunction
+    */
+int Camera::getGaussianPointSpreadFunction() const {
+    return this->gaussianPointSpreadFunction;
+}
+
+/*! Set the frequency at which cosmic rays can strike the camera
+    @param cameraCosmicRayFrequency double
+    @return void
+    */
+
+void Camera::setCosmicRayFrequency(const double cameraCosmicRayFrequency) {
+    this->cosmicRayFrequency = cameraCosmicRayFrequency;
+}
+
+/*! Get the frequency at which cosmic rays can strike the camera
+    @return double cosmicRayFrequency
+    */
+
+double Camera::getCosmicRayFrequency() const{
+    return this->cosmicRayFrequency;
+}
+
+/*! Set the read noise standard deviation
+    @param cameraReadNoise double
+    @return void
+    */
+
+void Camera::setReadNoise(const double cameraReadNoise) {
+    this->readNoise = cameraReadNoise;
+}
+
+/*! Get the read noise standard deviation
+    @return double readNoise
+    */
+
+double Camera::getReadNoise() const {
+    return this->readNoise;
+}
+
+/*! Set the mapping from current to pixel intensity
+    @param cameraGain double
+    @return void
+    */
+
+void Camera::setSystemGain(const double cameraGain) {
+    this->systemGain = cameraGain;
+}
+
+/*! Get the mapping from current to pixel intensity
+    @return double systemGain
+    */
+
+double Camera::getSystemGain() const {
+    return this->systemGain;
+}
+
+/*! Set the mapping from current to pixel intensity
+    @param cameraEnableStrayLight bool
+    @return void
+    */
+
+void Camera::setEnableStrayLight(const bool cameraEnableStrayLight) {
+    this->enableStrayLight = cameraEnableStrayLight;
+}
+
+/*! Set the mapping from current to pixel intensity
+    @return bool enableStrayLight
+    */
+
+bool Camera::getEnableStrayLight() const {
+    return this->enableStrayLight;
 }
