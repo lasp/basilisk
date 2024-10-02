@@ -21,17 +21,13 @@
 #define _CSS_WLS_EST_H_
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "architecture/messaging/messaging.h"
 #include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
 #include "architecture/msgPayloadDefC/CSSConfigMsgPayload.h"
 #include "architecture/msgPayloadDefC/CSSUnitConfigMsgPayload.h"
 #include "architecture/msgPayloadDefC/CSSArraySensorMsgPayload.h"
 #include "architecture/msgPayloadDefC/SunlineFilterMsgPayload.h"
 
-#include "architecture/utilities/bskLogging.h"
 #include <stdint.h>
-
-
 
 
 /*! @brief Top level structure for the CSS weighted least squares estimator.
@@ -41,10 +37,10 @@ public:
     void Reset(uint64_t callTime) override;
     void UpdateState(uint64_t callTime) override;
 
-    ReadFunctor<CSSArraySensorMsgPayload> cssDataInMsg;                   //!< The name of the CSS sensor input message
-    ReadFunctor<CSSConfigMsgPayload> cssConfigInMsg;                      //!< The name of the CSS configuration input message
-    Message<NavAttMsgPayload> navStateOutMsg;                         //!< The name of the navigation output message containing the estimated states
-    Message<SunlineFilterMsgPayload> cssWLSFiltResOutMsg;             //!< The name of the CSS filter data out message
+    CSSArraySensorMsgPayload cssDataInMsgPayload;                   //!< The name of the CSS sensor input message
+    CSSConfigMsgPayload cssConfigInMsgPayload;                      //!< The name of the CSS configuration input message
+    NavAttMsgPayload navStateOutMsgPayload;                         //!< The name of the navigation output message containing the estimated states
+    SunlineFilterMsgPayload cssWlsFiltResOutMsgPayload;             //!< The name of the CSS filter data out message
 
     uint32_t numActiveCss;                              //!< [-] Number of currently active CSS sensors
     uint32_t useWeights;                                //!< Flag indicating whether or not to use weights for least squares
@@ -52,10 +48,6 @@ public:
     double dOld[3];                                     //!< The prior sun heading estimate
     double sensorUseThresh;                             //!< Threshold below which we discount sensors
     uint64_t priorTime;                                 //!< [ns] Last time the attitude control is called
-    CSSConfigMsgPayload cssConfigInBuffer;              //!< CSS constellation configuration message buffer
-    SunlineFilterMsgPayload filtStatus;                 //!< Filter message
-
-    BSKLogger bskLogger={};                               //!< BSK Logging
 };
 
 #endif
