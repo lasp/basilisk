@@ -95,22 +95,23 @@ def phase_angle_correction(alpha, method):
 
 
 @pytest.mark.parametrize("method", [noCorr, binary, lambertian])
-@pytest.mark.parametrize("cameraResolution, sigma_CB, sigma_BN, centerOfBrightness, numberOfPixels, sunDirection",
-                         [([512, 512], [1., 0.3, 0.1], [0.6, 1., 0.1], [152, 251], 75, [-1., -1., 0.]),
-                          ([128, 345], [0, 0, 0], [0, 0, 0], [120, 251], 100, [0., -1., 0.]),
-                          ([742, 512], [-1., -0.3, -0.1], [-0.6, -1., -0.1], [0, 0], 0, [0., 1., 0.]),
-                          ([2048, 2048], [-1., -0.3, -0.1], [-0.6, -1., -0.1], [1021, 1891], 1000, [0., 1., 1.]),
-                          ([1024, 1024], [-1., 0.3, 0.1], [0.6, 1., -0.1], [521, 891], 800, [1., 0., 0.]),
-                          ([875, 987], [1., 0.3, 0.1], [0.6, 1., 0.1], [321, 191], 375, [1., 0.5, 0.3])
+@pytest.mark.parametrize("distance", [500e3, 5000e3, 50000e3])
+@pytest.mark.parametrize("cameraResolution, centerOfBrightness, numberOfPixels, sunDirection",
+                         [([512, 512], [152, 251], 75, [-1., -1., 0.]),
+                          ([128, 345], [120, 251], 100, [0., -1., 0.]),
+                          ([742, 512], [0, 0], 0, [0., 1., 0.]),
+                          ([2048, 2048], [1021, 1891], 1000, [0., 1., 1.]),
+                          ([1024, 1024], [521, 891], 800, [1., 0., 0.]),
+                          ([875, 987], [321, 191], 375, [1., 0.5, 0.3])
                           ])
-def test_cob_converter(show_plots, cameraResolution, sigma_CB, sigma_BN, centerOfBrightness, numberOfPixels,
-                       sunDirection, method):
-    cob_converter_test_function(show_plots, cameraResolution, sigma_CB, sigma_BN, centerOfBrightness, numberOfPixels,
-                                sunDirection, method)
+def test_cob_converter(show_plots, cameraResolution, centerOfBrightness, numberOfPixels,
+                       sunDirection, distance,  method):
+    cob_converter_test_function(show_plots, cameraResolution, centerOfBrightness, numberOfPixels,
+                                sunDirection, distance, method)
 
 
-def cob_converter_test_function(show_plots, cameraResolution, sigma_CB, sigma_BN, centerOfBrightness, numberOfPixels,
-                                sunDirection, method):
+def cob_converter_test_function(show_plots, cameraResolution, centerOfBrightness, numberOfPixels,
+                                sunDirection, distance, method):
     unitTaskName = "unitTask"
     unitProcessName = "TestProcess"
     unitTestSim = SimulationBaseClass.SimBaseClass()
@@ -123,11 +124,30 @@ def cob_converter_test_function(show_plots, cameraResolution, sigma_CB, sigma_BN
     covar_att_B = np.diag([att_sigma**2, (0.9*att_sigma)**2, (0.95*att_sigma)**2])
     module = cobConverter.CobConverter(method, R_object)
     module.setAttitudeCovariance(covar_att_B)
+    module.setNumStandardDeviations(3)
+    module.setStandardDeviation(100)
+    module.enableOutlierDetection()
     unitTestSim.AddModelToTask(unitTaskName, module, module)
+
+    r_BdyZero_N = np.array([-distance, -300. * 1e3, 0.])
+    v_BdyZero_N = np.array([8. * 1e3, 0., 0.])
+
+    # compute spacecraft pointing
+    h_1 = np.array(r_BdyZero_N) / np.linalg.norm(r_BdyZero_N)
+    h_3 = np.cross(h_1, np.array(v_BdyZero_N) / np.linalg.norm(v_BdyZero_N))
+    h_3 *= 1 / np.linalg.norm(h_3)
+    h_2 = np.cross(h_3, h_1) / np.linalg.norm(np.cross(h_3, h_1))
+    dcm_BN = np.array([h_1, h_2, h_3])
+    sigma_BN = rbk.C2MRP(dcm_BN)
+
+    # set up camera orientation such that it is pointing at the target
+    dcm_CB = np.array([[0.0, 1.0, 0.0], [0.0, 0.0, -1.0], [-1.0, 0.0, 0.0]])
+    sigma_CB = rbk.C2MRP(dcm_CB)
 
     # Create the input messages.
     inputCamera = messaging.CameraConfigMsgPayload()
     inputCob = messaging.OpNavCOBMsgPayload()
+    inputFilter = messaging.FilterMsgPayload()
     inputAtt = messaging.NavAttMsgPayload()
     inputEphem = messaging.EphemerisMsgPayload()
 
@@ -147,15 +167,20 @@ def cob_converter_test_function(show_plots, cameraResolution, sigma_CB, sigma_BN
     cobInMsg = messaging.OpNavCOBMsg().write(inputCob)
     module.opnavCOBInMsg.subscribeTo(cobInMsg)
 
+    # Set filter message
+    inputFilter.numberOfStates = 6
+    inputFilter.state = np.array([r_BdyZero_N, v_BdyZero_N]).flatten()
+    inputFilter.covar = np.diag([50e3, 50e3, 50e3, 0.01, 0.01, 0.01]).flatten()
+    filterInMsg = messaging.FilterMsg().write(inputFilter)
+    module.opnavFilterInMsg.subscribeTo(filterInMsg)
+
     vehSunPntN = np.array(sunDirection) / np.linalg.norm(np.array(sunDirection))  # unit vector from SC to Sun
-    dcm_BN = rbk.MRP2C(sigma_BN)
     # Set body attitude relative to inertial
     inputAtt.sigma_BN = sigma_BN
     inputAtt.vehSunPntBdy = dcm_BN @ vehSunPntN
     attInMsg = messaging.NavAttMsg().write(inputAtt)
     module.navAttInMsg.subscribeTo(attInMsg)
 
-    r_BdyZero_N = np.array([-500. * 1e3, 0., 0.])
     # Set ephemeris message of spacecraft relative to object
     inputEphem.r_BdyZero_N = r_BdyZero_N
     ephemInMsg = messaging.EphemerisMsg().write(inputEphem)
@@ -172,11 +197,18 @@ def cob_converter_test_function(show_plots, cameraResolution, sigma_CB, sigma_BN
     unitTestSim.ConfigureStopTime(testProcessRate)
     unitTestSim.ExecuteSimulation()
 
+    # the target is at the center of the image, as this test assumes perfect pointing at the target.
+    # Thus, for the outlier check, the expected COB is at the center of the image.
+    # This compares the input COB with the expected COB
+    cobCenter = np.array(cameraResolution) / 2
+    cobErrorCenter = np.linalg.norm(np.array(centerOfBrightness) - cobCenter)
+    acceptedCobError = module.getNumStandardDeviations() * module.getStandardDeviation()
+
     # Truth Values
     if numberOfPixels > 0:
-        valid_COB_true = 1
+        goodPixels = 1
     else:
-        valid_COB_true = 0
+        goodPixels = 0
     cob_true = [inputCob.centerOfBrightness[0], inputCob.centerOfBrightness[1]]
     num_pixels = inputCob.pixelsFound
     dcm_CB = rbk.MRP2C(inputCamera.sigma_CB)
@@ -186,13 +218,18 @@ def cob_converter_test_function(show_plots, cameraResolution, sigma_CB, sigma_BN
     # Center of Brightness Unit Vector
     [rhat_COB_C_true, norm_COB_vector] = mapState(cob_true, inputCamera)
     covar_COB_C_true = mapCovar(num_pixels, inputCamera, norm_COB_vector)
-    rhat_COB_N_true = np.dot(dcm_NC, rhat_COB_C_true) * valid_COB_true  # multiple by validity to get zero vector if bad
-    timeTag_true_ns = inputCob.timeTag * valid_COB_true
+    rhat_COB_N_true = np.dot(dcm_NC, rhat_COB_C_true) * goodPixels  # multiple by validity to get zero vector if bad
+    timeTag_true_ns = inputCob.timeTag * goodPixels
     timeTag_true = timeTag_true_ns * macros.NANO2SEC
 
     covar_COB_B_true = np.dot(dcm_CB.T, np.dot(covar_COB_C_true, dcm_CB))
     covar_B_true = covar_COB_B_true + covar_att_B
-    covar_N_true = np.dot(dcm_BN.T, np.dot(covar_B_true, dcm_BN)).flatten() * valid_COB_true
+    covar_N_true = np.dot(dcm_BN.T, np.dot(covar_B_true, dcm_BN)).flatten() * goodPixels
+
+    if goodPixels and cobErrorCenter < acceptedCobError:
+        valid_COB_true = True
+    else:
+        valid_COB_true = False
 
     # Center of Mass Message and Unit Vector
     alpha = np.arccos(np.dot(r_BdyZero_N.T / np.linalg.norm(r_BdyZero_N), vehSunPntN))  # phase angle
@@ -204,10 +241,10 @@ def cob_converter_test_function(show_plots, cameraResolution, sigma_CB, sigma_BN
     Kx = dX / inputCamera.ppFocalLength
     Rc = R_object * Kx * inputCamera.ppFocalLength / np.linalg.norm(r_BdyZero_N)  # object radius in pixels
     com_true = [None] * 2  # COM location in image
-    com_true[0] = cob_true[0] - gamma * Rc * np.cos(phi) * valid_COB_true
-    com_true[1] = cob_true[1] - gamma * Rc * np.sin(phi) * valid_COB_true
+    com_true[0] = cob_true[0] - gamma * Rc * np.cos(phi) * goodPixels
+    com_true[1] = cob_true[1] - gamma * Rc * np.sin(phi) * goodPixels
     [rhat_COM_C_true, norm_COM_vector] = mapState(com_true, inputCamera)
-    if valid_COB_true and (method == binary or method == lambertian):
+    if goodPixels and (method == binary or method == lambertian):
         valid_COM_true = True
         rhat_COM_N_true = np.dot(dcm_NC, rhat_COM_C_true)
     else:
@@ -218,6 +255,7 @@ def cob_converter_test_function(show_plots, cameraResolution, sigma_CB, sigma_BN
     rhat_COB_N = dataLogUnitVecCOB.rhat_BN_N[0]
     covar_N = dataLogUnitVecCOB.covar_N[0]
     time_COB = dataLogUnitVecCOB.timeTag[0]
+    valid_COB = dataLogUnitVecCOB.valid[0]
     com = dataLogCOM.centerOfMass[0]
     time_COM_ns = dataLogCOM.timeTag[0]
     valid_COM = dataLogCOM.valid[0]
@@ -245,6 +283,10 @@ def cob_converter_test_function(show_plots, cameraResolution, sigma_CB, sigma_BN
                                atol=tolerance,
                                err_msg='Variable: time_COB',
                                verbose=True)
+    np.testing.assert_equal(valid_COB,
+                            valid_COB_true,
+                            err_msg='Variable: valid_COB',
+                            verbose=True)
     np.testing.assert_allclose(com,
                                com_true,
                                rtol=0,
@@ -270,4 +312,4 @@ def cob_converter_test_function(show_plots, cameraResolution, sigma_CB, sigma_BN
 
 
 if __name__ == '__main__':
-    test_cob_converter(False, [512, 512], [1.0, 0.3, 0.1], [0.6, 1.0, 0.1], [152, 251], 75, [-1.0, -1.0, 0.0], binary)
+    test_cob_converter(False, [512, 512], [152, 251], 75, [-1.0, -1.0, 0.0], 36e6, binary)
