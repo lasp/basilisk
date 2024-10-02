@@ -32,10 +32,10 @@
 
 /*! @brief Top level structure for the CSS weighted least squares estimator.
  Used to estimate the sun state in the vehicle body frame*/
-class CssWlsEst : public SysModel {
+class CssWlsEst {
 public:
-    void Reset(uint64_t callTime) override;
-    void UpdateState(uint64_t callTime) override;
+    void Reset(uint64_t callTime);
+    void UpdateState(uint64_t callTime);
 
     CSSArraySensorMsgPayload cssDataInMsgPayload;                   //!< The name of the CSS sensor input message
     CSSConfigMsgPayload cssConfigInMsgPayload;                      //!< The name of the CSS configuration input message

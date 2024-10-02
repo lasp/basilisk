@@ -10,7 +10,7 @@
 %include "sys_model.i"
 %include "swig_conly_data.i"
 %import "cssWlsEst.h"
-%include "cssWlsEstAdapter.h"
+%include "cssWlsEstAdapter.hpp"
 
 %include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
 %include "architecture/msgPayloadDefC/CSSConfigMsgPayload.h"
