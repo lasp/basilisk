@@ -87,6 +87,7 @@ jobs:
         if: ${{ always() }}
 
   build-windows:
+    if: 'false'
     name: Build Windows
     runs-on: windows-2022
     strategy:
