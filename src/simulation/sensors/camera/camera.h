@@ -76,14 +76,13 @@ public:
     double getFocalLength() const;
     void setGaussianPointSpreadFunction(int cameraGaussianPointSpreadFunction);
     int getGaussianPointSpreadFunction() const;
-    void setCosmicRayFrequency(double cameraCosmicRayFrequency);
-    double getCosmicRayFrequency() const;
     void setReadNoise(double cameraReadNoise);
     double getReadNoise() const;
     void setSystemGain(double cameraGain);
     double getSystemGain() const;
-    void setEnableStrayLight(bool cameraEnablesStrayLight);
-    bool getEnableStrayLight() const;
+    void setExposureTime(double exposureTime);
+    double getExposureTime() const;
+
 
 private:
     std::string parentSpacecraftName{};  //!< [-] Name of the parent body to which the camera should be attached
@@ -96,10 +95,9 @@ private:
     Eigen::Vector3d bodyToCameraMrp{};        //!< [-] MRP defining the orientation of the camera frame relative to the body frame
     double focalLength{};   //!< Camera focal length
     int gaussianPointSpreadFunction{};  //!< Size of square Gaussian kernel to model point spread function, must be odd
-    double cosmicRayFrequency{};  //!< Frequency at which cosmic rays can strike the camera
     double readNoise{};  //!< Read noise standard deviation
     double systemGain{};  //!< Mapping from current to pixel intensity
-    bool enableStrayLight{};  //!< Add basic stray light modelling to images
+    double exposureTime{1};  //!< Mapping from current to pixel intensity
 
 public:
     std::string filename{};                //!< Filename for module to read an image directly
