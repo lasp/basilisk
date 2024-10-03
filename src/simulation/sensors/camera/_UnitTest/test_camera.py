@@ -167,10 +167,9 @@ def cameraTest(show_plots, image, gauss, darkCurrent, saltPepper, cosmic, blurSi
     module.setImageCadence(1)
     module.setFocalLength(2.1)
     module.setGaussianPointSpreadFunction(3)
-    module.setCosmicRayFrequency(2.2)
     module.setReadNoise(2.3)
     module.setSystemGain(3.3)
-    module.setEnableStrayLight(True)
+    module.setExposureTime(1.1)
 
     # Noise parameters
     module.gaussian = gauss
@@ -228,14 +227,12 @@ def cameraTest(show_plots, image, gauss, darkCurrent, saltPepper, cosmic, blurSi
                             "Test failed camera focal length")
     np.testing.assert_equal(dataLogCameraModel.gaussianPointSpreadFunction, module.getGaussianPointSpreadFunction(),
                             "Test failed size of square Gaussian kernel to model point spread function")
-    np.testing.assert_equal(dataLogCameraModel.cosmicRayFrequency, module.getCosmicRayFrequency(),
-                            "Test failed frequency at which cosmic rays can strike the camera")
     np.testing.assert_equal(dataLogCameraModel.readNoise, module.getReadNoise(),
                             "Test failed read noise standard deviation")
     np.testing.assert_equal(dataLogCameraModel.systemGain, module.getSystemGain(),
                             "System failed mapping from current to pixel intensity")
-    np.testing.assert_equal(dataLogCameraModel.enableStrayLight, module.getEnableStrayLight(),
-                            "Test failed add basic stray light modelling to images")
+    np.testing.assert_equal(dataLogCameraModel.exposureTime, module.getExposureTime(),
+                            "System failed exposure time")
 
     #  Error check for corruption
     err = np.linalg.norm(np.linalg.norm(input_image, axis=2) - np.linalg.norm(output_image, axis=2)) / np.linalg.norm(
