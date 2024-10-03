@@ -4,7 +4,9 @@
   "dependencies": [
     "cppzmq",
     "eigen3",
+    "gtest",
+    "opencv",
     "protobuf",
-    "opencv"
+    "cspice"
   ]
 }

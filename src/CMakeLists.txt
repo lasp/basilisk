@@ -1,26 +1,116 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.26)
 
-project("basilisk")
+project("basilisk" C CXX)
+enable_testing()
 
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE
-      "Debug"
-      CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
-endif(NOT CMAKE_BUILD_TYPE)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+################################################################################
+## Cache (user-controllable) parameters
 
-include(bskTargetExcludeBuildOptions)
+set(CMAKE_BUILD_TYPE Debug CACHE STRING
+  "The build configuration (Debug, Release, RelWithDebInfo, MinSizeRel")
+set(BUILD_OPNAV OFF CACHE BOOL
+  "Whether to include the additional OpNav modules in the build.")
+set(BUILD_VIZINTERFACE ON CACHE BOOL
+  "Whether to include the additional VizInterface modules in the build.")
+set(EXTERNAL_MODULES_PATH "" CACHE PATH
+  "The path, if any, to an additional set of Basilisk module sources to be built.")
+set(GTEST_FORCE_SHARED_CRT ON CACHE BOOL
+  "[Windows] Make GTest link the C runtime dynamically.")
+set(EXCLUDED_BSK_TARGETS "" CACHE STRING
+  "A semicolon-delimited list of targets to exclude from the build.")
+set(USE_COVERAGE OFF CACHE BOOL
+  "Whether to enable GCOV code coverage analysis")
 
-# This was set because when executing on a github runner the runner
-# has 4 compiler versions on it and conan finds version 9 and Cmake find 11.3.
-# I didn't manage to find a robust way of accommodating this dynamically setting
-# the conan compiler to the same as what Cmake finds. But I did find
-# some discussion on this setting and it seems that if we are not looking to
-# support a wide range of versions of then the compiler needs of our conan
-# dependencies will often be met with the compiler that CMake ends up finding.
-set(CONAN_DISABLE_CHECK_COMPILER TRUE CACHE BOOL "" FORCE )
+
+## Toolchain parameters
+
+# Direct SWIG to emit depfiles to support accurate incremental rebuilds.
+set(SWIG_USE_SWIG_DEPENDENCIES ON)
+# Set C++ language standard.
+set(CMAKE_CXX_STANDARD 17)
+# Always generate position-independent code.
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+if(MSVC)
+  set(CMAKE_MSVCIDE_RUN_PATH "${CMAKE_BINARY_DIR}/Basilisk")
+
+  add_compile_options(/MP /W3 /wd"4913" /wd"4251" /wd"5208" /wd"4267" /bigobj /EHsc)
+  add_compile_definitions(
+    _USE_MATH_DEFINES
+    _CRT_SECURE_NO_WARNINGS
+    _WINSOCK_DEPRECATED_NO_WARNINGS
+    _WIN32_WINNT=0x0501 # Windows XP
+  )
+else()
+  # Set the `install_name` of our built shared libraries with `@rpath`.
+  set(CMAKE_MACOSX_RPATH ON)
+  string(APPEND CMAKE_CXX_FLAGS " -Wall")
+  string(APPEND CMAKE_CXX_FLAGS_RELEASE " -O2 -DNDEBUG")
+  string(APPEND CMAKE_CXX_FLAGS_DEBUG " -g -gdwarf-3")
+endif()
+
+set(CMAKE_SKIP_BUILD_RPATH FALSE) # use, i.e. don't skip the full RPATH for the build tree
+if(WIN32)
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS YES)
+elseif(APPLE)
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) # when building, don't use the install RPATH already (but later on when
+                                           # installing)
+  set(CMAKE_INSTALL_RPATH "${CMAKE_BINARY_DIR}/Basilisk") # the RPATH to be used when installing
+
+  # don't add the automatically determined parts of the RPATH which point to directories outside the build tree to the
+  # install RPATH
+  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+else()
+  set(CMAKE_INSTALL_RPATH "\$ORIGIN/../../")
+endif()
+
+
+################################################################################
+## External dependencies
+
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+find_package(SWIG REQUIRED)
+find_package(Eigen3 CONFIG REQUIRED)
+find_package(GTest CONFIG REQUIRED)
+
+include(UseSwig)
+include(GoogleTest)
+include(FetchContent)
+
+# Construct an import target around the CSPICE library,
+# since the `vcpkg` port for CSPICE doesn't seem to do it for us.
+block()
+  find_path(CSPICE_INCLUDE_DIR cspice/SpiceUsr.h REQUIRED)
+  find_library(CSPICE_LIBRARY cspice REQUIRED)
+
+  message(STATUS "${CSPICE_LIBRARY}")
+  add_library(cspice::cspice STATIC IMPORTED GLOBAL)
+  target_include_directories(cspice::cspice
+    INTERFACE "${CSPICE_INCLUDE_DIR}")
+  set_target_properties(cspice::cspice PROPERTIES
+    # CMake complains vociferously if the config-specific versions
+    # of IMPORT_LOCATION aren't given, even though the documentation
+    # says the nonspecific version will be used if set.
+    IMPORTED_LOCATION "${CSPICE_LIBRARY}"
+    IMPORTED_LOCATION_DEBUG "${CSPICE_LIBRARY}"
+    IMPORTED_LOCATION_RELEASE "${CSPICE_LIBRARY}")
+endblock()
+
+# Hack the Python3 module link options to *not* use `-undefined dynamic_lookup`.
+# Instead, pass an explicit allowlist of symbols that may be left undefined.
+# This trick is adapted from:
+#    https://github.com/wjakob/nanobind/blob/0a6f8f36006dadff4b6279f58ce2188be20c9ada/cmake/nanobind-config.cmake#L33-L42
+# The allowlist is obtained from:
+#    https://github.com/python/cpython/issues/97524#issuecomment-1460492751
+if(APPLE)
+  set_target_properties(Python3::Module PROPERTIES
+    INTERFACE_LINK_OPTIONS
+      "-Wl,@${CMAKE_CURRENT_SOURCE_DIR}/cmake/cpython-exported-symbols"
+  )
+endif()
+
+################################################################################
 
 # ! create_symlinks : create symlinks to support files in source rather than keeping them in dist The function takes one
 # required argument and N optional arguments. \argn: a list of supporting file paths
@@ -298,193 +388,62 @@ function(generate_package_targets TARGET_LIST LIB_DEP_LIST MODULE_DIR)
   endforeach()
 endfunction(generate_package_targets)
 
-# add header search directories
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
+################################################################################
 
-# Start of main projection configuration
-find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
-
-# Hack the Python3 module link options to *not* use `-undefined dynamic_lookup`.
-# Instead, pass an explicit allowlist of symbols that may be left undefined.
-# This trick is adapted from:
-#    https://github.com/wjakob/nanobind/blob/0a6f8f36006dadff4b6279f58ce2188be20c9ada/cmake/nanobind-config.cmake#L33-L42
-# The allowlist is obtained from:
-#    https://github.com/python/cpython/issues/97524#issuecomment-1460492751
-if(APPLE)
-  set_target_properties(Python3::Module PROPERTIES
-    INTERFACE_LINK_OPTIONS
-      "-Wl,@${CMAKE_CURRENT_SOURCE_DIR}/cmake/cpython-exported-symbols"
+if(NOT BUILD_VIZINTERFACE)
+  list(APPEND EXCLUDED_BSK_TARGETS
+    "vizInterface"
+    "cielimInterface"
   )
 endif()
 
-find_package(SWIG REQUIRED)
-include(UseSwig)
+if(NOT BUILD_OPNAV)
+  list(APPEND EXCLUDED_BSK_TARGETS
+    "limbFinding"
+    "centerRadiusCNN"
+    "houghCircles"
+    "camera"
+    "centerOfBrightness"
+    "opticalFlow"
+  )
+endif()
 
-set(SWIG_USE_SWIG_DEPENDENCIES True)
+if(USE_COVERAGE AND (CMAKE_COMPILER_IS_GNUC OR CMAKE_COMPILER_IS_GNUCXX))
+  set(GCOV_FLAGS "-fprofile-arcs -ftest-coverage -O0 -fno-default-inline -fno-inline")
 
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
-)
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
-include(GoogleTest)
-enable_testing()
+  string(APPEND CMAKE_C_FLAGS " ${GCOV_FLAGS}")
+  string(APPEND CMAKE_CXX_FLAGS " ${GCOV_FLAGS}")
+  string(APPEND CMAKE_LD_FLAGS " ${GCOV_FLAGS}")
+endif()
 
 # Check if the large Spice files are present.  If not, download from JPL site directly
 if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../supportData/EphemerisData/de430.bsp")
   message(STATUS "File de430.bsp not found, downloading file:")
-  file(DOWNLOAD
-          "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de430.bsp"
-          # Download it to the build directory (in case the download gets interrupted).
-          "${CMAKE_BINARY_DIR}/data/de430.bsp"
-       SHOW_PROGRESS
-       STATUS DOWNLOAD_RESULT
+
+  # Download it to the build directory (in case the download gets interrupted).
+  file(
+    DOWNLOAD
+      "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de430.bsp"
+      "${CMAKE_BINARY_DIR}/data/de430.bsp"
+    SHOW_PROGRESS
+    STATUS
+      DOWNLOAD_RESULT
   )
-  list(GET DOWNLOAD_RESULT 1 RESULT_MESSAGE)
+
   list(GET DOWNLOAD_RESULT 0 RESULT_CODE)
   if(NOT RESULT_CODE EQUAL 0)
+    list(GET DOWNLOAD_RESULT 1 RESULT_MESSAGE)
     message(FATAL_ERROR "Failed downloading de430.bsp with error code: ${RESULT_CODE} : ${RESULT_MESSAGE}.")
   endif()
+
   # Move the SPICE file into the appropriate directory.
   file(RENAME "${CMAKE_BINARY_DIR}/data/de430.bsp" "${CMAKE_CURRENT_SOURCE_DIR}/../supportData/EphemerisData/de430.bsp")
 else()
   message(STATUS "Found Spice files.")
-endif ()
-
-# TODO: Remove the global link-libraries call
-find_package(Eigen3 CONFIG REQUIRED)
-# The following lines are necessary to prevent Xcode from issuing a warning about Eigen not being within the search
-# path. Related to Eigen being a header only library.
-if(DEFINED Eigen3_INCLUDE_DIRS_DEBUG)
-  set(DIRECTORIES
-      "$<$<CONFIG:Debug>:${Eigen3_INCLUDE_DIRS_DEBUG}>" "$<$<CONFIG:Release>:${Eigen3_INCLUDE_DIRS_DEBUG}>"
-      "$<$<CONFIG:RelWithDebInfo>:${Eigen3_INCLUDE_DIRS_DEBUG}>" "$<$<CONFIG:MinSizeRel>:${Eigen3_INCLUDE_DIRS_DEBUG}>")
-else()
-  set(DIRECTORIES
-      "$<$<CONFIG:Debug>:${Eigen3_INCLUDE_DIRS_RELEASE}>" "$<$<CONFIG:Release>:${Eigen3_INCLUDE_DIRS_RELEASE}>"
-      "$<$<CONFIG:RelWithDebInfo>:${Eigen3_INCLUDE_DIRS_RELEASE}>"
-      "$<$<CONFIG:MinSizeRel>:${Eigen3_INCLUDE_DIRS_RELEASE}>")
 endif()
-# set_property(TARGET Eigen3::Eigen PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${DIRECTORIES})
+
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 link_libraries(Eigen3::Eigen)
-
-# Add general compiler flags
-set(CMAKE_MACOSX_RPATH 1)
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
-
-# Test Coverage
-option(USE_COVERAGE "GCOV code coverage analysis" OFF)
-
-if(USE_COVERAGE AND (CMAKE_COMPILER_IS_GNUC OR CMAKE_COMPILER_IS_GNUCXX))
-  message(STATUS "USE_COVERAGE : ${USE_COVERAGE}")
-  set(GCOV_CFLAGS "-fprofile-arcs -ftest-coverage -O0 -fno-default-inline -fno-inline")
-  set(GCOV_LDFLAGS "-fprofile-arcs -ftest-coverage -O0 -fno-default-inline -fno-inline")
-
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GCOV_CFLAGS}")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCOV_CFLAGS}")
-  set(CMAKE_LD_FLAGS "${CMAKE_LD_FLAGS} ${GCOV_LDFLAGS}")
-
-  message(STATUS "CMAKE_C_FLAGS : ${CMAKE_C_FLAGS}")
-  message(STATUS "CMAKE_CXX_FLAGS : ${CMAKE_CXX_FLAGS}")
-  message(STATUS "CMAKE_LD_FLAGS : ${CMAKE_LD_FLAGS}")
-endif()
-
-# Add platform specific compiler flags
-if(MSVC)
-  set(CMAKE_CXX_STANDARD 17)
-  add_definitions(/MP)
-  add_definitions(/D _USE_MATH_DEFINES)
-  add_definitions(/D _CRT_SECURE_NO_WARNINGS)
-  add_definitions(/D _WINSOCK_DEPRECATED_NO_WARNINGS)
-  add_definitions(/D _WIN32_WINNT=0x0501) # Targets Windows xp
-  add_definitions(/W3)
-  add_definitions(/wd"4913")
-  add_definitions(/wd"4251")
-  add_definitions(/wd"5208")
-  add_definitions(/wd"4267")
-  add_definitions(/bigobj)
-  # Make sure we are using Multi-Threaded run time library
-  foreach(flag CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG
-               CMAKE_CXX_FLAGS_RELEASE)
-    if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-      string(REPLACE "/D_DEBUG" "" "${flag}" "${${flag}}")
-      string(REPLACE "/MDd" "${CONAN_LINK_RUNTIME_MULTI}" "${flag}" "${${flag}}")
-      string(REPLACE "/MTd" "${CONAN_LINK_RUNTIME_MULTI}" "${flag}" "${${flag}}")
-    else()
-      string(REPLACE "/MD" "${CONAN_LINK_RUNTIME_MULTI}" "${flag}" "${${flag}}")
-      string(REPLACE "/MT" "${CONAN_LINK_RUNTIME_MULTI}" "${flag}" "${${flag}}")
-    endif()
-    set("${flag}" "${${flag}} /EHsc")
-  endforeach()
-elseif(APPLE)
-  set(CMAKE_CXX_STANDARD 17)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -gdwarf-3")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -gdwarf-3 -stdlib=libc++")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -gdwarf-3")
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}  -Wall")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}  -Wall")
-  if(${CMAKE_GENERATOR} MATCHES "Xcode")
-    set(CMAKE_XCODE_GENERATE_SCHEME YES)
-  endif()
-else()
-  set(CMAKE_CXX_STANDARD 17)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -gdwarf-3")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -gdwarf-3 -fPIC")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -gdwarf-3")
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}  -Wall")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}  -Wall")
-endif()
-
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-register")
-endif()
-
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-  set(_arch_suffix 64)
-else()
-  set(_arch_suffix 32)
-endif()
-
-# TODO: Move the cspice library extension into a custom pyswice CMakeList.txt Manually create list of libraries
-# depending on system
-if(WIN32)
-  set(CMAKE_MSVCIDE_RUN_PATH "${CMAKE_BINARY_DIR}/Basilisk")
-  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS YES)
-  set(library_dependencies ${CMAKE_CURRENT_SOURCE_DIR}/../libs/cspice/lib/cspice_win${_arch_suffix}.lib)
-  # fix for opencv not finding conan gflags for opencv sfm lib on windows when the finding is fixed, the following line
-  # should be removed https://github.com/conan-community/community/issues/210
-  list(REMOVE_ITEM CONAN_LIBS opencv_sfm411d multiview)
-
-elseif(APPLE)
-  if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm64")
-    set(library_dependencies ${CMAKE_CURRENT_SOURCE_DIR}/../libs/cspice/lib/cspice_osx_arm64.a)
-  else()
-    set(library_dependencies ${CMAKE_CURRENT_SOURCE_DIR}/../libs/cspice/lib/cspice_osx.a)
-  endif()
-
-  set(CMAKE_SKIP_BUILD_RPATH FALSE) # use, i.e. don't skip the full RPATH for the build tree
-  set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) # when building, don't use the install RPATH already (but later on when
-                                           # installing)
-  set(CMAKE_INSTALL_RPATH "${CMAKE_BINARY_DIR}/Basilisk") # the RPATH to be used when installing
-
-  # don't add the automatically determined parts of the RPATH which point to directories outside the build tree to the
-  # install RPATH
-  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-else()
-  if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "^(arm64|aarch64)$")
-    set(library_dependencies ${CMAKE_CURRENT_SOURCE_DIR}/../libs/cspice/lib/cspice_arm64.a)
-  else()
-    set(library_dependencies ${CMAKE_CURRENT_SOURCE_DIR}/../libs/cspice/lib/cspice.a)
-  endif()
-  set(CMAKE_SKIP_BUILD_RPATH FALSE)
-  set(CMAKE_INSTALL_RPATH "\$ORIGIN/../../")
-endif()
-
-set_property(GLOBAL PROPERTY BUILT_LIB_LIST "ArchitectureUtilities")
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Targets that must be built first
 add_subdirectory("architecture/utilities")
@@ -531,7 +490,7 @@ endif(NOT "${EXTERNAL_MODULES_PATH}" STREQUAL "")
 
 # The quotations around DYN_TARGETS informs function that it is a list
 generate_package_targets("${DYN_TARGETS}" "dynamicsLib;${ARCHITECTURE_LIBS}" "simulation")
-generate_package_targets("${ENV_TARGETS}" "environmentLib;${ARCHITECTURE_LIBS};${library_dependencies}" "simulation")
+generate_package_targets("${ENV_TARGETS}" "environmentLib;${ARCHITECTURE_LIBS};cspice::cspice" "simulation")
 generate_package_targets("${DATA_TARGETS}" "onboardDataHandlingLib;${ARCHITECTURE_LIBS};" "simulation")
 generate_package_targets("${DEVICE_INTERFACE_TARGETS}" "${ARCHITECTURE_LIBS};" "simulation")
 generate_package_targets("${POWER_TARGETS}" "powerLib;${ARCHITECTURE_LIBS};" "simulation")
@@ -595,7 +554,7 @@ generate_package_targets("${ARCHITECTURE_TARGETS}" "${ARCHITECTURE_LIBS};" "arch
 # Pyswice
 find_package_targets("${CMAKE_CURRENT_SOURCE_DIR}/topLevelModules/pyswice" PYSWICE_TARGETS) # Finds relative path of all .i
                                                                                     # files within the directory
-generate_package_targets("${PYSWICE_TARGETS}" "${ARCHITECTURE_LIBS};${library_dependencies}" "topLevelModules")
+generate_package_targets("${PYSWICE_TARGETS}" "${ARCHITECTURE_LIBS};cspice::cspice" "topLevelModules")
 
 # PYTHON PACKAGE CONFIGURATION
 # Must make the build directories first, so that cmake can insert empty init files before build (linux specific need)
