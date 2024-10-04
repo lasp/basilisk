@@ -20,7 +20,6 @@
 #include "fswAlgorithms/attControl/thrMomentumManagementCpp/thrMomentumManagementCpp.h"
 #include "architecture/utilities/linearAlgebra.h"
 #include "architecture/utilities/avsEigenSupport.h"
-#include <Eigen/Core>
 
 void ThrMomentumManagementCpp::Reset(uint64_t currentSimNanos)
 {
@@ -41,22 +40,27 @@ void ThrMomentumManagementCpp::Reset(uint64_t currentSimNanos)
 
 void ThrMomentumManagementCpp::UpdateState(uint64_t currentSimNanos)
 {
+    Eigen::Vector3d Delta_H_B = Eigen::Vector3d::Zero();
+
     if (this->initRequest == 1) {
-        Eigen::Vector3d hs_B = Eigen::Vector3d::Zero();
         RWSpeedMsgPayload rwSpeedMsg = this->rwSpeedsInMsg();
+        Eigen::Vector3d hs_B = Eigen::Vector3d::Zero();
         for (int i=0; i<this->rwConfigParams.numRW; i++) {
             hs_B += this->rwConfigParams.JsList[i] * rwSpeedMsg.wheelSpeeds[i] * cArray2EigenVector3d(&this->rwConfigParams.GsMatrix_B[i * 3]);
         }
 
-        Eigen::Vector3d Delta_H_B = Eigen::Vector3d::Zero();
-        if (double hs = hs_B.norm(); hs >= this->hs_min) {
-            Delta_H_B = - hs_B * (hs - this->hs_min) / hs;
+        if (this->hd_B.norm() > 0) {
+            Delta_H_B = this->hd_B - hs_B;
+        } else {
+            if (double hs = hs_B.norm(); hs >= this->hs_min) {
+                Delta_H_B = - hs_B * (hs - this->hs_min) / hs;
+            }
         }
-
-        CmdTorqueBodyMsgPayload controlOutMsg = this->deltaHOutMsg.zeroMsgPayload;
-        eigenVector3d2CArray(Delta_H_B, controlOutMsg.torqueRequestBody);
-        this->deltaHOutMsg.write(&controlOutMsg, this->moduleID, currentSimNanos);
 
         this->initRequest = 0;
     }
+
+    CmdTorqueBodyMsgPayload controlOutMsg = this->deltaHOutMsg.zeroMsgPayload;
+    eigenVector3d2CArray(Delta_H_B, controlOutMsg.torqueRequestBody);
+    this->deltaHOutMsg.write(&controlOutMsg, this->moduleID, currentSimNanos);
 }
