@@ -75,15 +75,17 @@ where :math:`\mathbf{\bar{u}}_{COB} = [\mathrm{cob}_x, \mathrm{cob}_y, 1]^T` wit
 brightmess :math:`\mathrm{cob}_x` and :math:`\mathrm{cob}_y`, :math:`[K]` is the camera calibration matrix and
 :math:`\mathbf{r}_{COB}^N` is the unit vector describing the physical heading to the target in the camera frame.
 
-The covariance is found using the number of detected pixels and the camera parameters, given by:
+The covariance of the COB error is found using the number of detected pixels and the camera parameters, given by:
 
 .. math::
 
-    P = \frac{2 \ pi}{\sqrt{\mathrm{numPixels}}} \left( \begin{bmatrix} d_x^2 & 0 & 0 \\ 0 & d_y^2 & 0
+    P = \frac{\mathrm{numPixels}}{4 \pi \cdot ||\mathbf{\bar{u}}_{COB}||^2} \left( \begin{bmatrix} d_x^2 & 0 & 0 \\ 0 & d_y^2 & 0
     \\ 0 & 0 & 1 \end{bmatrix}\right)
 
 where :math:`d_x` and :math:`d_y` are the first and second diagonal elements of the camera calibration matrix
-:math:`[K]`.
+:math:`[K]`. This covariance matrix is then transformed into the body frame and added to the covariance of the attitude
+error. Both individual covariance matrices, and thus the total covariance matrix, describe the measurement noise of a
+unit vector.
 
 By reading the camera orientation and the current body attitude in the inertial frame, the final step is to rotate
 the covariance and heading vector in all the relevant frames for modules downstream. This is done simply by
@@ -141,6 +143,10 @@ This section is to outline the steps needed to setup a center of brightness conv
     module = cobConverter.CobConverter(cobConverter.PhaseAngleCorrectionMethod_NoCorrection, R_obj)  # no correction
     # module = cobConverter.CobConverter(cobConverter.PhaseAngleCorrectionMethod_Lambertian, R_obj)  # Lambertian method
     # module = cobConverter.CobConverter(cobConverter.PhaseAngleCorrectionMethod_Binary, R_obj)  # Binary method
+
+#. The attitude error covariance matrix is set by::
+
+    module.setAttitudeCovariance(covar_att_BN_B)
 
 #. The object radius in units of meters for the phase angle correction can be updated by::
 

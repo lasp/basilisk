@@ -39,12 +39,13 @@ def mapState(state, input_camera):
     Kinv = np.linalg.inv(K)
 
     rHat_BN_C = Kinv @ np.array([state[0], state[1], 1])
+    norm_COB_vector = np.linalg.norm(rHat_BN_C)
     rHat_BN_C = -rHat_BN_C / np.linalg.norm(rHat_BN_C)
 
-    return rHat_BN_C
+    return rHat_BN_C, norm_COB_vector
 
 
-def mapCovar(pixels, input_camera):
+def mapCovar(pixels, input_camera, norm_COB_vector):
     """Secondary method to map the covariance in pixel space to position"""
     K = compute_camera_calibration_matrix(input_camera)
     d_x = K[0, 0]
@@ -52,17 +53,14 @@ def mapCovar(pixels, input_camera):
     X = 1 / d_x
     Y = 1 / d_y
 
-    if pixels > 0:
-        scale_factor = np.sqrt(pixels) / (2 * np.pi)
-    else:
-        scale_factor = 1  # prevent division by zero
+    scale_factor = np.sqrt(pixels / (4 * np.pi)) / (norm_COB_vector ** 2)
 
     covar = np.zeros([3, 3])
     covar[0, 0] = X ** 2
     covar[1, 1] = Y ** 2
     covar[2, 2] = 1
 
-    return 1 / scale_factor * covar
+    return scale_factor * covar
 
 
 def compute_camera_calibration_matrix(input_camera):
@@ -121,7 +119,10 @@ def cob_converter_test_function(show_plots, cameraResolution, sigma_CB, sigma_BN
     testProc = unitTestSim.CreateNewProcess(unitProcessName)
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
     R_object = 25. * 1e3
+    att_sigma = 0.001
+    covar_att_B = np.diag([att_sigma**2, (0.9*att_sigma)**2, (0.95*att_sigma)**2])
     module = cobConverter.CobConverter(method, R_object)
+    module.setAttitudeCovariance(covar_att_B)
     unitTestSim.AddModelToTask(unitTaskName, module, module)
 
     # Create the input messages.
@@ -183,12 +184,15 @@ def cob_converter_test_function(show_plots, cameraResolution, sigma_CB, sigma_BN
     dcm_NC = np.dot(dcm_CB, dcm_BN).T
 
     # Center of Brightness Unit Vector
-    rhat_COB_C_true = mapState(cob_true, inputCamera)
-    covar_COB_C_true = mapCovar(num_pixels, inputCamera)
+    [rhat_COB_C_true, norm_COB_vector] = mapState(cob_true, inputCamera)
+    covar_COB_C_true = mapCovar(num_pixels, inputCamera, norm_COB_vector)
     rhat_COB_N_true = np.dot(dcm_NC, rhat_COB_C_true) * valid_COB_true  # multiple by validity to get zero vector if bad
-    covar_COB_N_true = np.dot(dcm_NC, np.dot(covar_COB_C_true, dcm_NC.T)).flatten() * valid_COB_true
     timeTag_true_ns = inputCob.timeTag * valid_COB_true
     timeTag_true = timeTag_true_ns * macros.NANO2SEC
+
+    covar_COB_B_true = np.dot(dcm_CB.T, np.dot(covar_COB_C_true, dcm_CB))
+    covar_B_true = covar_COB_B_true + covar_att_B
+    covar_N_true = np.dot(dcm_BN.T, np.dot(covar_B_true, dcm_BN)).flatten() * valid_COB_true
 
     # Center of Mass Message and Unit Vector
     alpha = np.arccos(np.dot(r_BdyZero_N.T / np.linalg.norm(r_BdyZero_N), vehSunPntN))  # phase angle
@@ -202,7 +206,7 @@ def cob_converter_test_function(show_plots, cameraResolution, sigma_CB, sigma_BN
     com_true = [None] * 2  # COM location in image
     com_true[0] = cob_true[0] - gamma * Rc * np.cos(phi) * valid_COB_true
     com_true[1] = cob_true[1] - gamma * Rc * np.sin(phi) * valid_COB_true
-    rhat_COM_C_true = mapState(com_true, inputCamera)
+    [rhat_COM_C_true, norm_COM_vector] = mapState(com_true, inputCamera)
     if valid_COB_true and (method == binary or method == lambertian):
         valid_COM_true = True
         rhat_COM_N_true = np.dot(dcm_NC, rhat_COM_C_true)
@@ -212,7 +216,7 @@ def cob_converter_test_function(show_plots, cameraResolution, sigma_CB, sigma_BN
 
     # module output
     rhat_COB_N = dataLogUnitVecCOB.rhat_BN_N[0]
-    covar_COB_N = dataLogUnitVecCOB.covar_N[0]
+    covar_N = dataLogUnitVecCOB.covar_N[0]
     time_COB = dataLogUnitVecCOB.timeTag[0]
     com = dataLogCOM.centerOfMass[0]
     time_COM_ns = dataLogCOM.timeTag[0]
@@ -228,11 +232,11 @@ def cob_converter_test_function(show_plots, cameraResolution, sigma_CB, sigma_BN
                                err_msg='Variable: rhat_COB_N',
                                verbose=True)
 
-    np.testing.assert_allclose(covar_COB_N,
-                               covar_COB_N_true,
+    np.testing.assert_allclose(covar_N,
+                               covar_N_true,
                                rtol=0,
                                atol=tolerance,
-                               err_msg='Variable: covar_COB_N',
+                               err_msg='Variable: covar_N',
                                verbose=True)
 
     np.testing.assert_allclose(time_COB,

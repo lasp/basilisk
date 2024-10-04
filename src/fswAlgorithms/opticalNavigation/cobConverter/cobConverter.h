@@ -51,6 +51,8 @@ public:
 
     void setRadius(const double radius);
     double getRadius() const;
+    void setAttitudeCovariance(const Eigen::Matrix3d covAtt_BN_B);
+    Eigen::Matrix3d getAttitudeCovariance() const;
 
 public:
     Message<OpNavUnitVecMsgPayload> opnavUnitVecCOBOutMsg;
@@ -67,6 +69,7 @@ public:
 private:
     PhaseAngleCorrectionMethod phaseAngleCorrectionMethod;
     double objectRadius{};
+    Eigen::Matrix3d covarAtt_BN_B{};
 };
 
 #endif

@@ -138,49 +138,54 @@ void CobConverter::UpdateState(uint64_t CurrentSimNanos)
         centerOfMass[2] = 1.0;
 
         /*! - Get the heading in the image plane */
-        Eigen::Vector3d rhat_COB_C = cameraCalibrationMatrixInverse * centerOfBrightness;
-        Eigen::Vector3d rhat_COM_C = cameraCalibrationMatrixInverse * centerOfMass;
+        Eigen::Vector3d rhatCOB_C = cameraCalibrationMatrixInverse * centerOfBrightness;
+        Eigen::Vector3d rhatCOM_C = cameraCalibrationMatrixInverse * centerOfMass;
 
         /*! - Retrieve the vector from target to camera and normalize */
-        rhat_COB_C *= - 1;
-        rhat_COB_C.normalize();
-        rhat_COM_C *= - 1;
-        rhat_COM_C.normalize();
+        rhatCOB_C *= - 1;
+        double rhatCOBNorm = rhatCOB_C.norm();
+        rhatCOB_C.normalize();
+        rhatCOM_C *= - 1;
+        rhatCOM_C.normalize();
 
         /*! - Rotate the vector into frames of interest */
-        Eigen::Vector3d rhat_COB_N = dcm_NC * rhat_COB_C;
-        Eigen::Vector3d rhat_COB_B = dcm_CB.transpose() * rhat_COB_C;
-        Eigen::Vector3d rhat_COM_N = dcm_NC * rhat_COM_C;
-        Eigen::Vector3d rhat_COM_B = dcm_CB.transpose() * rhat_COM_C;
+        Eigen::Vector3d rhatCOB_N = dcm_NC * rhatCOB_C;
+        Eigen::Vector3d rhatCOB_B = dcm_CB.transpose() * rhatCOB_C;
+        Eigen::Vector3d rhatCOM_N = dcm_NC * rhatCOM_C;
+        Eigen::Vector3d rhatCOM_B = dcm_CB.transpose() * rhatCOM_C;
 
-        /*! - Define diagonal terms of the covariance */
-        Eigen::Matrix3d covar_C;
-        covar_C.setZero();
-        covar_C(0,0) = pow(X,2);
-        covar_C(1,1) = pow(Y,2);
-        covar_C(2,2) = 1;
-        /*! - define and rotate covariance using number of pixels found */
-        double scaleFactor = sqrt(cobMsgBuffer.pixelsFound)/(2*M_PI);
-        covar_C *= 1./scaleFactor;
-        Eigen::Matrix3d covar_N = dcm_NC * covar_C * dcm_NC.transpose();
-        Eigen::Matrix3d covar_B = dcm_CB.transpose() * covar_C * dcm_CB;
+        /*! - define diagonal terms of the COB covariance */
+        Eigen::Matrix3d covarCob_C;
+        covarCob_C.setZero();
+        covarCob_C(0,0) = pow(X,2);
+        covarCob_C(1,1) = pow(Y,2);
+        covarCob_C(2,2) = 1;
+        /*! - scale covariance using number of pixels found and rotate into B frame */
+        double scaleFactor = sqrt(cobMsgBuffer.pixelsFound / (4 * M_PI)) / pow(rhatCOBNorm, 2);
+        covarCob_C *= scaleFactor;
+        Eigen::Matrix3d covarCob_B = dcm_CB.transpose() * covarCob_C * dcm_CB;
+        /*! - add attitude error covariance in B frame to get total covariance of unit vector measurements */
+        Eigen::Matrix3d covar_B = covarCob_B + this->covarAtt_BN_B;
+        /*! - rotate total covariance into all remaining frames */
+        Eigen::Matrix3d covar_N = dcm_BN.transpose() * covar_B * dcm_BN;
+        Eigen::Matrix3d covar_C = dcm_CB.transpose() * covar_B * dcm_CB;
 
         /*! - output messages */
         eigenMatrix3d2CArray(covar_N, uVecCOBMsgBuffer.covar_N);
         eigenMatrix3d2CArray(covar_C, uVecCOBMsgBuffer.covar_C);
         eigenMatrix3d2CArray(covar_B, uVecCOBMsgBuffer.covar_B);
-        eigenVector3d2CArray(rhat_COB_N, uVecCOBMsgBuffer.rhat_BN_N);
-        eigenVector3d2CArray(rhat_COB_C, uVecCOBMsgBuffer.rhat_BN_C);
-        eigenVector3d2CArray(rhat_COB_B, uVecCOBMsgBuffer.rhat_BN_B);
+        eigenVector3d2CArray(rhatCOB_N, uVecCOBMsgBuffer.rhat_BN_N);
+        eigenVector3d2CArray(rhatCOB_C, uVecCOBMsgBuffer.rhat_BN_C);
+        eigenVector3d2CArray(rhatCOB_B, uVecCOBMsgBuffer.rhat_BN_B);
         uVecCOBMsgBuffer.timeTag = (double) cobMsgBuffer.timeTag * NANO2SEC;
         uVecCOBMsgBuffer.valid = true;
 
         eigenMatrix3d2CArray(covar_N, uVecCOMMsgBuffer.covar_N);
         eigenMatrix3d2CArray(covar_C, uVecCOMMsgBuffer.covar_C);
         eigenMatrix3d2CArray(covar_B, uVecCOMMsgBuffer.covar_B);
-        eigenVector3d2CArray(rhat_COM_N, uVecCOMMsgBuffer.rhat_BN_N);
-        eigenVector3d2CArray(rhat_COM_C, uVecCOMMsgBuffer.rhat_BN_C);
-        eigenVector3d2CArray(rhat_COM_B, uVecCOMMsgBuffer.rhat_BN_B);
+        eigenVector3d2CArray(rhatCOM_N, uVecCOMMsgBuffer.rhat_BN_N);
+        eigenVector3d2CArray(rhatCOM_C, uVecCOMMsgBuffer.rhat_BN_C);
+        eigenVector3d2CArray(rhatCOM_B, uVecCOMMsgBuffer.rhat_BN_B);
         uVecCOMMsgBuffer.timeTag = (double) cobMsgBuffer.timeTag * NANO2SEC;
         uVecCOMMsgBuffer.valid = validCOM;
 
@@ -214,4 +219,21 @@ void CobConverter::setRadius(const double radius){
     */
 double CobConverter::getRadius() const {
     return this->objectRadius;
+}
+
+/*! Set the attitude error covariance matrix in body frame B, for unit vector measurements
+    @param cov_att_BN_B
+    @return void
+    */
+void CobConverter::setAttitudeCovariance(const Eigen::Matrix3d covAtt_BN_B)
+{
+    this->covarAtt_BN_B = covAtt_BN_B;
+}
+
+/*! Get the attitude error covariance matrix in body frame B, for unit vector measurements
+    @return Eigen::Matrix3d cov_att_BN_B
+    */
+Eigen::Matrix3d CobConverter::getAttitudeCovariance() const
+{
+    return this->covarAtt_BN_B;
 }
