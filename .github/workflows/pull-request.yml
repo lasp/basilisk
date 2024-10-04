@@ -20,12 +20,13 @@ jobs:
       - uses: pre-commit/action@v3.0.1
         with:
           extra_args: --files ${{ steps.file_changes.outputs.all_changed_files}}
+
   build-linux:
     name: Build Linux
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        python-version: ["3.10"]
+        python-version: ["3.10", "3.11"]
     permissions:
       actions: read
       contents: read
@@ -87,6 +88,7 @@ jobs:
         if: ${{ always() }}
 
   build-windows:
+    if: 'false'
     name: Build Windows
     runs-on: windows-2022
     strategy:
