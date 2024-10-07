@@ -710,6 +710,7 @@
 -U _PyUnicode_AsUCS4Copy
 -U _PyUnicode_AsUTF16String
 -U _PyUnicode_AsUTF32String
+-U _PyUnicode_AsUTF8
 -U _PyUnicode_AsUTF8AndSize
 -U _PyUnicode_AsUTF8String
 -U _PyUnicode_AsUnicodeEscapeString
