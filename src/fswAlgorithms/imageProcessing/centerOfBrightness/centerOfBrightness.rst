@@ -63,8 +63,10 @@ The normalized total brightness is equal to
     I_\mathrm{tot, normalized} = \frac{I_\mathrm{tot}}{255}
 
 and the rolling average is computed over the last :math:`N` time steps, as specified by numberOfPointsBrightnessAverage.
+If the relative increase of the rolling brightness average from one time step to the next is below the threshold
+brightnessIncreaseThreshold, the image is tagged as invalid.
 
-If the incomping image is not valid, or there were no pixels above the threshold, the image is tagged as invalid.
+If the incoming image is not valid, or there were no pixels above the threshold, the image is tagged as invalid.
 Downstream algorithms can therefore know when to skip a measurement.
 
 User Guide
@@ -92,6 +94,10 @@ This section is to outline the steps needed to setup a Center of Brightness in P
 #. Specify the number of data points to be used for the rolling average of total brightness (optional)::
 
     cobAlgorithm.numberOfPointsBrightnessAverage = 5
+
+#. Specify the minimum relative brightness increase of the rolling average of total brightness (optional)::
+
+    moduleConfig.setRelativeBrightnessIncreaseThreshold(0.1)
 
 #. Subscribe to the image message output by the camera model or visualization interface::
 

@@ -92,15 +92,29 @@ void CenterOfBrightness::UpdateState(uint64_t CurrentSimNanos)
     if (!locations.empty()){
         std::pair<Eigen::Vector2d, double> cobData;
         cobData = this->computeWeightedCenterOfBrightness(locations);
-        this->updateBrightnessHistory(cobData.second);
 
-        cobBuffer.valid = true;
-        cobBuffer.timeTag = this->sensorTimeTag;
-        cobBuffer.cameraID = imageBuffer.cameraID;
-        cobBuffer.centerOfBrightness[0] = cobData.first[0];
-        cobBuffer.centerOfBrightness[1] = cobData.first[1];
-        cobBuffer.pixelsFound = static_cast<int32_t> (locations.size());
-        cobBuffer.rollingAverageBrightness = this->brightnessHistory.mean();
+        double averageBrightnessOld = 0.0;
+        if (this->brightnessHistory.rows() > 0){
+            averageBrightnessOld = this->brightnessHistory.mean();
+        }
+        this->updateBrightnessHistory(cobData.second);
+        double averageBrightnessNew = this->brightnessHistory.mean();
+        double brightnessIncrease = 0.0;
+        if (averageBrightnessOld > 0.0){
+            brightnessIncrease = (averageBrightnessNew - averageBrightnessOld)
+                    / averageBrightnessOld;
+        }
+
+        /*! If brightness increase is less than brightness increase threshold, do not validate image */
+        if (brightnessIncrease >= this->relativeBrightnessIncreaseThreshold){
+            cobBuffer.valid = true;
+            cobBuffer.timeTag = this->sensorTimeTag;
+            cobBuffer.cameraID = imageBuffer.cameraID;
+            cobBuffer.centerOfBrightness[0] = cobData.first[0];
+            cobBuffer.centerOfBrightness[1] = cobData.first[1];
+            cobBuffer.pixelsFound = static_cast<int32_t> (locations.size());
+        }
+        cobBuffer.rollingAverageBrightness = averageBrightnessNew;
     }
 
     this->opnavCOBOutMsg.write(&cobBuffer, this->moduleID, CurrentSimNanos);
@@ -272,4 +286,21 @@ Eigen::VectorXi CenterOfBrightness::getWindowSize() const
 {
     Eigen::VectorXi center = {this->windowWidth, this->windowHeight};
     return center;
+}
+
+/*! Set threshold for the increase in brightness for images not to be invalidated
+    @param double increaseThreshold
+    @return void
+    */
+void CenterOfBrightness::setRelativeBrightnessIncreaseThreshold(double increaseThreshold)
+{
+    this->relativeBrightnessIncreaseThreshold = increaseThreshold;
+}
+
+/*! Get threshold for the increase in brightness for images not to be invalidated
+    @return double increaseThreshold
+    */
+double CenterOfBrightness::getRelativeBrightnessIncreaseThreshold() const
+{
+    return this->relativeBrightnessIncreaseThreshold;
 }

@@ -45,6 +45,8 @@ public:
     Eigen::VectorXi getWindowCenter() const;
     void setWindowSize(int32_t width, int32_t height);
     Eigen::VectorXi getWindowSize() const;
+    void setRelativeBrightnessIncreaseThreshold(double increaseThreshold);
+    double getRelativeBrightnessIncreaseThreshold() const;
 
 private:
     std::vector<cv::Vec2i> extractBrightPixels(cv::Mat image);
@@ -75,6 +77,7 @@ private:
     Eigen::Vector2i windowPointBottomRight{};  //!< [px] bottom right point of window
     bool validWindow = false;            //!< [px] true if window is set, false if center, height, or width equal 0
     Eigen::VectorXd brightnessHistory{};    //!< [-] brightness history to be used for rolling average
+    double relativeBrightnessIncreaseThreshold{};  //!< [-] minimum relative brightness increase (if less, invalidated)
     /* OpenCV specific arguments needed for finding all non-zero pixels*/
     cv::Mat imageGray;                   //!< [cv mat] Gray scale image for weighting
 };
