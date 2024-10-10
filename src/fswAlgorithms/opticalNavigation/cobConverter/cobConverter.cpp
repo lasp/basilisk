@@ -19,6 +19,13 @@
 
 #include "cobConverter.h"
 
+static Eigen::Matrix3d computeTotalCobCovariance(const Eigen::Matrix3d& covarNav_N,
+                                                 const Eigen::Matrix3d& covarAtt_B,
+                                                 const Eigen::Matrix3d& covarCob_C,
+                                                 const Eigen::Matrix3d& dcm_CN,
+                                                 const Eigen::Matrix3d& dcm_CB,
+                                                 const Eigen::Matrix3d& cameraCalibrationMatrix);
+
 CobConverter::CobConverter(PhaseAngleCorrectionMethod method, double radiusObject)
 {
     phaseAngleCorrectionMethod = method;
@@ -38,6 +45,9 @@ void CobConverter::Reset(uint64_t CurrentSimNanos)
     // check that the required message has not been connected
     if (!this->opnavCOBInMsg.isLinked()) {
         bskLogger.bskLog(BSK_ERROR, "CobConverter.opnavCOBInMsg wasn't connected.");
+    }
+    if (this->performOutlierDetection && !this->opnavFilterInMsg.isLinked()) {
+        bskLogger.bskLog(BSK_ERROR, "CobConverter.opnavFilterInMsg wasn't connected.");
     }
     if (!this->cameraConfigInMsg.isLinked()) {
         bskLogger.bskLog(BSK_ERROR, "CobConverter.cameraConfigInMsg wasn't connected.");
@@ -93,6 +103,11 @@ void CobConverter::UpdateState(uint64_t CurrentSimNanos)
         double vp = resolutionY/2;
         double X = 1/dX;
         double Y = 1/dY;
+        /*! - build camera calibration matrix K */
+        Eigen::Matrix3d cameraCalibrationMatrix;
+        cameraCalibrationMatrix << dX, alpha, up,
+                                   0., dY, vp,
+                                   0., 0., 1.;
         /*! - build inverse K^-1 of camera calibration matrix K */
         Eigen::Matrix3d cameraCalibrationMatrixInverse;
         cameraCalibrationMatrixInverse << 1./dX, -alpha/(dX*dY), (alpha*vp - dY*up)/(dX*dY),
@@ -170,6 +185,30 @@ void CobConverter::UpdateState(uint64_t CurrentSimNanos)
         Eigen::Matrix3d covar_N = dcm_BN.transpose() * covar_B * dcm_BN;
         Eigen::Matrix3d covar_C = dcm_CB.transpose() * covar_B * dcm_CB;
 
+        Eigen::Matrix3d dcm_CN = dcm_NC.transpose();
+
+        bool goodOutlierCheck = true;
+        if (this->performOutlierDetection){
+            FilterMsgPayload filterMsgBuffer = this->opnavFilterInMsg();
+
+            int numberOfStates = filterMsgBuffer.numberOfStates;
+            Eigen::VectorXd filterState = cArray2EigenMatrixXd(filterMsgBuffer.state, numberOfStates, 1);
+            Eigen::Vector3d rNav_BN_N = filterState.segment(0, 3);
+            Eigen::Vector3d rhatNav_N = rNav_BN_N.normalized();
+            Eigen::MatrixXd filterCovariance = cArray2EigenMatrixXd(filterMsgBuffer.covar,
+                                                                    numberOfStates,
+                                                                    numberOfStates);
+            Eigen::Matrix3d covarNav_N = filterCovariance.block(0, 0, 3, 3) / pow(rNav_BN_N.norm(), 2);
+
+            goodOutlierCheck = this->cobOutlierDetection(rhatCOB_C,
+                                                         rhatNav_N,
+                                                         covarNav_N,
+                                                         covarCob_C,
+                                                         dcm_CN,
+                                                         dcm_CB,
+                                                         cameraCalibrationMatrix);
+        }
+
         /*! - output messages */
         eigenMatrix3d2CArray(covar_N, uVecCOBMsgBuffer.covar_N);
         eigenMatrix3d2CArray(covar_C, uVecCOBMsgBuffer.covar_C);
@@ -178,7 +217,7 @@ void CobConverter::UpdateState(uint64_t CurrentSimNanos)
         eigenVector3d2CArray(rhatCOB_C, uVecCOBMsgBuffer.rhat_BN_C);
         eigenVector3d2CArray(rhatCOB_B, uVecCOBMsgBuffer.rhat_BN_B);
         uVecCOBMsgBuffer.timeTag = (double) cobMsgBuffer.timeTag * NANO2SEC;
-        uVecCOBMsgBuffer.valid = true;
+        uVecCOBMsgBuffer.valid = goodOutlierCheck;
 
         eigenMatrix3d2CArray(covar_N, uVecCOMMsgBuffer.covar_N);
         eigenMatrix3d2CArray(covar_C, uVecCOMMsgBuffer.covar_C);
@@ -187,7 +226,7 @@ void CobConverter::UpdateState(uint64_t CurrentSimNanos)
         eigenVector3d2CArray(rhatCOM_C, uVecCOMMsgBuffer.rhat_BN_C);
         eigenVector3d2CArray(rhatCOM_B, uVecCOMMsgBuffer.rhat_BN_B);
         uVecCOMMsgBuffer.timeTag = (double) cobMsgBuffer.timeTag * NANO2SEC;
-        uVecCOMMsgBuffer.valid = validCOM;
+        uVecCOMMsgBuffer.valid = (validCOM && goodOutlierCheck);
 
         comMsgBuffer.centerOfMass[0] = centerOfMass[0];
         comMsgBuffer.centerOfMass[1] = centerOfMass[1];
@@ -203,6 +242,77 @@ void CobConverter::UpdateState(uint64_t CurrentSimNanos)
     this->opnavUnitVecCOBOutMsg.write(&uVecCOBMsgBuffer, this->moduleID, CurrentSimNanos);
     this->opnavUnitVecCOMOutMsg.write(&uVecCOMMsgBuffer, this->moduleID, CurrentSimNanos);
     this->opnavCOMOutMsg.write(&comMsgBuffer, this->moduleID, CurrentSimNanos);
+}
+
+/*! Compute the total COB covariance matrix in pixel units (given unit vector covariances)
+    @param Eigen::Matrix3d& covarNav_N
+    @param Eigen::Matrix3d& covarAtt_B
+    @param Eigen::Matrix3d& covarCob_C
+    @param Eigen::Matrix3d& dcm_CN
+    @param Eigen::Matrix3d& dcm_CB
+    @param Eigen::Matrix3d& cameraCalibrationMatrix
+    @return Eigen::Matrix3d covarImage
+    */
+static Eigen::Matrix3d computeTotalCobCovariance(const Eigen::Matrix3d& covarNav_N,
+                                                 const Eigen::Matrix3d& covarAtt_B,
+                                                 const Eigen::Matrix3d& covarCob_C,
+                                                 const Eigen::Matrix3d& dcm_CN,
+                                                 const Eigen::Matrix3d& dcm_CB,
+                                                 const Eigen::Matrix3d& cameraCalibrationMatrix)
+{
+    Eigen::Matrix3d covarAtt_C = dcm_CB * covarAtt_B * dcm_CB.transpose();
+    Eigen::Matrix3d covarNav_C = dcm_CN * covarNav_N * dcm_CN.transpose();
+    Eigen::Matrix3d covarTotal_C = covarCob_C + covarAtt_C + covarNav_C;
+    Eigen::Matrix3d covarImage = cameraCalibrationMatrix * covarTotal_C * cameraCalibrationMatrix.transpose();
+
+    return covarImage;
+}
+
+/*! Outlier detection on the COB
+    @param Eigen::Vector3d& rhatCOB_C
+    @param Eigen::Vector3d& rhatNav_N [m]
+    @param Eigen::Matrix3d& covarNav_N [px]
+    @param Eigen::Matrix3d& covarCob_C [px]
+    @param Eigen::Matrix3d& dcm_CN
+    @param Eigen::Matrix3d& dcm_CB
+    @param Eigen::Matrix3d& cameraCalibrationMatrix
+    @return bool goodOutlierCheck
+    */
+bool CobConverter::cobOutlierDetection(Eigen::Vector3d& rhatCOB_C,
+                                       const Eigen::Vector3d& rhatNav_N,
+                                       const Eigen::Matrix3d& covarNav_N,
+                                       const Eigen::Matrix3d& covarCob_C,
+                                       const Eigen::Matrix3d& dcm_CN,
+                                       const Eigen::Matrix3d& dcm_CB,
+                                       const Eigen::Matrix3d& cameraCalibrationMatrix) const
+{
+    rhatCOB_C *= - 1;  // turn unit vector from asteroid to camera into unit vector from camera to asteroid
+    rhatCOB_C /= rhatCOB_C[2];  // make z-component 1 for image plane
+    Eigen::Vector3d cob = cameraCalibrationMatrix * rhatCOB_C;
+
+    // assume that the time of the last filter update corresponds to the current timestep (so no propagation required)
+    Eigen::Vector3d rhatNav_C = (dcm_CN * rhatNav_N);
+    rhatNav_C *= - 1;
+    rhatNav_C /= rhatNav_C[2];
+    Eigen::Vector3d cobNav = cameraCalibrationMatrix * rhatNav_C;
+
+    double cobErrorPrediction = (cob - cobNav).norm();
+    double sigma;
+    if (this->specifiedStandardDeviation) {
+        sigma = this->standardDeviation;
+    } else {
+        Eigen::Matrix3d covarImage = computeTotalCobCovariance(covarNav_N,
+                                                               this->covarAtt_BN_B,
+                                                               covarCob_C,
+                                                               dcm_CN,
+                                                               dcm_CB,
+                                                               cameraCalibrationMatrix);
+        sigma = sqrt(std::max(covarImage(0, 0), covarImage(1, 1)));
+    }
+
+    bool goodOutlierCheck = cobErrorPrediction < this->numStandardDeviations * sigma;
+
+    return goodOutlierCheck;
 }
 
 /*! Set the object radius
@@ -236,4 +346,64 @@ void CobConverter::setAttitudeCovariance(const Eigen::Matrix3d covAtt_BN_B)
 Eigen::Matrix3d CobConverter::getAttitudeCovariance() const
 {
     return this->covarAtt_BN_B;
+}
+
+/*! Set the number of standard deviations that are acceptable for the expected COB error
+    @param double numStandardDeviations
+    @return void
+    */
+void CobConverter::setNumStandardDeviations(const double num){
+    assert(num > 0.0);
+    this->numStandardDeviations = num;
+}
+
+/*! Get the number of standard deviations that are acceptable for the expected COB error
+    @return double numStandardDeviations
+    */
+double CobConverter::getNumStandardDeviations() const {
+    return this->numStandardDeviations;
+}
+
+/*! Set the accepted standard deviation for the expected COB error
+    @return void
+    */
+void CobConverter::setStandardDeviation(const double num){
+    assert(num > 0.0);
+    this->standardDeviation = num;
+    this->specifiedStandardDeviation = true;
+}
+
+/*! Get the accepted standard deviation for the expected COB error
+    @return double numStandardDeviations
+    */
+double CobConverter::getStandardDeviation() const {
+    return this->standardDeviation;
+}
+
+/*! Get whether or not a standard deviation is set
+    @return bool specifiedStandardDeviation
+    */
+bool CobConverter::isStandardDeviationSpecified() const {
+    return this->specifiedStandardDeviation;
+}
+
+/*! Enable the COB outlier detection
+    @return void
+    */
+void CobConverter::enableOutlierDetection(){
+    this->performOutlierDetection = true;
+}
+
+/*! Disable the COB outlier detection
+    @return void
+    */
+void CobConverter::disableOutlierDetection(){
+    this->performOutlierDetection = false;
+}
+
+/*! Get whether or not the COB outlier detection is performed
+    @return bool performOutlierDetection
+    */
+bool CobConverter::isOutlierDetectionEnabled() const {
+    return this->performOutlierDetection;
 }

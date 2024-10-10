@@ -43,6 +43,7 @@ struct EphemerisMsg_C;
 %include "architecture/msgPayloadDefCpp/OpNavUnitVecMsgPayload.h"
 %include "architecture/msgPayloadDefCpp/OpNavCOBMsgPayload.h"
 %include "architecture/msgPayloadDefCpp/OpNavCOMMsgPayload.h"
+%include "architecture/msgPayloadDefCpp/FilterMsgPayload.h"
 
 
 %pythoncode %{

@@ -31,6 +31,7 @@
 #include "architecture/msgPayloadDefCpp/OpNavCOBMsgPayload.h"
 #include "architecture/msgPayloadDefCpp/OpNavCOMMsgPayload.h"
 #include "architecture/msgPayloadDefCpp/OpNavUnitVecMsgPayload.h"
+#include "architecture/msgPayloadDefCpp/FilterMsgPayload.h"
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/rigidBodyKinematics.h"
@@ -53,12 +54,30 @@ public:
     double getRadius() const;
     void setAttitudeCovariance(const Eigen::Matrix3d covAtt_BN_B);
     Eigen::Matrix3d getAttitudeCovariance() const;
+    void setNumStandardDeviations(const double num);
+    double getNumStandardDeviations() const;
+    void setStandardDeviation(const double num);
+    double getStandardDeviation() const;
+    bool isStandardDeviationSpecified() const;
+    void enableOutlierDetection();
+    void disableOutlierDetection();
+    bool isOutlierDetectionEnabled() const;
+
+private:
+    bool cobOutlierDetection(Eigen::Vector3d& rhatCOB_C,
+                             const Eigen::Vector3d& rhatNav_N,
+                             const Eigen::Matrix3d& covarNav_N,
+                             const Eigen::Matrix3d& covarCob_C,
+                             const Eigen::Matrix3d& dcm_CN,
+                             const Eigen::Matrix3d& dcm_CB,
+                             const Eigen::Matrix3d& cameraCalibrationMatrix) const;
 
 public:
     Message<OpNavUnitVecMsgPayload> opnavUnitVecCOBOutMsg;
     Message<OpNavUnitVecMsgPayload> opnavUnitVecCOMOutMsg;
     Message<OpNavCOMMsgPayload> opnavCOMOutMsg;
     ReadFunctor<OpNavCOBMsgPayload> opnavCOBInMsg;
+    ReadFunctor<FilterMsgPayload> opnavFilterInMsg;
     ReadFunctor<CameraConfigMsgPayload> cameraConfigInMsg;
     ReadFunctor<NavAttMsgPayload> navAttInMsg;
     ReadFunctor<EphemerisMsgPayload> ephemInMsg;
@@ -70,6 +89,10 @@ private:
     PhaseAngleCorrectionMethod phaseAngleCorrectionMethod;
     double objectRadius{};
     Eigen::Matrix3d covarAtt_BN_B{};
+    double numStandardDeviations = 3;
+    double standardDeviation{};
+    bool specifiedStandardDeviation{};
+    bool performOutlierDetection{};
 };
 
 #endif

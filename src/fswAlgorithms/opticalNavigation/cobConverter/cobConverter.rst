@@ -31,7 +31,10 @@ provides information on what this message is used for:
       - Input the camera config message
     * - opnavCOBInMsg
       - :ref:`OpNavCOBMsgPayload`
-      - Input enter of brightness message written out by the image processing module
+      - Input center of brightness message written out by the image processing module
+    * - opnavFilterInMsg
+      - :ref:`FilterMsgPayload`
+      - Input filter message
     * - navAttInMsg
       - :ref:`NavAttMsgPayload`
       - Input navigation message containing the spacecraft attitude in the inertial frame
@@ -130,6 +133,22 @@ Finally, similar to the COB unit vector, the COM unit vector is obtained by
 
 where :math:`\mathbf{\bar{u}}_{COM} = [\mathrm{com}_x, \mathrm{com}_y, 1]^T`.
 
+An outlier detection may be performed for the COB. In this case, the filter message :ref:`FilterMsgPayload` is used to
+predict the location of the COB. If the location of the COB coming from the image is significantly different from the
+predicted COB, it is considered an outlier and the output unit vector is invalidated. For the output message to be
+valid, the following condition must be fulfilled:
+
+.. math::
+
+    e_{COB} = | \mathbf{u}_{COB} - \mathbf{u}_{COB, predicted} | \le n_\sigma \cdot \sigma
+
+where :math:`\mathbf{u}_{COB} = [\mathrm{cob}_x, \mathrm{cob}_y]^T` are the x-y coordinates of the COB coming from the
+image, :math:`\mathbf{u}_{COB, predicted}` are the x-y coordinates of the predicted COB, :math:`n_\sigma` are the number
+of standard deviations specified by the module input "numStandardDeviations". The standard deviation :math:`\sigma` is
+either set using the setStandardDeviation setter function, or automatically obtained by the module using the attitude
+covariance matrix (specified as parameter of the module) as well as the covariance of the COB estimation and the filter
+covariance (both of which are automatically computed).
+
 User Guide
 ----------
 This section is to outline the steps needed to setup a center of brightness converter in Python.
@@ -152,10 +171,20 @@ This section is to outline the steps needed to setup a center of brightness conv
 
     module.setRadius(R_obj)
 
+#. The COB outlier detection is enabled by::
+
+    module.enableOutlierDetection()
+
+#. The number of acceptable standard deviations and the standard deviation itself for COB outlier detection are set by::
+
+    module.setNumStandardDeviations(3)  # default 3
+    module.setStandardDeviation(100)  # if not set, then the standard deviation is dynamically updated by the module
+
 #. Subscribe to the messages::
 
     module.cameraConfigInMsg.subscribeTo(camInMsg)
     module.opnavCOBInMsg.subscribeTo(cobInMsg)
+    module.opnavFilterInMsg.subscribeTo(filterInMsg)
     module.navAttInMsg.subscribeTo(attInMsg)
     module.ephemInMsg.subscribeTo(ephemInMsg)
 
