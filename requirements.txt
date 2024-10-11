@@ -1,6 +1,7 @@
 bokeh
 conan>=1.40.1, <2.00.0
 datashader==0.16.3
+delimited-protobuf==1.0.0
 holoviews==1.19.1
 hvplot==0.10.0
 opencv-contrib-python
@@ -9,6 +10,7 @@ pandas
 param==2.1.1
 parse>=1.18.0
 Pillow
+protobuf==3.19.1
 pytest
 pytest-html
 pytest-xdist
