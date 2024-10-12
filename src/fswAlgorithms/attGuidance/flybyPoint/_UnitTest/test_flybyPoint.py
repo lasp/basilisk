@@ -30,20 +30,21 @@ import pytest
 from Basilisk import __path__
 from Basilisk.architecture import messaging
 from Basilisk.fswAlgorithms import flybyPoint
-from Basilisk.utilities import SimulationBaseClass, macros, unitTestSupport
 from Basilisk.utilities import RigidBodyKinematics as rbk
+from Basilisk.utilities import SimulationBaseClass, macros, unitTestSupport
 
 bskPath = __path__[0]
 fileName = os.path.basename(os.path.splitext(__file__)[0])
 
 
-@pytest.mark.parametrize("initPos", [[-5e7, 7.5e6, 5e5]])  # m - r_CN_N
-@pytest.mark.parametrize("initVel", [[2e4, 0, 0]])  # m/s - v_CN_N
-@pytest.mark.parametrize("dTsim", [10, 100])  # s
-@pytest.mark.parametrize("dTfilter", [0, 60, 600])  # s
-@pytest.mark.parametrize("signOrbitNormal", [1, -1])
-@pytest.mark.parametrize("accuracy", [1e-12])
-def test_flybyPoint(show_plots, initPos, initVel, dTsim, dTfilter, signOrbitNormal, accuracy):
+@pytest.mark.parametrize("initial_position", [[-5e7, 7.5e6, 5e5]])  # m - r_CN_N
+@pytest.mark.parametrize("initial_velocity", [[2e4, 0, 0]])  # m/s - v_CN_N
+@pytest.mark.parametrize("filter_dt", [1, 60])  # s
+@pytest.mark.parametrize("orbit_normal_sign", [1, -1])
+@pytest.mark.parametrize("max_rate", [0, 0.01])
+@pytest.mark.parametrize("max_acceleration", [0, 1E-7])
+def test_flybyPoint(show_plots, initial_position, initial_velocity, filter_dt, orbit_normal_sign, max_rate,
+                    max_acceleration):
     r"""
     **Validation Test Description**
 
@@ -59,16 +60,14 @@ def test_flybyPoint(show_plots, initPos, initVel, dTsim, dTfilter, signOrbitNorm
     Correctness is tested assessing whether the computed hill frame moves according to the motion of the spacecraft.
 
     Args:
-        initPos[3] (m): initial position of the spacecraft w.r.t. the body/origin
-        initVel[3] (m): initial velocity of the spacecraft w.r.t. the body/origin
-        dTsim (s): simulation time step
-        dTfilter (s): time between two consecutive reads of the input message
-        signOrbitNormal (-): sign of the reference frame "out of plane" vector (orbit normal or anti orbit normal)
-        accuracy: tolerance on the result.
+        initial_position[3] (m): initial position of the spacecraft w.r.t. the body/origin
+        initial_velocity[3] (m): initial velocity of the spacecraft w.r.t. the body/origin
+        filter_dt (s): time between two consecutive reads of the input message
+        orbit_normal_sign (-): sign of the reference frame "out of plane" vector (orbit normal or anti orbit normal)
 
     **Description of Variables Being Tested**
 
-    The referene attitude :math:`\sigma_\mathcal{R/N}`, reference angular rates :math:`\omega_\mathcal{R/N}` and
+    The reference attitude :math:`\sigma_\mathcal{R/N}`, reference angular rates :math:`\omega_\mathcal{R/N}` and
     angular accelerations :math:`\dot{\omega}_\mathcal{R/N}` are tested. These are compared to the analytical results
     expected from the rectilinear motion described in the documentation of :ref:`flybyPoint`.
     The reference attitude is mapped to the corresponding reference frame, and each axis of the reference frame is
@@ -76,202 +75,171 @@ def test_flybyPoint(show_plots, initPos, initVel, dTsim, dTfilter, signOrbitNorm
     expressed in R-frame coordinates.
     """
     # each test method requires a single assert method to be called
-    flybyPointTestFunction(show_plots, initPos, initVel, dTsim, dTfilter, signOrbitNormal, accuracy)
+    flybyPointTestFunction(show_plots, initial_position, initial_velocity, filter_dt, orbit_normal_sign,
+                           max_rate, max_acceleration)
 
 
-def flybyPointTestFunction(show_plots, initPos, initVel, dTsim, dTfilter, signOrbitNormal, accuracy):
-    testFailCount = 0                       # zero unit test result counter
-    testMessages = []                       # create empty array to store test log messages
-    unitTaskName = "unitTask"               # arbitrary name (don't change)
-    unitProcessName = "TestProcess"         # arbitrary name (don't change)
-
-    # Create a sim module as an empty container
-    unitTestSim = SimulationBaseClass.SimBaseClass()
-
-    # Create test thread
-    testProcessRate = macros.sec2nano(dTsim)     # update process rate update time
-    testProc = unitTestSim.CreateNewProcess(unitProcessName)
-    testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
-
-    # Create simulation variable names
-    unitTaskName = "unitTask"
-    unitProcessName = "unitProcess"
-
-    #  Create a sim module as an empty container
-    unitTestSim = SimulationBaseClass.SimBaseClass()
-
-    #  create the simulation process
-    testProcess = unitTestSim.CreateNewProcess(unitProcessName)
-
-    # create the dynamics task and specify the integration update time
-    simulationTimeStep = macros.sec2nano(dTsim)
-    testProcess.addTask(unitTestSim.CreateNewTask(unitTaskName, simulationTimeStep))
+def flybyPointTestFunction(show_plots, initial_position, initial_velocity, filter_dt, orbit_normal_sign,
+                           max_rate, max_acceleration):
+    # setup simulation environment
+    sim_dt = 10
+    unit_test_sim = SimulationBaseClass.SimBaseClass()
+    process_rate = macros.sec2nano(sim_dt)
+    test_process = unit_test_sim.CreateNewProcess("unit_process")
+    test_process.addTask(unit_test_sim.CreateNewTask("unit_task", process_rate))
 
     # setup flybyPoint guidance module
-    flybyGuid = flybyPoint.FlybyPoint()
-    flybyGuid.ModelTag = "flybyPoint"
-    flybyGuid.setTimeBetweenFilterData(dTfilter)
-    flybyGuid.setToleranceForCollinearity(1E-5)
-    flybyGuid.setSignOfOrbitNormalFrameVector(signOrbitNormal)
-    unitTestSim.AddModelToTask(unitTaskName, flybyGuid)
+    flyby_guidance = flybyPoint.FlybyPoint()
+    flyby_guidance.ModelTag = "flybyPoint"
+    flyby_guidance.setTimeBetweenFilterData(filter_dt)
+    flyby_guidance.setToleranceForCollinearity(1E-5)
+    flyby_guidance.setSignOfOrbitNormalFrameVector(orbit_normal_sign)
+    flyby_guidance.setMaximumRateThreshold(max_rate)
+    flyby_guidance.setMaximumAccelerationThreshold(max_acceleration)
+    unit_test_sim.AddModelToTask("unit_task", flyby_guidance)
 
-    inputData = messaging.NavTransMsgPayload()
-    inputData.v_BN_N = np.array(initVel)
-    filterInMsg = messaging.NavTransMsg()
-    flybyGuid.filterInMsg.subscribeTo(filterInMsg)
+    input_data = messaging.NavTransMsgPayload()
+    input_data.v_BN_N = np.array(initial_velocity)
+    filter_msg = messaging.NavTransMsg()
+    flyby_guidance.filterInMsg.subscribeTo(filter_msg)
 
-    #
-    #   Setup data logging before the simulation is initialized
-    #
-    attRefLog = flybyGuid.attRefOutMsg.recorder()
-    unitTestSim.AddModelToTask(unitTaskName, attRefLog)
+    # Setup data logging before the simulation is initialized
+    attitude_reference_log = flyby_guidance.attRefOutMsg.recorder()
+    unit_test_sim.AddModelToTask("unit_task", attitude_reference_log)
 
-    unitTestSim.InitializeSimulation()
-    dataPos = []
-    dataVel = []
-    for i in range(round(9*600/dTsim)):
-        dataPos.append(np.array(initPos) + np.array(initVel) * (i * dTsim))
-        dataVel.append(np.array(initVel))
-        inputData.timeTag = macros.sec2nano(i * dTsim)
-        inputData.r_BN_N = dataPos[i]
-        filterInMsg.write(inputData, unitTestSim.TotalSim.getCurrentNanos())
-        unitTestSim.ConfigureStopTime(macros.sec2nano((i + 1) * dTsim) - 1)
-        unitTestSim.ExecuteSimulation()
+    unit_test_sim.InitializeSimulation()
+    position_data = []
+    velocity_data = []
+    for i in range(round(9 * 600 / sim_dt)):
+        position_data.append(np.array(initial_position) + np.array(initial_velocity) * (i * sim_dt))
+        velocity_data.append(np.array(initial_velocity))
+        input_data.timeTag = macros.sec2nano(i * sim_dt)
+        input_data.r_BN_N = position_data[i]
+        filter_msg.write(input_data, unit_test_sim.TotalSim.getCurrentNanos())
+        unit_test_sim.ConfigureStopTime(macros.sec2nano((i + 1) * sim_dt) - 1)
+        unit_test_sim.ExecuteSimulation()
 
-    #   retrieve the logged data
-    refAtt = attRefLog.sigma_RN
-    refRate = attRefLog.omega_RN_N
-    refAcc = attRefLog.domega_RN_N
-    timeData = attRefLog.times() * macros.NANO2MIN
+    #  retrieve the logged data
+    reference_attitude = attitude_reference_log.sigma_RN
+    reference_rate = attitude_reference_log.omega_RN_N
+    reference_acceleration = attitude_reference_log.domega_RN_N
+    time_data = attitude_reference_log.times() * macros.NANO2MIN
 
     ur_output = []
     ut_output = []
     uh_output = []
-    for i in range(len(refAtt)):
-        RN = rbk.MRP2C(refAtt[i])
+    for i in range(len(reference_attitude)):
+        RN = rbk.MRP2C(reference_attitude[i])
         ur_output.append(np.matmul(RN.transpose(), [1, 0, 0]))
         ut_output.append(np.matmul(RN.transpose(), [0, 1, 0]))
         uh_output.append(np.matmul(RN.transpose(), [0, 0, 1]))
 
-    ur = initPos / np.linalg.norm(initPos)
-    uh = np.cross(initPos, initVel) / np.linalg.norm(np.cross(initPos, initVel))
+    ur = initial_position / np.linalg.norm(initial_position)
+    uh = np.cross(initial_position, initial_velocity) / np.linalg.norm(np.cross(initial_position, initial_velocity))
     ut = np.cross(uh, ur)
-    f0 = np.linalg.norm(initVel) / np.linalg.norm(initPos)
-    gamma0 = np.arctan(np.dot(initVel, ur) / np.dot(initVel, ut))
+    f0 = np.linalg.norm(initial_velocity) / np.linalg.norm(initial_position)
+    gamma0 = np.arctan(np.dot(initial_velocity, ur) / np.dot(initial_velocity, ut))
 
-    for i in range(len(refAtt)):
-        # check a vector values
-        ur = dataPos[i] / np.linalg.norm(dataPos[i])
-        uh = np.cross(dataPos[i], dataVel[i]) / np.linalg.norm(np.cross(dataPos[i], dataVel[i]))
+    for i in range(len(reference_attitude)):
+        ur = position_data[i] / np.linalg.norm(position_data[i])
+        uh = np.cross(position_data[i], velocity_data[i]) / np.linalg.norm(np.cross(position_data[i], velocity_data[i]))
         ut = np.cross(uh, ur)
-        dt = timeData[i]*60
-        den = ((f0*dt)**2 + 2*f0*np.sin(gamma0)*dt + 1)
+        dt = time_data[i] * 60
+        den = ((f0 * dt) ** 2 + 2 * f0 * np.sin(gamma0) * dt + 1)
         omega = uh * f0 * np.cos(gamma0) / den
-        omegaDot = uh * (-2*f0*f0 * np.cos(gamma0)) * (f0*dt + np.sin(gamma0)) / den / den
-        if signOrbitNormal == -1:
+        omegaDot = uh * (-2 * f0 * f0 * np.cos(gamma0)) * (f0 * dt + np.sin(gamma0)) / den / den
+        if orbit_normal_sign == -1:
             ut = np.cross(ur, uh)
             uh = np.cross(ur, ut)
 
         # test correctness of frame, angular rate and acceleration
-        np.testing.assert_allclose(ur_output[i], ur, rtol=0, atol=accuracy, verbose=True)
-        np.testing.assert_allclose(ut_output[i], ut, rtol=0, atol=accuracy, verbose=True)
-        np.testing.assert_allclose(uh_output[i], uh, rtol=0, atol=accuracy, verbose=True)
-        np.testing.assert_allclose(refRate[i], omega, rtol=0, atol=accuracy, verbose=True)
-        np.testing.assert_allclose(refAcc[i], omegaDot, rtol=0, atol=accuracy, verbose=True)
+        np.testing.assert_allclose(ur_output[i], ur, rtol=0, atol=1E-12, verbose=True)
+        np.testing.assert_allclose(ut_output[i], ut, rtol=0, atol=1E-12, verbose=True)
+        np.testing.assert_allclose(uh_output[i], uh, rtol=0, atol=1E-12, verbose=True)
+        np.testing.assert_allclose(reference_rate[i], omega, rtol=0, atol=1E-12, verbose=True)
+        np.testing.assert_allclose(reference_acceleration[i], omegaDot, rtol=0, atol=1E-12, verbose=True)
 
-    # plot the results
-    plt.close("all")  # clears out plots from earlier test runs
-    dataPos = np.array(dataPos)
-    dataVel = np.array(dataVel)
-    plot_position(timeData, dataPos)
-    plot_velocity(timeData, dataVel)
-    plot_ref_attitude(timeData, refAtt)
-    plot_ref_rates(timeData, refRate)
-    plot_ref_accelerations(timeData, refAcc)
+    plt.close("all")
+    position_data = np.array(position_data)
+    velocity_data = np.array(velocity_data)
+    plot_position(time_data, position_data)
+    plot_velocity(time_data, velocity_data)
+    plot_ref_attitude(time_data, reference_attitude)
+    plot_ref_rates(time_data, reference_rate)
+    plot_ref_accelerations(time_data, reference_acceleration)
 
     if show_plots:
         plt.show()
 
-    # close the plots being saved off to avoid over-writing old and new figures
     plt.close("all")
 
-    # each test method requires a single assert method to be called
-    # this check below just makes sure no sub-test failures were found
-    # return [testFailCount, ''.join(testMessages)]
-    return
 
-
-def plot_position(timeData, dataPos):
+def plot_position(time_data, position_data):
     """Plot the attitude errors."""
     plt.figure(1)
     for idx in range(3):
-        plt.plot(timeData, dataPos[:, idx],
+        plt.plot(time_data, position_data[:, idx],
                  color=unitTestSupport.getLineColor(idx, 3),
-                 label=r'$r_{BN,' + str(idx+1) + '}$')
+                 label=r'$r_{BN,' + str(idx + 1) + '}$')
     plt.legend(loc='lower right')
     plt.xlabel('Time [min]')
     plt.ylabel(r'Inertial Position [m]')
 
 
-def plot_velocity(timeData, dataVel):
+def plot_velocity(time_data, velocity_data):
     """Plot the attitude errors."""
     plt.figure(2)
     for idx in range(3):
-        plt.plot(timeData, dataVel[:, idx],
+        plt.plot(time_data, velocity_data[:, idx],
                  color=unitTestSupport.getLineColor(idx, 3),
-                 label=r'$v_{BN,' + str(idx+1) + '}$')
+                 label=r'$v_{BN,' + str(idx + 1) + '}$')
     plt.legend(loc='lower right')
     plt.xlabel('Time [min]')
     plt.ylabel(r'Inertial Velocity [m/s]')
 
 
-def plot_ref_attitude(timeData, sigma_RN):
+def plot_ref_attitude(time_data, sigma_RN):
     """Plot the attitude errors."""
     plt.figure(3)
     for idx in range(3):
-        plt.plot(timeData, sigma_RN[:, idx],
+        plt.plot(time_data, sigma_RN[:, idx],
                  color=unitTestSupport.getLineColor(idx, 3),
-                 label=r'$\sigma_{RN,' + str(idx+1) + '}$')
+                 label=r'$\sigma_{RN,' + str(idx + 1) + '}$')
     plt.legend(loc='lower right')
     plt.xlabel('Time [min]')
     plt.ylabel(r'Reference attitude')
 
 
-def plot_ref_rates(timeData, omega_RN):
+def plot_ref_rates(time_data, omega_RN):
     """Plot the attitude errors."""
     plt.figure(4)
     for idx in range(3):
-        plt.plot(timeData, omega_RN[:, idx],
+        plt.plot(time_data, omega_RN[:, idx],
                  color=unitTestSupport.getLineColor(idx, 3),
-                 label=r'$\omega_{RN,' + str(idx+1) + '}$')
+                 label=r'$\omega_{RN,' + str(idx + 1) + '}$')
     plt.legend(loc='lower right')
     plt.xlabel('Time [min]')
     plt.ylabel(r'Reference rates')
 
 
-def plot_ref_accelerations(timeData, omegaDot_RN):
+def plot_ref_accelerations(time_data, omegaDot_RN):
     """Plot the attitude errors."""
     plt.figure(5)
     for idx in range(3):
-        plt.plot(timeData, omegaDot_RN[:, idx],
+        plt.plot(time_data, omegaDot_RN[:, idx],
                  color=unitTestSupport.getLineColor(idx, 3),
-                 label=r'$\dot{\omega}_{RN,' + str(idx+1) + '}$')
+                 label=r'$\dot{\omega}_{RN,' + str(idx + 1) + '}$')
     plt.legend(loc='lower right')
     plt.xlabel('Time [min]')
     plt.ylabel(r'Reference accelerations')
 
 
-#
-# This statement below ensures that the unit test scrip can be run as a
-# stand-along python script
-#
 if __name__ == "__main__":
-    test_flybyPoint(
-        True,                # show_plots
-        [-5e7, 7.5e6, 5e5],  # initPos
-        [2e4, 0, 0],         # initVel
-        100,                  # dTsim
-        600,                  # dTfilter
-        1,                   # sign Orbit Normal
-        1e-12                # accuracy
-    )
+    test_flybyPoint(True,  # show_plots
+                    [-5e7, 7.5e6, 5e5],  # initial_position
+                    [2e4, 0, 0],  # initial_velocity
+                    1,  # filter_dt
+                    1,  # sign Orbit Normal
+                    0.01,  # max rate
+                    0  # max acceleration
+                    )
