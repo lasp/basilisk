@@ -30,40 +30,16 @@ from Basilisk.architecture.swig_common_model import *
 %include "sys_model.h"
 %include "std_vector.i"
 
-// Instantiate templates used by example
-namespace std {
-    %template(PointLineConfig) vector<PointLine>;
-    %template(LocationConfig) vector<LocationPbMsg *>;
-    %template(CustomModelConfig) vector<CustomModel>;
-    %template(ActuatorGuiSettingsConfig) vector<ActuatorGuiSettings>;
-    %template(InstrumentGuiSettingsConfig) vector<InstrumentGuiSettings>;
-    %template(KeepOutInConeConfig) vector<KeepOutInCone>;
-    %template(StdCameraConfig) vector<StdCameraSettings>;
-    %template(VizSCVector) vector<VizSpacecraftData>;
-    %template(ThrClusterVector) vector<ThrClusterMap>;
-    %template(GravBodyInfoVector) vector<GravBodyInfo>;
-    %template(GenericSensorVector) vector<GenericSensor *>;
-    %template(LightVector) vector<Light *>;
-    %template(TransceiverVector) vector<Transceiver *>;
-    %template(GenericStorageVector) vector<GenericStorage *>;
-    %template(MultiSphereVector) vector<MultiSphere *>;
-    %template(EllipsoidVector) vector<Ellipsoid *>;
-}
-
 %include "cielimInterface.h"
-%include "simulation/vizard/_GeneralModuleFiles/vizStructures.h"
 
-%include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
-%include "architecture/msgPayloadDefC/RWConfigLogMsgPayload.h"
+%include "architecture/msgPayloadDefCpp/CameraModelMsgPayload.h"
 %include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
 %include "architecture/msgPayloadDefC/CameraImageMsgPayload.h"
 %include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-%include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
 %include "architecture/msgPayloadDefC/EpochMsgPayload.h"
 
-%include "architecture/msgPayloadDefCpp/CSSConfigLogMsgPayload.h"
-%include "architecture/msgPayloadDefCpp/THROutputMsgPayload.h"
-%include "architecture/msgPayloadDefCpp/ChargeMsmMsgPayload.h"
+%include "architecture/msgPayloadDefC/CelestialBodyParametersMsgPayload.h"
+%include "architecture/msgPayloadDefC/CameraRenderingMsgPayload.h"
 
 %pythoncode %{
 import sys
