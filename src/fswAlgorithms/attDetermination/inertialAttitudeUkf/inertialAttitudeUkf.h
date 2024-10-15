@@ -36,7 +36,7 @@
 #include "architecture/msgPayloadDefCpp/FilterResidualsMsgPayload.h"
 
 #include "architecture/msgPayloadDefC/STAttMsgPayload.h"
-#include "architecture/msgPayloadDefC/AccDataMsgPayload.h"
+#include "architecture/msgPayloadDefC/IMUSensorMsgPayload.h"
 #include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
 #include "architecture/msgPayloadDefC/VehicleConfigMsgPayload.h"
 #include "architecture/msgPayloadDefC/RWArrayConfigMsgPayload.h"
@@ -77,7 +77,7 @@ public:
     RWArrayConfigMsgPayload rwArrayConfigPayload;
     ReadFunctor<VehicleConfigMsgPayload> vehicleConfigMsg;
     ReadFunctor<RWSpeedMsgPayload> rwSpeedMsg;
-    ReadFunctor<AccDataMsgPayload> accelDataMsg;
+    ReadFunctor<IMUSensorMsgPayload> imuSensorDataInMsg;
 
     Message<NavAttMsgPayload> navAttitudeOutputMsg;
     Message<FilterMsgPayload> inertialFilterOutputMsg;

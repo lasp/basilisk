@@ -20,6 +20,7 @@ import numpy as np
 import pytest
 from Basilisk.architecture import messaging
 from Basilisk.fswAlgorithms import inertialAttitudeUkf
+from Basilisk.fswAlgorithms import miruLowPassFilterConverter
 from Basilisk.utilities import SimulationBaseClass, macros
 from Basilisk.utilities import RigidBodyKinematics as rbk
 
@@ -107,9 +108,15 @@ def test_propagation_kf(show_plots):
     test_process = unit_test_sim.CreateNewProcess(unit_process_name)
     test_process.addTask(unit_test_sim.CreateNewTask(unit_task_name, test_process_rate))
 
+    # Create miruLowPassFilterConverter module
+    miru_low_pass_filter_converter = miruLowPassFilterConverter.MiruLowPassFilterConverter()
+    miru_low_pass_filter_converter.setLowPassFilter(0.5, 15/(2*np.pi))
+    unit_test_sim.AddModelToTask(unit_task_name, miru_low_pass_filter_converter)
+
     # Construct algorithm and associated C++ container
     allMeasurements = inertialAttitudeUkf.AttitudeFilterMethod_AllMeasurements
     intertialAttitudeFilter = inertialAttitudeUkf.InertialAttitudeUkf(allMeasurements)
+    intertialAttitudeFilter.imuSensorDataInMsg.subscribeTo(miru_low_pass_filter_converter.imuSensorOutMsg)
     unit_test_sim.AddModelToTask(unit_task_name, intertialAttitudeFilter)
 
     # Add test module to runtime call list
@@ -173,7 +180,7 @@ def test_propagation_kf(show_plots):
 
     accel_data = messaging.AccDataMsgPayload()
     accel_measurement = messaging.AccDataMsg().write(accel_data)
-    intertialAttitudeFilter.accelDataMsg.subscribeTo(accel_measurement)
+    miru_low_pass_filter_converter.imuAccelDataInMsg.subscribeTo(accel_measurement)
 
     attitude_data_log = intertialAttitudeFilter.inertialFilterOutputMsg.recorder()
     unit_test_sim.AddModelToTask(unit_task_name, attitude_data_log)
@@ -226,7 +233,13 @@ def test_measurements_kf(show_plots, initial_error, method):
     test_process = unit_test_sim.CreateNewProcess(unit_process_name)
     test_process.addTask(unit_test_sim.CreateNewTask(unit_task_name, test_process_rate))
 
+    # Create miruLowPassFilterConverter module
+    miru_low_pass_filter_converter = miruLowPassFilterConverter.MiruLowPassFilterConverter()
+    miru_low_pass_filter_converter.setLowPassFilter(0.5, 15/(2*np.pi))
+    unit_test_sim.AddModelToTask(unit_task_name, miru_low_pass_filter_converter)
+
     intertialAttitudeFilter = inertialAttitudeUkf.InertialAttitudeUkf(method)
+    intertialAttitudeFilter.imuSensorDataInMsg.subscribeTo(miru_low_pass_filter_converter.imuSensorOutMsg)
     unit_test_sim.AddModelToTask(unit_task_name, intertialAttitudeFilter)
 
     # Add test module to runtime call list
@@ -294,7 +307,7 @@ def test_measurements_kf(show_plots, initial_error, method):
 
     accel_data = messaging.AccDataMsgPayload()
     accel_measurement = messaging.AccDataMsg().write(accel_data)
-    intertialAttitudeFilter.accelDataMsg.subscribeTo(accel_measurement)
+    miru_low_pass_filter_converter.imuAccelDataInMsg.subscribeTo(accel_measurement)
 
     filter_data_log = intertialAttitudeFilter.inertialFilterOutputMsg.recorder()
     unit_test_sim.AddModelToTask(unit_task_name, filter_data_log)

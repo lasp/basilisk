@@ -27,6 +27,8 @@ typedef struct{
     double AccelPlatform[3];        //!< m/s2 Apparent acceleration of the platform
     double DRFramePlatform[3];      //!< r  Accumulated DRs in platform
     double AngVelPlatform[3];       //!< r/s Angular velocity in platform frame
+    double timeTag;                 //!< [-] Observation time tag
+    double numberOfValidGyroMeasurements;   //!< Number of valid gyro measurements
 }IMUSensorMsgPayload;
 
 
