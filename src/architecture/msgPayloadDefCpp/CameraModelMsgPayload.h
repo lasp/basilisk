@@ -34,10 +34,9 @@ typedef struct {
     double bodyToCameraMrp[3];        //!< [-] MRP defining the orientation of the camera frame relative to the body frame */
     double focalLength;
     int gaussianPointSpreadFunction;  //!< Size of square Gaussian kernel to model point spread function, must be odd
-    double cosmicRayFrequency;  //!< Frequency at which cosmic rays can strike the camera
+    double exposureTime;  //!< [s] Exposure time for each image taken
     double readNoise;  //!< Read noise standard deviation
     double systemGain;  //!< Mapping from current to pixel intensity
-    bool enableStrayLight;  //!< Add basic stray light modelling to images
 }CameraModelMsgPayload;
 
 #endif

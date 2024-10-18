@@ -346,10 +346,9 @@ void Camera::UpdateState(uint64_t currentSimNanos)
     eigenVector3d2CArray(this->bodyToCameraMrp, cameraModelMsg.bodyToCameraMrp);
     cameraModelMsg.focalLength = this->focalLength;
     cameraModelMsg.gaussianPointSpreadFunction = this->gaussianPointSpreadFunction;
-    cameraModelMsg.cosmicRayFrequency = this->cosmicRayFrequency;
     cameraModelMsg.readNoise = this->readNoise;
     cameraModelMsg.systemGain = this->systemGain;
-    cameraModelMsg.enableStrayLight = this->enableStrayLight;
+    cameraModelMsg.exposureTime = this->exposureTime;
 
     /*! - Update the camera config data no matter if an image is present*/
     this->cameraConfigOutMsg.write(&cameraMsg, this->moduleID, currentSimNanos);
@@ -489,7 +488,7 @@ Eigen::Vector2i Camera::getResolution() const {
     @return void
     */
 void Camera::setImageCadence(const uint64_t& cameraImageCadence) {
-    this->renderRate = cameraImageCadence;
+    this->imageCadence = cameraImageCadence;
 }
 
 /*! Get the frame time interval at which to capture images in units of nanosecond
@@ -577,23 +576,6 @@ int Camera::getGaussianPointSpreadFunction() const {
     return this->gaussianPointSpreadFunction;
 }
 
-/*! Set the frequency at which cosmic rays can strike the camera
-    @param cameraCosmicRayFrequency double
-    @return void
-    */
-
-void Camera::setCosmicRayFrequency(const double cameraCosmicRayFrequency) {
-    this->cosmicRayFrequency = cameraCosmicRayFrequency;
-}
-
-/*! Get the frequency at which cosmic rays can strike the camera
-    @return double cosmicRayFrequency
-    */
-
-double Camera::getCosmicRayFrequency() const{
-    return this->cosmicRayFrequency;
-}
-
 /*! Set the read noise standard deviation
     @param cameraReadNoise double
     @return void
@@ -628,19 +610,19 @@ double Camera::getSystemGain() const {
     return this->systemGain;
 }
 
-/*! Set the mapping from current to pixel intensity
-    @param cameraEnableStrayLight bool
+/*! Set the camera epxosure time in seconds
+    @param openExposureTime double
     @return void
     */
 
-void Camera::setEnableStrayLight(const bool cameraEnableStrayLight) {
-    this->enableStrayLight = cameraEnableStrayLight;
+void Camera::setExposureTime(const double openExposureTime) {
+    this->exposureTime = openExposureTime;
 }
 
-/*! Set the mapping from current to pixel intensity
-    @return bool enableStrayLight
+/*! Get the mapping from current to pixel intensity
+    @return double exposureTime
     */
 
-bool Camera::getEnableStrayLight() const {
-    return this->enableStrayLight;
+double Camera::getExposureTime() const {
+    return this->exposureTime;
 }

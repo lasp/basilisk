@@ -20,7 +20,7 @@
 #ifndef ZMQCONNECTOR_H
 #define ZMQCONNECTOR_H
 
-#include "vizMessage.pb.h"
+#include "cielimMessage.pb.h"
 #include <zmq.hpp>
 #include <string>
 
@@ -36,9 +36,11 @@ public:
 
     void connect();
     [[nodiscard]] bool isConnected() const;
-    void send(const vizProtobufferMessage::VizMessage& vizMessagePayload);
+    void send(const cielimMessage::CielimMessage& messagePayload);
     ImageData requestImage(size_t cameraId);
+    void setComPortNumber(std::string &portNumber);
     void ping();
+
 
 private:
     std::shared_ptr<zmq::context_t> context;

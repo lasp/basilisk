@@ -67,7 +67,7 @@ void CobConverter::Reset(uint64_t CurrentSimNanos)
  */
 void CobConverter::UpdateState(uint64_t CurrentSimNanos)
 {
-    CameraConfigMsgPayload cameraSpecs = this->cameraConfigInMsg();
+    CameraModelMsgPayload cameraSpecs = this->cameraConfigInMsg();
     OpNavCOBMsgPayload cobMsgBuffer = this->opnavCOBInMsg();
     NavAttMsgPayload navAttBuffer = this->navAttInMsg();
     EphemerisMsgPayload ephemBuffer = this->ephemInMsg();
@@ -83,7 +83,7 @@ void CobConverter::UpdateState(uint64_t CurrentSimNanos)
         /*! - Extract rotations from relevant messages */
         double CB[3][3];
         double BN[3][3];
-        MRP2C(cameraSpecs.sigma_CB, CB);
+        MRP2C(cameraSpecs.bodyToCameraMrp, CB);
         Eigen::Matrix3d dcm_CB = c2DArray2EigenMatrix3d(CB);
         MRP2C(navAttBuffer.sigma_BN, BN);
         Eigen::Matrix3d dcm_BN = c2DArray2EigenMatrix3d(BN);
@@ -92,7 +92,7 @@ void CobConverter::UpdateState(uint64_t CurrentSimNanos)
 
         /*! - camera parameters */
         double alpha = 0;
-        double fieldOfView = cameraSpecs.fieldOfView;
+        double fieldOfView = cameraSpecs.fieldOfView[0];
         double resolutionX = cameraSpecs.resolution[0];
         double resolutionY = cameraSpecs.resolution[1];
         double pX = 2.*tan(fieldOfView/2.0);
@@ -234,7 +234,7 @@ void CobConverter::UpdateState(uint64_t CurrentSimNanos)
         comMsgBuffer.objectPixelRadius = int(Rc);
         comMsgBuffer.phaseAngle = alphaPA;
         comMsgBuffer.sunDirection = phi;
-        comMsgBuffer.cameraID = cameraSpecs.cameraID;
+        comMsgBuffer.cameraID = cameraSpecs.cameraId;
         comMsgBuffer.timeTag = cobMsgBuffer.timeTag;
         comMsgBuffer.valid = validCOM;
     }

@@ -1,0 +1,79 @@
+syntax = "proto3";
+package cielimMessage;
+option optimize_for = LITE_RUNTIME;
+
+message TimeStamp{
+    int64 frameNumber = 1;
+    double simTimeElapsed = 2;
+}
+
+message EpochDateTime{
+    int32 year = 1;
+    int32 month = 2;
+    int32 day = 3;
+    int32 hours = 4;
+    int32 minutes = 5;
+    double seconds = 6;
+}
+
+message CelestialModel{
+    string shapeModel = 1; // [string] Name of the shape model to apply to the body (default is a sphere)
+    double perlinNoiseStdDeviation = 2;  //[-] Standard deviation of the perlin noise to apply (none by default)
+    double proceduralRocks = 3;  //[-] Parameter to generate procedural rocks on the base mesh (none by default)
+    string brdfModel = 4; // [string] Name of the BRDF model to apply (Lambertian by default)
+    repeated double reflectanceParameters = 5;  //[-] Parameter to apply to BRDF
+    double meanRadius = 6; // [m] Length of the mean asteroid radius
+    repeated double principalAxisDistortion = 7; // [%] Length distortions to apply to principal axes (none by default)
+}
+
+//CelestialBody messages will carry position, velocity, and rotation data for all celestial bodies
+message CelestialBody{
+    string bodyName = 1;
+    repeated double position = 2;   //SpicePlanetStateSimMsg.PositionVector
+    repeated double velocity = 3;   //SpicePlanetStateSimMsg.VelocityVector
+    repeated double attitude = 4;  //SpicePlanetStateSimMsg.J20002Pfix
+    bool centralBody = 5;  // Central body for all positions and velocities
+    CelestialModel models = 6; // Models for rendering
+}
+
+//Spacecraft position, velocity, and attitude data
+message Spacecraft{
+    string spacecraftName = 1;
+    repeated double position = 2;  //SCStatesMsg.r_BN_N
+    repeated double velocity = 3;  //SCStatesMsg.v_BN_N
+    repeated double attitude = 4;  //SCStatesMsg.sigma_BN
+}
+
+message RenderingModel{
+    double cosmicRayStdDeviation = 1;  //[-] Standard deviation of cosmic ray frequency (poisson distribution)
+    bool enableStrayLight = 2;  // [-] Denable stray light model
+    bool starField = 3;  //[-] Enable star field
+    string rendering = 4;  //[-] Type of rendering engine to be used (Lumen, Ray tracing)
+    bool enableSmear = 5;  //[-] Enable effects of long exposure times
+}
+
+//Camera parameters
+message CameraModel{
+    int64 cameraId = 1;  //[-] ID of the camera
+    string parentName = 2;  //[-] Name of the parent body to which the camera is attached
+    repeated double fieldOfView = 3;  //[deg, deg] Camera Field of View edge-to-edge
+    repeated int64 resolution = 4;  // [pixels, pixels] Desired image width and height
+    repeated double cameraPositionInBody = 5;  //[m] Camera position in body frame
+    repeated double bodyFrameToCameraMrp = 6;  //[-] Rotation to the camera frame MRP
+    uint64 renderRate = 7;  //[ns] Sim elapsed time between saved camera images
+    double focalLength = 8; // [mm] Camera focal length
+    double exposureTime = 9; // [ns] Time with open shutter
+    uint64 pointSpreadFunction = 10; // [pix] Kernel size of gaussian psf
+    double readNoise = 11; // [ns] Time with open shutter
+    double systemGain = 12; // [-] System gain between sensor current and pixel intensity
+    RenderingModel renderParameters = 13; // [-] Rendering information attached to the camera
+}
+
+/*! Cielim Message containing relevant data for image generation*/
+message CielimMessage{
+    EpochDateTime epoch = 1;
+    TimeStamp currentTime = 2;
+    repeated CelestialBody celestialBodies = 3;
+    Spacecraft spacecraft = 4;
+    CameraModel camera = 5;
+}

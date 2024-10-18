@@ -25,7 +25,7 @@
 #include "architecture/utilities/avsEigenSupport.h"
 #include "architecture/messaging/messaging.h"
 
-#include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
+#include "architecture/msgPayloadDefCpp/CameraModelMsgPayload.h"
 #include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
 #include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
 #include "architecture/msgPayloadDefCpp/OpNavCOBMsgPayload.h"
@@ -38,6 +38,7 @@
 #include "architecture/utilities/linearAlgebra.h"
 #include "architecture/utilities/avsEigenMRP.h"
 #include "architecture/utilities/bskLogging.h"
+#include "architecture/utilities/macroDefinitions.h"
 
 enum class PhaseAngleCorrectionMethod {NoCorrection, Lambertian, Binary};
 
@@ -78,7 +79,7 @@ public:
     Message<OpNavCOMMsgPayload> opnavCOMOutMsg;
     ReadFunctor<OpNavCOBMsgPayload> opnavCOBInMsg;
     ReadFunctor<FilterMsgPayload> opnavFilterInMsg;
-    ReadFunctor<CameraConfigMsgPayload> cameraConfigInMsg;
+    ReadFunctor<CameraModelMsgPayload> cameraConfigInMsg;
     ReadFunctor<NavAttMsgPayload> navAttInMsg;
     ReadFunctor<EphemerisMsgPayload> ephemInMsg;
 

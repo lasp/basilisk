@@ -39,7 +39,7 @@ bool ZmqConnector::isConnected() const {
     return false;
 }
 
-void ZmqConnector::send(const vizProtobufferMessage::VizMessage& message) {
+void ZmqConnector::send(const cielimMessage::CielimMessage& message) {
     /*! - The viz needs 10 images before placing the planets, wait for 11 protobuffers to
      * have been created before attempting to go into opNavMode 2 */
     if (this->firstPass < 11){
@@ -114,3 +114,8 @@ void ZmqConnector::ping() {
     static_cast<void>(this->requesterSocket->recv(message, zmq::recv_flags::none));
     std::cout << message.str() << std::endl;
 }
+
+void ZmqConnector::setComPortNumber(std::string &portNumber) {
+    this->comPortNumber = portNumber;
+}
+
