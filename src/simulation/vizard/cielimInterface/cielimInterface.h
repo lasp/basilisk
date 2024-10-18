@@ -78,6 +78,7 @@ public:
     std::string getSaveFilename() const;
     void closeProtobufFile();
     void setLiveStream(bool liveStreaming);
+    void setPortNumber(std::string &port);
     void addCelestialBody(const SpiceBody &celestialBodiesList);
     std::vector<SpiceBody> getCelestialBodies() const;
 

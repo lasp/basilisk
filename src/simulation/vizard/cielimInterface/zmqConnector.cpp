@@ -114,3 +114,8 @@ void ZmqConnector::ping() {
     static_cast<void>(this->requesterSocket->recv(message, zmq::recv_flags::none));
     std::cout << message.str() << std::endl;
 }
+
+void ZmqConnector::setComPortNumber(std::string &portNumber) {
+    this->comPortNumber = portNumber;
+}
+
