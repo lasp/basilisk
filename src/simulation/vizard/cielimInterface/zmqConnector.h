@@ -38,7 +38,9 @@ public:
     [[nodiscard]] bool isConnected() const;
     void send(const cielimMessage::CielimMessage& messagePayload);
     ImageData requestImage(size_t cameraId);
+    void setComPortNumber(std::string &portNumber);
     void ping();
+
 
 private:
     std::shared_ptr<zmq::context_t> context;

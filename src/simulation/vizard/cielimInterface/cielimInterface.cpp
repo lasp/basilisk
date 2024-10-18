@@ -356,6 +356,13 @@ void CielimInterface::setOpNavMode(ClosedLoopMode mode) {
     this->opNavMode = mode;
 }
 
+/*! Set the tcp port number
+ * @param std::string port number
+*/
+void CielimInterface::setPortNumber(std::string port) {
+    this->connector.setComPortNumber(port);
+}
+
 /*! Get the frame number
  * @return int64_t frame
 */

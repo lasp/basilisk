@@ -78,6 +78,7 @@ public:
     std::string getSaveFilename() const;
     void closeProtobufFile();
     void setLiveStream(bool liveStreaming);
+    void setPortNumber(std::string port);
     void addCelestialBody(const SpiceBody &celestialBodiesList);
     std::vector<SpiceBody> getCelestialBodies() const;
 
@@ -98,7 +99,7 @@ private:
     bool liveStream{false};                  //!< [Bool] Set True if Vizard should receive a live stream of BSK data.
     void* imagePointer;                  /*!< [RUN] permanent pointers for the images to be used
                                               without relying on ZMQ because ZMQ will free it (whenever, who knows) */
-    ZmqConnector connector;
+    ZmqConnector connector{};
     ClosedLoopMode opNavMode{ClosedLoopMode::ALL_FRAMES}; /*!< [int] Set if Unity/Viz couple in direct communication. */
     int64_t frameNumber{-1}; //!< Number of frames that have been updated for TimeStamp message
 
