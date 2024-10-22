@@ -32,6 +32,7 @@ further discussion and instructions.
 
 import inspect
 import os
+import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -56,7 +57,7 @@ import scenario_AttFeedback
 sNavTransName = "sNavTransMsg"
 attGuidName = "attGuidMsg"
 
-def run(show_plots):
+def run(show_plots, execution_count=4, thread_count=2):
     """This function is called by the py.test environment."""
 
     # A MonteCarlo simulation can be created using the `MonteCarlo` module.
@@ -65,11 +66,11 @@ def run(show_plots):
     monteCarlo = Controller()
     monteCarlo.setSimulationFunction(scenario_AttFeedback.scenario_AttFeedback)  # Required: function that configures the base scenario
     monteCarlo.setExecutionFunction(scenario_AttFeedback.runScenario)  # Required: function that runs the scenario
-    monteCarlo.setExecutionCount(4)  # Required: Number of MCs to run
+    monteCarlo.setExecutionCount(execution_count)  # Required: Number of MCs to run
 
     monteCarlo.setArchiveDir(path + "/scenario_AttFeedbackMC")  # Optional: If/where to save retained data.
     monteCarlo.setShouldDisperseSeeds(True)  # Optional: Randomize the seed for each module
-    monteCarlo.setThreadCount(2)  # Optional: Number of processes to spawn MCs on
+    monteCarlo.setThreadCount(thread_count)  # Optional: Number of processes to spawn MCs on
     monteCarlo.setVerbose(True)  # Optional: Produce supplemental text output in console describing status
     monteCarlo.setVarCast('float')  # Optional: Downcast the retained numbers to float32 to save on storage space
     monteCarlo.setDispMagnitudeFile(True)  # Optional: Produce a .txt file that shows dispersion in std dev units
@@ -117,4 +118,9 @@ def displayPlots(data, retentionPolicy):
 
 
 if __name__ == "__main__":
-    run(True)
+    if len(sys.argv) == 1:
+        run(True)
+    elif len(sys.argv) == 2:
+        run(True, int(sys.argv[1]))
+    elif len(sys.argv) == 3:
+        run(True, int(sys.argv[1]), int(sys.argv[2]))
