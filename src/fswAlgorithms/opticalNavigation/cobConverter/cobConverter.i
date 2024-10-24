@@ -33,12 +33,9 @@ from Basilisk.architecture.swig_common_model import *
 
 %include "cobConverter.h"
 
-%include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
-struct CameraConfigMsg_C;
+%include "architecture/msgPayloadDefCpp/CameraModelMsgPayload.h"
 %include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-struct NavAttMsg_C;
 %include "architecture/msgPayloadDefC/EphemerisMsgPayload.h"
-struct EphemerisMsg_C;
 
 %include "architecture/msgPayloadDefCpp/OpNavUnitVecMsgPayload.h"
 %include "architecture/msgPayloadDefCpp/OpNavCOBMsgPayload.h"

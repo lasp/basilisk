@@ -33,7 +33,7 @@ typedef struct {
     char brdf[MAX_STRING_LENGTH];
     double reflectanceParameters[MAX_PARAMETER_LENGTH];
     double meanRadius;
-    double principalAxisDistortion;
+    double principalAxisDistortion[3];
 }CelestialBodyParametersMsgPayload;
 
 #endif //CELESTIAL_BODY_PARAMETERS

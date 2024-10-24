@@ -20,20 +20,25 @@
 
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/messaging/messaging.h"
-#include "architecture/msgPayloadDefC/CameraConfigMsgPayload.h"
+#include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
+#include "architecture/msgPayloadDefCpp/CameraModelMsgPayload.h"
 #include "architecture/msgPayloadDefC/CameraImageMsgPayload.h"
 #include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-#include "architecture/msgPayloadDefC/RWSpeedMsgPayload.h"
 #include "architecture/msgPayloadDefC/EpochMsgPayload.h"
-#include "architecture/utilities/bskLogging.h"
-#include "architecture/utilities/simDefinitions.h"
-#include "utilities/vizProtobuffer/vizMessage.pb.h"
-#include "simulation/vizard/cielimInterface/zmqConnector.h"
-#include "simulation/vizard/_GeneralModuleFiles/vizStructures.h"
+#include "architecture/msgPayloadDefC/CelestialBodyParametersMsgPayload.h"
+#include "architecture/msgPayloadDefC/CameraRenderingMsgPayload.h"
 
+#include "architecture/utilities/rigidBodyKinematics.hpp"
+#include "utilities/vizProtobuffer/cielimMessage.pb.h"
+#include "simulation/vizard/cielimInterface/zmqConnector.h"
+
+#include <google/protobuf/util/delimited_message_util.h>
+#include <google/protobuf/io/coded_stream.h>
 #include <fstream>
 #include <vector>
 #include <zmq.h>
+#include <iostream>
+#include <filesystem>
 
 enum class ClosedLoopMode {
     OPEN_LOOP = 0,
@@ -41,61 +46,84 @@ enum class ClosedLoopMode {
     REQUESTED_FRAMES = 2
 };
 
-/*! Defines a data structure for the spacecraft state messages and ID's.
+class MessageStatus{
+public:
+    uint64_t lastTimeTag = 0xFFFFFFFFFFFFFFFF;  //!< [ns] The previous read time-tag for msg
+    bool dataFresh = false;                     //!< [-] Flag indicating that new data has been read
+};
+
+/*! Structure defining vizard gravity body values */
+class SpiceBody{
+public:
+    std::string name{};               //!< [-] celestial body name
+    ReadFunctor<SpicePlanetStateMsgPayload> spiceStateMessage{};               //!< [-] celestial body name
+    SpicePlanetStateMsgPayload spiceStatePayload{};               //!< [-] celestial body name
+    bool isCentralBody = false;               //!< [-] celestial body name
+};
+
+/*!  @brief The interface to Cielim via ZMQ and protobuffers
 */
 class CielimInterface : public SysModel {
 public:
-    CielimInterface();
-    ~CielimInterface();
+
     void Reset(uint64_t currentSimNanos) override;
     void UpdateState(uint64_t currentSimNanos) override;
     void readBskMessages();
     void writeProtobuffer(uint64_t currentSimNanos);
-    void addCamMsgToModule(Message<CameraConfigMsgPayload> *tmpMsg);
+
     void setOpNavMode(ClosedLoopMode mode);
     ClosedLoopMode getOpNavMode() const;
     int64_t getFrameNumber() const;
+    void setSaveFile(const std::string &pathAndFilename);
+    std::string getSaveFilename() const;
+    void closeProtobufFile();
+    void setLiveStream(bool liveStreaming);
+    void setPortNumber(std::string port);
+    void addCelestialBody(const SpiceBody &celestialBodiesList);
+    std::vector<SpiceBody> getCelestialBodies() const;
 
-    std::vector<VizSpacecraftData> scData;      //!< [-] vector of spacecraft data containers
-    std::vector<ReadFunctor<SpicePlanetStateMsgPayload>> spiceInMsgs;   //!< [-] vector of input messages of planet Spice data
-    std::vector<LocationPbMsg *> locations;       //!< [] vector of ground or spacecraft locations
-    std::vector<GravBodyInfo> gravBodyInformation; //!< [-] vector of gravitational body info
-    std::vector<Message<CameraImageMsgPayload>*> opnavImageOutMsgs;  //!< vector of vizard instrument camera output messages
 
-    bool saveFile{false};                              //!< [Bool] Set True if Vizard should save a file of the data.
-    bool liveStream{false};                            //!< [Bool] Set True if Vizard should receive a live stream of BSK data.
-    std::vector<void* >bskImagePtrs;            /*!< [RUN] vector of permanent pointers for the images to be used in BSK
-                                                     without relying on ZMQ because ZMQ will free it (whenever, who knows) */
+    ReadFunctor<SCStatesMsgPayload> spacecraftMessage;      //!< [-] vector of spacecraft data containers
+    ReadFunctor<CameraModelMsgPayload> cameraModelMessage;        //!< [-] incoming camera data message
+    ReadFunctor<CameraRenderingMsgPayload > cameraRenderingMessage;      //!< [-] camera rendering message
+    ReadFunctor<CelestialBodyParametersMsgPayload> celestialParametersMessage;  //!< [-] celestial body parameters
+    ReadFunctor<EpochMsgPayload> epochMessage;    //!< [-] simulation epoch date/time input msg
 
-    std::vector<ReadFunctor<CameraConfigMsgPayload>> cameraConfInMsgs;        //!< [-] vector of incoming camera data messages
-    std::vector<MsgCurrStatus> cameraConfMsgStatus;                           //!< [-] vector of msg status of incoming camera data
-    std::vector<CameraConfigMsgPayload> cameraConfigBuffers;                  //!< [-] vector of Camera config buffers
-
-    std::string protoFilename;                  //!< Filename for where to save the protobuff message
-    VizSettings settings;                       //!< [-] container for the Viz settings that can be specified from BSK
-    LiveVizSettings liveSettings;               //!< [-] container for Viz settings that are updated on each time step
-
-    ReadFunctor<EpochMsgPayload> epochInMsg;    //!< [-] simulation epoch date/time input msg
-    MsgCurrStatus epochMsgStatus;                   //!< [-] ID of the epoch msg
-    EpochMsgPayload epochMsgBuffer{};                   //!< [-] epoch msg data
-
-    BSKLogger bskLogger;                        //!< [-] BSK Logging object
+    Message<CameraImageMsgPayload> imageOutMessage;  //!< vector of vizard instrument camera output messages
 
 private:
-    ZmqConnector connector;
+    void requestImage(uint64_t currentSimNanos);  //!<   request image and store it in output image message
+    bool shouldRequestACameraImage(uint64_t currentSimNanos) const;
+
+    bool saveFile{false};                     //!< [Bool] Set True if Vizard should save a file of the data.
+    bool liveStream{false};                  //!< [Bool] Set True if Vizard should receive a live stream of BSK data.
+    void* imagePointer;                  /*!< [RUN] permanent pointers for the images to be used
+                                              without relying on ZMQ because ZMQ will free it (whenever, who knows) */
+    ZmqConnector connector{};
     ClosedLoopMode opNavMode{ClosedLoopMode::ALL_FRAMES}; /*!< [int] Set if Unity/Viz couple in direct communication. */
     int64_t frameNumber{-1}; //!< Number of frames that have been updated for TimeStamp message
-    std::vector<MsgCurrStatus> spiceInMsgStatus;             //!< [-] status of the incoming planets' spice data messages
-    std::vector <SpicePlanetStateMsgPayload> spiceMessage;  //!< [-] Spice message copies
-    std::ofstream *outputStream{};                            //!< [-] Output file stream opened in reset
-    void requestImage(size_t camCounter, uint64_t currentSimNanos);  //!<   request image from Vizard and store it in output img msg
-    vizProtobufferMessage::VizMessage::VizSettingsPb*  collectVizSettings();
-    vizProtobufferMessage::VizMessage::LiveVizSettingsPb* collectVizLiveSettings();
 
-    void readRWConstellationMessages(VizSpacecraftData &scIt) const;
-    void readThrusterMessages(VizSpacecraftData &scIt) const;
-    void readCSSMessages(VizSpacecraftData &scIt) const;
-    bool shouldRequestACameraImage(uint64_t currentSimNanos) const;
+    SCStatesMsgPayload spacecraftPayload{};      //!< [-] vector of spacecraft data containers
+    MessageStatus spacecraftMessageStatus{};     //!< [-] message status of spacecraft data
+
+    EpochMsgPayload epochPayload{};                   //!< [-] epoch msg data
+    MessageStatus epochMessageStatus{};                //!< [-] ID of the epoch msg
+
+    std::vector<SpicePlanetStateMsgPayload> spiceBodyPayloads; //!< [-] payloads of planet Spice data
+    std::vector<MessageStatus> spiceBodyMessageStatus;         //!< [-] status of the incoming planets' spice data
+    std::vector<SpiceBody> celestialBodiesList;     //!< [-] celestial body names
+
+    CameraModelMsgPayload cameraModelPayload{};      //!< [-] camera config buffers
+    MessageStatus cameraModelMessageStatus{};         //!< [-] message status of incoming camera data
+
+    CelestialBodyParametersMsgPayload celestialParametersPayload{}; //!< [-] buffer for celestial parameters
+    MessageStatus celestialParametersMessageStatus{};     //!< [-] message status of celestial parameter message
+
+    CameraRenderingMsgPayload cameraRenderingPayload{};      //!< [-] buffer for camera rendering settings
+    MessageStatus cameraRenderingMessageStatus{};     //!< [-] message status of the camera rendering message
+
+    std::string protoFilename{};                  //!< Filename for where to save the protobuff message
+    std::ofstream outputStream{};              //!< [-] Output file stream opened in reset
 };
 
 #endif /* CIELIM_INTERFACE_H */

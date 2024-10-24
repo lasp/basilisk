@@ -11,16 +11,18 @@ foreach(PROTO_DEF ${PROTO_DEFS})
   get_filename_component(PROTO_TARGET "${PROTO_DEF}" NAME_WE)
 
   add_custom_command(
-    COMMENT "Generating protobuf (C++): ${PROTO_TARGET}"
+    COMMENT "Generating protobuf (C++/Python): ${PROTO_TARGET}"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     DEPENDS "${PROTO_DEF}"
     OUTPUT
       "${CMAKE_CURRENT_SOURCE_DIR}/${PROTO_TARGET}.pb.cc"
       "${CMAKE_CURRENT_SOURCE_DIR}/${PROTO_TARGET}.pb.h"
+      "${CMAKE_CURRENT_SOURCE_DIR}/${PROTO_TARGET}_pb2.py"
     COMMAND
       "${Protobuf_PROTOC_EXECUTABLE}"
       "--proto_path=${CMAKE_CURRENT_SOURCE_DIR}"
       "--cpp_out=${CMAKE_CURRENT_SOURCE_DIR}"
+      "--python_out=${CMAKE_CURRENT_SOURCE_DIR}"
       "${PROTO_DEF}"
   )
 
