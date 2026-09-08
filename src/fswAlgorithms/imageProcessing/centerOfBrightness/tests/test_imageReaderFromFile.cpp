@@ -7,7 +7,13 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 
+#ifdef _WIN32
+#include <process.h>
+static inline int currentProcessId() { return _getpid(); }
+#else
 #include <unistd.h>
+static inline int currentProcessId() { return getpid(); }
+#endif
 
 #include <cstdio>
 #include <filesystem>
@@ -31,7 +37,7 @@ class ImageReaderFromFileTest : public ::testing::Test {
         // Use a temp directory unique per test (and per process).
         const ::testing::TestInfo* info = ::testing::UnitTest::GetInstance()->current_test_info();
         tempDir = std::filesystem::temp_directory_path().string() + "/imageReaderFileTest_" + info->test_suite_name() +
-                  "_" + info->name() + "_" + std::to_string(::getpid());
+                  "_" + info->name() + "_" + std::to_string(currentProcessId());
         std::filesystem::remove_all(tempDir);  // clear any stale leftover
         std::filesystem::create_directories(tempDir);
     }
