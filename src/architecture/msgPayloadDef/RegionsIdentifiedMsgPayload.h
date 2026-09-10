@@ -1,7 +1,7 @@
 #ifndef REGIONS_IDENTIFIED_H
 #define REGIONS_IDENTIFIED_H
 
-#include "definitions.h"
+#include <mission/parameters.h>
 
 /*! @brief Regions of interest extracted by camera */
 typedef struct {

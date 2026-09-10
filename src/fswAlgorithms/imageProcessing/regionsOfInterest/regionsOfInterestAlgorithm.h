@@ -10,9 +10,10 @@
 #ifndef _IMAGE_PROC_REGIONS_ALGORITHM_H_
 #define _IMAGE_PROC_REGIONS_ALGORITHM_H_
 
+#include <mission/parameters.h>
 #include <stdint.h>
+
 #include <Eigen/Core>
-#include "architecture/msgPayloadDef/definitions.h"
 
 /**
  * @brief Structure representing a detected region of interest in an image
@@ -40,11 +41,11 @@ struct RegionOfInterest {
  * detections.
  */
 class RegionsOfInterestAlgorithm {
-   public:
+public:
     RegionsOfInterestAlgorithm();
     ~RegionsOfInterestAlgorithm();
 
-    RegionOfInterest update(const std::array<RegionOfInterest, MAX_NUMBER_REGIONS>& regions) const;
+    RegionOfInterest update(std::array<RegionOfInterest, MAX_NUMBER_REGIONS> const &regions) const;
     void reset();
 
     void setMaxRoiSeparation(int32_t pixelSeparation);
@@ -53,24 +54,26 @@ class RegionsOfInterestAlgorithm {
     int32_t getCameraId() const;
     void setMinimumDetectionSize(int32_t pixels);
     int32_t getMinimumDetectionSize() const;
-    void setWindowCenter(const Eigen::Vector2i& center);
+    void setWindowCenter(Eigen::Vector2i const &center);
     Eigen::Vector2i getWindowCenter() const;
     void setWindowSize(int32_t width, int32_t height);
     Eigen::Vector2i getWindowSize() const;
     void setImageSize(int32_t width, int32_t height);
     Eigen::Vector2i getImageSize() const;
 
-   private:
+private:
     void computeWindow();
-    bool regionInWindow(const RegionOfInterest& region) const;
+    bool regionInWindow(RegionOfInterest const &region) const;
     std::array<RegionOfInterest, MAX_NUMBER_REGIONS> applyWindow(
-        const std::array<RegionOfInterest, MAX_NUMBER_REGIONS>& regions) const;
-    RegionOfInterest identifyRoi(const std::array<RegionOfInterest, MAX_NUMBER_REGIONS>& regions) const;
+        std::array<RegionOfInterest, MAX_NUMBER_REGIONS> const &regions
+    ) const;
+    RegionOfInterest identifyRoi(std::array<RegionOfInterest, MAX_NUMBER_REGIONS> const &regions) const;
     static std::array<RegionOfInterest, MAX_NUMBER_REGIONS> orderRegions(
-        const std::array<RegionOfInterest, MAX_NUMBER_REGIONS>& regions);
+        std::array<RegionOfInterest, MAX_NUMBER_REGIONS> const &regions
+    );
 
     RegionOfInterest regionOfInterest{};                         //!< [ROI] Final region of interest
-    Eigen::Vector2i imageSize = Eigen::Vector2i(1024, 1024);     //!< [bool] Size the incoming image
+    Eigen::Vector2i imageSize = Eigen::Vector2i(1'024, 1'024);   //!< [bool] Size the incoming image
     int32_t minDetectionPixel = 2;                               //!< [int] Minimum pixel detection size
     int32_t maxSeparation{500};                                  //!< [px] width of mask to be used for windowing
     int32_t cameraId{};                                          //!< [-] Id of the camera imaging
@@ -78,7 +81,7 @@ class RegionsOfInterestAlgorithm {
     int32_t windowWidth{};                                       //!< [px] width of mask to be used for windowing
     int32_t windowHeight{};                                      //!< [px] height of mask to be used for windowing
     Eigen::Vector2i windowPointTopLeft = Eigen::Vector2i(0, 0);  //!< [px] top left point of window
-    Eigen::Vector2i windowPointBottomRight = Eigen::Vector2i(1024, 1024);
+    Eigen::Vector2i windowPointBottomRight = Eigen::Vector2i(1'024, 1'024);
     ;  //!< [px] bottom right point of window
 };
 

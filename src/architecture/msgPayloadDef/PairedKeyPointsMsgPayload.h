@@ -5,7 +5,7 @@
 #ifndef KEYPOINTSMSG_H
 #define KEYPOINTSMSG_H
 
-#include <architecture/msgPayloadDef/definitions.h>
+#include <mission/parameters.h>
 
 //!@brief Optical Navigation measurement message containing the matched key points between two images
 /*! This message is output by the optical flow module and contains the key points shared between the two image

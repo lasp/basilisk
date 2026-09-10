@@ -5,7 +5,7 @@
 #ifndef THR_ARRAY_CMD_FORCE_MESSAGE_H_
 #define THR_ARRAY_CMD_FORCE_MESSAGE_H_
 
-#include "definitions.h"
+#include <mission/parameters.h>
 
 /*! @brief Message used to define a vector of thruster force commands */
 typedef struct {

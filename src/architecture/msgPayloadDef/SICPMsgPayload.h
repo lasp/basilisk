@@ -5,7 +5,8 @@
 #ifndef SICP_H
 #define SICP_H
 
-#include <architecture/msgPayloadDef/definitions.h>
+#include <mission/parameters.h>
+
 #include <array>
 
 //!@brief Message containing the output of the Scaling Iterative Closest Point algorithm

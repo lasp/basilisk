@@ -6,7 +6,8 @@
 #define THR_ARRAY_MESSAGE_H
 
 #include "THRConfigMsgPayload.h"
-#include "definitions.h"
+
+#include <mission/parameters.h>
 #include <stdint.h>
 
 /*! @brief FSW message definition containing the thruster cluster information */

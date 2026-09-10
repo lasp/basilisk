@@ -8,12 +8,13 @@
 #include <architecture/_GeneralModuleFiles/sys_model.h>
 #include <architecture/messaging/messaging.h>
 #include <architecture/msgPayloadDef/RWSpeedMsgPayload.h>
-#include <architecture/msgPayloadDef/definitions.h>
 #include <architecture/utilities/bskLogging.h>
+
+#include <mission/parameters.h>
 
 /*! @brief wheel speed encoder module class */
 class Encoder : public SysModel {
-   public:
+public:
     Encoder();
     ~Encoder();
 
@@ -23,7 +24,7 @@ class Encoder : public SysModel {
     void writeOutputMessages(uint64_t CurrentClock);
     void encode(uint64_t currentSimNanos);
 
-   public:
+public:
     Message<RWSpeedMsgPayload> rwSpeedOutMsg;     //!< [rad/s] reaction wheel speed output message
     ReadFunctor<RWSpeedMsgPayload> rwSpeedInMsg;  //!< [rad/s] reaction wheel speed input message
     int rwSignalState[RW_EFF_CNT];                //!< vector of reaction wheel signal states
@@ -31,7 +32,7 @@ class Encoder : public SysModel {
     int numRW;                                    //!< number of reaction wheels
     BSKLogger bskLogger;                          //!< -- BSK Logging
 
-   private:
+private:
     RWSpeedMsgPayload rwSpeedBuffer;     //!< reaction wheel speed buffer for internal calculations
     RWSpeedMsgPayload rwSpeedConverted;  //!< reaction wheel speed buffer for converted values
     double remainingClicks[RW_EFF_CNT];  //!< remaining clicks from the previous iteration

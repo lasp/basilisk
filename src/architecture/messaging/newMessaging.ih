@@ -3,7 +3,7 @@
 %};
 %{
 #include "architecture/_GeneralModuleFiles/sys_model.h"
-#include "architecture/msgPayloadDef/definitions.h"
+#include <mission/parameters.h>
 #include "fswAlgorithms/fswUtilities/fswDefinitions.h"
 #include <vector>
 %}

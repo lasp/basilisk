@@ -23,7 +23,9 @@
 %template(DoubleVector) std::vector<double, std::allocator<double>>;
 %template(StringVector) std::vector<std::string, std::allocator<std::string>>;
 
-%include <architecture/msgPayloadDef/definitions.h>
+// SWIG does not read #include directives. Thus this file must %include the mission parameters
+// for the constants to get to the Python layer.
+%include <mission/parameters.h>
 %include "fswAlgorithms/fswUtilities/fswDefinitions.h"
 %include "simulation/dynamics/reactionWheels/reactionWheelSupport.h"
 ARRAYINTASLIST(FSWdeviceAvailability)

@@ -23,7 +23,7 @@ def extract_struct_name(header_path):
 def generate_payload_rst(header_path, output_dir):
     """Generate a single RST file for a message payload header."""
     struct_name = extract_struct_name(header_path)
-    # Skip headers that don't define a Payload struct (e.g., definitions.h)
+    # Ignore headers that do not define a Payload struct
     if not struct_name.endswith("Payload"):
         return None, struct_name
 

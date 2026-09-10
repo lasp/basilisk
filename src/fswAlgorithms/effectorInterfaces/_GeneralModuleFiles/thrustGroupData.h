@@ -7,7 +7,8 @@
 
 #include <architecture/messaging/messaging.h>
 #include <architecture/msgPayloadDef/THRArrayOnTimeCmdMsgPayload.h>
-#include <architecture/msgPayloadDef/definitions.h>
+
+#include <mission/parameters.h>
 
 #include <cstdint>
 

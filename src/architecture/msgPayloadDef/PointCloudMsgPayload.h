@@ -5,7 +5,8 @@
 #ifndef POINTCLOUDMSG_H
 #define POINTCLOUDMSG_H
 
-#include <architecture/msgPayloadDef/definitions.h>
+#include <mission/parameters.h>
+
 #include <array>
 
 //!@brief N-D point cloud

@@ -4,22 +4,22 @@
 #ifndef _SICP_H_
 #define _SICP_H_
 
+#include <architecture/_GeneralModuleFiles/sys_model.h>
 #include <architecture/messaging/messaging.h>
-#include <architecture/msgPayloadDef/definitions.h>
-#include <stdint.h>
-#include <Eigen/Dense>
-
 #include <architecture/msgPayloadDef/PointCloudMsgPayload.h>
 #include <architecture/msgPayloadDef/SICPMsgPayload.h>
-
-#include <architecture/_GeneralModuleFiles/sys_model.h>
 #include <architecture/utilities/bskLogging.h>
 #include <architecture/utilities/eigenMRP.h>
 #include <architecture/utilities/eigenSupport.h>
 
+#include <mission/parameters.h>
+#include <stdint.h>
+
+#include <Eigen/Dense>
+
 /*! @brief Scaling iterative Closest Point Algorithm */
 class ScalingIterativeClosestPoint : public SysModel {
-   public:
+public:
     ScalingIterativeClosestPoint();
     ~ScalingIterativeClosestPoint();
 
@@ -44,16 +44,18 @@ class ScalingIterativeClosestPoint : public SysModel {
     Eigen::MatrixXd t_init = Eigen::VectorXd::Zero(SICP_POINT_DIM);
     double s_init = 1;
 
-   private:
-    void computePointCorrespondance(const Eigen::MatrixXd& R_kmin1,
-                                    const Eigen::MatrixXd& t_kmin1,
-                                    const double s_kmin1,
-                                    const Eigen::MatrixXd& measuredPoints,
-                                    const Eigen::MatrixXd& referencePoints);
-    void centerCloud(const Eigen::MatrixXd& measuredPoints);
-    Eigen::MatrixXd computeRk(const double s_kmin1, const Eigen::MatrixXd& R_kmin1);
-    double computeSk(const Eigen::MatrixXd& R_kmin1);
-    Eigen::MatrixXd computeTk(const double s_k, const Eigen::MatrixXd& R_k, const Eigen::MatrixXd& measuredPoints);
+private:
+    void computePointCorrespondance(
+        Eigen::MatrixXd const &R_kmin1,
+        Eigen::MatrixXd const &t_kmin1,
+        double const s_kmin1,
+        Eigen::MatrixXd const &measuredPoints,
+        Eigen::MatrixXd const &referencePoints
+    );
+    void centerCloud(Eigen::MatrixXd const &measuredPoints);
+    Eigen::MatrixXd computeRk(double const s_kmin1, Eigen::MatrixXd const &R_kmin1);
+    double computeSk(Eigen::MatrixXd const &R_kmin1);
+    Eigen::MatrixXd computeTk(double const s_k, Eigen::MatrixXd const &R_k, Eigen::MatrixXd const &measuredPoints);
 
     PointCloudMsgPayload outputCloudBuffer;
     PointCloudMsgPayload measuredCloudBuffer;
