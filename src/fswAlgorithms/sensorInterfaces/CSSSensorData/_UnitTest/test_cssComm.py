@@ -99,7 +99,7 @@ def cssCommTestFunction(numSensors, sensorData):
     if numSensors==4:
         trueCssList[0:4] = [0.0, 0.45791653042, 1.0, 0.615444781018]
     if numSensors==MAX_NUM_CSS_SENSORS+1:
-        trueCssList = [0.45791653042]*32
+        trueCssList = [0.45791653042]*MAX_NUM_CSS_SENSORS
 
     # Create the true array
     trueCss = [
