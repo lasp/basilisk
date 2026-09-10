@@ -43,15 +43,15 @@ RwMotorTorqueMsgPayload RwNullSpaceAlgorithm::update(
                                             the control and null motion torques */
 
     /* compute the wheel speed control vector d = -K.DeltaOmega */
-    Eigen::Vector<double, MAX_EFF_CNT> d =
+    Eigen::Vector<double, RW_EFF_CNT> d =
         -this->omegaGain
         * (cArrayToEigenVector(rwSpeeds.wheelSpeeds) - cArrayToEigenVector(rwDesiredSpeeds.wheelSpeeds));
 
     /* compute the RW null space motor torque solution to reduce the wheel speeds */
-    Eigen::Vector<double, MAX_EFF_CNT> motorTorqueNullSpace = this->tau * d;
+    Eigen::Vector<double, RW_EFF_CNT> motorTorqueNullSpace = this->tau * d;
 
     /* add the null motion RW torque solution to the RW feedback control torque solution */
-    Eigen::Vector<double, MAX_EFF_CNT> motorTorque =
+    Eigen::Vector<double, RW_EFF_CNT> motorTorque =
         motorTorqueNullSpace + cArrayToEigenVector(controlRequest.motorTorque);
 
     eigenVectorToCArray(motorTorque, finalControl.motorTorque);
