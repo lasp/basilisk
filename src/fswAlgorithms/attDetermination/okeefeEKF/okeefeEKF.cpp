@@ -32,11 +32,11 @@ void OkeefeEKF::reset(uint64_t callTime) {
 
     /*! - Read in coarse sun sensor configuration information.*/
     cssConfigInBuffer = this->cssConfigInMsg();
-    if (cssConfigInBuffer.nCSS > MAX_N_CSS_MEAS) {
+    if (cssConfigInBuffer.nCSS > MAX_NUM_CSS_SENSORS) {
         this->bskLogger.bskLog(
             BSK_ERROR,
             "okeefeEKF.cssConfigInMsg.nCSS must not be greater than "
-            "MAX_N_CSS_MEAS value."
+            "MAX_NUM_CSS_SENSORS value."
         );
     }
 
@@ -52,7 +52,7 @@ void OkeefeEKF::reset(uint64_t callTime) {
     this->timeTag = callTime * NANO2SEC;
     this->dt = 0.0;
     this->numStates = SKF_N_STATES_HALF;
-    this->numObs = MAX_N_CSS_MEAS;
+    this->numObs = MAX_NUM_CSS_SENSORS;
 
     /*! - Ensure that all internal filter matrices are zeroed*/
     vSetZero(this->obs, this->numObs);
@@ -81,7 +81,7 @@ void OkeefeEKF::reset(uint64_t callTime) {
  */
 void OkeefeEKF::updateState(uint64_t callTime) {
     double newTimeTag;
-    double Hx[MAX_N_CSS_MEAS];
+    double Hx[MAX_NUM_CSS_SENSORS];
     uint64_t timeOfMsgWritten;
     int isWritten;
     SunlineFilterMsgPayload sunlineDataOutBuffer;
@@ -124,7 +124,7 @@ void OkeefeEKF::updateState(uint64_t callTime) {
     memmove(sunlineDataOutBuffer.covar, this->covar, SKF_N_STATES_HALF * SKF_N_STATES_HALF * sizeof(double));
     memmove(sunlineDataOutBuffer.state, this->state, SKF_N_STATES * sizeof(double));
     memmove(sunlineDataOutBuffer.stateError, this->x, SKF_N_STATES * sizeof(double));
-    memmove(sunlineDataOutBuffer.postFitRes, this->postFits, MAX_N_CSS_MEAS * sizeof(double));
+    memmove(sunlineDataOutBuffer.postFitRes, this->postFits, MAX_NUM_CSS_SENSORS * sizeof(double));
     this->filtDataOutMsg.write(sunlineDataOutBuffer, this->moduleID, callTime);
 
     return;
@@ -377,32 +377,32 @@ void sunlineDynMatrixOkeefe(double omega[SKF_N_STATES_HALF], double dt, double* 
 
 void sunlineCKFUpdateOkeefe(
     double xBar[SKF_N_STATES_HALF],
-    double kalmanGain[SKF_N_STATES_HALF * MAX_N_CSS_MEAS],
+    double kalmanGain[SKF_N_STATES_HALF * MAX_NUM_CSS_SENSORS],
     double covarBar[SKF_N_STATES_HALF * SKF_N_STATES_HALF],
     double qObsVal,
     int numObsInt,
-    double yObs[MAX_N_CSS_MEAS],
-    double hObs[MAX_N_CSS_MEAS * SKF_N_STATES_HALF],
+    double yObs[MAX_NUM_CSS_SENSORS],
+    double hObs[MAX_NUM_CSS_SENSORS * SKF_N_STATES_HALF],
     double* x,
     double* covar
 ) {
-    double measMatx[MAX_N_CSS_MEAS], innov[MAX_N_CSS_MEAS], kInnov[SKF_N_STATES_HALF];
+    double measMatx[MAX_NUM_CSS_SENSORS], innov[MAX_NUM_CSS_SENSORS], kInnov[SKF_N_STATES_HALF];
     double eye[SKF_N_STATES_HALF * SKF_N_STATES_HALF], kH[SKF_N_STATES_HALF * SKF_N_STATES_HALF];
     double eyeKalH[SKF_N_STATES_HALF * SKF_N_STATES_HALF], eyeKalHT[SKF_N_STATES_HALF * SKF_N_STATES_HALF];
-    double eyeKalHCovarBar[SKF_N_STATES_HALF * SKF_N_STATES_HALF], kalR[SKF_N_STATES_HALF * MAX_N_CSS_MEAS];
-    double kalT[MAX_N_CSS_MEAS * SKF_N_STATES_HALF], kalRKalT[SKF_N_STATES_HALF * SKF_N_STATES_HALF];
-    double noiseMat[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS];
+    double eyeKalHCovarBar[SKF_N_STATES_HALF * SKF_N_STATES_HALF], kalR[SKF_N_STATES_HALF * MAX_NUM_CSS_SENSORS];
+    double kalT[MAX_NUM_CSS_SENSORS * SKF_N_STATES_HALF], kalRKalT[SKF_N_STATES_HALF * SKF_N_STATES_HALF];
+    double noiseMat[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS];
     size_t numObs = (size_t) numObsInt;
 
     /* Set variables to zero */
     mSetZero(kH, SKF_N_STATES_HALF, SKF_N_STATES_HALF);
     mSetZero(eyeKalH, SKF_N_STATES_HALF, SKF_N_STATES_HALF);
     mSetZero(eyeKalHT, SKF_N_STATES_HALF, SKF_N_STATES_HALF);
-    mSetZero(noiseMat, MAX_N_CSS_MEAS, MAX_N_CSS_MEAS);
+    mSetZero(noiseMat, MAX_NUM_CSS_SENSORS, MAX_NUM_CSS_SENSORS);
     mSetZero(eye, SKF_N_STATES_HALF, SKF_N_STATES_HALF);
     mSetZero(kalRKalT, SKF_N_STATES_HALF, SKF_N_STATES_HALF);
-    mSetZero(kalT, MAX_N_CSS_MEAS, SKF_N_STATES_HALF);
-    mSetZero(kalR, SKF_N_STATES_HALF, MAX_N_CSS_MEAS);
+    mSetZero(kalT, MAX_NUM_CSS_SENSORS, SKF_N_STATES_HALF);
+    mSetZero(kalR, SKF_N_STATES_HALF, MAX_NUM_CSS_SENSORS);
     mSetZero(eyeKalHCovarBar, SKF_N_STATES_HALF, SKF_N_STATES_HALF);
 
     /* Set noise matrix given number of observations */
@@ -459,32 +459,32 @@ void sunlineCKFUpdateOkeefe(
  @param covar Pointer to the covariance after update
  */
 void okeefeEKFUpdate(
-    double kalmanGain[SKF_N_STATES_HALF * MAX_N_CSS_MEAS],
+    double kalmanGain[SKF_N_STATES_HALF * MAX_NUM_CSS_SENSORS],
     double covarBar[SKF_N_STATES_HALF * SKF_N_STATES_HALF],
     double qObsVal,
     int numObsInt,
-    double yObs[MAX_N_CSS_MEAS],
-    double hObs[MAX_N_CSS_MEAS * SKF_N_STATES_HALF],
+    double yObs[MAX_NUM_CSS_SENSORS],
+    double hObs[MAX_NUM_CSS_SENSORS * SKF_N_STATES_HALF],
     double* states,
     double* x,
     double* covar
 ) {
     double eye[SKF_N_STATES_HALF * SKF_N_STATES_HALF], kH[SKF_N_STATES_HALF * SKF_N_STATES_HALF];
     double eyeKalH[SKF_N_STATES_HALF * SKF_N_STATES_HALF], eyeKalHT[SKF_N_STATES_HALF * SKF_N_STATES_HALF];
-    double eyeKalHCovarBar[SKF_N_STATES_HALF * SKF_N_STATES_HALF], kalR[SKF_N_STATES_HALF * MAX_N_CSS_MEAS];
-    double kalT[MAX_N_CSS_MEAS * SKF_N_STATES_HALF], kalRKalT[SKF_N_STATES_HALF * SKF_N_STATES_HALF];
-    double noiseMat[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS];
+    double eyeKalHCovarBar[SKF_N_STATES_HALF * SKF_N_STATES_HALF], kalR[SKF_N_STATES_HALF * MAX_NUM_CSS_SENSORS];
+    double kalT[MAX_NUM_CSS_SENSORS * SKF_N_STATES_HALF], kalRKalT[SKF_N_STATES_HALF * SKF_N_STATES_HALF];
+    double noiseMat[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS];
     size_t numObs = (size_t) numObsInt;
 
     /* Set variables to zero */
     mSetZero(kH, SKF_N_STATES_HALF, SKF_N_STATES_HALF);
     mSetZero(eyeKalH, SKF_N_STATES_HALF, SKF_N_STATES_HALF);
     mSetZero(eyeKalHT, SKF_N_STATES_HALF, SKF_N_STATES_HALF);
-    mSetZero(noiseMat, MAX_N_CSS_MEAS, MAX_N_CSS_MEAS);
+    mSetZero(noiseMat, MAX_NUM_CSS_SENSORS, MAX_NUM_CSS_SENSORS);
     mSetZero(eye, SKF_N_STATES_HALF, SKF_N_STATES_HALF);
     mSetZero(kalRKalT, SKF_N_STATES_HALF, SKF_N_STATES_HALF);
-    mSetZero(kalT, MAX_N_CSS_MEAS, SKF_N_STATES_HALF);
-    mSetZero(kalR, SKF_N_STATES_HALF, MAX_N_CSS_MEAS);
+    mSetZero(kalT, MAX_NUM_CSS_SENSORS, SKF_N_STATES_HALF);
+    mSetZero(kalR, SKF_N_STATES_HALF, MAX_NUM_CSS_SENSORS);
     mSetZero(eyeKalHCovarBar, SKF_N_STATES_HALF, SKF_N_STATES_HALF);
 
     /* Set noise matrix given number of observations */
@@ -547,7 +547,7 @@ void okeefeEKFUpdate(
 void sunlineHMatrixYMeas(
     double states[SKF_N_STATES_HALF],
     size_t numCSS,
-    double cssSensorCos[MAX_N_CSS_MEAS],
+    double cssSensorCos[MAX_NUM_CSS_SENSORS],
     double sensorUseThresh,
     double cssNHat_B[MAX_NUM_CSS_SENSORS * 3],
     double CBias[MAX_NUM_CSS_SENSORS],
@@ -589,24 +589,24 @@ void sunlineHMatrixYMeas(
 
 void sunlineKalmanGainOkeefe(
     double covarBar[SKF_N_STATES_HALF * SKF_N_STATES_HALF],
-    double hObs[MAX_N_CSS_MEAS * SKF_N_STATES_HALF],
+    double hObs[MAX_NUM_CSS_SENSORS * SKF_N_STATES_HALF],
     double qObsVal,
     int numObsInt,
     double* kalmanGain
 ) {
-    double hObsT[SKF_N_STATES_HALF * MAX_N_CSS_MEAS];
-    double covHT[SKF_N_STATES_HALF * MAX_N_CSS_MEAS];
-    double hCovar[MAX_N_CSS_MEAS * SKF_N_STATES_HALF], hCovarHT[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS];
-    double rMat[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS];
+    double hObsT[SKF_N_STATES_HALF * MAX_NUM_CSS_SENSORS];
+    double covHT[SKF_N_STATES_HALF * MAX_NUM_CSS_SENSORS];
+    double hCovar[MAX_NUM_CSS_SENSORS * SKF_N_STATES_HALF], hCovarHT[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS];
+    double rMat[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS];
     size_t numObs;
     numObs = (size_t) numObsInt;
 
     /* Setting all local variables to zero */
-    mSetZero(hObsT, SKF_N_STATES_HALF, MAX_N_CSS_MEAS);
-    mSetZero(covHT, SKF_N_STATES_HALF, MAX_N_CSS_MEAS);
-    mSetZero(hCovar, MAX_N_CSS_MEAS, SKF_N_STATES_HALF);
-    mSetZero(hCovarHT, MAX_N_CSS_MEAS, MAX_N_CSS_MEAS);
-    mSetZero(rMat, MAX_N_CSS_MEAS, MAX_N_CSS_MEAS);
+    mSetZero(hObsT, SKF_N_STATES_HALF, MAX_NUM_CSS_SENSORS);
+    mSetZero(covHT, SKF_N_STATES_HALF, MAX_NUM_CSS_SENSORS);
+    mSetZero(hCovar, MAX_NUM_CSS_SENSORS, SKF_N_STATES_HALF);
+    mSetZero(hCovarHT, MAX_NUM_CSS_SENSORS, MAX_NUM_CSS_SENSORS);
+    mSetZero(rMat, MAX_NUM_CSS_SENSORS, MAX_NUM_CSS_SENSORS);
 
     mTranspose(hObs, (size_t) numObs, SKF_N_STATES_HALF, hObsT);
 

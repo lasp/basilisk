@@ -28,11 +28,11 @@ void CssWlsEst::reset(uint64_t callTime) {
     }
 
     this->cssConfigInBuffer = this->cssConfigInMsg();
-    if (this->cssConfigInBuffer.nCSS > MAX_N_CSS_MEAS) {
+    if (this->cssConfigInBuffer.nCSS > MAX_NUM_CSS_SENSORS) {
         this->bskLogger.bskLog(
             BSK_ERROR,
             "cssWIsEst.cssDataInMsg.nCSS must not be greater than "
-            "MAX_N_CSS_MEAS value."
+            "MAX_NUM_CSS_SENSORS value."
         );
     }
 
@@ -42,7 +42,7 @@ void CssWlsEst::reset(uint64_t callTime) {
     this->filtStatus.numObs = 0;
     this->filtStatus.timeTag = 0.0;
     v3SetZero(this->filtStatus.state);
-    vSetZero(this->filtStatus.postFitRes, MAX_N_CSS_MEAS);
+    vSetZero(this->filtStatus.postFitRes, MAX_NUM_CSS_SENSORS);
 
     /* Reset the prior time flag state.
      If zero, control time step not evaluated on the first function call */

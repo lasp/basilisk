@@ -33,11 +33,11 @@ void SunlineSEKF::reset(uint64_t callTime) {
 
     /*! - Read coarse sun sensor configuration information.*/
     cssConfigInBuffer = this->cssConfigInMsg();
-    if (cssConfigInBuffer.nCSS > MAX_N_CSS_MEAS) {
+    if (cssConfigInBuffer.nCSS > MAX_NUM_CSS_SENSORS) {
         this->bskLogger.bskLog(
             BSK_ERROR,
             "sunlineSEKF.cssConfigInMsg.nCSS must not be greater than "
-            "MAX_N_CSS_MEAS value."
+            "MAX_NUM_CSS_SENSORS value."
         );
     }
 
@@ -52,7 +52,7 @@ void SunlineSEKF::reset(uint64_t callTime) {
     this->timeTag = callTime * NANO2SEC;
     this->dt = 0.0;
     this->numStates = EKF_N_STATES_SWITCH;
-    this->numObs = MAX_N_CSS_MEAS;
+    this->numObs = MAX_NUM_CSS_SENSORS;
 
     /*! Initalize the filter to use b_1 of the body frame to make frame*/
     v3Set(1, 0, 0, this->bVec_B);
@@ -85,7 +85,7 @@ void SunlineSEKF::reset(uint64_t callTime) {
  */
 void SunlineSEKF::updateState(uint64_t callTime) {
     double newTimeTag;
-    double Hx[MAX_N_CSS_MEAS];
+    double Hx[MAX_NUM_CSS_SENSORS];
     double states_BN[EKF_N_STATES_SWITCH];
     double sunheading_hat[SKF_N_STATES_HALF];
     uint64_t timeOfMsgWritten;
@@ -141,7 +141,7 @@ void SunlineSEKF::updateState(uint64_t callTime) {
     memmove(sunlineDataOutBuffer.covar, this->covar, EKF_N_STATES_SWITCH * EKF_N_STATES_SWITCH * sizeof(double));
     memmove(sunlineDataOutBuffer.state, states_BN, EKF_N_STATES_SWITCH * sizeof(double));
     memmove(sunlineDataOutBuffer.stateError, this->x, SKF_N_STATES * sizeof(double));
-    memmove(sunlineDataOutBuffer.postFitRes, this->postFits, MAX_N_CSS_MEAS * sizeof(double));
+    memmove(sunlineDataOutBuffer.postFitRes, this->postFits, MAX_NUM_CSS_SENSORS * sizeof(double));
     this->filtDataOutMsg.write(sunlineDataOutBuffer, this->moduleID, callTime);
 
     return;
@@ -402,31 +402,31 @@ void sunlineMeasUpdate(SunlineSEKF* data, double updateTime) {
 
 void sunlineCKFUpdate(
     double xBar[EKF_N_STATES_SWITCH],
-    double kalmanGain[EKF_N_STATES_SWITCH * MAX_N_CSS_MEAS],
+    double kalmanGain[EKF_N_STATES_SWITCH * MAX_NUM_CSS_SENSORS],
     double covarBar[EKF_N_STATES_SWITCH * EKF_N_STATES_SWITCH],
     double qObsVal,
     size_t numObs,
-    double yObs[MAX_N_CSS_MEAS],
-    double hObs[MAX_N_CSS_MEAS * EKF_N_STATES_SWITCH],
+    double yObs[MAX_NUM_CSS_SENSORS],
+    double hObs[MAX_NUM_CSS_SENSORS * EKF_N_STATES_SWITCH],
     double* x,
     double* covar
 ) {
-    double measMatx[MAX_N_CSS_MEAS], innov[MAX_N_CSS_MEAS], kInnov[EKF_N_STATES_SWITCH];
+    double measMatx[MAX_NUM_CSS_SENSORS], innov[MAX_NUM_CSS_SENSORS], kInnov[EKF_N_STATES_SWITCH];
     double eye[EKF_N_STATES_SWITCH * EKF_N_STATES_SWITCH], kH[EKF_N_STATES_SWITCH * EKF_N_STATES_SWITCH];
     double eyeKalH[EKF_N_STATES_SWITCH * EKF_N_STATES_SWITCH], eyeKalHT[EKF_N_STATES_SWITCH * EKF_N_STATES_SWITCH];
-    double eyeKalHCovarBar[EKF_N_STATES_SWITCH * EKF_N_STATES_SWITCH], kalR[EKF_N_STATES_SWITCH * MAX_N_CSS_MEAS];
-    double kalT[MAX_N_CSS_MEAS * EKF_N_STATES_SWITCH], kalRKalT[EKF_N_STATES_SWITCH * EKF_N_STATES_SWITCH];
-    double noiseMat[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS];
+    double eyeKalHCovarBar[EKF_N_STATES_SWITCH * EKF_N_STATES_SWITCH], kalR[EKF_N_STATES_SWITCH * MAX_NUM_CSS_SENSORS];
+    double kalT[MAX_NUM_CSS_SENSORS * EKF_N_STATES_SWITCH], kalRKalT[EKF_N_STATES_SWITCH * EKF_N_STATES_SWITCH];
+    double noiseMat[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS];
 
     /* Set variables to zero */
     mSetZero(kH, EKF_N_STATES_SWITCH, EKF_N_STATES_SWITCH);
     mSetZero(eyeKalH, EKF_N_STATES_SWITCH, EKF_N_STATES_SWITCH);
     mSetZero(eyeKalHT, EKF_N_STATES_SWITCH, EKF_N_STATES_SWITCH);
-    mSetZero(noiseMat, MAX_N_CSS_MEAS, MAX_N_CSS_MEAS);
+    mSetZero(noiseMat, MAX_NUM_CSS_SENSORS, MAX_NUM_CSS_SENSORS);
     mSetZero(eye, EKF_N_STATES_SWITCH, EKF_N_STATES_SWITCH);
     mSetZero(kalRKalT, EKF_N_STATES_SWITCH, EKF_N_STATES_SWITCH);
-    mSetZero(kalT, MAX_N_CSS_MEAS, EKF_N_STATES_SWITCH);
-    mSetZero(kalR, EKF_N_STATES_SWITCH, MAX_N_CSS_MEAS);
+    mSetZero(kalT, MAX_NUM_CSS_SENSORS, EKF_N_STATES_SWITCH);
+    mSetZero(kalR, EKF_N_STATES_SWITCH, MAX_NUM_CSS_SENSORS);
     mSetZero(eyeKalHCovarBar, EKF_N_STATES_SWITCH, EKF_N_STATES_SWITCH);
 
     /* Set noise matrix given number of observations */
@@ -483,31 +483,31 @@ void sunlineCKFUpdate(
  @param covar Pointer to the covariance after update
  */
 void sunlineSEKFUpdate(
-    double kalmanGain[EKF_N_STATES_SWITCH * MAX_N_CSS_MEAS],
+    double kalmanGain[EKF_N_STATES_SWITCH * MAX_NUM_CSS_SENSORS],
     double covarBar[EKF_N_STATES_SWITCH * EKF_N_STATES_SWITCH],
     double qObsVal,
     size_t numObs,
-    double yObs[MAX_N_CSS_MEAS],
-    double hObs[MAX_N_CSS_MEAS * EKF_N_STATES_SWITCH],
+    double yObs[MAX_NUM_CSS_SENSORS],
+    double hObs[MAX_NUM_CSS_SENSORS * EKF_N_STATES_SWITCH],
     double* states,
     double* x,
     double* covar
 ) {
     double eye[EKF_N_STATES_SWITCH * EKF_N_STATES_SWITCH], kH[EKF_N_STATES_SWITCH * EKF_N_STATES_SWITCH];
     double eyeKalH[EKF_N_STATES_SWITCH * EKF_N_STATES_SWITCH], eyeKalHT[EKF_N_STATES_SWITCH * EKF_N_STATES_SWITCH];
-    double eyeKalHCovarBar[EKF_N_STATES_SWITCH * EKF_N_STATES_SWITCH], kalR[EKF_N_STATES_SWITCH * MAX_N_CSS_MEAS];
-    double kalT[MAX_N_CSS_MEAS * EKF_N_STATES_SWITCH], kalRKalT[EKF_N_STATES_SWITCH * EKF_N_STATES_SWITCH];
-    double noiseMat[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS];
+    double eyeKalHCovarBar[EKF_N_STATES_SWITCH * EKF_N_STATES_SWITCH], kalR[EKF_N_STATES_SWITCH * MAX_NUM_CSS_SENSORS];
+    double kalT[MAX_NUM_CSS_SENSORS * EKF_N_STATES_SWITCH], kalRKalT[EKF_N_STATES_SWITCH * EKF_N_STATES_SWITCH];
+    double noiseMat[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS];
 
     /* Set variables to zero */
     mSetZero(kH, EKF_N_STATES_SWITCH, EKF_N_STATES_SWITCH);
     mSetZero(eyeKalH, EKF_N_STATES_SWITCH, EKF_N_STATES_SWITCH);
     mSetZero(eyeKalHT, EKF_N_STATES_SWITCH, EKF_N_STATES_SWITCH);
-    mSetZero(noiseMat, MAX_N_CSS_MEAS, MAX_N_CSS_MEAS);
+    mSetZero(noiseMat, MAX_NUM_CSS_SENSORS, MAX_NUM_CSS_SENSORS);
     mSetZero(eye, EKF_N_STATES_SWITCH, EKF_N_STATES_SWITCH);
     mSetZero(kalRKalT, EKF_N_STATES_SWITCH, EKF_N_STATES_SWITCH);
-    mSetZero(kalT, MAX_N_CSS_MEAS, EKF_N_STATES_SWITCH);
-    mSetZero(kalR, EKF_N_STATES_SWITCH, MAX_N_CSS_MEAS);
+    mSetZero(kalT, MAX_NUM_CSS_SENSORS, EKF_N_STATES_SWITCH);
+    mSetZero(kalR, EKF_N_STATES_SWITCH, MAX_NUM_CSS_SENSORS);
     mSetZero(eyeKalHCovarBar, EKF_N_STATES_SWITCH, EKF_N_STATES_SWITCH);
 
     /* Set noise matrix given number of observations */
@@ -569,7 +569,7 @@ void sunlineSEKFUpdate(
 void sunlineHMatrixYMeas(
     double states[EKF_N_STATES_SWITCH],
     size_t numCSS,
-    double cssSensorCos[MAX_N_CSS_MEAS],
+    double cssSensorCos[MAX_NUM_CSS_SENSORS],
     double sensorUseThresh,
     double cssNHat_B[MAX_NUM_CSS_SENSORS * 3],
     double* obs,
@@ -610,22 +610,22 @@ void sunlineHMatrixYMeas(
 
 void sunlineKalmanGain(
     double covarBar[EKF_N_STATES_SWITCH * EKF_N_STATES_SWITCH],
-    double hObs[MAX_N_CSS_MEAS * EKF_N_STATES_SWITCH],
+    double hObs[MAX_NUM_CSS_SENSORS * EKF_N_STATES_SWITCH],
     double qObsVal,
     size_t numObs,
     double* kalmanGain
 ) {
-    double hObsT[EKF_N_STATES_SWITCH * MAX_N_CSS_MEAS];
-    double covHT[EKF_N_STATES_SWITCH * MAX_N_CSS_MEAS];
-    double hCovar[MAX_N_CSS_MEAS * EKF_N_STATES_SWITCH], hCovarHT[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS];
-    double rMat[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS];
+    double hObsT[EKF_N_STATES_SWITCH * MAX_NUM_CSS_SENSORS];
+    double covHT[EKF_N_STATES_SWITCH * MAX_NUM_CSS_SENSORS];
+    double hCovar[MAX_NUM_CSS_SENSORS * EKF_N_STATES_SWITCH], hCovarHT[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS];
+    double rMat[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS];
 
     /* Setting all local variables to zero */
-    mSetZero(hObsT, EKF_N_STATES_SWITCH, MAX_N_CSS_MEAS);
-    mSetZero(covHT, EKF_N_STATES_SWITCH, MAX_N_CSS_MEAS);
-    mSetZero(hCovar, MAX_N_CSS_MEAS, EKF_N_STATES_SWITCH);
-    mSetZero(hCovarHT, MAX_N_CSS_MEAS, MAX_N_CSS_MEAS);
-    mSetZero(rMat, MAX_N_CSS_MEAS, MAX_N_CSS_MEAS);
+    mSetZero(hObsT, EKF_N_STATES_SWITCH, MAX_NUM_CSS_SENSORS);
+    mSetZero(covHT, EKF_N_STATES_SWITCH, MAX_NUM_CSS_SENSORS);
+    mSetZero(hCovar, MAX_NUM_CSS_SENSORS, EKF_N_STATES_SWITCH);
+    mSetZero(hCovarHT, MAX_NUM_CSS_SENSORS, MAX_NUM_CSS_SENSORS);
+    mSetZero(rMat, MAX_NUM_CSS_SENSORS, MAX_NUM_CSS_SENSORS);
 
     mTranspose(hObs, numObs, EKF_N_STATES_SWITCH, hObsT);
 

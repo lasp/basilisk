@@ -40,11 +40,11 @@ void SunlineUKF::reset(uint64_t callTime) {
 
     /*! - Read in mass properties and coarse sun sensor configuration information.*/
     cssConfigInBuffer = this->cssConfigInMsg();
-    if (cssConfigInBuffer.nCSS > MAX_N_CSS_MEAS) {
+    if (cssConfigInBuffer.nCSS > MAX_NUM_CSS_SENSORS) {
         this->bskLogger.bskLog(
             BSK_ERROR,
             "sunlineUKF.cssConfigInMsg.nCSS must not be greater than "
-            "MAX_N_CSS_MEAS value."
+            "MAX_NUM_CSS_SENSORS value."
         );
     }
 
@@ -61,7 +61,7 @@ void SunlineUKF::reset(uint64_t callTime) {
     this->dt = 0.0;
     this->numStates = SKF_N_STATES;
     this->countHalfSPs = SKF_N_STATES;
-    this->numObs = MAX_N_CSS_MEAS;
+    this->numObs = MAX_NUM_CSS_SENSORS;
 
     /*! - Ensure that all internal filter matrices are zeroed*/
     vSetZero(this->obs, this->numObs);
@@ -101,8 +101,8 @@ void SunlineUKF::reset(uint64_t callTime) {
  */
 void SunlineUKF::updateState(uint64_t callTime) {
     double newTimeTag;
-    double yBar[MAX_N_CSS_MEAS];
-    double tempYVec[MAX_N_CSS_MEAS];
+    double yBar[MAX_NUM_CSS_SENSORS];
+    double tempYVec[MAX_NUM_CSS_SENSORS];
     int i;
     uint64_t timeOfMsgWritten;
     int isWritten;
@@ -138,7 +138,7 @@ void SunlineUKF::updateState(uint64_t callTime) {
     }
 
     /*! - The post fits are y- ybar*/
-    mSubtract(this->obs, MAX_N_CSS_MEAS, 1, yBar, this->postFits);
+    mSubtract(this->obs, MAX_NUM_CSS_SENSORS, 1, yBar, this->postFits);
 
     /*! - Write the sunline estimate into the copy of the navigation message structure*/
     v3Copy(this->state, this->outputSunline.vehSunPntBdy);
@@ -151,7 +151,7 @@ void SunlineUKF::updateState(uint64_t callTime) {
     sunlineDataOutBuffer.numObs = this->numObs;
     memmove(sunlineDataOutBuffer.covar, this->covar, SKF_N_STATES * SKF_N_STATES * sizeof(double));
     memmove(sunlineDataOutBuffer.state, this->state, SKF_N_STATES * sizeof(double));
-    memmove(sunlineDataOutBuffer.postFitRes, this->postFits, MAX_N_CSS_MEAS * sizeof(double));
+    memmove(sunlineDataOutBuffer.postFitRes, this->postFits, MAX_NUM_CSS_SENSORS * sizeof(double));
     this->filtDataOutMsg.write(sunlineDataOutBuffer, this->moduleID, callTime);
 
     return;
@@ -316,13 +316,14 @@ void sunlineUKFMeasModel(SunlineUKF* configData) {
  @param updateTime The time that we need to fix the filter to (seconds)
  */
 void sunlineUKFMeasUpdate(SunlineUKF* configData, double updateTime) {
-    double yBar[MAX_N_CSS_MEAS], syInv[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS];
-    double kMat[SKF_N_STATES * MAX_N_CSS_MEAS];
-    double xHat[SKF_N_STATES], sBarT[SKF_N_STATES * SKF_N_STATES], tempYVec[MAX_N_CSS_MEAS];
-    double AT[(2 * SKF_N_STATES + MAX_N_CSS_MEAS) * MAX_N_CSS_MEAS], qChol[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS];
-    double rAT[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS], syT[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS];
-    double sy[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS];
-    double updMat[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS], pXY[SKF_N_STATES * MAX_N_CSS_MEAS];
+    double yBar[MAX_NUM_CSS_SENSORS], syInv[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS];
+    double kMat[SKF_N_STATES * MAX_NUM_CSS_SENSORS];
+    double xHat[SKF_N_STATES], sBarT[SKF_N_STATES * SKF_N_STATES], tempYVec[MAX_NUM_CSS_SENSORS];
+    double AT[(2 * SKF_N_STATES + MAX_NUM_CSS_SENSORS) * MAX_NUM_CSS_SENSORS],
+        qChol[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS];
+    double rAT[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS], syT[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS];
+    double sy[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS];
+    double updMat[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS], pXY[SKF_N_STATES * MAX_NUM_CSS_SENSORS];
 
     /*! - Compute the valid observations and the measurement model for all observations*/
     sunlineUKFMeasModel(configData);

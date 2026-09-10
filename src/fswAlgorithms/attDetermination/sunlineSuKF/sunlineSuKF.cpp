@@ -36,11 +36,11 @@ void SunlineSuKF::reset(uint64_t callTime) {
 
     /*! - Read in mass properties and coarse sun sensor configuration information.*/
     cssConfigInBuffer = this->cssConfigInMsg();
-    if (cssConfigInBuffer.nCSS > MAX_N_CSS_MEAS) {
+    if (cssConfigInBuffer.nCSS > MAX_NUM_CSS_SENSORS) {
         this->bskLogger.bskLog(
             BSK_ERROR,
             "sunlineSuKF.cssConfigInMsg.nCSS must not be greater than "
-            "MAX_N_CSS_MEAS value."
+            "MAX_NUM_CSS_SENSORS value."
         );
     }
 
@@ -57,7 +57,7 @@ void SunlineSuKF::reset(uint64_t callTime) {
     this->timeTag = callTime * NANO2SEC;
     this->numStates = SKF_N_STATES_SWITCH;
     this->countHalfSPs = SKF_N_STATES_SWITCH;
-    this->numObs = MAX_N_CSS_MEAS;
+    this->numObs = MAX_NUM_CSS_SENSORS;
 
     /*! Initalize the filter to use b_1 of the body frame to make frame*/
     v3Set(1, 0, 0, this->bVec_B);
@@ -111,8 +111,8 @@ void SunlineSuKF::reset(uint64_t callTime) {
  */
 void SunlineSuKF::updateState(uint64_t callTime) {
     double newTimeTag;
-    double yBar[MAX_N_CSS_MEAS];
-    double tempYVec[MAX_N_CSS_MEAS];
+    double yBar[MAX_NUM_CSS_SENSORS];
+    double tempYVec[MAX_NUM_CSS_SENSORS];
     double sunheading_hat[3];
     double states_BN[SKF_N_STATES_SWITCH];
     uint64_t i;
@@ -205,7 +205,7 @@ void SunlineSuKF::updateState(uint64_t callTime) {
     sunlineDataOutBuffer.numObs = (int) this->numObs;
     memmove(sunlineDataOutBuffer.covar, this->covar, SKF_N_STATES_SWITCH * SKF_N_STATES_SWITCH * sizeof(double));
     memmove(sunlineDataOutBuffer.state, states_BN, SKF_N_STATES_SWITCH * sizeof(double));
-    memmove(sunlineDataOutBuffer.postFitRes, this->postFits, MAX_N_CSS_MEAS * sizeof(double));
+    memmove(sunlineDataOutBuffer.postFitRes, this->postFits, MAX_NUM_CSS_SENSORS * sizeof(double));
     this->filtDataOutMsg.write(sunlineDataOutBuffer, this->moduleID, callTime);
 
     return;
@@ -407,14 +407,15 @@ void sunlineSuKFMeasModel(SunlineSuKF* data) {
 int sunlineSuKFMeasUpdate(SunlineSuKF* data, double updateTime) {
     uint32_t i;
     int32_t badUpdate;
-    double yBar[MAX_N_CSS_MEAS], syInv[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS];
-    double kMat[SKF_N_STATES_SWITCH * MAX_N_CSS_MEAS];
-    double xHat[SKF_N_STATES_SWITCH], sBarT[SKF_N_STATES_SWITCH * SKF_N_STATES_SWITCH], tempYVec[MAX_N_CSS_MEAS];
-    double AT[(2 * SKF_N_STATES_SWITCH + MAX_N_CSS_MEAS) * MAX_N_CSS_MEAS], qChol[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS];
-    double rAT[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS], syT[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS];
-    double sy[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS], Ucol[SKF_N_STATES_SWITCH];
-    double updMat[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS], pXY[SKF_N_STATES_SWITCH * MAX_N_CSS_MEAS],
-        Umat[SKF_N_STATES_SWITCH * MAX_N_CSS_MEAS];
+    double yBar[MAX_NUM_CSS_SENSORS], syInv[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS];
+    double kMat[SKF_N_STATES_SWITCH * MAX_NUM_CSS_SENSORS];
+    double xHat[SKF_N_STATES_SWITCH], sBarT[SKF_N_STATES_SWITCH * SKF_N_STATES_SWITCH], tempYVec[MAX_NUM_CSS_SENSORS];
+    double AT[(2 * SKF_N_STATES_SWITCH + MAX_NUM_CSS_SENSORS) * MAX_NUM_CSS_SENSORS],
+        qChol[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS];
+    double rAT[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS], syT[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS];
+    double sy[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS], Ucol[SKF_N_STATES_SWITCH];
+    double updMat[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS], pXY[SKF_N_STATES_SWITCH * MAX_NUM_CSS_SENSORS],
+        Umat[SKF_N_STATES_SWITCH * MAX_NUM_CSS_SENSORS];
     badUpdate = 0;
 
     vCopy(data->state, data->numStates, data->statePrev);
