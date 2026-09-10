@@ -16,6 +16,67 @@ set(XMERA_ENABLE_INTERNAL "NO"
   "Whether to enable modules that are marked as INTERNAL (default NO)"
 )
 
+define_property(GLOBAL PROPERTY XMERA_MISSION_PARAMETERS_PROVIDER BRIEF_DOCS
+  "This property is the one directory that xmera_provide_mission_parameters() declares. That \
+function rejects a second, different directory. Thus this property has a maximum of one value."
+)
+
+# Every target that uses a mission-sized array bound must link to this target. This target is the
+# one place that gives the mission include directory. A new target that does not link to it does
+# not compile.
+add_library(xmera_mission_parameters INTERFACE)
+add_library(Xmera::MissionParameters ALIAS xmera_mission_parameters)
+
+# Declare that <dir> contains the mission/parameters.h that this build must use. A module root
+# calls this function from its own CMakeLists.txt. Thus the module root and its mission parameters
+# are one selection and not two.
+#
+# This function rejects a second, different directory immediately. Thus the include path does not
+# get two mission headers at the same time. Two mission headers that do not agree cause an ABI
+# mismatch, and the build gives no error message. This mechanism prevents that failure. The check
+# is in this function, thus it also applies to a build that does not call
+# xmera_resolve_mission_parameters(). A second declaration of the same directory is permitted and
+# has no effect.
+function(xmera_provide_mission_parameters dir)
+  get_filename_component(_dir "${dir}" ABSOLUTE)
+  if(NOT EXISTS "${_dir}/mission/parameters.h")
+    message(FATAL_ERROR
+      "xmera_provide_mission_parameters(): there is no mission/parameters.h in '${_dir}'."
+    )
+  endif()
+
+  get_property(_existing GLOBAL PROPERTY XMERA_MISSION_PARAMETERS_PROVIDER)
+  if(_existing)
+    if(NOT _existing STREQUAL _dir)
+      message(FATAL_ERROR
+        "The build declares two sources of mission/parameters.h:\n  ${_existing}\n  ${_dir}\n"
+        "Only one source is permitted. If the build has two sources, different targets compile "
+        "against different array bounds. Remove a module root. Or make the two headers into one "
+        "mission header."
+      )
+    endif()
+    return()
+  endif()
+
+  set_property(GLOBAL PROPERTY XMERA_MISSION_PARAMETERS_PROVIDER "${_dir}")
+  target_include_directories(xmera_mission_parameters INTERFACE "${_dir}")
+endfunction()
+
+# Call this function one time, after the build adds every module root. At that time there is a
+# maximum of one provider. Thus this function only gives the default values when no module root
+# declared a directory.
+function(xmera_resolve_mission_parameters)
+  get_property(_provider GLOBAL PROPERTY XMERA_MISSION_PARAMETERS_PROVIDER)
+
+  if(_provider)
+    message(STATUS "Mission parameters: ${_provider}/mission/parameters.h")
+  else()
+    xmera_provide_mission_parameters("${CMAKE_SOURCE_DIR}/defaults")
+    message(STATUS "Mission parameters: Xmera default values "
+                   "(${CMAKE_SOURCE_DIR}/defaults/mission/parameters.h)")
+  endif()
+endfunction()
+
 if(APPLE)
   set(XMERA_RPATH_ORIGIN "@loader_path")
 else()
@@ -104,6 +165,14 @@ function(xmera_add_swig_module module)
     "${CMAKE_BINARY_DIR}"
     # @TODO add architecture/_GeneralModuleFiles to a global interface target or similar
     "${CMAKE_SOURCE_DIR}/architecture/_GeneralModuleFiles"
+  )
+
+  # The directory is BEFORE the others, thus the compiler always reads the header of the mission
+  # and not an in-tree src/mission/. A generator expression is necessary here, because module
+  # roots declare their directory after CMake calls this function. The SWIG command line above
+  # also uses this directory, because SWIG reads INCLUDE_DIRECTORIES.
+  target_include_directories("${module}" BEFORE PRIVATE
+    "$<TARGET_PROPERTY:Xmera::MissionParameters,INTERFACE_INCLUDE_DIRECTORIES>"
   )
 
   target_link_libraries("${module}" PRIVATE
@@ -211,6 +280,11 @@ function(xmera_add_swig_message message)
     "${CMAKE_CURRENT_SOURCE_DIR}"
     # Project-wide includes
     "${CMAKE_SOURCE_DIR}"
+  )
+
+  # Refer to the note in xmera_add_swig_module().
+  target_include_directories("${message}" BEFORE PRIVATE
+    "$<TARGET_PROPERTY:Xmera::MissionParameters,INTERFACE_INCLUDE_DIRECTORIES>"
   )
 
   target_link_libraries("${message}" PRIVATE

@@ -75,6 +75,10 @@ foreach(d IN LISTS XMERA_MODULE_ROOTS)
   add_subdirectory("${d}")
 endforeach()
 
+# This call comes after the module roots, because a module root can declare its own mission
+# parameters.
+xmera_resolve_mission_parameters()
+
 xmera_generate_messaging_init()
 
 install(DIRECTORY utilities DESTINATION xmera
