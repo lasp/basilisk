@@ -216,7 +216,7 @@ def compute_true_torque(C, Gs_B, Lr, avail_msg):
 if __name__ == "__main__":
     test_rw_motor_torque(False,
                          3,  # numControlAxes
-                         36,  # numWheels
+                         messaging.RW_EFF_CNT,  # numWheels
                          2,  # numInputCmdTorques
                          "NO"  # RWAvailMsg ("NO", "ON", "OFF")
                          )

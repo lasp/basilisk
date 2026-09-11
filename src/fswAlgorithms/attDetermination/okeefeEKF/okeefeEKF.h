@@ -5,23 +5,22 @@
 #ifndef _SUNLINE_EKF_H_
 #define _SUNLINE_EKF_H_
 
-#include <stdint.h>
-
 #include <architecture/_GeneralModuleFiles/sys_model.h>
 #include <architecture/messaging/messaging.h>
 #include <architecture/msgPayloadDef/CSSArraySensorMsgPayload.h>
 #include <architecture/msgPayloadDef/CSSConfigMsgPayload.h>
 #include <architecture/msgPayloadDef/NavAttMsgPayload.h>
 #include <architecture/msgPayloadDef/SunlineFilterMsgPayload.h>
-
 #include <architecture/utilities/bskLogging.h>
+
+#include <stdint.h>
 #include <string.h>
 
 /*!@brief Data structure for CSS Extended kalman filter estimator without gyros measurements.
  */
 
 class OkeefeEKF : public SysModel {
-   public:
+public:
     void reset(uint64_t callTime) override;
     void updateState(uint64_t callTime) override;
     void sunlineTimeUpdate(double updateTime);
@@ -46,17 +45,17 @@ class OkeefeEKF : public SysModel {
     double covarBar[SKF_N_STATES_HALF * SKF_N_STATES_HALF];        /*!< [-] Time updated covariance */
     double covar[SKF_N_STATES_HALF * SKF_N_STATES_HALF];           /*!< [-] covariance */
     double stateTransition[SKF_N_STATES_HALF * SKF_N_STATES_HALF]; /*!< [-] covariance */
-    double kalmanGain[SKF_N_STATES_HALF * MAX_N_CSS_MEAS];         /*!< Kalman Gain */
+    double kalmanGain[SKF_N_STATES_HALF * MAX_NUM_CSS_SENSORS];    /*!< Kalman Gain */
 
-    double dynMat[SKF_N_STATES_HALF * SKF_N_STATES_HALF]; /*!< [-] Dynamics Matrix, A */
-    double measMat[MAX_N_CSS_MEAS * SKF_N_STATES_HALF];   /*!< [-] Measurement Matrix, H*/
+    double dynMat[SKF_N_STATES_HALF * SKF_N_STATES_HALF];    /*!< [-] Dynamics Matrix, A */
+    double measMat[MAX_NUM_CSS_SENSORS * SKF_N_STATES_HALF]; /*!< [-] Measurement Matrix, H*/
 
-    double obs[MAX_N_CSS_MEAS];   /*!< [-] Observation vector for frame*/
-    double yMeas[MAX_N_CSS_MEAS]; /*!< [-] Linearized measurement model data */
+    double obs[MAX_NUM_CSS_SENSORS];   /*!< [-] Observation vector for frame*/
+    double yMeas[MAX_NUM_CSS_SENSORS]; /*!< [-] Linearized measurement model data */
 
-    double procNoise[SKF_N_STATES_HALF * SKF_N_STATES_HALF]; /*!< [-] process noise matrix */
-    double measNoise[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS];       /*!< [-] Maximally sized obs noise matrix*/
-    double postFits[MAX_N_CSS_MEAS];                         /*!< [-] PostFit residuals */
+    double procNoise[SKF_N_STATES_HALF * SKF_N_STATES_HALF];     /*!< [-] process noise matrix */
+    double measNoise[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS]; /*!< [-] Maximally sized obs noise matrix*/
+    double postFits[MAX_NUM_CSS_SENSORS];                        /*!< [-] PostFit residuals */
 
     double cssNHat_B[MAX_NUM_CSS_SENSORS * 3]; /*!< [-] CSS normal vectors converted over to body*/
     double CBias[MAX_NUM_CSS_SENSORS];         /*!< [-] CSS individual calibration coefficients */
@@ -73,55 +72,67 @@ class OkeefeEKF : public SysModel {
     BSKLogger bskLogger = {};  //!< BSK Logging
 };
 
-void sunlineStateSTMProp(double dynMat[SKF_N_STATES_HALF * SKF_N_STATES_HALF],
-                         double dt,
-                         double omega[SKF_N_STATES_HALF],
-                         double* stateInOut,
-                         double* prevstates,
-                         double* stateTransition);
+void sunlineStateSTMProp(
+    double dynMat[SKF_N_STATES_HALF * SKF_N_STATES_HALF],
+    double dt,
+    double omega[SKF_N_STATES_HALF],
+    double* stateInOut,
+    double* prevstates,
+    double* stateTransition
+);
 
-void sunlineHMatrixYMeas(double states[SKF_N_STATES_HALF],
-                         size_t numCSS,
-                         double cssSensorCos[MAX_N_CSS_MEAS],
-                         double sensorUseThresh,
-                         double cssNHat_B[MAX_NUM_CSS_SENSORS * 3],
-                         double CBias[MAX_NUM_CSS_SENSORS],
-                         double* obs,
-                         double* yMeas,
-                         int* numObs,
-                         double* measMat);
+void sunlineHMatrixYMeas(
+    double states[SKF_N_STATES_HALF],
+    size_t numCSS,
+    double cssSensorCos[MAX_NUM_CSS_SENSORS],
+    double sensorUseThresh,
+    double cssNHat_B[MAX_NUM_CSS_SENSORS * 3],
+    double CBias[MAX_NUM_CSS_SENSORS],
+    double* obs,
+    double* yMeas,
+    int* numObs,
+    double* measMat
+);
 
-void sunlineKalmanGainOkeefe(double covarBar[SKF_N_STATES_HALF * SKF_N_STATES_HALF],
-                             double hObs[MAX_N_CSS_MEAS * SKF_N_STATES_HALF],
-                             double qObsVal,
-                             int numObsInt,
-                             double* kalmanGain);
+void sunlineKalmanGainOkeefe(
+    double covarBar[SKF_N_STATES_HALF * SKF_N_STATES_HALF],
+    double hObs[MAX_NUM_CSS_SENSORS * SKF_N_STATES_HALF],
+    double qObsVal,
+    int numObsInt,
+    double* kalmanGain
+);
 
-void sunlineRateCompute(double states[SKF_N_STATES_HALF],
-                        double dt,
-                        double prev_states[SKF_N_STATES_HALF],
-                        double* omega);
+void sunlineRateCompute(
+    double states[SKF_N_STATES_HALF],
+    double dt,
+    double prev_states[SKF_N_STATES_HALF],
+    double* omega
+);
 
 void sunlineDynMatrixOkeefe(double omega[SKF_N_STATES_HALF], double dt, double* dynMat);
 
-void sunlineCKFUpdateOkeefe(double xBar[SKF_N_STATES_HALF],
-                            double kalmanGain[SKF_N_STATES_HALF * MAX_N_CSS_MEAS],
-                            double covarBar[SKF_N_STATES_HALF * SKF_N_STATES_HALF],
-                            double qObsVal,
-                            int numObsInt,
-                            double yObs[MAX_N_CSS_MEAS],
-                            double hObs[MAX_N_CSS_MEAS * SKF_N_STATES_HALF],
-                            double* x,
-                            double* covar);
+void sunlineCKFUpdateOkeefe(
+    double xBar[SKF_N_STATES_HALF],
+    double kalmanGain[SKF_N_STATES_HALF * MAX_NUM_CSS_SENSORS],
+    double covarBar[SKF_N_STATES_HALF * SKF_N_STATES_HALF],
+    double qObsVal,
+    int numObsInt,
+    double yObs[MAX_NUM_CSS_SENSORS],
+    double hObs[MAX_NUM_CSS_SENSORS * SKF_N_STATES_HALF],
+    double* x,
+    double* covar
+);
 
-void okeefeEKFUpdate(double kalmanGain[SKF_N_STATES_HALF * MAX_N_CSS_MEAS],
-                     double covarBar[SKF_N_STATES_HALF * SKF_N_STATES_HALF],
-                     double qObsVal,
-                     int numObsInt,
-                     double yObs[MAX_N_CSS_MEAS],
-                     double hObs[MAX_N_CSS_MEAS * SKF_N_STATES_HALF],
-                     double* states,
-                     double* x,
-                     double* covar);
+void okeefeEKFUpdate(
+    double kalmanGain[SKF_N_STATES_HALF * MAX_NUM_CSS_SENSORS],
+    double covarBar[SKF_N_STATES_HALF * SKF_N_STATES_HALF],
+    double qObsVal,
+    int numObsInt,
+    double yObs[MAX_NUM_CSS_SENSORS],
+    double hObs[MAX_NUM_CSS_SENSORS * SKF_N_STATES_HALF],
+    double* states,
+    double* x,
+    double* covar
+);
 
 #endif

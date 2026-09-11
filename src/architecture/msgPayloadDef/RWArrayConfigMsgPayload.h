@@ -5,7 +5,7 @@
 #ifndef RW_CONFIG_MESSAGE_H
 #define RW_CONFIG_MESSAGE_H
 
-#include "definitions.h"
+#include <mission/parameters.h>
 #include <stdint.h>
 
 /*! @brief RW array configuration FSW msg */

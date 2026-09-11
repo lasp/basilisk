@@ -2,6 +2,7 @@
 // Copyright (c) 2025, Laboratory for Atmospheric and Space Physics, University of Colorado at Boulder
 
 #include "rwNullSpaceAlgorithm.h"
+
 #include <architecture/utilities/eigenSupport.h>
 
 #include <stdexcept>
@@ -11,8 +12,8 @@
     @return void
     @param rwConfigInMsg Reaction Wheel constellation input message
  */
-void RwNullSpaceAlgorithm::reset(RWConstellationMsgPayload& rwConfigInMsg) {
-    this->numWheels = (uint32_t)rwConfigInMsg.numRW;
+void RwNullSpaceAlgorithm::reset(RWConstellationMsgPayload &rwConfigInMsg) {
+    this->numWheels = (uint32_t) rwConfigInMsg.numRW;
 
     Eigen::Matrix<double, 3, RW_EFF_CNT> G_s_B{};
     G_s_B.setZero();
@@ -21,8 +22,8 @@ void RwNullSpaceAlgorithm::reset(RWConstellationMsgPayload& rwConfigInMsg) {
     }
 
     /* find the [tau] null space projection matrix [tau] = ([I] - [Gs]^T.([Gs].[Gs]^T)^-1.[Gs]) */
-    this->tau = Eigen::Matrix<double, RW_EFF_CNT, RW_EFF_CNT>::Identity() -
-                G_s_B.transpose() * (G_s_B * G_s_B.transpose()).inverse() * G_s_B;
+    this->tau = Eigen::Matrix<double, RW_EFF_CNT, RW_EFF_CNT>::Identity()
+              - G_s_B.transpose() * (G_s_B * G_s_B.transpose()).inverse() * G_s_B;
 }
 
 /*! This method takes the input reaction wheel commands as well as the observed
@@ -33,21 +34,24 @@ void RwNullSpaceAlgorithm::reset(RWConstellationMsgPayload& rwConfigInMsg) {
  @param rwSpeeds array of wheel speeds
  @param rwDesiredSpeeds array of desired wheel speeds
  */
-RwMotorTorqueMsgPayload RwNullSpaceAlgorithm::update(RwMotorTorqueMsgPayload& controlRequest,
-                                                     RWSpeedMsgPayload& rwSpeeds,
-                                                     RWSpeedMsgPayload& rwDesiredSpeeds) {
+RwMotorTorqueMsgPayload RwNullSpaceAlgorithm::update(
+    RwMotorTorqueMsgPayload &controlRequest,
+    RWSpeedMsgPayload &rwSpeeds,
+    RWSpeedMsgPayload &rwDesiredSpeeds
+) {
     RwMotorTorqueMsgPayload finalControl{}; /* [Nm]  array of final RW motor torques containing both
                                             the control and null motion torques */
 
     /* compute the wheel speed control vector d = -K.DeltaOmega */
-    Eigen::Vector<double, MAX_EFF_CNT> d = -this->omegaGain * (cArrayToEigenVector(rwSpeeds.wheelSpeeds) -
-                                                               cArrayToEigenVector(rwDesiredSpeeds.wheelSpeeds));
+    Eigen::Vector<double, RW_EFF_CNT> d =
+        -this->omegaGain
+        * (cArrayToEigenVector(rwSpeeds.wheelSpeeds) - cArrayToEigenVector(rwDesiredSpeeds.wheelSpeeds));
 
     /* compute the RW null space motor torque solution to reduce the wheel speeds */
-    Eigen::Vector<double, MAX_EFF_CNT> motorTorqueNullSpace = this->tau * d;
+    Eigen::Vector<double, RW_EFF_CNT> motorTorqueNullSpace = this->tau * d;
 
     /* add the null motion RW torque solution to the RW feedback control torque solution */
-    Eigen::Vector<double, MAX_EFF_CNT> motorTorque =
+    Eigen::Vector<double, RW_EFF_CNT> motorTorque =
         motorTorqueNullSpace + cArrayToEigenVector(controlRequest.motorTorque);
 
     eigenVectorToCArray(motorTorque, finalControl.motorTorque);
@@ -59,10 +63,8 @@ RwMotorTorqueMsgPayload RwNullSpaceAlgorithm::update(RwMotorTorqueMsgPayload& co
  * @brief Set the gain used for the wheel speed difference.
  * @param gain The gain used for the wheel speed difference.
  */
-void RwNullSpaceAlgorithm::setOmegaGain(const double gain) {
-    if (gain < 0.0) {
-        throw std::invalid_argument("Feedback gain must not be negative");
-    }
+void RwNullSpaceAlgorithm::setOmegaGain(double const gain) {
+    if (gain < 0.0) { throw std::invalid_argument("Feedback gain must not be negative"); }
     this->omegaGain = gain;
 }
 
@@ -70,4 +72,6 @@ void RwNullSpaceAlgorithm::setOmegaGain(const double gain) {
  * @brief Get the gain used for the wheel speed difference.
  * @return double The gain used for the wheel speed difference.
  */
-double RwNullSpaceAlgorithm::getOmegaGain() const { return this->omegaGain; }
+double RwNullSpaceAlgorithm::getOmegaGain() const {
+    return this->omegaGain;
+}

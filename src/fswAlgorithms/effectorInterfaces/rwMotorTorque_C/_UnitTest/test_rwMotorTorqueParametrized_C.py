@@ -142,7 +142,7 @@ def rwMotorTorqueTest(show_plots, numControlAxes, numWheels, numInputCmdTorques,
             0.6839787443692367, 0.6598940110591041, 0.31098709204629277,
             0.35743175000357147, 0.8343049491885353, 0.4197353878920623,
             0.8124751056450826, 0.35669421673672336, 0.46114362020262967,
-            0.04721328350343224, 0.8901899787392832, 0.45313652204714083]
+            0.04721328350343224, 0.8901899787392832, 0.45313652204714083][:numWheels * 3]
     else:
         rwConfigParams.GsMatrix_B = [
             1.0, 0.0, 0.0,
@@ -270,7 +270,7 @@ def rwMotorTorqueTest(show_plots, numControlAxes, numWheels, numInputCmdTorques,
 if __name__ == "__main__":
     test_rwMotorTorque_C(False,
                 3,      # numControlAxes
-                36,      # numWheels
+                messaging.RW_EFF_CNT,      # numWheels
                 2,      # numInputCmdTorques
                 "NO"    # RWAvailMsg ("NO", "ON", "OFF")
                )

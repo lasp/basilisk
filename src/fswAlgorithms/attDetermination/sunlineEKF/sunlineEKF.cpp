@@ -32,11 +32,11 @@ void SunlineEKF::reset(uint64_t callTime) {
 
     /*! - Read in mass properties and coarse sun sensor configuration information.*/
     cssConfigInBuffer = this->cssConfigInMsg();
-    if (cssConfigInBuffer.nCSS > MAX_N_CSS_MEAS) {
+    if (cssConfigInBuffer.nCSS > MAX_NUM_CSS_SENSORS) {
         this->bskLogger.bskLog(
             BSK_ERROR,
             "sunlineEKF.cssConfigInMsg.nCSS must not be greater than "
-            "MAX_N_CSS_MEAS value."
+            "MAX_NUM_CSS_SENSORS value."
         );
     }
 
@@ -52,7 +52,7 @@ void SunlineEKF::reset(uint64_t callTime) {
     this->timeTag = callTime * NANO2SEC;
     this->dt = 0.0;
     this->numStates = SKF_N_STATES;
-    this->numObs = MAX_N_CSS_MEAS;
+    this->numObs = MAX_NUM_CSS_SENSORS;
 
     /*! - Ensure that all internal filter matrices are zeroed*/
     vSetZero(this->obs, (size_t) this->numObs);
@@ -80,7 +80,7 @@ void SunlineEKF::reset(uint64_t callTime) {
  */
 void SunlineEKF::updateState(uint64_t callTime) {
     double newTimeTag;
-    double Hx[MAX_N_CSS_MEAS];
+    double Hx[MAX_NUM_CSS_SENSORS];
     uint64_t timeOfMsgWritten;
     int isWritten;
     SunlineFilterMsgPayload sunlineDataOutBuffer;
@@ -123,7 +123,7 @@ void SunlineEKF::updateState(uint64_t callTime) {
     memmove(sunlineDataOutBuffer.covar, this->covar, SKF_N_STATES * SKF_N_STATES * sizeof(double));
     memmove(sunlineDataOutBuffer.state, this->state, SKF_N_STATES * sizeof(double));
     memmove(sunlineDataOutBuffer.stateError, this->x, SKF_N_STATES * sizeof(double));
-    memmove(sunlineDataOutBuffer.postFitRes, this->postFits, MAX_N_CSS_MEAS * sizeof(double));
+    memmove(sunlineDataOutBuffer.postFitRes, this->postFits, MAX_NUM_CSS_SENSORS * sizeof(double));
     this->filtDataOutMsg.write(sunlineDataOutBuffer, this->moduleID, callTime);
 
     return;
@@ -354,31 +354,31 @@ void SunlineEKF::sunlineMeasUpdate(double updateTime) {
 
 void sunlineCKFUpdate(
     double xBar[SKF_N_STATES],
-    double kalmanGain[SKF_N_STATES * MAX_N_CSS_MEAS],
+    double kalmanGain[SKF_N_STATES * MAX_NUM_CSS_SENSORS],
     double covarBar[SKF_N_STATES * SKF_N_STATES],
     double qObsVal,
     int numObs,
-    double yObs[MAX_N_CSS_MEAS],
-    double hObs[MAX_N_CSS_MEAS * SKF_N_STATES],
+    double yObs[MAX_NUM_CSS_SENSORS],
+    double hObs[MAX_NUM_CSS_SENSORS * SKF_N_STATES],
     double* x,
     double* covar
 ) {
-    double measMatx[MAX_N_CSS_MEAS], innov[MAX_N_CSS_MEAS], kInnov[SKF_N_STATES];
+    double measMatx[MAX_NUM_CSS_SENSORS], innov[MAX_NUM_CSS_SENSORS], kInnov[SKF_N_STATES];
     double eye[SKF_N_STATES * SKF_N_STATES], kH[SKF_N_STATES * SKF_N_STATES];
     double eyeKalH[SKF_N_STATES * SKF_N_STATES], eyeKalHT[SKF_N_STATES * SKF_N_STATES];
-    double eyeKalHCovarBar[SKF_N_STATES * SKF_N_STATES], kalR[SKF_N_STATES * MAX_N_CSS_MEAS];
-    double kalT[MAX_N_CSS_MEAS * SKF_N_STATES], kalRKalT[SKF_N_STATES * SKF_N_STATES];
-    double noiseMat[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS];
+    double eyeKalHCovarBar[SKF_N_STATES * SKF_N_STATES], kalR[SKF_N_STATES * MAX_NUM_CSS_SENSORS];
+    double kalT[MAX_NUM_CSS_SENSORS * SKF_N_STATES], kalRKalT[SKF_N_STATES * SKF_N_STATES];
+    double noiseMat[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS];
 
     /* Set variables to zero */
     mSetZero(kH, SKF_N_STATES, SKF_N_STATES);
     mSetZero(eyeKalH, SKF_N_STATES, SKF_N_STATES);
     mSetZero(eyeKalHT, SKF_N_STATES, SKF_N_STATES);
-    mSetZero(noiseMat, MAX_N_CSS_MEAS, MAX_N_CSS_MEAS);
+    mSetZero(noiseMat, MAX_NUM_CSS_SENSORS, MAX_NUM_CSS_SENSORS);
     mSetZero(eye, SKF_N_STATES, SKF_N_STATES);
     mSetZero(kalRKalT, SKF_N_STATES, SKF_N_STATES);
-    mSetZero(kalT, MAX_N_CSS_MEAS, SKF_N_STATES);
-    mSetZero(kalR, SKF_N_STATES, MAX_N_CSS_MEAS);
+    mSetZero(kalT, MAX_NUM_CSS_SENSORS, SKF_N_STATES);
+    mSetZero(kalR, SKF_N_STATES, MAX_NUM_CSS_SENSORS);
     mSetZero(eyeKalHCovarBar, SKF_N_STATES, SKF_N_STATES);
 
     /* Set noise matrix given number of observations */
@@ -419,31 +419,31 @@ void sunlineCKFUpdate(
  @param covar Pointer to the covariance after update
  */
 void sunlineEKFUpdate(
-    double kalmanGain[SKF_N_STATES * MAX_N_CSS_MEAS],
+    double kalmanGain[SKF_N_STATES * MAX_NUM_CSS_SENSORS],
     double covarBar[SKF_N_STATES * SKF_N_STATES],
     double qObsVal,
     int numObs,
-    double yObs[MAX_N_CSS_MEAS],
-    double hObs[MAX_N_CSS_MEAS * SKF_N_STATES],
+    double yObs[MAX_NUM_CSS_SENSORS],
+    double hObs[MAX_NUM_CSS_SENSORS * SKF_N_STATES],
     double* states,
     double* x,
     double* covar
 ) {
     double eye[SKF_N_STATES * SKF_N_STATES], kH[SKF_N_STATES * SKF_N_STATES];
     double eyeKalH[SKF_N_STATES * SKF_N_STATES], eyeKalHT[SKF_N_STATES * SKF_N_STATES];
-    double eyeKalHCovarBar[SKF_N_STATES * SKF_N_STATES], kalR[SKF_N_STATES * MAX_N_CSS_MEAS];
-    double kalT[MAX_N_CSS_MEAS * SKF_N_STATES], kalRKalT[SKF_N_STATES * SKF_N_STATES];
-    double noiseMat[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS];
+    double eyeKalHCovarBar[SKF_N_STATES * SKF_N_STATES], kalR[SKF_N_STATES * MAX_NUM_CSS_SENSORS];
+    double kalT[MAX_NUM_CSS_SENSORS * SKF_N_STATES], kalRKalT[SKF_N_STATES * SKF_N_STATES];
+    double noiseMat[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS];
 
     /* Set variables to zero */
     mSetZero(kH, SKF_N_STATES, SKF_N_STATES);
     mSetZero(eyeKalH, SKF_N_STATES, SKF_N_STATES);
     mSetZero(eyeKalHT, SKF_N_STATES, SKF_N_STATES);
-    mSetZero(noiseMat, MAX_N_CSS_MEAS, MAX_N_CSS_MEAS);
+    mSetZero(noiseMat, MAX_NUM_CSS_SENSORS, MAX_NUM_CSS_SENSORS);
     mSetZero(eye, SKF_N_STATES, SKF_N_STATES);
     mSetZero(kalRKalT, SKF_N_STATES, SKF_N_STATES);
-    mSetZero(kalT, MAX_N_CSS_MEAS, SKF_N_STATES);
-    mSetZero(kalR, SKF_N_STATES, MAX_N_CSS_MEAS);
+    mSetZero(kalT, MAX_NUM_CSS_SENSORS, SKF_N_STATES);
+    mSetZero(kalR, SKF_N_STATES, MAX_NUM_CSS_SENSORS);
     mSetZero(eyeKalHCovarBar, SKF_N_STATES, SKF_N_STATES);
 
     /* Set noise matrix given number of observations */
@@ -490,7 +490,7 @@ void sunlineEKFUpdate(
 void sunlineHMatrixYMeas(
     double states[SKF_N_STATES],
     int numCSS,
-    double cssSensorCos[MAX_N_CSS_MEAS],
+    double cssSensorCos[MAX_NUM_CSS_SENSORS],
     double sensorUseThresh,
     double cssNHat_B[MAX_NUM_CSS_SENSORS * 3],
     double CBias[MAX_NUM_CSS_SENSORS],
@@ -533,22 +533,22 @@ void sunlineHMatrixYMeas(
 
 void sunlineKalmanGain(
     double covarBar[SKF_N_STATES * SKF_N_STATES],
-    double hObs[MAX_N_CSS_MEAS * SKF_N_STATES],
+    double hObs[MAX_NUM_CSS_SENSORS * SKF_N_STATES],
     double qObsVal,
     int numObs,
     double* kalmanGain
 ) {
-    double hObsT[SKF_N_STATES * MAX_N_CSS_MEAS];
-    double covHT[SKF_N_STATES * MAX_N_CSS_MEAS];
-    double hCovar[MAX_N_CSS_MEAS * SKF_N_STATES], hCovarHT[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS];
-    double rMat[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS];
+    double hObsT[SKF_N_STATES * MAX_NUM_CSS_SENSORS];
+    double covHT[SKF_N_STATES * MAX_NUM_CSS_SENSORS];
+    double hCovar[MAX_NUM_CSS_SENSORS * SKF_N_STATES], hCovarHT[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS];
+    double rMat[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS];
 
     /* Setting all local variables to zero */
-    mSetZero(hObsT, SKF_N_STATES, MAX_N_CSS_MEAS);
-    mSetZero(covHT, SKF_N_STATES, MAX_N_CSS_MEAS);
-    mSetZero(hCovar, MAX_N_CSS_MEAS, SKF_N_STATES);
-    mSetZero(hCovarHT, MAX_N_CSS_MEAS, MAX_N_CSS_MEAS);
-    mSetZero(rMat, MAX_N_CSS_MEAS, MAX_N_CSS_MEAS);
+    mSetZero(hObsT, SKF_N_STATES, MAX_NUM_CSS_SENSORS);
+    mSetZero(covHT, SKF_N_STATES, MAX_NUM_CSS_SENSORS);
+    mSetZero(hCovar, MAX_NUM_CSS_SENSORS, SKF_N_STATES);
+    mSetZero(hCovarHT, MAX_NUM_CSS_SENSORS, MAX_NUM_CSS_SENSORS);
+    mSetZero(rMat, MAX_NUM_CSS_SENSORS, MAX_NUM_CSS_SENSORS);
 
     mTranspose(hObs, (size_t) numObs, SKF_N_STATES, hObsT);
 

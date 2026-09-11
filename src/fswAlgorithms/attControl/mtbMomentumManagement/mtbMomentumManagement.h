@@ -10,14 +10,15 @@
 #include <architecture/msgPayloadDef/MTBArrayConfigMsgPayload.h>
 #include <architecture/msgPayloadDef/MTBCmdMsgPayload.h>
 #include <architecture/msgPayloadDef/RWArrayConfigMsgPayload.h>
-#include <architecture/msgPayloadDef/RWSpeedMsgPayload.h>
 #include <architecture/msgPayloadDef/RwMotorTorqueMsgPayload.h>
+#include <architecture/msgPayloadDef/RWSpeedMsgPayload.h>
 #include <architecture/msgPayloadDef/TAMSensorBodyMsgPayload.h>
-#include <architecture/msgPayloadDef/definitions.h>
+
+#include <mission/parameters.h>
 
 /*! @brief Top level structure for the sub-module routines. */
 class MtbMomentumManagement : public SysModel {
-   public:
+public:
     void reset(uint64_t callTime) override;
     void updateState(uint64_t callTime) override;
 

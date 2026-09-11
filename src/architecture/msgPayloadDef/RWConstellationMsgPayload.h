@@ -6,7 +6,8 @@
 #define _RW_CONSTELLATION_MESSAGE_H
 
 #include "RWConfigElementMsgPayload.h"
-#include "definitions.h"
+
+#include <mission/parameters.h>
 
 /*! @brief Message used to define an array of RW FSW configurations  */
 typedef struct {

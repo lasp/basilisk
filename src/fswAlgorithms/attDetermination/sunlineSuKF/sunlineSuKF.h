@@ -5,17 +5,16 @@
 #ifndef _SUNLINE_UKF_H_
 #define _SUNLINE_UKF_H_
 
-#include <stdint.h>
-#include <string.h>
-
 #include <architecture/_GeneralModuleFiles/sys_model.h>
 #include <architecture/messaging/messaging.h>
 #include <architecture/msgPayloadDef/CSSArraySensorMsgPayload.h>
 #include <architecture/msgPayloadDef/CSSConfigMsgPayload.h>
 #include <architecture/msgPayloadDef/NavAttMsgPayload.h>
 #include <architecture/msgPayloadDef/SunlineFilterMsgPayload.h>
-
 #include <architecture/utilities/bskLogging.h>
+
+#include <stdint.h>
+#include <string.h>
 
 /*! structure containing the fitting parameters
  */
@@ -28,7 +27,7 @@ typedef struct {
 /*!@brief Data structure for CSS Switch unscented kalman filter estimator.
  */
 class SunlineSuKF : public SysModel {
-   public:
+public:
     void reset(uint64_t callTime) override;
     void updateState(uint64_t callTime) override;
 
@@ -67,16 +66,16 @@ class SunlineSuKF : public SysModel {
     double covarPrev[SKF_N_STATES_SWITCH * SKF_N_STATES_SWITCH];  //!< [-] Covariance logged for clean
     double xBar[SKF_N_STATES_SWITCH];                             //!< [-] Current mean state estimate
 
-    double obs[MAX_N_CSS_MEAS];                                    //!< [-] Observation vector for frame
-    double yMeas[MAX_N_CSS_MEAS * (2 * SKF_N_STATES_SWITCH + 1)];  //!< [-] Measurement model data
-    double postFits[MAX_N_CSS_MEAS];                               //!< [-] PostFit residuals
+    double obs[MAX_NUM_CSS_SENSORS];                                    //!< [-] Observation vector for frame
+    double yMeas[MAX_NUM_CSS_SENSORS * (2 * SKF_N_STATES_SWITCH + 1)];  //!< [-] Measurement model data
+    double postFits[MAX_NUM_CSS_SENSORS];                               //!< [-] PostFit residuals
 
     double SP[(2 * SKF_N_STATES_SWITCH + 1) * SKF_N_STATES_SWITCH];  //!< [-]    sigma point matrix
 
     double qNoise[SKF_N_STATES_SWITCH * SKF_N_STATES_SWITCH];   //!< [-] process noise matrix
     double sQnoise[SKF_N_STATES_SWITCH * SKF_N_STATES_SWITCH];  //!< [-] cholesky of Qnoise
 
-    double qObs[MAX_N_CSS_MEAS * MAX_N_CSS_MEAS];  //!< [-] Maximally sized obs noise matrix
+    double qObs[MAX_NUM_CSS_SENSORS * MAX_NUM_CSS_SENSORS];  //!< [-] Maximally sized obs noise matrix
 
     double cssNHat_B[MAX_NUM_CSS_SENSORS * 3];      //!< [-] CSS normal vectors converted over to body
     double CBias[MAX_NUM_CSS_SENSORS];              //!< [-] CSS individual calibration coefficients

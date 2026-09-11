@@ -15,6 +15,10 @@ target_include_directories(xmera_core PRIVATE
   "${CMAKE_SOURCE_DIR}"
 )
 
+# The link is PUBLIC, thus every target that uses the core also gets the mission include
+# directory. Other libraries and test executables do not declare the directory again.
+target_link_libraries(xmera_core PUBLIC Xmera::MissionParameters)
+
 install(TARGETS xmera_core DESTINATION lib)
 
 add_library(Xmera::Core ALIAS xmera_core)

@@ -5,7 +5,7 @@
 #ifndef THR_CMD_MESSAGE_H
 #define THR_CMD_MESSAGE_H
 
-#include "definitions.h"
+#include <mission/parameters.h>
 
 /*! @brief Structure used to define the output definition for vehicle effectors*/
 typedef struct {

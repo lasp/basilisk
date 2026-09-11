@@ -5,7 +5,7 @@
 #ifndef MTB_ARRAY_CONFIG_MSG_H
 #define MTB_ARRAY_CONFIG_MSG_H
 
-#include "definitions.h"
+#include <mission/parameters.h>
 
 /*! @brief magnetic torque bar array configuration msg */
 typedef struct {

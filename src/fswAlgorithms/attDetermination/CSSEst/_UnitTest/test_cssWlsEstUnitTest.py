@@ -47,7 +47,7 @@ def checkNumActiveAccuracy(measVec, numActiveUse, numActiveFailCriteria, thresh)
     numActivePred = 0
     testFailCount = 0
     # Iterate through measVec and find all valid signals
-    for i in range(0, 32):
+    for i in range(len(measVec.CosValue)):
         obsVal = measVec.CosValue[i]
         if (obsVal > thresh):
             numActivePred += 1

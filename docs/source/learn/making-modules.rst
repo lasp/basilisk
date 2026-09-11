@@ -36,6 +36,7 @@ and subclasses of either:
    making-modules/messaging/overview
    making-modules/messaging/message-objects
    making-modules/messaging/creating-message-types
+   making-modules/messaging/mission-parameters
    making-modules/module-adapter
    making-modules/module-python
    making-modules/module-testing

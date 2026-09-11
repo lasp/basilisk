@@ -6,7 +6,8 @@
 #define CSS_CONFIG_MESSAGE_H
 
 #include "architecture/msgPayloadDef/CSSUnitConfigMsgPayload.h"
-#include "definitions.h"
+
+#include <mission/parameters.h>
 #include <stdint.h>
 
 /*! @brief Structure used to contain the configuration information for

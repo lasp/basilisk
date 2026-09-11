@@ -4,24 +4,24 @@
 #ifndef _INITSICP_H_
 #define _INITSICP_H_
 
+#include <architecture/_GeneralModuleFiles/sys_model.h>
 #include <architecture/messaging/messaging.h>
-#include <architecture/msgPayloadDef/definitions.h>
-#include <stdint.h>
-#include <Eigen/Dense>
-
 #include <architecture/msgPayloadDef/CameraConfigMsgPayload.h>
 #include <architecture/msgPayloadDef/EphemerisMsgPayload.h>
 #include <architecture/msgPayloadDef/PointCloudMsgPayload.h>
 #include <architecture/msgPayloadDef/SICPMsgPayload.h>
-
-#include <architecture/_GeneralModuleFiles/sys_model.h>
 #include <architecture/utilities/bskLogging.h>
 #include <architecture/utilities/eigenSupport.h>
 #include <architecture/utilities/rigidBodyKinematics.h>
 
+#include <mission/parameters.h>
+#include <stdint.h>
+
+#include <Eigen/Dense>
+
 /*! @brief Scaling iterative Closest Point Algorithm */
 class InitializeICP : public SysModel {
-   public:
+public:
     InitializeICP();
     ~InitializeICP();
 
@@ -40,7 +40,7 @@ class InitializeICP : public SysModel {
     double maxTimeBetweenMeasurements = 600;
     bool normalizeMeasuredCloud = false;
 
-   private:
+private:
     void normalizePointCloud();
     void setInitialConditions(uint64_t currentSimNanos);
     void writeOutputMessages(uint64_t currentSimNanos);

@@ -5,21 +5,21 @@
 #ifndef _THR_FIRING_SCHMITT_ALGORITHM_H
 #define _THR_FIRING_SCHMITT_ALGORITHM_H
 
+#include <architecture/msgPayloadDef/THRArrayCmdForceMsgPayload.h>
+#include <architecture/msgPayloadDef/THRArrayConfigMsgPayload.h>
+#include <architecture/msgPayloadDef/THRArrayOnTimeCmdMsgPayload.h>
+
+#include <mission/parameters.h>
 #include <stdint.h>
 
 #include <array>
 
-#include <architecture/msgPayloadDef/THRArrayCmdForceMsgPayload.h>
-#include <architecture/msgPayloadDef/THRArrayConfigMsgPayload.h>
-#include <architecture/msgPayloadDef/THRArrayOnTimeCmdMsgPayload.h>
-#include <architecture/msgPayloadDef/definitions.h>
-
 enum class PulsingRegime { ONPULSING = 0, OFFPULSING = 1 };
 
 class ThrFiringSchmittAlgorithm {
-   public:
-    void reset(uint64_t callTime, THRArrayConfigMsgPayload const& thrusterConfigPayload);
-    THRArrayOnTimeCmdMsgPayload update(uint64_t callTime, THRArrayCmdForceMsgPayload& thrForceIn);
+public:
+    void reset(uint64_t callTime, THRArrayConfigMsgPayload const &thrusterConfigPayload);
+    THRArrayOnTimeCmdMsgPayload update(uint64_t callTime, THRArrayCmdForceMsgPayload &thrForceIn);
     double getLevelOn() const;
     void setLevelOn(double level);
     double getLevelOff() const;
@@ -29,7 +29,7 @@ class ThrFiringSchmittAlgorithm {
     PulsingRegime getPulsingRegime() const;
     void setPulsingRegime(PulsingRegime state);
 
-   private:
+private:
     double levelOn{};                                 //!< [-] ON duty cycle fraction
     double levelOff{};                                //!< [-] OFF duty cycle fraction
     double thrMinFireTime{};                          //!< [s] Minimum ON time for thrusters
